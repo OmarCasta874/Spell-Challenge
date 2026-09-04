@@ -1,0 +1,42 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Log In — Spell-Challenge{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <h1>Welcome Back!</h1>
+
+  <div class="brand-lockup">
+    <div class="brand-mark">
+      <img src="{% static 'img/logo.png' %}" alt="Spell-Challenge logo">
+    </div>
+  </div>
+
+  {# {% if form.errors %}<div class="form-error">Check your email and password and try again.</div>{% endif %} #}
+
+  <form method="post" action="{% url 'login' %}" novalidate>
+    {# {% csrf_token %} #}
+
+    <div class="field">
+      <label for="id_email">Email Address:</label>
+      <div class="field-input">
+        <input type="email" id="id_email" name="email" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="id_password">Password:</label>
+      <div class="field-input">
+        <input type="password" id="id_password" name="password" required>
+      </div>
+    </div>
+
+    <div class="auth-actions">
+      <button type="submit" class="btn btn-outline">Log In</button>
+    </div>
+  </form>
+
+  <p class="auth-footer">Don't have an account?<a href="{% url 'choose_role' %}">Sign Up</a></p>
+</div>
+{% endblock %}
