@@ -1,0 +1,209 @@
+{% extends 'teacher/teacher_base.html' %}
+
+{% block teacher_content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2>WORD LISTS</h2>
+    <p class="text-muted">Manage your vocabulary lists.</p>
+  </div>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createListModal">
+    + Create Word List
+  </button>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+    <div class="card p-3 shadow-sm">
+      <h5>Greetings - A1</h5>
+      <span class="badge bg-info text-dark w-fit mb-2">20 words - Beginner</span>
+      <small class="text-muted d-block mb-3">Created: Sep 3, 2026</small>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-primary">VIEW</button>
+        <button class="btn btn-sm btn-outline-secondary">EDIT</button>
+        <button class="btn btn-sm btn-outline-danger">DELETE</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="createListModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4 text-center">
+      <h4>How would you like to create your list?</h4>
+      <div class="row mt-4">
+        <div class="col-6">
+          <div class="card p-3 cursor-pointer border-primary">
+            <h6>Create Manually</h6>
+            <small class="text-muted">Add words one by one.</small>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card p-3 cursor-pointer">
+            <h6>Import from Excel</h6>
+            <small class="text-muted">Upload an Excel file.</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Crear Lista Manualmente -->
+<div class="modal fade" id="manualListModal" tabindex="-1" aria-labelledby="manualListModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="manualListModalLabel">CREATE WORD LIST (Manual)</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="formManualList">
+          <!-- INFORMACIÓN DE LA LISTA -->
+          <h6 class="fw-bold mb-3 border-bottom pb-2">LIST INFORMATION</h6>
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <label for="listName" class="form-label">List Name *</label>
+              <input type="text" class="form-control" id="listName" placeholder="e.g. Greetings - A1" required>
+            </div>
+            <div class="col-md-4">
+              <label for="listCategory" class="form-label">Category *</label>
+              <select class="form-select" id="listCategory" required>
+                <option value="" selected disabled>Select a Category</option>
+                <option value="greetings">Greetings</option>
+                <option value="family">Family & People</option>
+                <option value="geography">Countries & Capitals</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="listLevel" class="form-label">Level *</label>
+              <select class="form-select" id="listLevel" required>
+                <option value="" selected disabled>Select a Level</option>
+                <option value="A1">A1 - Beginner</option>
+                <option value="A2">A2 - Elementary</option>
+                <option value="B1">B1 - Intermediate</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- TABLA DE PALABRAS -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold mb-0">WORDS (<span id="wordCount">0</span>/20)</h6>
+            <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#addWordModal">
+              + Add Word
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle" id="wordsTable">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 50px;">#</th>
+                  <th>Word</th>
+                  <th>Meaning</th>
+                  <th>Pronunciation</th>
+                  <th style="width: 150px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="wordsTableBody">
+                <tr id="emptyRow">
+                  <td colspan="5" class="text-center text-muted py-4">
+                    No words added yet. Click "+ Add Word" to begin.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" form="formManualList" class="btn btn-success">Save Word List</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Editar Palabra -->
+<div class="modal fade" id="addWordModal" tabindex="-1" aria-labelledby="addWordModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title" id="addWordModalLabel">ADD WORD</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="formAddWord">
+          <div class="mb-3">
+            <label for="wordText" class="form-label">Word *</label>
+            <input type="text" class="form-control" id="wordText" placeholder="e.g. Hello" required>
+          </div>
+          <div class="mb-3">
+            <label for="wordMeaning" class="form-label">Meaning *</label>
+            <input type="text" class="form-control" id="wordMeaning" placeholder="e.g. Greeting" required>
+          </div>
+          <div class="mb-3">
+            <label for="wordPronunciation" class="form-label">Pronunciation *</label>
+            <input type="text" class="form-control" id="wordPronunciation" placeholder="e.g. /həˈloʊ/" required>
+          </div>
+          <div class="mb-3">
+            <label for="wordImage" class="form-label">Image</label>
+            <input class="form-control" type="file" id="wordImage" accept="image/*">
+          </div>
+          <div class="mb-3">
+            <label for="wordAudio" class="form-label">Audio</label>
+            <input class="form-control" type="file" id="wordAudio" accept="audio/*">
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="btnSaveWord" class="btn btn-primary">Save Word</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Importar desde Excel -->
+<div class="modal fade" id="excelListModal" tabindex="-1" aria-labelledby="excelListModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="excelListModalLabel">IMPORT FROM EXCEL</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body text-center p-4">
+        <div id="dropZone" class="border border-2 border-dashed rounded-3 p-5 bg-light position-relative cursor-pointer">
+          <i class="bi bi-file-earmark-excel fs-1 text-success mb-3 d-block"></i>
+          <h5>Drag & Drop your Excel File</h5>
+          <p class="text-muted small mb-3">Supports .xlsx, .xls formats</p>
+          <span class="badge bg-secondary mb-3">or</span>
+          <div>
+            <label for="excelFileInput" class="btn btn-outline-primary">
+              + CHOOSE EXCEL FILE
+            </label>
+            <input type="file" id="excelFileInput" accept=".xlsx, .xls" hidden>
+          </div>
+          <div id="fileInfo" class="mt-3 text-success fw-bold d-none"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="btnUploadExcel" class="btn btn-success" disabled>Import List</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

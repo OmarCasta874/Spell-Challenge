@@ -1,0 +1,51 @@
+{% extends 'teacher/teacher_base.html' %}
+{% block teacher_content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>My Groups</h2>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+    + Create New Group
+  </button>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card p-3 shadow-sm">
+      <h5>Group 3A - English</h5>
+      <p class="mb-1 text-muted">24 students | 5 Lists</p>
+      <a href="#" class="btn btn-outline-primary btn-sm mt-2">View Group</a>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="createGroupModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content p-3">
+      <div class="modal-header">
+        <h5 class="modal-title">Create New Group</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label class="form-label">Group Name:</label>
+            <input type="text" class="form-control" placeholder="e.g. Group 3A - English">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">English Level:</label>
+            <select class="form-select">
+              <option selected>Select a Level</option>
+              <option>A1 - Beginner</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description (optional):</label>
+            <textarea class="form-control" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-success w-100">Create Group</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

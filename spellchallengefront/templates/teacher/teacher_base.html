@@ -1,0 +1,34 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="d-flex vh-100">
+    <aside class="bg-dark text-white p-3 style=width: 260px;">
+    <h3 class="fw-bold mb-4">SPELL-CHALLENGE</h3>
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+        <a href="{% url 'teacher_dashboard' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">
+          DASHBOARD
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'teacher_groups' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'teacher_groups' %}active{% endif %}">
+          MY GROUPS
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'teacher_word_lists' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'teacher_word_lists' %}active{% endif %}">
+          WORD LISTS
+        </a>
+      </li>
+      <li><a href="#" class="nav-link text-secondary">COMPETITIONS</a></li>
+      <li><a href="#" class="nav-link text-secondary">STATISTICS</a></li>
+      <li><a href="#" class="nav-link text-secondary">PROFILE</a></li>
+    </ul>
+  </aside>
+
+  <main class="flex-grow-1 p-4 bg-light overflow-auto">
+    {% block teacher_content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}
