@@ -1,0 +1,41 @@
+# Spell-Challenge - Git Ignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# VENV
+venv/
+.venv/
+env/
+.env/
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+
+.idea/
+*.iml
+
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+
+build/
+dist/
+*.egg-info/
+.eggs/
+
+*.sqlite
+*.sqlite3
