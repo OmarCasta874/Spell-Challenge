@@ -10,7 +10,7 @@
   <h1>Create Your Student Account</h1>
 
   <form method="post" action="{% url 'signup_student' %}" novalidate>
-    {# {% csrf_token %} #}
+    {% csrf_token %} 
 
     <div class="field">
       <label for="id_first_name">First Name:</label>
