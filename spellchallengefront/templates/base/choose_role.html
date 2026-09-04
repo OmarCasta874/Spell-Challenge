@@ -1,0 +1,38 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Choose a Role — Spell-Challenge{% endblock %}
+
+{% block content %}
+<div class="role-select">
+
+  <a href="{% url 'landing' %}" class="back-link">&larr; Back</a>
+
+  <div class="role-select__intro">
+    <h1>Choose a Role</h1>
+    <div class="brand-lockup">
+      <div class="brand-mark">
+        <img src="{% static 'img/spell-challenge-red-logo.png' %}" alt="Spell-Challenge logo">
+      </div>
+    </div>
+  </div>
+
+  <div class="role-select__cards">
+
+    <a href="{% url 'signup_teacher' %}" class="role-card">
+      <h2>Teacher</h2>
+      <img src="{% static 'img/teacher.png' %}" alt="" aria-hidden="true">
+      <p>Create and Manage Competitions</p>
+      <span class="btn btn-outline">Select</span>
+    </a>
+
+    <a href="{% url 'signup_student' %}" class="role-card">
+      <h2>Student</h2>
+      <img src="{% static 'img/student.png' %}" alt="" aria-hidden="true">
+      <p>Join Competitions and Challenge Yourself</p>
+      <span class="btn btn-outline">Select</span>
+    </a>
+
+  </div>
+
+</div>
+{% endblock %}

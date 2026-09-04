@@ -1,0 +1,76 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Create Student Account — Spell-Challenge{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <a href="{% url 'choose_role' %}" class="back-link">&larr; Back</a>
+
+  <h1>Create Your Student Account</h1>
+
+  <form method="post" action="{% url 'signup_student' %}" novalidate>
+    {% csrf_token %} 
+
+    <div class="field">
+      <label for="id_first_name">First Name:</label>
+      <div class="field-input">
+        <input type="text" id="id_first_name" name="first_name" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="id_last_name">Last Name:</label>
+      <div class="field-input">
+        <input type="text" id="id_last_name" name="last_name" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="id_student_id">Student ID:</label>
+      <div class="field-input">
+        <input type="text" id="id_student_id" name="student_id" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="id_email">Email Address:</label>
+      <div class="field-input">
+        <input type="email" id="id_email" name="email" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="id_password">Password:</label>
+      <div class="field-input">
+        <input type="password" id="id_password" name="password" required>
+        <button type="button" class="toggle-password" data-target="id_password" aria-label="Show password">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="id_confirm_password">Confirm Password:</label>
+      <div class="field-input">
+        <input type="password" id="id_confirm_password" name="confirm_password" required>
+        <button type="button" class="toggle-password" data-target="id_confirm_password" aria-label="Show password">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="auth-actions">
+      <button type="submit" class="btn btn-outline">Create Account</button>
+    </div>
+  </form>
+
+  <p class="auth-footer">You have an account?<a href="{% url 'login' %}">Log In</a></p>
+</div>
+{% endblock %}
