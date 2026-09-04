@@ -440,37 +440,83 @@ INSERT INTO practica_sesion VALUES
 INSERT INTO intento_palabra VALUES
 ('INT001', 0, 00:00:03, 1, 'PRA01', 'PAL001'),
 ('INT002', 1, 00:00:04, 2, 'PRA02', 'PAL002'),
-('INT003', 1, 00:00:05, 3, 'PRA03', ''),
-('INT004', 1, 00:00:06, 1, 'PRA04', ''),
-('INT005', 0, 00:00:07, 2, 'PRA05', ''),
-('INT006', 1, 00:00:08, 3, 'PRA06', ''),
-('INT007', 1, 00:00:03, 1, 'PRA07', ''),
-('INT008', 1, 00:00:04, 2, 'PRA08', ''),
-('INT009', 0, 00:00:05, 3, 'PRA09', ''),
-('INT010', 1, 00:00:06, 1, 'PRA10', ''),
+('INT003', 1, 00:00:05, 3, 'PRA03', 'PAL003'),
+('INT004', 1, 00:00:06, 1, 'PRA04', 'PAL004'),
+('INT005', 0, 00:00:07, 2, 'PRA05', 'PAL005'),
+('INT006', 1, 00:00:08, 3, 'PRA06', 'PAL006'),
+('INT007', 1, 00:00:03, 1, 'PRA07', 'PAL007'),
+('INT008', 1, 00:00:04, 2, 'PRA08', 'PAL008'),
+('INT009', 0, 00:00:05, 3, 'PRA09', 'PAL009'),
+('INT010', 1, 00:00:06, 1, 'PRA10', 'PAL010')
 
+INSERT INTO proceso_lista VALUES
+('LIS01', 'AL0001', 60, 'No', 2026-08-01),
+('LIS02', 'AL0002', 63.7, 'No', 2026-08-04),
+('LIS03', 'AL0003', 67.4, 'No', 2026-08-07),
+('LIS04', 'AL0004', 71.1, 'No', 2026-08-10),
+('LIS05', 'AL0005', 74.8, 'No', 2026-08-13),
+('LIS06', 'AL0006', 78.5, 'No', 2026-08-16),
+('LIS07', 'AL0007', 82.2, 'No', 2026-08-19),
+('LIS08', 'AL0008', 85.9, 'No', 2026-08-22),
+('LIS09', 'AL0009', 89.6, 'No', 2026-08-25),
+('LIS10', 'AL0010', 93.3, 'Si', 2026-08-28)
 
-CREATE TABLE alumno_insignia (
-    alumno VARCHAR(10) NOT NULL,
-    insignia VARCHAR(10) NOT NULL,
-    fecha_asignada DATE NOT NULL,
-    PRIMARY KEY (alumno, insignia),
-    FOREIGN KEY (alumno) REFERENCES alumno(matricula)
-    FOREIGN KEY (insignia) REFERENCES insignia(clave)
-);
+INSERT INTO lista_grupo VALUES
+('LIS01', 'GRU02'),
+('LIS02', 'GRU03'),
+('LIS03', 'GRU04'),
+('LIS04', 'GRU05'),
+('LIS05', 'GRU06'),
+('LIS06', 'GRU07'),
+('LIS07', 'GRU08'),
+('LIS08', 'GRU09'),
+('LIS09', 'GRU10'),
+('LIS10', 'GRU01')
 
-CREATE TABLE alumno_practica (
-    alumno VARCHAR(10) NOT NULL,
-    practica_sesion VARCHAR(10) NOT NULL,
-    PRIMARY KEY (alumno, practica_sesion),
-    FOREIGN KEY (alumno) REFERENCES alumno(matricula)
-    FOREIGN KEY (practica_sesion) REFERENCES practica_sesion(clave)
-);
+INSERT INTO grupo_alumno VALUES
+('GRU01', 'AL0003'),
+('GRU02', 'AL0004'),
+('GRU03', 'AL0005'),
+('GRU04', 'AL0006'),
+('GRU05', 'AL0007'),
+('GRU06', 'AL0008'),
+('GRU07', 'AL0009'),
+('GRU08', 'AL0010'),
+('GRU09', 'AL0001'),
+('GRU10', 'AL0002')
 
-CREATE TABLE dificultad_juego (
-    juego VARCHAR(10) NOT NULL,
-    dificultad VARCHAR(10) NOT NULL,
-    PRIMARY KEY (juego, dificultad),
-    FOREIGN KEY (juego) REFERENCES juego(clave),
-    FOREIGN KEY (dificultad) REFERENCES dificultad(clave)
-);
+INSERT INTO alumno_insignia VALUES
+('AL0001', 'INS01', 2026-08-01),
+('AL0002', 'INS02', 2026-08-05),
+('AL0003', 'INS03', 2026-08-09),
+('AL0004', 'INS04', 2026-08-13),
+('AL0005', 'INS05', 2026-08-17),
+('AL0006', 'INS06', 2026-08-21),
+('AL0007', 'INS07', 2026-08-25),
+('AL0008', 'INS08', 2026-08-29),
+('AL0009', 'INS09', 2026-09-02),
+('AL0010', 'INS10', 2026-09-06)
+
+INSERT INTO alumno_practica VALUES
+('AL0001', 'PRA01'),
+('AL0002', 'PRA02'),
+('AL0003', 'PRA03'),
+('AL0004', 'PRA04'),
+('AL0005', 'PRA05'),
+('AL0006', 'PRA06'),
+('AL0007', 'PRA07'),
+('AL0008', 'PRA08'),
+('AL0009', 'PRA09'),
+('AL0010', 'PRA10')
+
+INSERT INTO dificultad_juego VALUES
+('JUE01', 'DIF01'),
+('JUE02', 'DIF02'),
+('JUE03', 'DIF03'),
+('JUE04', 'DIF01'),
+('JUE05', 'DIF02'),
+('JUE06', 'DIF03'),
+('JUE07', 'DIF03'),
+('JUE08', 'DIF01'),
+('JUE09', 'DIF02'),
+('JUE10', 'DIF03')
