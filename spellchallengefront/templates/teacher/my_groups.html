@@ -1,51 +1,91 @@
 {% extends 'teacher/teacher_base.html' %}
-{% block teacher_content %}
+{% load static %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>My Groups</h2>
-  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/teacher_base.css' %}"> {# o student_base.css #}
+<link rel="stylesheet" href="{% static 'css/my_groups.css' %}">
+{% endblock %}
+
+{% block teacher_content %}
+<div class="groups-header">
+  <h2 class="groups-title">My Groups</h2>
+  <button class="btn-create-group" data-bs-toggle="modal" data-bs-target="#createGroupModal">
     + Create New Group
   </button>
 </div>
 
-<div class="row g-3">
-  <div class="col-md-4">
-    <div class="card p-3 shadow-sm">
+<div class="groups-row">
+  <div class="group-card">
+    <div class="group-card-header">
       <h5>Group 3A - English</h5>
-      <p class="mb-1 text-muted">24 students | 5 Lists</p>
-      <a href="#" class="btn btn-outline-primary btn-sm mt-2">View Group</a>
+    </div>
+    <div class="group-card-body">
+      <p class="group-stat">24 students</p>
+      <p class="group-stat">5 Lists</p>
+      <a href="#" class="view-group-link">
+        View Group <i data-lucide="arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="group-card">
+    <div class="group-card-header">
+      <h5>Group 4C - English</h5>
+    </div>
+    <div class="group-card-body">
+      <p class="group-stat">28 students</p>
+      <p class="group-stat">3 Lists</p>
+      <a href="#" class="view-group-link">
+        View Group <i data-lucide="arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="group-card">
+    <div class="group-card-header">
+      <h5>Group 2A - English</h5>
+    </div>
+    <div class="group-card-body">
+      <p class="group-stat">23 students</p>
+      <p class="group-stat">2 Lists</p>
+      <a href="#" class="view-group-link">
+        View Group <i data-lucide="arrow-right"></i>
+      </a>
     </div>
   </div>
 </div>
 
 <div class="modal fade" id="createGroupModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content p-3">
-      <div class="modal-header">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content create-group-modal">
+      <div class="modal-header create-group-header">
         <h5 class="modal-title">Create New Group</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close create-group-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body create-group-body">
         <form>
           <div class="mb-3">
-            <label class="form-label">Group Name:</label>
-            <input type="text" class="form-control" placeholder="e.g. Group 3A - English">
+            <label class="form-label create-group-label">Group Name:</label>
+            <input type="text" class="form-control create-group-input" placeholder="e.g. Group 3A - English">
           </div>
           <div class="mb-3">
-            <label class="form-label">English Level:</label>
-            <select class="form-select">
+            <label class="form-label create-group-label">English Level:</label>
+            <select class="form-select create-group-input">
               <option selected>Select a Level</option>
               <option>A1 - Beginner</option>
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label">Description (optional):</label>
-            <textarea class="form-control" rows="3"></textarea>
+            <label class="form-label create-group-label">Description (optional):</label>
+            <input type="text" class="form-control create-group-input">
           </div>
-          <button type="submit" class="btn btn-success w-100">Create Group</button>
+          <div class="text-end">
+            <button type="submit" class="btn-create-group-submit">Create Group</button>
+          </div>
         </form>
       </div>
     </div>
   </div>
 </div>
+
 {% endblock %}

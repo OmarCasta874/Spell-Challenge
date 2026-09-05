@@ -1,45 +1,62 @@
 {% extends 'student/student_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/student_base.css' %}"> {# o teacher_base.css #}
+<link rel="stylesheet" href="{% static 'css/my_groups_student.css' %}">
+{% endblock %}
 
 {% block student_content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2>My Groups</h2>
-  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#joinGroupModal">
+<div class="groups-header">
+  <h2 class="groups-title">My Groups</h2>
+  <button class="btn-join-group" data-bs-toggle="modal" data-bs-target="#joinGroupModal">
     + Join Group
   </button>
 </div>
 
-<div class="row g-3">
-  <div class="col-md-6">
-    <div class="card p-3 shadow-sm">
+<div class="groups-row">
+  <div class="group-card">
+    <div class="group-card-header">
       <h5>Group 4A - English</h5>
-      <p class="text-muted mb-2">Teacher: Roberto Solórzano Ibarra</p>
-      <a href="#" class="btn btn-outline-primary btn-sm w-fit">View Group</a>
+    </div>
+    <div class="group-card-body">
+      <p class="group-teacher">Teacher Roberto Solórzano Ibarra</p>
+      <a href="#" class="view-group-link">
+        View Group <i data-lucide="arrow-right"></i>
+      </a>
     </div>
   </div>
-  <div class="col-md-6">
-    <div class="card p-3 shadow-sm">
+
+  <div class="group-card">
+    <div class="group-card-header">
       <h5>Group 3A - English</h5>
-      <p class="text-muted mb-2">Teacher: Alejandro Flores</p>
-      <a href="#" class="btn btn-outline-primary btn-sm w-fit">View Group</a>
+    </div>
+    <div class="group-card-body">
+      <p class="group-teacher">Teacher Alejandro Flores</p>
+      <a href="#" class="view-group-link">
+        View Group <i data-lucide="arrow-right"></i>
+      </a>
     </div>
   </div>
 </div>
 
 <div class="modal fade" id="joinGroupModal" tabindex="-1" aria-labelledby="joinGroupModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content p-3">
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="joinGroupModalLabel">Join Group</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-content join-group-modal">
+      <div class="modal-header join-group-header">
+        <h5 class="modal-title" id="joinGroupModalLabel">Join Group</h5>
+        <button type="button" class="btn-close join-group-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <p class="text-muted small">Enter the code provided by your teacher.</p>
+      <div class="modal-body join-group-body">
+        <p class="join-group-hint">Enter the code provided by your teacher.</p>
         <form id="formJoinGroup">
           <div class="mb-3">
-            <label for="groupCode" class="form-label fw-bold">Group Code:</label>
-            <input type="text" class="form-control form-control-lg text-center font-monospace" id="groupCode" placeholder="e.g. X7K9P2" required>
+            <label for="groupCode" class="form-label join-group-label">Group Code:</label>
+            <input type="text" class="form-control join-group-input" id="groupCode" placeholder="" required>
           </div>
-          <button type="submit" class="btn btn-success w-100 fw-bold">Join Group</button>
+          <div class="text-end">
+            <button type="submit" class="btn-join-group-submit">Join Group</button>
+          </div>
         </form>
       </div>
     </div>

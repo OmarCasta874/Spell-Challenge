@@ -1,95 +1,102 @@
 {% extends 'student/student_base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/student_base.css' %}"> {# o teacher_base.css #}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
 {% block student_content %}
-<div class="card mb-4 border-0 shadow-sm bg-warning bg-gradient text-dark">
-  <div class="card-body d-flex align-items-center p-4">
-    <img src="{% static 'img/beenary-left.png' %}" alt="Beenary" width="70" class="me-4">
-    <div>
-      <h4 class="fw-bold mb-1">Welcome to Spell-Challenge!</h4>
-      <p class="mb-0">My name is <strong>Beenary</strong>, and I'll be your bee assistant.</p>
+
+<div class="home-row">
+  <div class="home-col-left">
+    <div class="continue-lesson-banner">
+      <p class="continue-lesson-text">Continue a lesson or start a new one?</p>
+      <a href="{% url 'student_practices' %}" class="go-to-practice-link">
+        GO TO PRACTICE <i data-lucide="arrow-right"></i>
+      </a>
+    </div>
+    <h5 class="section-heading">Progress Overview</h5>
+
+    <div class="progress-stats-row">
+      <div class="progress-stat-card">
+        <p class="progress-stat-label">Completed Lessons:</p>
+        <h3 class="progress-stat-value">0</h3>
+      </div>
+      <div class="progress-stat-card">
+        <p class="progress-stat-label">Completed Units:</p>
+        <h3 class="progress-stat-value">0</h3>
+      </div>
+      <div class="progress-stat-card">
+        <p class="progress-stat-label">Current English Level:</p>
+        <h3 class="progress-stat-value">A1</h3>
+      </div>
+    </div>
+
+    <div class="level-progress-wrapper">
+      <div class="level-progress-labels">
+        <span>A1</span>
+        <span>A2</span>
+      </div>
+      <div class="level-progress-track">
+        <div class="level-progress-fill" style="width: 10%;"></div>
+      </div>
+      <p class="level-progress-score">Score: 0%</p>
+    </div>
+  </div>
+
+  <div class="home-col-right">
+    <div class="mini-games-header">
+      <h5 class="section-heading">Mini-Games</h5>
+      <i data-lucide="bell" class="notification-bell"></i>
+    </div>
+
+    <div class="mini-games-row">
+      <div class="mini-game-card">
+        <h6 class="mini-game-title">HANGMAN</h6>
+        <a href="#" class="play-link">PLAY <i data-lucide="arrow-right"></i></a>
+      </div>
+      <div class="mini-game-card">
+        <h6 class="mini-game-title">MISSING LETTERS</h6>
+        <a href="#" class="play-link">PLAY <i data-lucide="arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="leaderboard-card">
+      <div class="leaderboard-header">
+        <div class="leaderboard-title-group">
+          <i data-lucide="bar-chart-2"></i>
+          <h5 class="leaderboard-title">Group 3A Leaderboard</h5>
+        </div>
+        <span class="leaderboard-column-label">AVERAGE SCORE%</span>
+      </div>
+
+      <ul class="leaderboard-list">
+        <li class="leaderboard-item">
+          <span class="rank-icon rank-gold"><i data-lucide="star"></i></span>
+          <span class="leaderboard-name">#1 - Sánchez Hernández Diego</span>
+          <span class="leaderboard-score">86%</span>
+        </li>
+        <li class="leaderboard-item">
+          <span class="rank-icon rank-silver"><i data-lucide="star"></i></span>
+          <span class="leaderboard-name">#2 - Castañon Castañon Jesús Omar</span>
+          <span class="leaderboard-score">85%</span>
+        </li>
+        <li class="leaderboard-item">
+          <span class="rank-icon rank-bronze"><i data-lucide="star"></i></span>
+          <span class="leaderboard-name">#3 - Villegas Hernández Josué Alberto</span>
+          <span class="leaderboard-score">83%</span>
+        </li>
+        <li class="leaderboard-item">
+          <span class="rank-icon rank-plain"></span>
+          <span class="leaderboard-name">#4 - Aycardo Balcázar Eric</span>
+          <span class="leaderboard-score">82%</span>
+        </li>
+      </ul>
+
+      <a href="#" class="view-leaderboard-link">VIEW LEADERBOARD <i data-lucide="arrow-right"></i></a>
     </div>
   </div>
 </div>
 
-<div class="row g-4">
-    <div class="col-md-7">
-        <div class="card p-4 mb-4 shadow-sm">
-      <h5 class="fw-bold mb-3">Progress Overview</h5>
-      <div class="row text-center mb-3">
-        <div class="col-4">
-          <small class="text-muted d-block">Completed Lessons</small>
-          <span class="fs-4 fw-bold">0</span>
-        </div>
-        <div class="col-4">
-          <small class="text-muted d-block">Completed Units</small>
-          <span class="fs-4 fw-bold">0</span>
-        </div>
-        <div class="col-4">
-          <small class="text-muted d-block">Current English Level</small>
-          <span class="badge bg-success fs-6">A1</span>
-        </div>
-      </div>
-      <a href="{% url 'student_practices' %}" class="btn btn-primary w-100 fw-bold">GO TO PRACTICE</a>
-    </div>
-
-    <div class="card p-4 shadow-sm">
-      <h5 class="fw-bold mb-3">Mini-Games</h5>
-      <div class="row g-3">
-        <div class="col-6">
-          <div class="border rounded p-3 text-center bg-light">
-            <h6 class="fw-bold">HANGMAN</h6>
-            <button class="btn btn-sm btn-outline-primary px-4 mt-2">PLAY</button>
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="border rounded p-3 text-center bg-light">
-            <h6 class="fw-bold">MISSING LETTERS</h6>
-            <button class="btn btn-sm btn-outline-primary px-4 mt-2">PLAY</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-5">
-    <div class="card p-4 shadow-sm">
-      <h5 class="fw-bold mb-3">GROUP 3A LEADERBOARD</h5>
-      <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>#</th>
-              <th>Student</th>
-              <th class="text-end">Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="badge bg-warning text-dark">#1</span></td>
-              <td>Sánchez Hernández Diego</td>
-              <td class="text-end fw-bold text-success">86%</td>
-            </tr>
-            <tr>
-              <td><span class="badge bg-secondary">#2</span></td>
-              <td>Castañon Castañon Jesús Omar</td>
-              <td class="text-end fw-bold">85%</td>
-            </tr>
-            <tr>
-              <td><span class="badge bg-dark">#3</span></td>
-              <td>Villegas Hernández Josué Alberto</td>
-              <td class="text-end fw-bold">83%</td>
-            </tr>
-            <tr>
-              <td>#4</td>
-              <td>Aycardo Balcázar Eric</td>
-              <td class="text-end fw-bold">82%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <button class="btn btn-outline-secondary btn-sm w-100 mt-2">VIEW LEADERBOARD</button>
-    </div>
-  </div>
-</div>
 {% endblock student_content %}

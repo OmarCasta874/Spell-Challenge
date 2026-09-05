@@ -1,0 +1,255 @@
+/* home.css — Student */
+
+.continue-lesson-banner {
+  background: #f28f89;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.continue-lesson-text {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  color: #111;
+  margin: 0;
+}
+
+.go-to-practice-link {
+  align-self: flex-end;
+  color: #7a1f2b;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.go-to-practice-link i { width: 16px; height: 16px; }
+.go-to-practice-link:hover { color: #5c1620; }
+
+.home-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.section-heading {
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 1rem;
+}
+
+.progress-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.progress-stat-card {
+  background: #f28f89;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+}
+
+.progress-stat-label {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #111;
+  margin: 0 0 0.4rem;
+}
+
+.progress-stat-value {
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: #111;
+  margin: 0;
+}
+
+.level-progress-wrapper { margin-top: 0.5rem; }
+
+.level-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 0.35rem;
+}
+
+.level-progress-track {
+  background: #e3e3e3;
+  border: 1px solid #1a1a1a;
+  border-radius: 4px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.level-progress-fill {
+  height: 100%;
+  background: #2e7d32;
+}
+
+.level-progress-score {
+  color: #2e7d32;
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+
+.mini-games-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.notification-bell {
+  color: #f0ad4e;
+  width: 22px;
+  height: 22px;
+}
+
+.mini-games-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.mini-game-card {
+  background: #f28f89;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.mini-game-title {
+  font-weight: 800;
+  color: #111;
+  margin: 0;
+}
+
+.play-link {
+  color: #7a1f2b;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.play-link i { width: 16px; height: 16px; }
+.play-link:hover { color: #5c1620; }
+
+.leaderboard-card {
+  background: #f28f89;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  padding: 1.25rem;
+}
+
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.leaderboard-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.leaderboard-title-group i { width: 20px; height: 20px; color: #111; }
+
+.leaderboard-title {
+  font-weight: 800;
+  color: #111;
+  margin: 0;
+}
+
+.leaderboard-column-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.leaderboard-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.leaderboard-item:last-child { border-bottom: none; }
+
+.rank-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rank-icon i { width: 18px; height: 18px; }
+.rank-gold i   { color: #fdd835; }
+.rank-silver i { color: #c0c0c0; }
+.rank-bronze i { color: #fb8c00; }
+
+.rank-plain {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #5c1620;
+}
+
+.leaderboard-name {
+  flex: 1;
+  color: #111;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.leaderboard-score {
+  color: #111;
+  font-weight: 700;
+}
+
+.view-leaderboard-link {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.35rem;
+  color: #7a1f2b;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.view-leaderboard-link i { width: 16px; height: 16px; }
+.view-leaderboard-link:hover { color: #5c1620; }
+
+/* RESPONSIVE */
+
+@media (max-width: 992px) {
+  .home-row { grid-template-columns: 1fr; }
+  .progress-stats-row { grid-template-columns: 1fr 1fr; }
+  .mini-games-row { grid-template-columns: 1fr; }
+}
