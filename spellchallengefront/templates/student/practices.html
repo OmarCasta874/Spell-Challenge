@@ -1,60 +1,131 @@
 {% extends 'student/student_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/student_base.css' %}"> {# o teacher_base.css #}
+<link rel="stylesheet" href="{% static 'css/practice.css' %}">
+{% endblock %}
 
 {% block student_content %}
-<div class="mb-4">
-  <span class="badge bg-secondary mb-1">Unit #1: Beginning (A1)</span>
-  <h3>Practice #1: Greetings</h3>
+
+<div class="practice-header">
+  <span class="unit-badge">Unit #1: Beginning (A1)</span>
+  <div class="practice-header-icons">
+    <i data-lucide="bar-chart-2"></i>
+    <i data-lucide="bell" class="notification-bell"></i>
+  </div>
 </div>
 
-<div class="card p-5 shadow-sm align-items-center justify-content-center bg-white" style="min-height: 300px;">
-  <div class="d-flex align-items-center gap-4 flex-wrap justify-content-center">
-    
-    <button class="btn btn-danger rounded-circle p-3 shadow" style="width: 70px; height: 70px;" data-bs-toggle="modal" data-bs-target="#practiceModal">
-      <i class="bi bi-star-fill fs-3 text-white">★</i>
-    </button>
-    
-    <div class="border-top border-4 border-danger" style="width: 40px;"></div>
+<div class="practice-path-wrapper">
 
-    <button class="btn btn-light border rounded-circle p-3" style="width: 60px; height: 60px;" disabled>🔒</button>
-    <div class="border-top border-3 border-secondary" style="width: 30px;"></div>
-
-    <button class="btn btn-light border rounded-circle p-3" style="width: 60px; height: 60px;" disabled>🔒</button>
-    <div class="border-top border-3 border-secondary" style="width: 30px;"></div>
-
-    <button class="btn btn-light border rounded-circle p-3" style="width: 60px; height: 60px;" disabled>🔒</button>
+  <div class="practice-label">
+    <p class="practice-label-title">Practice #1</p>
+    <p class="practice-label-subtitle">Greetings</p>
   </div>
+
+  <div class="practice-path">
+
+    <div class="path-node-wrap node-low">
+      <button class="path-node node-star" data-bs-toggle="modal" data-bs-target="#practiceModal">
+        <svg viewBox="0 0 24 24" class="star-icon"><path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 16.9 5.8 20.3l1.6-6.8L2.2 8.9l6.9-.6L12 2z"/></svg>
+      </button>
+    </div>
+
+    <div class="path-connector connector-active"></div>
+
+    <div class="path-node-wrap node-high">
+      <button class="path-node node-locked" disabled>
+        <i data-lucide="lock"></i>
+      </button>
+    </div>
+
+    <div class="path-connector"></div>
+
+    <div class="path-node-wrap node-low">
+      <button class="path-node node-locked" disabled>
+        <i data-lucide="lock"></i>
+      </button>
+    </div>
+
+    <div class="path-connector"></div>
+
+    <div class="path-node-wrap node-high">
+      <button class="path-node node-locked" disabled>
+        <i data-lucide="lock"></i>
+      </button>
+    </div>
+
+    <div class="path-connector"></div>
+
+    <div class="path-node-wrap node-low">
+      <button class="path-node node-locked" disabled>
+        <i data-lucide="lock"></i>
+      </button>
+    </div>
+
+    <div class="path-connector"></div>
+
+    <div class="path-node-wrap node-high">
+      <button class="path-node node-locked" disabled>
+        <i data-lucide="lock"></i>
+      </button>
+    </div>
+
+    <div class="path-connector"></div>
+
+    <div class="path-node-wrap node-low">
+      <button class="path-node node-locked" disabled>
+        <i data-lucide="lock"></i>
+      </button>
+    </div>
+
+    <div class="path-connector"></div>
+
+    <div class="path-node-wrap node-high">
+      <button class="path-node node-locked" disabled>
+        <i data-lucide="lock"></i>
+      </button>
+    </div>
+
+  </div>
+
+  <button class="next-unit-btn">
+    <i data-lucide="arrow-right"></i>
+  </button>
+
 </div>
 
 <div class="modal fade" id="practiceModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-dark text-white p-3">
-      
-      <div class="modal-header border-0">
-        <h5 class="modal-title fw-bold">PRACTICE #1 - GREETINGS</h5>
-        <span class="badge bg-danger ms-auto fs-6">0%</span>
-        <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal"></button>
+    <div class="modal-content practice-modal">
+
+      <div class="modal-header practice-modal-header">
+        <h5 class="modal-title">PRACTICE #1 - GREETINGS</h5>
+        <span class="practice-percent">0%</span>
+        <button type="button" class="btn-close practice-modal-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      <div class="modal-body">
-        <div class="d-flex justify-content-between align-items-center bg-secondary bg-opacity-25 p-3 rounded mb-2">
-          <span class="fw-bold">LESSON 1</span>
-          <a href="#" class="btn btn-danger btn-sm px-4 fw-bold">PLAY</a>
+      <div class="modal-body practice-modal-body">
+        <div class="lesson-row">
+          <span class="lesson-label">LESSON 1</span>
+          <a href="#" class="lesson-play-btn">PLAY</a>
         </div>
-        <div class="d-flex justify-content-between align-items-center bg-secondary bg-opacity-10 p-3 rounded mb-2">
-          <span class="text-muted">LESSON 2</span>
-          <button class="btn btn-outline-light btn-sm px-3" disabled>LOCKED</button>
+        <div class="lesson-row">
+          <span class="lesson-label lesson-label-locked">LESSON 2</span>
+          <button class="lesson-locked-btn" disabled>LOCKED</button>
         </div>
-        <div class="d-flex justify-content-between align-items-center bg-secondary bg-opacity-10 p-3 rounded mb-2">
-          <span class="text-muted">LESSON 3</span>
-          <button class="btn btn-outline-light btn-sm px-3" disabled>LOCKED</button>
+        <div class="lesson-row">
+          <span class="lesson-label lesson-label-locked">LESSON 3</span>
+          <button class="lesson-locked-btn" disabled>LOCKED</button>
         </div>
-        <div class="d-flex justify-content-between align-items-center bg-secondary bg-opacity-10 p-3 rounded">
-          <span class="text-muted">LESSON 4</span>
-          <button class="btn btn-outline-light btn-sm px-3" disabled>LOCKED</button>
+        <div class="lesson-row">
+          <span class="lesson-label lesson-label-locked">LESSON 4</span>
+          <button class="lesson-locked-btn" disabled>LOCKED</button>
         </div>
       </div>
 
     </div>
   </div>
 </div>
+
 {% endblock student_content %}

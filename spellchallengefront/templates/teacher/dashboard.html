@@ -1,9 +1,14 @@
 {% extends 'teacher/teacher_base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/teacher_base.css' %}"> {# o student_base.css #}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
 {% block teacher_content %}
 <div class="row mb-4 align-items-center bg-white p-4 rounded shadow-sm">
-    <div class="col-md-8">
+  <div class="col-md-8">
     <h2>Welcome Back, Diego!</h2>
     <p class="text-muted">Here is an overview of your classes and activities!</p>
     <div class="alert alert-info d-flex align-items-center">
@@ -16,42 +21,113 @@
   </div>
 </div>
 
-<div class="row g-3 mb-4">
-  <div class="col-md-3"><div class="card p-3 text-center"><h5>Groups</h5><h3>4</h3></div></div>
-  <div class="col-md-3"><div class="card p-3 text-center"><h5>Lists</h5><h3>12</h3></div></div>
-  <div class="col-md-3"><div class="card p-3 text-center"><h5>Competitions</h5><h3>3</h3></div></div>
-  <div class="col-md-3"><div class="card p-3 text-center"><h5>Students</h5><h3>86</h3></div></div>
+<div class="stat-cards-row">
+  <div class="stat-card">
+    <div class="stat-icon"><i data-lucide="users"></i></div>
+    <p class="stat-label">Groups:</p>
+    <h3 class="stat-value">4</h3>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon"><i data-lucide="clipboard-list"></i></div>
+    <p class="stat-label">Lists:</p>
+    <h3 class="stat-value">12</h3>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon"><i data-lucide="award"></i></div>
+    <p class="stat-label">Competitions:</p>
+    <h3 class="stat-value">3</h3>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon"><i data-lucide="user"></i></div>
+    <p class="stat-label">Students:</p>
+    <h3 class="stat-value">86</h3>
+  </div>
 </div>
 
-<div class="row g-3 mb-4">
-  <div class="col-md-3"><div class="card p-3 text-center"><h5>Groups</h5><h3>4</h3></div></div>
-  <div class="col-md-3"><div class="card p-3 text-center"><h5>Lists</h5><h3>12</h3></div></div>
-  <div class="col-md-3"><div class="card p-3 text-center"><h5>Competitions</h5><h3>3</h3></div></div>
-  <div class="col-md-3"><div class="card p-3 text-center"><h5>Students</h5><h3>86</h3></div></div>
-</div>
+<div class="dashboard-overview-row">
 
-<div class="row g-4">
-  <div class="col-md-6">
-    <div class="card p-3">
-      <h5>Student Performance & Group Overview</h5>
-      <div class="bg-light text-center py-5 rounded">
-        [ Gráfico de Pastel & Barras ]
+  <div class="overview-card">
+    <h5 class="overview-title">Student Performance &amp; Group Overview</h5>
+
+    <div class="overview-content">
+      <div class="pie-section">
+        <h6 class="section-subtitle">Group Overview</h6>
+
+        <div class="pie-chart-wrapper">
+          <div class="pie-chart"></div>
+          <span class="pie-label pie-label-1">62.5%</span>
+          <span class="pie-label pie-label-2">17.5%</span>
+          <span class="pie-label pie-label-3">12.5%</span>
+          <span class="pie-label pie-label-4">7.5%</span>
+        </div>
+
+        <ul class="pie-legend">
+          <li><span class="legend-swatch legend-green"></span> Group 3A</li>
+          <li><span class="legend-swatch legend-yellow"></span> Group 4B</li>
+          <li><span class="legend-swatch legend-red"></span> Group 2A</li>
+          <li><span class="legend-swatch legend-orange"></span> Group 1C</li>
+        </ul>
+      </div>
+
+      <div class="bars-section">
+        <h6 class="section-subtitle">Student Performance</h6>
+
+        <div class="bar-row">
+          <span class="bar-label">GROUP 3A</span>
+          <div class="bar-track"><div class="bar-fill" style="width: 85%;"></div></div>
+          <span class="bar-value">85%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">GROUP 4B</span>
+          <div class="bar-track"><div class="bar-fill" style="width: 71%;"></div></div>
+          <span class="bar-value">71%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">GROUP 2A</span>
+          <div class="bar-track"><div class="bar-fill" style="width: 98%;"></div></div>
+          <span class="bar-value">98%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">GROUP 1C</span>
+          <div class="bar-track"><div class="bar-fill" style="width: 58%;"></div></div>
+          <span class="bar-value">58%</span>
+        </div>
+
+        <p class="average-score">Average Score: 78%</p>
       </div>
     </div>
   </div>
-  <div class="col-md-6">
-    <div class="card p-3">
-      <h5>Recent Learning Activity</h5>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div>
-            <strong>Group 3A improved its average score</strong><br>
-            <small class="text-muted">Average increased from 78% to 85%</small>
-          </div>
-          <span class="badge bg-success">Sep 3rd, 2026</span>
-        </li>
-      </ul>
-    </div>
+
+  <div class="activity-card">
+    <h5 class="overview-title">Recent Learning Activity</h5>
+
+    <table class="activity-table">
+      <thead>
+        <tr>
+          <th>Activity Name</th>
+          <th>Description</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Group 3A improved its average score</td>
+          <td>Average increased from 78% to 85%</td>
+          <td>Sep 3rd, 2026</td>
+        </tr>
+        <tr>
+          <td>Group 2A completed a practice session</td>
+          <td>Average score: 91%</td>
+          <td>Sep 3rd, 2026</td>
+        </tr>
+        <tr>
+          <td>Group 4B competition results are available</td>
+          <td>Group 4B - Basic Challenge</td>
+          <td>Sep 3rd, 2026</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
+
 </div>
 {% endblock %}
