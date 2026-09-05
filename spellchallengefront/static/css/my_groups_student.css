@@ -1,0 +1,162 @@
+/* my_groups_student.css — Student */
+
+.groups-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.groups-title {
+  color: #7a1f2b;
+  font-weight: 800;
+  margin: 0;
+}
+
+.btn-join-group {
+  background: #e0574f;
+  border: 2px solid #1a1a1a;
+  border-radius: 20px;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.5rem 1.25rem;
+  cursor: pointer;
+}
+
+.btn-join-group:hover {
+  background: #c8443c;
+}
+
+.groups-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 260px));
+  gap: 1.5rem;
+}
+
+.group-card {
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.group-card-header {
+  background: #fff;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid #1a1a1a;
+}
+
+.group-card-header h5 {
+  margin: 0;
+  color: #7a1f2b;
+  font-weight: 800;
+}
+
+.group-card-body {
+  background: #f28f89;
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.group-teacher {
+  color: #fff;
+  font-weight: 700;
+  margin: 0 0 auto;
+}
+
+.view-group-link {
+  margin-top: 1.5rem;
+  align-self: flex-end;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.view-group-link i {
+  width: 16px;
+  height: 16px;
+}
+
+.view-group-link:hover {
+  color: #f0f0f0;
+}
+
+/* JOIN GROUP MODAL */
+
+.join-group-modal {
+  background: #f28f89;
+  border: 2px solid #1a1a1a;
+  border-radius: 8px;
+}
+
+.join-group-header {
+  background: transparent;
+  border-bottom: none;
+  padding: 1.25rem 1.5rem 0.5rem;
+}
+
+.join-group-header .modal-title {
+  color: #fff;
+  font-weight: 800;
+}
+
+.join-group-close {
+  filter: brightness(0) invert(1);
+  opacity: 1;
+}
+
+.join-group-body {
+  padding: 0.5rem 1.5rem 1.5rem;
+}
+
+.join-group-hint {
+  color: #fff;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+}
+
+.join-group-label {
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.join-group-input {
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  max-width: 220px;
+}
+
+.join-group-input:focus {
+  box-shadow: none;
+  outline: 2px solid #1a1a1a;
+}
+
+.btn-join-group-submit {
+  background: #e0574f;
+  border: 2px solid #1a1a1a;
+  border-radius: 20px;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.5rem 1.5rem;
+  cursor: pointer;
+}
+
+.btn-join-group-submit:hover {
+  background: #c8443c;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 600px) {
+  .groups-row {
+    grid-template-columns: 1fr;
+  }
+}
