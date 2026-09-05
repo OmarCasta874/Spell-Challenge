@@ -1,7 +1,9 @@
 {% extends 'base/base.html' %}
 {% load static %}
 {% block title %}Spell-Challenge — Learn, Practice, Challenge, Spell{% endblock %}
-
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+{% endblock %}
 {% block content %}
 <div class="landing">
 
@@ -26,6 +28,10 @@
     <div class="landing__heading">
       <h1>Welcome to <strong>SPELL-CHALLENGE</strong></h1>
       <p>Learn, Practice, Challenge, Spell</p>
+    </div>
+
+    <div class="landing__cta">
+      <a href="{% url 'choose_role' %}" class="btn btn-outline">Start</a>
     </div>
   </div>
 

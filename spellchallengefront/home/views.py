@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import logout
 
 # Create your views here.
 
@@ -34,3 +35,7 @@ def student_groups(request):
 
 def practices(request):
     return render(request, 'student/practices.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
