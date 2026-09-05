@@ -1,34 +1,60 @@
 {% extends 'base/base.html' %}
 {% load static %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/teacher_base.css' %}"> {# o student_base.css #}
+{% endblock %}
 
 {% block content %}
-<div class="d-flex vh-100">
-    <aside class="bg-dark text-white p-3 style=width: 260px;">
-    <h3 class="fw-bold mb-4">SPELL-CHALLENGE</h3>
-    <ul class="nav nav-pills flex-column mb-auto">
-      <li class="nav-item">
-        <a href="{% url 'student_home' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'student_home' %}active{% endif %}">
-          HOME
-        </a>
-      </li>
-      <li>
-        <a href="{% url 'student_groups' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'student_groups' %}active{% endif %}">
-          MY GROUPS
-        </a>
-      </li>
-      <li>
-        <a href="{% url 'practices' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'practices' %}active{% endif %}">
-          PRACTICE
-        </a>
-      </li>
-      <li><a href="#" class="nav-link text-secondary">COMPETITIONS</a></li>
-      <li><a href="#" class="nav-link text-secondary">STATISTICS</a></li>
-      <li><a href="#" class="nav-link text-secondary">PROFILE</a></li>
-    </ul>
-  </aside>
+<nav class="navbar">
+  <div class="navbar__brand">
+    <img src="{% static 'img/spell-challenge-white-logo.png' %}" alt="Spell-Challenge logo" class="navbar__logo">
+  </div>
 
-  <main class="flex-grow-1 p-4 bg-light overflow-auto">
-    {% block teacher_content %}{% endblock %}
-  </main>
-</div>
+  <ul class="navbar__nav">
+    <li>
+      <a href="{% url 'student_home' %}" class="navbar__link {% if request.resolver_match.url_name == 'student_home' %}active{% endif %}">
+        <i data-lucide="home"></i> HOME
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'student_groups' %}" class="navbar__link {% if request.resolver_match.url_name == 'student_groups' %}active{% endif %}">
+        <i data-lucide="users"></i> MY GROUPS
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'student_practices' %}" class="navbar__link {% if request.resolver_match.url_name == 'student_practices' %}active{% endif %}">
+        <i data-lucide="book-open"></i> PRACTICE
+      </a>
+    </li>
+    <li>
+      <a href="#" class="navbar__link">
+        <i data-lucide="trophy"></i> COMPETITIONS
+      </a>
+    </li>
+    <li>
+      <a href="#" class="navbar__link">
+        <i data-lucide="trending-up"></i> PROGRESS
+      </a>
+    </li>
+    <li>
+      <a href="#" class="navbar__link">
+        <i data-lucide="user"></i> PROFILE
+      </a>
+    </li>
+  </ul>
+
+  <a href="{% url 'logout' %}" class="navbar__logout" aria-label="Log out">
+    <i data-lucide="log-out"></i>
+  </a>
+</nav>
+
+<main class="app-main">
+  {% block student_content %}{% endblock %}
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  lucide.createIcons();
+</script>
 {% endblock %}

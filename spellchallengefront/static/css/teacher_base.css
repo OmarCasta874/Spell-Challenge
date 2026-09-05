@@ -1,0 +1,100 @@
+/* teacher_base.css */
+
+body {
+  margin: 0;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #7a1f2b;
+  padding: 10px 24px;
+  font-family: 'Lato', sans-serif;
+  box-sizing: border-box;
+}
+
+.navbar__brand {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.navbar__logo {
+  height: 40px;
+  width: auto;
+}
+
+.navbar__nav {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.navbar__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.navbar__link i {
+  width: 16px;
+  height: 16px;
+}
+
+.navbar__link:hover,
+.navbar__link.active {
+  color: #f2c9ce;
+}
+
+.navbar__logout {
+  display: flex;
+  align-items: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.navbar__logout i {
+  width: 20px;
+  height: 20px;
+}
+
+.navbar__logout:hover {
+  color: #f2c9ce;
+}
+
+/* MAIN CONTENT AREA */
+
+.app-main {
+  min-height: calc(100vh - 60px);
+  background-color: #fafafa;
+  padding: 24px;
+  box-sizing: border-box;
+  font-family: 'Lato', sans-serif;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .navbar__nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 16px;
+  }
+}

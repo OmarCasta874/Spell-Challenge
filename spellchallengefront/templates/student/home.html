@@ -4,7 +4,7 @@
 {% block student_content %}
 <div class="card mb-4 border-0 shadow-sm bg-warning bg-gradient text-dark">
   <div class="card-body d-flex align-items-center p-4">
-    <img src="{% static 'img/bee_assistant.png' %}" alt="Beenary" width="70" class="me-4">
+    <img src="{% static 'img/beenary-left.png' %}" alt="Beenary" width="70" class="me-4">
     <div>
       <h4 class="fw-bold mb-1">Welcome to Spell-Challenge!</h4>
       <p class="mb-0">My name is <strong>Beenary</strong>, and I'll be your bee assistant.</p>
@@ -30,7 +30,7 @@
           <span class="badge bg-success fs-6">A1</span>
         </div>
       </div>
-      <a href="{% url 'student_practice' %}" class="btn btn-primary w-100 fw-bold">GO TO PRACTICE</a>
+      <a href="{% url 'student_practices' %}" class="btn btn-primary w-100 fw-bold">GO TO PRACTICE</a>
     </div>
 
     <div class="card p-4 shadow-sm">
