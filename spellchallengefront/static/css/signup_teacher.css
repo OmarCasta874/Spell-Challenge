@@ -1,0 +1,157 @@
+/* signup_teacher.css */
+
+.auth-page {
+    min-height: 100vh;
+    margin: 0;
+    background-color: #fafafa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lato', sans-serif;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 480px;
+    background-color: #fff;
+    border: 2px solid #7a1f2b;
+    border-radius: 14px;
+    padding: 24px 32px 32px;
+    box-sizing: border-box;
+    position: relative;
+    margin: 24px;
+}
+
+/* BACK LINK */
+
+.auth-card .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #7a1f2b;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* TITLE */
+
+.auth-card h1 {
+    text-align: center;
+    font-family: 'Lato', sans-serif;
+    font-weight: 900;
+    font-size: 1.3rem;
+    color: #7a1f2b;
+    margin: 8px 0 28px 0;
+    letter-spacing: 0.02em;
+}
+
+/* FIELDS */
+
+.field {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.field-label {
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #7a1f2b;
+    flex: 0 0 150px;
+    text-align: left;
+}
+
+.field-input {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.field-input input {
+    width: 100%;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem;
+    color: #333;
+    padding: 8px 36px 8px 12px;
+    border: 1.5px solid #7a1f2b;
+    border-radius: 6px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.field-input input:focus {
+    box-shadow: 0 0 0 2px rgba(122, 31, 43, 0.2);
+}
+
+.field-input:not(:has(.toogle-password)) input {
+    padding-right: 12px;
+}
+
+/* PASSWORD TOOGLE */
+
+.toogle-password {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    padding: 0;
+    color: #7a1f2b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.toogle-password svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* SUBMIT BUTTON */
+
+.auth-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+.auth-actions .btn {
+    padding: 10px 32px;
+}
+
+/* FOOTER */
+
+.auth-footer {
+    text-align: center;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #7a1f2b;
+    margin: 20px 0 0 0;
+}
+
+.auth-footer a {
+    color: #7a1f2b;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    margin-left: 4px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 520px) {
+    .field {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .field-label {
+        flex: none;
+    }
+}
