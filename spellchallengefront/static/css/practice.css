@@ -1,0 +1,234 @@
+/* practice.css — Student */
+
+.practice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 3rem;
+}
+
+.unit-badge {
+  background: #4a1014;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 4px;
+}
+
+.practice-header-icons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.practice-header-icons i {
+  width: 22px;
+  height: 22px;
+  color: #7a1f2b;
+}
+
+.practice-header-icons .notification-bell {
+  color: #f0ad4e;
+}
+
+.practice-path-wrapper {
+  position: relative;
+  min-height: 220px;
+}
+
+.practice-label {
+  position: absolute;
+  top: -2.75rem;
+  left: 0;
+}
+
+.practice-label-title,
+.practice-label-subtitle {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #111;
+}
+
+.practice-path {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 1rem;
+}
+
+.path-node-wrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.node-high { transform: translateY(-14px); }
+.node-low  { transform: translateY(14px); }
+
+.path-node {
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.node-star {
+  width: 68px;
+  height: 68px;
+  background: #7a1f2b;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+}
+
+.star-icon {
+  width: 30px;
+  height: 30px;
+  fill: #fff;
+}
+
+.node-locked {
+  width: 56px;
+  height: 56px;
+  background: #e3e3e3;
+  border: 1px solid #bdbdbd;
+  cursor: not-allowed;
+}
+
+.node-locked i {
+  width: 22px;
+  height: 22px;
+  color: #555;
+}
+
+.node-locked:disabled {
+  opacity: 1;
+}
+
+.path-connector {
+  flex: 1;
+  height: 12px;
+  background: #d9d9d9;
+  border-radius: 6px;
+  margin: 0 -6px;
+}
+
+.connector-active {
+  background: #7a1f2b;
+}
+
+.next-unit-btn {
+  position: absolute;
+  right: 0.5rem;
+  bottom: -1.5rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e0574f;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.next-unit-btn i {
+  width: 20px;
+  height: 20px;
+  color: #fff;
+}
+
+.next-unit-btn:hover {
+  background: #c8443c;
+}
+
+/* PRACTICE MODAL */
+
+.practice-modal {
+  background: #4a1014;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+}
+
+.practice-modal-header {
+  border-bottom: none;
+  padding: 1.5rem 1.5rem 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.practice-modal-header .modal-title {
+  font-weight: 800;
+  font-size: 1rem;
+  margin: 0;
+  flex: 1;
+}
+
+.practice-percent {
+  background: transparent;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  margin-right: 0.75rem;
+}
+
+.practice-modal-close {
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
+}
+
+.practice-modal-body {
+  padding: 0.5rem 1.5rem 1.5rem;
+}
+
+.lesson-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.lesson-row:last-child { margin-bottom: 0; }
+
+.lesson-label {
+  font-weight: 700;
+  color: #fff;
+}
+
+.lesson-label-locked {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.lesson-play-btn {
+  background: #e0574f;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.4rem 1.5rem;
+  border-radius: 20px;
+  text-decoration: none;
+}
+
+.lesson-play-btn:hover {
+  background: #c8443c;
+  color: #fff;
+}
+
+.lesson-locked-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.4rem 1.25rem;
+  border-radius: 20px;
+  cursor: not-allowed;
+}
