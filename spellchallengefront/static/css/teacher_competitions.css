@@ -1,0 +1,86 @@
+/* =========================================================
+   SPELL-CHALLENGE — Teacher / Competitions
+   ========================================================= */
+:root {
+  --sc-maroon: #7A1220;
+  --sc-maroon-dark: #6E1119;
+  --sc-salmon: #F2908A;
+  --sc-salmon-soft: rgba(242, 144, 138, 0.35);
+  --sc-cream: #FAF8F6;
+  --sc-white: #FFFFFF;
+}
+
+/* =========================================================
+   Barra de búsqueda / filtro
+   ========================================================= */
+.search-input {
+  border: 2px solid var(--sc-maroon);
+  border-radius: 8px;
+  padding: 8px 14px;
+  min-width: 260px;
+  color: var(--sc-maroon-dark);
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--sc-maroon-dark);
+  box-shadow: 0 0 0 3px rgba(122, 18, 32, .15);
+}
+
+/* =========================================================
+   Stat boxes (Total / Active / Finished / Upcoming)
+   ========================================================= */
+.stat-box {
+  background: var(--sc-salmon-soft);
+  border-radius: 12px;
+  padding: 18px 20px;
+  color: var(--sc-maroon-dark);
+}
+.stat-box .stat-label { font-weight: 700; color: var(--sc-maroon-dark); }
+.stat-box .stat-value { font-size: 2rem; font-weight: 800; color: var(--sc-maroon-dark); }
+
+/* =========================================================
+   Tarjetas de competencia (blancas, borde vino, con badge)
+   ========================================================= */
+.competition-card {
+  background: var(--sc-white);
+  border: 2px solid var(--sc-maroon);
+  border-radius: 12px;
+  padding: 20px;
+  color: var(--sc-maroon-dark);
+  position: relative;
+}
+.competition-card h5 { color: var(--sc-maroon-dark); font-weight: 800; }
+.competition-card .comp-meta { font-weight: 700; margin-bottom: 2px; }
+.competition-card .comp-datetime {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+  font-weight: 700;
+}
+
+.badge-status {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 5px 16px;
+  font-weight: 800;
+  font-size: .85rem;
+  color: #4a2e00;
+}
+.badge-finished { background: #f5e34a; }
+.badge-active   { background: #6fe36f; }
+.badge-upcoming { background: #f2a94a; }
+
+/* =========================================================
+   Panel "Create Competition" — reutiliza .panel-right
+   (definido en teacher-modals.css), aquí solo el layout
+   propio del formulario de 4 columnas de fecha/hora
+   ========================================================= */
+.datetime-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 720px) {
+  .datetime-grid { grid-template-columns: repeat(2, 1fr); }
+}

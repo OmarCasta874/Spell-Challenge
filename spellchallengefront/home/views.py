@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout
+from django.views.decorators.http import require_POST
 
 # Create your views here.
 
@@ -37,5 +38,10 @@ def practices(request):
     return render(request, 'student/practices.html')
 
 def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+@require_POST
+def custom_logout_view(request):
     logout(request)
     return redirect('login')

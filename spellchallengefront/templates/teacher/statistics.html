@@ -1,0 +1,180 @@
+{% extends 'teacher/teacher_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/teacher_statistics.css' %}">
+{% endblock %}
+
+{% block teacher_content %}
+<div class="statistics-container">
+  <!-- Encabezado y Filtros -->
+  <header class="statistics-header">
+    <div>
+      <h1 class="statistics-title">STATISTICS</h1> <!--[cite: 5] -->
+      <p class="statistics-subtitle">Analyze student performance and learning progress.</p> <!--[cite: 5] -->
+    </div>
+
+    <!-- Barra de Filtros -->
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label for="filterGroup">Group</label> <!--[cite: 5] -->
+        <select id="filterGroup" class="form-select form-select-sm">
+          <option selected>All Groups</option> <!--[cite: 5] -->
+          <option value="3A">Group 3A</option> <!--[cite: 5] -->
+          <option value="4B">Group 4B</option> <!--[cite: 5] -->
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filterWordList">Word List</label> <!--[cite: 5] -->
+        <select id="filterWordList" class="form-select form-select-sm">
+          <option selected>All Word Lists</option> <!--[cite: 5] -->
+          <option value="greetings">Greetings - A1</option> <!--[cite: 5] -->
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filterPeriod">Period</label> <!--[cite: 5] -->
+        <select id="filterPeriod" class="form-select form-select-sm">
+          <option selected>Last 7 Days</option> <!--[cite: 5] -->
+          <option value="month">Last 30 Days</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Grilla Principal -->
+  <div class="row g-4 mb-4">
+    <!-- Columna Izquierda: Student Performance Table -->
+    <div class="col-lg-7">
+      <div class="stat-card-box h-100">
+        <h3 class="card-section-title">Student Performance</h3> <!--[cite: 5] -->
+        
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Student</th> <!--[cite: 5] -->
+                <th class="text-center">Competitions</th> <!--[cite: 5] -->
+                <th class="text-center">Best Score</th> <!--[cite: 5] -->
+                <th class="text-center">Accuracy</th> <!--[cite: 5] -->
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Castañon Castañon</strong><br><small class="text-muted">Jesús Omar</small></td> <!--[cite: 5] -->
+                <td class="text-center">4</td> <!--[cite: 5] -->
+                <td class="text-center fw-bold">19/20</td> <!--[cite: 5] -->
+                <td class="text-center"><span class="badge bg-success-light text-success">95%</span></td> <!--[cite: 5] -->
+              </tr>
+              <tr>
+                <td><strong>Sánchez Hernández</strong><br><small class="text-muted">Diego</small></td> <!--[cite: 5] -->
+                <td class="text-center">3</td> <!--[cite: 5] -->
+                <td class="text-center fw-bold">18/20</td> <!--[cite: 5] -->
+                <td class="text-center"><span class="badge bg-success-light text-success">90%</span></td> <!--[cite: 5] -->
+              </tr>
+              <tr>
+                <td><strong>Villegas Hernández</strong><br><small class="text-muted">Josué Alberto</small></td> <!--[cite: 5] -->
+                <td class="text-center">3</td> <!--[cite: 5] -->
+                <td class="text-center fw-bold">18/20</td> <!--[cite: 5] -->
+                <td class="text-center"><span class="badge bg-success-light text-success">90%</span></td> <!--[cite: 5] -->
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna Derecha: Métricas Resumidas + Palabras -->
+    <div class="col-lg-5">
+      <!-- Tarjetas Pequeñas de Estadísticas Generales -->
+      <div class="summary-stats-grid mb-4">
+        <div class="mini-stat-card">
+          <span class="mini-stat-label">Total Students:</span> <!--[cite: 5] -->
+          <span class="mini-stat-value">24</span> <!--[cite: 5] -->
+        </div>
+        <div class="mini-stat-card">
+          <span class="mini-stat-label">Average Accuracy:</span> <!--[cite: 5] -->
+          <span class="mini-stat-value">84%</span> <!--[cite: 5] -->
+        </div>
+        <div class="mini-stat-card">
+          <span class="mini-stat-label">Competitions:</span> <!--[cite: 5] -->
+          <span class="mini-stat-value">8</span> <!--[cite: 5] -->
+        </div>
+        <div class="mini-stat-card">
+          <span class="mini-stat-label">Average Score:</span> <!--[cite: 5] -->
+          <span class="mini-stat-value">16.8/20</span> <!--[cite: 5] -->
+        </div>
+      </div>
+
+      <!-- Word Performance -->
+      <div class="stat-card-box">
+        <h3 class="card-section-title">Word Performance</h3> <!--[cite: 5] -->
+        
+        <div class="row g-3">
+          <!-- Most Failed Words -->
+          <div class="col-6">
+            <h4 class="word-list-title text-danger">Most Failed Words</h4> <!--[cite: 5] -->
+            <ul class="word-rank-list">
+              <li><span>1. Accommodation</span> <strong class="text-muted">74%</strong></li> <!--[cite: 5] -->
+              <li><span>2. Necessary</span> <strong class="text-muted">70%</strong></li> <!--[cite: 5] -->
+              <li><span>3. Environment</span> <strong class="text-muted">68%</strong></li> <!--[cite: 5] -->
+              <li><span>4. Beautiful</span> <strong class="text-muted">63%</strong></li> <!--[cite: 5] -->
+            </ul>
+          </div>
+
+          <!-- Most Successful Words -->
+          <div class="col-6">
+            <h4 class="word-list-title text-success">Most Successful Words</h4> <!--[cite: 5] -->
+            <ul class="word-rank-list">
+              <li><span>1. Responsibility</span> <strong class="text-muted">95%</strong></li> <!--[cite: 5] -->
+              <li><span>2. Procedure</span> <strong class="text-muted">87%</strong></li> <!--[cite: 5] -->
+              <li><span>3. Performance</span> <strong class="text-muted">84%</strong></li> <!--[cite: 5] -->
+              <li><span>4. Instantly</span> <strong class="text-muted">79%</strong></li> <!--[cite: 5] -->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fila Inferior: Chart Accuracy Over Time -->
+  <div class="row">
+    <div class="col-12">
+      <div class="stat-card-box">
+        <h3 class="card-section-title mb-1">Accuracy Over Time</h3> <!--[cite: 5] -->
+        <p class="text-center fw-semibold text-muted mb-2">September</p> <!--[cite: 5] -->
+
+        <div class="chart-wrapper">
+          <div class="chart-y-axis">
+            <span>100%</span> <!--[cite: 5] -->
+            <span>80%</span> <!--[cite: 5] -->
+            <span>60%</span> <!--[cite: 5] -->
+            <span>40%</span> <!--[cite: 5] -->
+            <span>20%</span> <!--[cite: 5] -->
+          </div>
+          <div class="chart-bars">
+            <div class="bar-group">
+              <div class="bar" style="height: 67%;"></div>
+              <span class="bar-label">W1</span> <!--[cite: 5] -->
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height: 15%;"></div>
+              <span class="bar-label">W2</span> <!--[cite: 5] -->
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height: 0%;"></div>
+              <span class="bar-label">W3</span> <!--[cite: 5] -->
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height: 0%;"></div>
+              <span class="bar-label">W4</span> <!--[cite: 5] -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

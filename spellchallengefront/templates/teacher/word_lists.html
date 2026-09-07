@@ -1,4 +1,10 @@
 {% extends 'teacher/teacher_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/teacher_modals.css' %}">
+{% endblock %}
 
 {% block teacher_content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -6,41 +12,76 @@
     <h2>WORD LISTS</h2>
     <p class="text-muted">Manage your vocabulary lists.</p>
   </div>
-  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createListModal">
+  <button class="btn btn-pill-solid" data-bs-toggle="modal" data-bs-target="#createListModal">
     + Create Word List
   </button>
 </div>
 
 <div class="row g-3">
-    <div class="col-md-4">
-    <div class="card p-3 shadow-sm">
+
+  <div class="col-md-4">
+    <div class="card wordlist-card p-3 shadow-sm">
       <h5>Greetings - A1</h5>
-      <span class="badge bg-info text-dark w-fit mb-2">20 words - Beginner</span>
-      <small class="text-muted d-block mb-3">Created: Sep 3, 2026</small>
+      <span class="badge w-fit mb-2">20 words - Beginner</span>
+      <small class="d-block mb-3">Created: Sep 3, 2026</small>
       <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-outline-primary">VIEW</button>
-        <button class="btn btn-sm btn-outline-secondary">EDIT</button>
-        <button class="btn btn-sm btn-outline-danger">DELETE</button>
+        <button class="btn btn-sm btn-pill-outline">VIEW</button>
+        <button class="btn btn-sm btn-pill-outline">EDIT</button>
+        <button class="btn btn-sm btn-pill-solid">DELETE</button>
       </div>
     </div>
   </div>
+
+  <div class="col-md-4">
+    <div class="card wordlist-card p-3 shadow-sm">
+      <h5>Family & People - A1</h5>
+      <span class="badge w-fit mb-2">20 words - Beginner</span>
+      <small class="d-block mb-3">Created: Sep 2, 2026</small>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-pill-outline">VIEW</button>
+        <button class="btn btn-sm btn-pill-outline">EDIT</button>
+        <button class="btn btn-sm btn-pill-solid">DELETE</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card wordlist-card p-3 shadow-sm">
+      <h5>Capitals and Countries - A1</h5>
+      <span class="badge w-fit mb-2">20 words - Beginner</span>
+      <small class="d-block mb-3">Created: Sep 5, 2026</small>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-pill-outline">VIEW</button>
+        <button class="btn btn-sm btn-pill-outline">EDIT</button>
+        <button class="btn btn-sm btn-pill-solid">DELETE</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
+<!-- Modal 1: elegir cómo crear la lista (centrado, chico) -->
 <div class="modal fade" id="createListModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog panel-center modal-dialog-centered">
     <div class="modal-content p-4 text-center">
-      <h4>How would you like to create your list?</h4>
-      <div class="row mt-4">
-        <div class="col-6">
-          <div class="card p-3 cursor-pointer border-primary">
-            <h6>Create Manually</h6>
-            <small class="text-muted">Add words one by one.</small>
+      <div class="modal-header">
+        <h5 class="modal-title">Create a Word List</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h6 class="mb-4">How would you like to create your list?</h6>
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="choice-card">
+              <h6>Create Manually</h6>
+              <small class="text-muted">Add words one by one.</small>
+            </div>
           </div>
-        </div>
-        <div class="col-6">
-          <div class="card p-3 cursor-pointer">
-            <h6>Import from Excel</h6>
-            <small class="text-muted">Upload an Excel file.</small>
+          <div class="col-6">
+            <div class="choice-card">
+              <h6>Import from Excel</h6>
+              <small class="text-muted">Upload an Excel file.</small>
+            </div>
           </div>
         </div>
       </div>
@@ -48,27 +89,29 @@
   </div>
 </div>
 
-<!-- MODAL: Crear Lista Manualmente -->
+<!-- Modal 2: Create Word List manual (panel anclado a la derecha) -->
 <div class="modal fade" id="manualListModal" tabindex="-1" aria-labelledby="manualListModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+  <div class="modal-dialog panel-right modal-dialog-scrollable">
     <div class="modal-content">
-      
-      <div class="modal-header bg-dark text-white">
-        <h5 class="modal-title" id="manualListModalLabel">CREATE WORD LIST (Manual)</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title" id="manualListModalLabel">CREATE WORD LIST</h5>
+          <small class="modal-subtitle">Add words manually to create a new vocabulary list</small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
         <form id="formManualList">
-          <!-- INFORMACIÓN DE LA LISTA -->
-          <h6 class="fw-bold mb-3 border-bottom pb-2">LIST INFORMATION</h6>
+          <h6 class="section-title mb-3 pb-2">LIST INFORMATION</h6>
           <div class="row g-3 mb-4">
-            <div class="col-md-4">
-              <label for="listName" class="form-label">List Name *</label>
+            <div class="col-md-6">
+              <label for="listName" class="form-label">List Name</label>
               <input type="text" class="form-control" id="listName" placeholder="e.g. Greetings - A1" required>
             </div>
-            <div class="col-md-4">
-              <label for="listCategory" class="form-label">Category *</label>
+            <div class="col-md-3">
+              <label for="listCategory" class="form-label">Category</label>
               <select class="form-select" id="listCategory" required>
                 <option value="" selected disabled>Select a Category</option>
                 <option value="greetings">Greetings</option>
@@ -76,8 +119,8 @@
                 <option value="geography">Countries & Capitals</option>
               </select>
             </div>
-            <div class="col-md-4">
-              <label for="listLevel" class="form-label">Level *</label>
+            <div class="col-md-3">
+              <label for="listLevel" class="form-label">Level</label>
               <select class="form-select" id="listLevel" required>
                 <option value="" selected disabled>Select a Level</option>
                 <option value="A1">A1 - Beginner</option>
@@ -87,23 +130,22 @@
             </div>
           </div>
 
-          <!-- TABLA DE PALABRAS -->
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="fw-bold mb-0">WORDS (<span id="wordCount">0</span>/20)</h6>
-            <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#addWordModal">
+            <button type="button" class="btn btn-pill-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#addWordModal">
               + Add Word
             </button>
           </div>
 
           <div class="table-responsive">
-            <table class="table table-bordered table-striped align-middle" id="wordsTable">
-              <thead class="table-light">
+            <table class="table table-bordered align-middle" id="wordsTable">
+              <thead>
                 <tr>
                   <th style="width: 50px;">#</th>
                   <th>Word</th>
                   <th>Meaning</th>
                   <th>Pronunciation</th>
-                  <th style="width: 150px;">Actions</th>
+                  <th style="width: 190px;">Actions</th>
                 </tr>
               </thead>
               <tbody id="wordsTableBody">
@@ -119,19 +161,19 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" form="formManualList" class="btn btn-success">Save Word List</button>
+        <button type="button" class="btn btn-pill-outline-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" form="formManualList" class="btn btn-pill-solid">Save Word List</button>
       </div>
 
     </div>
   </div>
 </div>
 
-<!-- Editar Palabra -->
+<!-- Modal 3: Add Word (panel anclado a la derecha) -->
 <div class="modal fade" id="addWordModal" tabindex="-1" aria-labelledby="addWordModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog panel-right modal-dialog-scrollable" style="max-width:min(560px,96vw);">
     <div class="modal-content">
-      
+
       <div class="modal-header">
         <h5 class="modal-title" id="addWordModalLabel">ADD WORD</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -163,47 +205,51 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" id="btnSaveWord" class="btn btn-primary">Save Word</button>
+        <button type="button" class="btn btn-pill-outline-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="btnSaveWord" class="btn btn-pill-solid">Save Word</button>
       </div>
 
     </div>
   </div>
 </div>
 
-<!-- Importar desde Excel -->
+<!-- Modal 4: Import from Excel (centrado, chico) -->
 <div class="modal fade" id="excelListModal" tabindex="-1" aria-labelledby="excelListModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
+  <div class="modal-dialog panel-center modal-dialog-centered modal-lg">
     <div class="modal-content">
-      
-      <div class="modal-header bg-dark text-white">
-        <h5 class="modal-title" id="excelListModalLabel">IMPORT FROM EXCEL</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="excelListModalLabel">Create a Word List</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body text-center p-4">
-        <div id="dropZone" class="border border-2 border-dashed rounded-3 p-5 bg-light position-relative cursor-pointer">
-          <i class="bi bi-file-earmark-excel fs-1 text-success mb-3 d-block"></i>
+        <div id="dropZone" class="border border-2 border-dashed rounded-3 p-5 position-relative" style="cursor:pointer;">
+          <i class="bi bi-file-earmark-text fs-1 mb-3 d-block"></i>
           <h5>Drag & Drop your Excel File</h5>
-          <p class="text-muted small mb-3">Supports .xlsx, .xls formats</p>
-          <span class="badge bg-secondary mb-3">or</span>
+          <p class="mb-3">or</p>
           <div>
-            <label for="excelFileInput" class="btn btn-outline-primary">
+            <label for="excelFileInput" class="btn btn-pill-solid">
               + CHOOSE EXCEL FILE
             </label>
             <input type="file" id="excelFileInput" accept=".xlsx, .xls" hidden>
           </div>
-          <div id="fileInfo" class="mt-3 text-success fw-bold d-none"></div>
+          <div id="fileInfo" class="mt-3 fw-bold d-none"></div>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" id="btnUploadExcel" class="btn btn-success" disabled>Import List</button>
+        <button type="button" class="btn btn-pill-outline-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="btnUploadExcel" class="btn btn-pill-solid" disabled>Import List</button>
       </div>
 
     </div>
   </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script src="{% static 'js/word_lists.js' %}"></script>
 {% endblock %}

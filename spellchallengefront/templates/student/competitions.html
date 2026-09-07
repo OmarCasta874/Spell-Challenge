@@ -1,0 +1,92 @@
+{% extends 'student/student_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/student_competitions.css' %}">
+{% endblock %}
+
+{% block student_content %}
+<div class="competitions-container">
+  <!-- Encabezado de la vista -->
+  <header class="competitions-header">
+    <h1 class="competitions-title">COMPETITIONS</h1> <!--[cite: 5] -->
+    <p class="competitions-subtitle">Join competitions & challenge yourself.</p> <!--[cite: 5] -->
+  </header>
+
+  <section class="competitions-section">
+    <h2 class="section-title">My Competitions</h2> <!--[cite: 5] -->
+
+    <div class="competitions-grid">
+      <!-- 1. Competition #1 (Finished) -->
+      <article class="comp-card">
+        <div class="comp-card__content">
+          <div class="comp-card__header">
+            <h3 class="comp-card__title">Competition #1</h3> <!--[cite: 5] -->
+            <span class="status-badge status-badge--finished">Finished</span> <!--[cite: 5] -->
+          </div>
+          <p class="comp-card__group">Group 3-A</p> <!--[cite: 5] -->
+
+          <!-- Métricas de Resultado -->
+          <div class="comp-card__metrics">
+            <div class="metric-item">
+              <span class="metric-label">Score:</span>
+              <span class="metric-value">18/20</span> <!--[cite: 5] -->
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Accuracy:</span>
+              <span class="metric-value">90%</span> <!--[cite: 5] -->
+            </div>
+          </div>
+
+          <p class="comp-card__date">
+            <i data-lucide="calendar"></i> Sep 4, 2026 | 10:00 am <!--[cite: 5] -->
+          </p>
+        </div>
+
+        <button class="btn-action btn-action--outline">View Results</button> <!--[cite: 3, 5] -->
+      </article>
+
+      <!-- 2. Competition #2 (Active) -->
+      <article class="comp-card comp-card--active">
+        <div class="comp-card__content">
+          <div class="comp-card__header">
+            <h3 class="comp-card__title">Competition #2</h3> <!--[cite: 5] -->
+            <span class="status-badge status-badge--active">Active</span> <!--[cite: 5] -->
+          </div>
+          <p class="comp-card__group">Group 4-C</p> <!--[cite: 5] -->
+
+          <div class="comp-card__info-tag">
+            <span class="tag">20 words</span> <!--[cite: 5] -->
+          </div>
+
+          <p class="comp-card__date">
+            <i data-lucide="calendar"></i> Sep 7, 2026 | 9:30 am <!--[cite: 5] -->
+          </p>
+        </div>
+
+        <button class="btn-action btn-action--primary">Enter Competition</button> <!--[cite: 5] -->
+      </article>
+
+      <!-- 3. Competition #3 (Upcoming) -->
+      <article class="comp-card">
+        <div class="comp-card__content">
+          <div class="comp-card__header">
+            <h3 class="comp-card__title">Competition #3</h3> <!--[cite: 5] -->
+            <span class="status-badge status-badge--upcoming">Upcoming</span> <!--[cite: 5] -->
+          </div>
+          <p class="comp-card__group">Group 4-C</p> <!--[cite: 5] -->
+
+          <p class="comp-card__countdown">Starts in 4 days</p> <!--[cite: 5] -->
+
+          <p class="comp-card__date">
+            <i data-lucide="calendar"></i> Sep 11, 2026 | 10:50 am <!--[cite: 5] -->
+          </p>
+        </div>
+
+        <button class="btn-action btn-action--secondary">View Details</button> <!--[cite: 5] -->
+      </article>
+    </div>
+  </section>
+</div>
+{% endblock %}
