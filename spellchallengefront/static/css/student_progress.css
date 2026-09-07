@@ -1,0 +1,201 @@
+.progress-container {
+  padding: 1.5rem;
+}
+
+.progress-title {
+  font-weight: 700;
+  font-size: 1.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.progress-subtitle {
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+}
+
+.card-section-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+/* Grilla de Métricas */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.stat-card {
+  background: #7a1c1c; /* Tono guinda del tema */
+  color: #fff;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Grafica Simular */
+.chart-card, .achievements-card {
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  height: 100%;
+}
+
+.chart-wrapper {
+  display: flex;
+  align-items: flex-end;
+  height: 180px;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.chart-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.chart-bars {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
+  border-left: 2px solid #7a1c1c;
+  border-bottom: 2px solid #7a1c1c;
+  padding-left: 0.5rem;
+}
+
+.bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  width: 20%;
+}
+
+.bar {
+  background-color: #7a1c1c;
+  width: 100%;
+  border-radius: 2px 2px 0 0;
+}
+
+.bar-label {
+  font-size: 0.75rem;
+  margin-top: 0.4rem;
+  color: #6c757d;
+}
+
+/* Logros */
+.achievements-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.achievement-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f8f9fa;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.375rem;
+  border: 1px solid #e9ecef;
+}
+
+.achievement-icon {
+  color: #7a1c1c;
+  display: flex;
+  align-items: center;
+}
+
+.achievement-info {
+  flex-grow: 1;
+}
+
+.achievement-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.achievement-desc {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.achievement-counter {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #7a1c1c;
+}
+
+/* Resultados Recientes */
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.result-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid #e9ecef;
+}
+
+.result-name {
+  font-weight: 600;
+  margin-right: 1.5rem;
+}
+
+.result-score {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.btn-view-details {
+  background: transparent;
+  color: #7a1c1c;
+  border: 1px solid #7a1c1c;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-view-all {
+  background: #7a1c1c;
+  color: #fff;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}

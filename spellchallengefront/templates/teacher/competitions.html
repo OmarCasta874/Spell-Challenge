@@ -1,0 +1,176 @@
+{% extends 'teacher/teacher_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/teacher_modals.css' %}">
+<link rel="stylesheet" href="{% static 'css/teacher_competitions.css' %}">
+{% endblock %}
+
+{% block teacher_content %}
+<div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+  <div>
+    <h2>COMPETITIONS</h2>
+    <p class="text-muted mb-0">Create, manage and monitor your competitions.</p>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <input type="text" id="competitionSearch" class="search-input" placeholder="Search competitions...">
+    <button class="btn btn-pill-solid text-nowrap" data-bs-toggle="modal" data-bs-target="#createCompetitionModal">
+      + Create Competition
+    </button>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-box">
+      <div class="stat-label">Total Competitions:</div>
+      <div class="stat-value" id="statTotal">12</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-box">
+      <div class="stat-label">Active:</div>
+      <div class="stat-value" id="statActive">2</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-box">
+      <div class="stat-label">Finished:</div>
+      <div class="stat-value" id="statFinished">3</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-box">
+      <div class="stat-label">Upcoming:</div>
+      <div class="stat-value" id="statUpcoming">7</div>
+    </div>
+  </div>
+</div>
+
+<h4 class="mb-3">Your Competitions</h4>
+
+<div class="row g-3" id="competitionsRow">
+
+  <div class="col-md-4">
+    <div class="competition-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <h5>Competition #1</h5>
+        <span class="badge-status badge-finished">Finished</span>
+      </div>
+      <div class="comp-meta">Group 3-A</div>
+      <div class="comp-meta">25 Participants</div>
+      <div class="comp-datetime"><span>Sep 4, 2026</span><span>10:00 am</span></div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="competition-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <h5>Competition #2</h5>
+        <span class="badge-status badge-active">Active</span>
+      </div>
+      <div class="comp-meta">Group 4-C</div>
+      <div class="comp-meta">20 Participants</div>
+      <div class="comp-datetime"><span>Sep 7, 2026</span><span>9:30 am</span></div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="competition-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <h5>Competition #3</h5>
+        <span class="badge-status badge-upcoming">Upcoming</span>
+      </div>
+      <div class="comp-meta">Group 4-C</div>
+      <div class="comp-meta">18 Participants</div>
+      <div class="comp-datetime"><span>Sep 11, 2026</span><span>10:50 am</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal fade" id="createCompetitionModal" tabindex="-1" aria-labelledby="createCompetitionModalLabel" aria-hidden="true">
+  <div class="modal-dialog panel-right modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title" id="createCompetitionModalLabel">Create Competition</h5>
+          <small class="modal-subtitle">Set up a new Spelling Bee competition.</small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="formCreateCompetition">
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="compName" class="form-label">Competition Name:</label>
+              <input type="text" class="form-control" id="compName" required>
+            </div>
+            <div class="col-md-6">
+              <label for="compDescription" class="form-label">Description (optional):</label>
+              <input type="text" class="form-control" id="compDescription">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label for="compGroup" class="form-label">Group:</label>
+              <select class="form-select" id="compGroup" required>
+                <option value="" selected disabled>Select a Group</option>
+                <option value="3a">Group 3A - English</option>
+                <option value="4c">Group 4C - English</option>
+                <option value="2a">Group 2A - English</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="compWordList" class="form-label">Word List:</label>
+              <select class="form-select" id="compWordList" required>
+                <option value="" selected disabled>Select a Word List</option>
+                <option value="greetings">Greetings - A1</option>
+                <option value="family">Family & People - A1</option>
+                <option value="geo">Capitals and Countries - A1</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="datetime-grid">
+            <div>
+              <label for="compStartDate" class="form-label">Start Date:</label>
+              <input type="date" class="form-control" id="compStartDate" required>
+            </div>
+            <div>
+              <label for="compStartTime" class="form-label">Start Time:</label>
+              <input type="time" class="form-control" id="compStartTime" required>
+            </div>
+            <div>
+              <label for="compEndDate" class="form-label">End Date:</label>
+              <input type="date" class="form-control" id="compEndDate" required>
+            </div>
+            <div>
+              <label for="compEndTime" class="form-label">End Time:</label>
+              <input type="time" class="form-control" id="compEndTime" required>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-pill-outline-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="btnCreateCompetition" class="btn btn-pill-solid">Create Competition</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script src="{% static 'js/competitions.js' %}"></script>
+{% endblock %}

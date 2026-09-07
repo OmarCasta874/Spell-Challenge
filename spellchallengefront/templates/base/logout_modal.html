@@ -1,0 +1,26 @@
+<!-- Modal de Cierre de Sesión -->
+<div class="modal fade logout-modal" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-body p-4">
+        <!-- Mascota Cuervo -->
+        <div class="mascot-container mb-3">
+          <img src="{% static 'images/crow_assistant.png' %}" alt="Crow Assistant" class="modal-mascot">
+        </div>
+        
+        <h3 class="modal-title mb-2" id="logoutModalLabel">Log Out</h3>
+        <p class="modal-text mb-4">Are you sure you want to log out of <strong>Spell-Challenge</strong>?</p>
+        
+        <!-- Acciones del Modal -->
+        <div class="d-flex justify-content-center gap-3">
+          <button type="button" class="btn btn-modal-cancel" data-bs-dismiss="modal">NO</button>
+          
+          <form method="POST" action="{% url 'logout_ask' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-modal-confirm">YES</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

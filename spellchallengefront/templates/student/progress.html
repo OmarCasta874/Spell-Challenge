@@ -1,0 +1,171 @@
+{% extends 'student/student_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/student_progress.css' %}">
+{% endblock %}
+
+{% block student_content %}
+<div class="progress-container">
+  <!-- Encabezado -->
+  <header class="progress-header">
+    <h1 class="progress-title">PROGRESS</h1> <!-- -->
+    <p class="progress-subtitle">Track your learning progress and achievements.</p> <!-- -->
+  </header>
+
+  <!-- Tarjetas de Estadísticas Principales -->
+  <section class="stats-grid mb-4">
+    <div class="stat-card">
+      <span class="stat-label">Overall Accuracy:</span> <!-- -->
+      <span class="stat-value">87%</span> <!-- -->
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Words Practiced:</span> <!-- -->
+      <span class="stat-value">146</span> <!-- -->
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Competitions:</span> <!-- -->
+      <span class="stat-value">8</span> <!-- -->
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Best Score:</span> <!-- -->
+      <span class="stat-value">19/20</span> <!-- -->
+    </div>
+  </section>
+
+  <div class="row g-4">
+    <!-- Columna Izquierda: Accuracy Over Time -->
+    <div class="col-lg-6">
+      <div class="chart-card">
+        <h3 class="card-section-title">Accuracy Over Time</h3> <!-- -->
+        <p class="text-center fw-semibold text-muted mb-2">September</p> <!-- -->
+        
+        <!-- Simulación de gráfica de barras -->
+        <div class="chart-wrapper">
+          <div class="chart-y-axis">
+            <span>100%</span> <!-- -->
+            <span>80%</span> <!-- -->
+            <span>60%</span> <!-- -->
+            <span>40%</span> <!-- -->
+            <span>20%</span> <!-- -->
+          </div>
+          <div class="chart-bars">
+            <div class="bar-group">
+              <div class="bar" style="height: 67%;"></div>
+              <span class="bar-label">W1</span> <!-- -->
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height: 15%;"></div>
+              <span class="bar-label">W2</span> <!-- -->
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height: 0%;"></div>
+              <span class="bar-label">W3</span> <!-- -->
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height: 0%;"></div>
+              <span class="bar-label">W4</span> <!-- -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna Derecha: Achievements -->
+    <div class="col-lg-6">
+      <div class="achievements-card">
+        <h3 class="card-section-title">Achievements</h3> <!-- -->
+
+        <div class="achievements-grid">
+          <!-- Achievement 1 -->
+          <div class="achievement-item">
+            <div class="achievement-icon">
+              <i data-lucide="check-circle"></i>
+            </div>
+            <div class="achievement-info">
+              <h4 class="achievement-title">50 Correct Answers</h4> <!-- -->
+              <p class="achievement-desc">50 correct words</p> <!-- -->
+            </div>
+            <span class="achievement-counter">50/50</span> <!-- -->
+          </div>
+
+          <!-- Achievement 2 -->
+          <div class="achievement-item">
+            <div class="achievement-icon">
+              <i data-lucide="award"></i>
+            </div>
+            <div class="achievement-info">
+              <h4 class="achievement-title">No Mistakes</h4> <!-- -->
+              <p class="achievement-desc">No mistakes in a list</p> <!-- -->
+            </div>
+            <span class="achievement-counter">0/5</span> <!-- -->
+          </div>
+
+          <!-- Achievement 3 -->
+          <div class="achievement-item">
+            <div class="achievement-icon">
+              <i data-lucide="zap"></i>
+            </div>
+            <div class="achievement-info">
+              <h4 class="achievement-title">Maximum Speed</h4> <!-- -->
+              <p class="achievement-desc">5 lessons completed in less than 1 minute</p> <!-- -->
+            </div>
+            <span class="achievement-counter">0/1</span> <!-- -->
+          </div>
+
+          <!-- Achievement 4 -->
+          <div class="achievement-item">
+            <div class="achievement-icon">
+              <i data-lucide="sun"></i>
+            </div>
+            <div class="achievement-info">
+              <h4 class="achievement-title">Early Bird</h4> <!-- -->
+              <p class="achievement-desc">Doing a lesson before 7 am</p> <!-- -->
+            </div>
+            <span class="achievement-counter">0/1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección Resultados Recientes -->
+  <section class="recent-results-section mt-4">
+    <h3 class="card-section-title">Recent Results</h3> <!-- -->
+
+    <div class="results-list">
+      <!-- Result 1 -->
+      <div class="result-card">
+        <div class="result-info">
+          <span class="result-name">Competition 1</span> <!-- -->
+          <span class="result-score">Score: 18/20</span> <!-- -->
+        </div>
+        <button class="btn-view-details">View Details</button> <!-- -->
+      </div>
+
+      <!-- Result 2 -->
+      <div class="result-card">
+        <div class="result-info">
+          <span class="result-name">Competition 2</span> <!-- -->
+          <span class="result-score">Score: 17/20</span> <!-- -->
+        </div>
+        <button class="btn-view-details">View Details</button> <!-- -->
+      </div>
+
+      <!-- Result 3 -->
+      <div class="result-card">
+        <div class="result-info">
+          <span class="result-name">Competition 3</span> <!-- -->
+          <span class="result-score">Score: 18/20</span> <!-- -->
+        </div>
+        <button class="btn-view-details">View Details</button> <!-- -->
+      </div>
+    </div>
+
+    <div class="text-center mt-3">
+      <button class="btn-view-all">View All Competitions</button> <!-- -->
+    </div>
+  </section>
+</div>
+{% endblock %}
