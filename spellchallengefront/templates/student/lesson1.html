@@ -1,0 +1,217 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/student_lesson1.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid vh-100 d-flex flex-column bg-light p-4">
+
+  <!-- ENCABEZADO SUPERIOR -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <a href="{% url 'student_practice' %}" class="btn btn-outline-secondary fw-bold">
+      ← BACK
+    </a>
+    <div class="text-center">
+      <h5 class="fw-bold mb-0" id="lessonTitle">Lesson 1</h5>
+      <span class="badge bg-primary fs-6" id="lessonProgress">1 / 10</span>
+    </div>
+    <div style="width: 80px;"></div> 
+
+  <!-- CONTENEDOR PRINCIPAL DEL EJERCICIO -->
+  <div class="row flex-grow-1 justify-content-center align-items-center">
+    <div class="col-md-7 col-lg-6">
+
+      <!-- EJERCICIO 1: Grammar -->
+      <div id="ex1" class="card shadow p-4 text-center exercise-card">
+        <span class="badge bg-secondary mb-2 w-fit mx-auto">(1/10)</span>
+        <h4 class="fw-bold mb-4">1. Choose the correct word to complete the sentence.</h4>
+        <p class="fs-3 mb-5 border-bottom pb-3"><span class="text-danger fw-bold">_____</span>! My name is Emma.</p>
+        <div class="row g-3 mb-4">
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">A) Goodbye</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn active">B) Hello</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">C) Thanks</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">D) Sorry</button></div>
+        </div>
+        <button class="btn btn-success btn-lg w-100 fw-bold py-3" onclick="nextExercise(1, 2)">NEXT</button>
+      </div>
+
+      <!-- EJERCICIO 2: Grammar -->
+      <div id="ex2" class="card shadow p-4 text-center exercise-card d-none">
+        <span class="badge bg-secondary mb-2 w-fit mx-auto">(2/10)</span>
+        <h4 class="fw-bold mb-4">2. How do you respond to "How are you?"</h4>
+        <div class="row g-3 mb-4">
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">A) I'm fine, thanks.</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">B) Good night.</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">C) Bye!</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">D) Nice to meet you.</button></div>
+        </div>
+        <button class="btn btn-success btn-lg w-100 fw-bold py-3" onclick="nextExercise(2, 3)">NEXT</button>
+      </div>
+
+      <!-- EJERCICIO 3: Grammar -->
+      <div id="ex3" class="card shadow p-4 text-center exercise-card d-none">
+        <span class="badge bg-secondary mb-2 w-fit mx-auto">(3/10)</span>
+        <h4 class="fw-bold mb-4">3. Complete: "____ to meet you!"</h4>
+        <div class="row g-3 mb-4">
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">A) Good</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">B) Fine</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn active">C) Nice</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">D) Hello</button></div>
+        </div>
+        <button class="btn btn-success btn-lg w-100 fw-bold py-3" onclick="nextExercise(3, 4)">NEXT</button>
+      </div>
+      
+      <!-- EJERCICIO 4: Grammar -->
+      <div id="ex4" class="card shadow p-4 text-center exercise-card d-none">
+        <span class="badge bg-secondary mb-2 w-fit mx-auto">(4/10)</span>
+        <h4 class="fw-bold mb-4">4. What do you say before going to sleep?</h4>
+        <div class="row g-3 mb-4">
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">A) Good morning</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn active">B) Good night</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">C) Hello</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">D) Goodbye</button></div>
+        </div>
+        <button class="btn btn-success btn-lg w-100 fw-bold py-3" onclick="nextExercise(4, 5)">NEXT</button>
+      </div>
+
+        <!-- EJERCICIO 5: Grammar -->
+        <div id="ex5" class="card shadow p-4 text-center exercise-card d-none">
+          <span class="badge bg-secondary mb-2 w-fit mx-auto">(5/10)</span>
+          <h4 class="fw-bold mb-4">5. Select the formal greeting for 9:00 AM.</h4>
+          <div class="row g-3 mb-4">
+            <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn active">A) Good morning</button></div>
+            <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">B) Good afternoon</button></div>
+            <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">C) Good evening</button></div>
+            <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">D) Good night</button></div>
+          </div>
+          <button class="btn btn-success btn-lg w-100 fw-bold py-3" onclick="nextExercise(5, 6)">NEXT</button>
+        </div>
+
+        <!-- EJERCICIO 6: Listening -->
+      <div id="ex6" class="card shadow p-4 text-center exercise-card d-none">
+        <span class="badge bg-info text-dark mb-2 w-fit mx-auto">(6/10)</span>
+        <h4 class="fw-bold mb-4">6. Listen and choose what you hear.</h4>
+        <div class="my-4">
+          <button class="btn btn-primary rounded-circle p-4 shadow" style="width: 80px; height: 80px;">🔊</button>
+        </div>
+        <div class="row g-3 mb-4">
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">A) Good morning</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">B) Good night</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">C) See you</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">D) Welcome</button></div>
+        </div>
+        <button class="btn btn-success btn-lg w-100 fw-bold py-3" onclick="nextExercise(6, 7)">NEXT</button>
+      </div>
+
+      <!-- EJERCICIO 7: Listening -->
+      <div id="ex7" class="card shadow p-4 text-center exercise-card d-none">
+        <span class="badge bg-info text-dark mb-2 w-fit mx-auto">(7/10)</span>
+        <h4 class="fw-bold mb-4">7. Listen to the audio and select the option.</h4>
+        <div class="my-4">
+          <button class="btn btn-primary rounded-circle p-4 shadow" style="width: 80px; height: 80px;">🔊</button>
+        </div>
+        <div class="row g-3 mb-4">
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">A) Nice to meet you</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">B) See you later</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">C) Good afternoon</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">D) Thank you</button></div>
+        </div>
+        <button class="btn btn-success btn-lg w-100 fw-bold py-3" onclick="nextExercise(7, 8)">NEXT</button>
+      </div>
+
+      <!-- EJERCICIO 8: Listening -->
+      <div id="ex8" class="card shadow p-4 text-center exercise-card d-none">
+        <span class="badge bg-info text-dark mb-2 w-fit mx-auto">(8/10)</span>
+        <h4 class="fw-bold mb-4">8. Which phrase did you hear?</h4>
+        <div class="my-4">
+          <button class="btn btn-primary rounded-circle p-4 shadow" style="width: 80px; height: 80px;">🔊</button>
+        </div>
+        <div class="row g-3 mb-4">
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">A) How are you?</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">B) Good night</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">C) See you later</button></div>
+          <div class="col-6"><button class="btn btn-outline-dark btn-lg w-100 py-3 option-btn">D) Thank you</button></div>
+        </div>
+        <button class="btn btn-success btn-lg w-100 fw-bold py-3" onclick="nextExercise(8, 9)">NEXT</button>
+      </div>
+
+      <!-- EJERCICIO 9: Speaking -->
+      <div id="ex9" class="card shadow p-4 text-center exercise-card d-none">
+        <span class="badge bg-warning text-dark mb-2 w-fit mx-auto">(9/10)</span>
+        <h4 class="fw-bold mb-4">9. Listen and repeat the word.</h4>
+        <div class="d-flex justify-content-center gap-3 my-3">
+          <button class="btn btn-outline-primary btn-lg px-4">Play 🔊</button>
+          <button class="btn btn-danger btn-lg px-4">Speak 🎙️</button>
+        </div>
+        <div class="p-4 bg-light rounded border mb-4">
+          <span class="fs-2 fw-bold text-dark">" Good Morning "</span>
+        </div>
+        <button class="btn btn-success btn-lg w-100 fw-bold py-3" onclick="nextExercise(9, 10)">NEXT</button>
+      </div>
+
+      <!-- EJERCICIO 10: Speaking -->
+      <div id="ex10" class="card shadow p-4 text-center exercise-card d-none">
+        <span class="badge bg-warning text-dark mb-2 w-fit mx-auto">SPEAKING (2/2)</span>
+        <h4 class="fw-bold mb-4">10. Final Exercise: Pronounce the phrase.</h4>
+        <div class="d-flex justify-content-center gap-3 my-3">
+          <button class="btn btn-outline-primary btn-lg px-4">Play 🔊</button>
+          <button class="btn btn-danger btn-lg px-4">Speak 🎙️</button>
+        </div>
+        <div class="p-4 bg-light rounded border mb-4">
+          <span class="fs-2 fw-bold text-dark">" See you later "</span>
+        </div>
+        <button class="btn btn-success btn-lg w-100 fw-bold py-3" onclick="nextExercise(10, 'completed')">FINISH LESSON</button>
+      </div>
+
+      <!-- PANTALLA: LESSON COMPLETED -->
+      <div id="lessonCompleted" class="card shadow p-5 text-center exercise-card d-none border-success">
+        <div class="mb-3"><span class="fs-1">🎉</span></div>
+        <h2 class="fw-bold text-success mb-2">Lesson Completed!</h2>
+        <p class="text-muted mb-4">Great job! Let's check your results...</p>
+
+        <div class="badge bg-success fs-3 p-3 mb-4 rounded-pill">10 / 10</div>
+
+        <div class="card bg-light p-3 mb-4 border-0">
+          <h6 class="fw-bold text-start mb-3">Exercises Breakdown</h6>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Grammar (Multiple Choice)</span>
+            <strong class="text-success">5 / 5</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Listening</span>
+            <strong class="text-success">3 / 3</strong>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span>Speaking</span>
+            <strong class="text-success">2 / 2</strong>
+          </div>
+        </div>
+
+        <div class="d-flex gap-3">
+          <a href="{% url 'student_practice' %}" class="btn btn-outline-secondary w-50 py-2 fw-bold">BACK TO PRACTICE</a>
+          <button class="btn btn-success w-50 py-2 fw-bold" onclick="location.reload()">REPEAT LESSON</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function nextExercise(currentNum, nextNum) {
+    document.getElementById('ex' + currentNum).classList.add('d-none');
+
+    if (nextNum === 'completed') {
+      document.getElementById('lessonCompleted').classList.remove('d-none');
+      document.getElementById('lessonTitle').textContent = 'Results';
+      document.getElementById('lessonProgress').style.display = 'none';
+    } else {
+      document.getElementById('ex' + nextNum).classList.remove('d-none');
+      document.getElementById('lessonProgress').textContent = nextNum + ' / 10';
+    }
+  }
+</script>
+{% endblock %}

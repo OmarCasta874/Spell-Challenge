@@ -1,0 +1,131 @@
+.competitions-container {
+  padding: 1.5rem;
+}
+
+.competitions-title {
+  font-weight: 700;
+  font-size: 1.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.competitions-subtitle {
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+/* Grid de Tarjetas */
+.competitions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Tarjeta Base */
+.comp-card {
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.comp-card--active {
+  border: 2px solid #0d6efd;
+}
+
+.comp-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.comp-card__title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.comp-card__group {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+/* Badges de Estado */
+.status-badge {
+  padding: 0.25em 0.6em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.25rem;
+}
+
+.status-badge--finished { background-color: #6c757d; color: #fff; }
+.status-badge--active { background-color: #198754; color: #fff; }
+.status-badge--upcoming { background-color: #ffc107; color: #000; }
+
+/* Métricas */
+.comp-card__metrics {
+  background-color: #f8f9fa;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.metric-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.comp-card__info-tag .tag {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.comp-card__countdown {
+  color: #0d6efd;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.comp-card__date {
+  font-size: 0.85rem;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.comp-card__date svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Botones */
+.btn-action {
+  width: 100%;
+  padding: 0.4rem 0.8rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+.btn-action--primary { background: #0d6efd; color: #fff; border: none; }
+.btn-action--outline { background: transparent; color: #0d6efd; border: 1px solid #0d6efd; }
+.btn-action--secondary { background: transparent; color: #6c757d; border: 1px solid #6c757d; }

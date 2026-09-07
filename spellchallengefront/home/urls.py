@@ -14,4 +14,5 @@ urlpatterns = [
     path('mygroups_student/', views.student_groups, name='student_groups'),
     path('practices/', views.practices, name='student_practices'),
     path('logout/', views.logout_view, name='logout'),
+    path('logout_ask/', views.custom_logout_view, name='logout_ask'),
 ]
