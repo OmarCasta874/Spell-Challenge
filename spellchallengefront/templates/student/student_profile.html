@@ -23,7 +23,7 @@
   <div class="account-settings-card">
     <h2 class="section-title">ACCOUNT SETTINGS</h2>
     
-    <form method="POST" action="{% url 'edit_profile' %}" class="profile-form">
+    <form method="POST" action="{% url 'student_profile' %}" class="profile-form">
       {% csrf_token %}
       <div class="form-grid">
         <div class="form-group">
