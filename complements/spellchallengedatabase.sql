@@ -785,11 +785,11 @@ INSERT INTO dificultad_juego VALUES
 ('J12', 'DI03');
 
 INSERT INTO lista_palabra VALUES
-('LISO1', 'PAL0001'),
+('LIS01', 'PAL0001'),
 ('LIS02', 'PAL0002'),
 ('LIS03', 'PAL0003'),
-('LISO4', 'PAL0004'),
-('LISO5', 'PAL0005'),
+('LIS04', 'PAL0004'),
+('LIS05', 'PAL0005'),
 ('LIS06', 'PAL0006'),
 ('LIS07', 'PAL0007'),
 ('LIS08', 'PAL0008'),
