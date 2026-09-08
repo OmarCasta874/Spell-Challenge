@@ -147,32 +147,87 @@
 }
 
 /* =========================================================
-   Modales centrados más chicos: choice + import excel
+   Modal centrado chico: Create a Word List (choice)
    ========================================================= */
 .modal-dialog.panel-center .modal-content {
-  background: var(--sc-salmon);
-  color: var(--sc-white);
+  background: var(--sc-white);
+  color: var(--sc-maroon);
   border-radius: 18px;
   border: none;
   padding: 8px;
 }
-.panel-center .modal-header { border: none; }
-.panel-center .modal-title { color: var(--sc-white); font-weight: 800; }
-.panel-center .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+
+.panel-center .modal-header {
+  border: none;
+  align-items: flex-start;
+}
+.panel-center .modal-title {
+  color: var(--sc-maroon);
+  font-weight: 800;
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+}
+.panel-center .modal-subtitle {
+  display: block;
+  color: #8a8a8a;
+  font-weight: 500;
+}
 .panel-center .modal-footer { border: none; }
 
+.btn-close-custom {
+  background: none;
+  border: none;
+  color: var(--sc-maroon);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.btn-close-custom:hover { opacity: .7; }
+
 .choice-card {
-  background: var(--sc-white);
+  background: rgba(242, 144, 138, .35);
   border-radius: 12px;
   border: 2px solid transparent;
   padding: 22px;
   cursor: pointer;
-  transition: border-color .15s ease, transform .15s ease;
+  transition: background-color .15s ease, border-color .15s ease;
   color: var(--sc-maroon);
   height: 100%;
 }
-.choice-card:hover { border-color: var(--sc-maroon); transform: translateY(-2px); }
-.choice-card h6 { color: var(--sc-maroon); font-weight: 800; margin-bottom: 6px; }
+.choice-card:hover {
+  background: var(--sc-white);
+  border-color: var(--sc-maroon);
+}
+
+.choice-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.choice-card-title i {
+  font-size: 1.3rem;
+  color: var(--sc-maroon);
+}
+.choice-card h6 {
+  color: var(--sc-maroon);
+  font-weight: 800;
+  margin: 0;
+}
+
+/* =========================================================
+   Modal centrado grande: Import from Excel
+   (sigue usando fondo salmón, no aparece en el mockup del
+   choice — no se tocó)
+   ========================================================= */
+.modal-dialog.panel-center.modal-lg .modal-content {
+  background: var(--sc-salmon);
+  color: var(--sc-white);
+}
+.modal-dialog.panel-center.modal-lg .modal-title,
+.modal-dialog.panel-center.modal-lg .modal-subtitle {
+  color: var(--sc-white);
+}
 
 #dropZone {
   background: rgba(255, 255, 255, .15) !important;
@@ -187,64 +242,43 @@
    Tarjetas de "Word Lists" en la página
    ========================================================= */
 .wordlist-card {
-  background: var(--sc-salmon);
-  border-radius: 14px;
-  color: var(--sc-white);
-  border: none;
-}
-.wordlist-card h5 { color: var(--sc-white); font-weight: 800; }
-.wordlist-card .badge {
-  background: rgba(255, 255, 255, .25);
-  color: var(--sc-white);
-  font-weight: 600;
-}
-
-/* =========================================================
-   Responsive: en pantallas chicas el panel derecho ocupa todo
-   ========================================================= */
-@media (max-width: 640px) {
-  .modal-dialog.panel-right { max-width: 100vw; }
-  .panel-right .modal-header,
-  .panel-right .modal-body,
-  .panel-right .modal-footer { padding-left: 20px; padding-right: 20px; }
-}
-
-/* =========================================================
-   SPELL-CHALLENGE — Teacher modals theme
-   Convierte los modales de Bootstrap en los paneles de los
-   mockups: paneles anclados a la derecha (Create Word List,
-   Add Word) y modales centrados más chicos (choice, Excel).
-   ========================================================= */
-
-:root {
-  --sc-maroon: #7A1220;
-  --sc-maroon-dark: #6E1119;
-  --sc-salmon: #F2908A;
-  --sc-cream: #FAF8F6;
-  --sc-white: #FFFFFF;
-}
-
-/* Fondo detrás del modal más claro, para que la página siga
-   siendo legible (como en los mockups, sin overlay oscuro) */
-.modal-backdrop.show {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.55);
-}
-
-/* =========================================================
-   Botones tipo "pill" reutilizables dentro de los paneles
-   ========================================================= */
-.btn-pill-outline {
-  border: 2px solid var(--sc-maroon);
-  color: var(--sc-maroon);
   background: var(--sc-white);
+  border-radius: 14px;
+  color: var(--sc-maroon-dark);
+  border: none;
+  border-top: 6px solid var(--sc-maroon);
+}
+.wordlist-card h5 { color: var(--sc-maroon); font-weight: 800; }
+
+.wordlist-date { color: #8a8a8a; }
+
+.badge-pill {
+  display: inline-block;
+  background: rgba(242, 144, 138, .35);
+  color: var(--sc-maroon);
+  font-weight: 700;
+  font-size: .8rem;
+  padding: 4px 14px;
+  border-radius: 999px;
+}
+
+.btn-pill-delete {
+  border: 2px solid var(--sc-salmon);
+  background: var(--sc-salmon);
+  color: var(--sc-white);
   border-radius: 999px;
   font-weight: 700;
   padding: 6px 20px;
 }
-.btn-pill-outline:hover { background: var(--sc-maroon); color: var(--sc-white); }
 
-.btn-pill-solid {
+.wordlist-card .btn-pill-outline:hover,
+.btn-pill-delete:hover {
+  background: var(--sc-maroon-dark);
+  border-color: var(--sc-maroon-dark);
+  color: var(--sc-white);
+}
+
+.btn-create-list {
   border: 2px solid var(--sc-maroon);
   background: var(--sc-maroon);
   color: var(--sc-white);
@@ -252,162 +286,10 @@
   font-weight: 700;
   padding: 8px 24px;
 }
-.btn-pill-solid:hover { background: var(--sc-maroon-dark); color: var(--sc-white); }
-
-.btn-pill-outline-light {
-  border: 2px solid var(--sc-white);
-  color: var(--sc-white);
-  background: transparent;
-  border-radius: 999px;
-  font-weight: 700;
-}
-.btn-pill-outline-light:hover { background: var(--sc-white); color: var(--sc-maroon); }
-
-/* =========================================================
-   Paneles anclados a la derecha: Create Word List (manual) y Add Word
-   ========================================================= */
-.modal-dialog.panel-right {
-  position: fixed;
-  top: 0;
-  right: 0;
-  margin: 0;
-  height: 100vh;
-  max-width: min(920px, 96vw);
-  width: 100%;
-}
-
-.modal.fade .modal-dialog.panel-right {
-  transform: translateX(100%);
-  transition: transform .3s ease-out;
-}
-.modal.show .modal-dialog.panel-right { transform: translateX(0); }
-
-.panel-right .modal-content {
-  height: 100vh;
-  border: none;
-  border-radius: 0;
+.btn-create-list:hover {
   background: var(--sc-salmon);
+  border-color: var(--sc-salmon);
   color: var(--sc-white);
-  overflow-y: auto;
-}
-
-.panel-right .modal-header {
-  border: none;
-  background: transparent;
-  align-items: flex-start;
-  padding: 32px 40px 8px;
-}
-.panel-right .modal-title {
-  font-weight: 800;
-  font-size: 1.5rem;
-  letter-spacing: .3px;
-  color: var(--sc-white);
-}
-.panel-right .modal-header .modal-subtitle {
-  display: block;
-  font-weight: 600;
-  opacity: .9;
-  margin-top: 4px;
-  font-size: .92rem;
-}
-.panel-right .btn-close {
-  filter: invert(1) grayscale(100%) brightness(200%);
-  opacity: .9;
-}
-
-.panel-right .modal-body { padding: 8px 40px 24px; }
-
-.panel-right label,
-.panel-right h6 { color: var(--sc-white); font-weight: 700; }
-
-.panel-right h6.section-title {
-  border-bottom: 1px solid rgba(255, 255, 255, .5) !important;
-  padding-bottom: 8px;
-  letter-spacing: .4px;
-}
-
-.panel-right .form-control,
-.panel-right .form-select {
-  background: var(--sc-white);
-  border: 2px solid var(--sc-maroon);
-  border-radius: 8px;
-}
-.panel-right .form-control:focus,
-.panel-right .form-select:focus {
-  border-color: var(--sc-maroon-dark);
-  box-shadow: 0 0 0 3px rgba(122, 18, 32, .15);
-}
-
-.panel-right .table {
-  background: var(--sc-white);
-  border-radius: 10px;
-  overflow: hidden;
-  color: var(--sc-maroon-dark);
-}
-.panel-right .table thead th {
-  background: var(--sc-maroon);
-  color: var(--sc-white);
-  border: none;
-  font-weight: 700;
-}
-
-.panel-right .modal-footer {
-  border: none;
-  background: transparent;
-  padding: 16px 40px 32px;
-}
-
-/* =========================================================
-   Modales centrados más chicos: choice + import excel
-   ========================================================= */
-.modal-dialog.panel-center .modal-content {
-  background: var(--sc-salmon);
-  color: var(--sc-white);
-  border-radius: 18px;
-  border: none;
-  padding: 8px;
-}
-.panel-center .modal-header { border: none; }
-.panel-center .modal-title { color: var(--sc-white); font-weight: 800; }
-.panel-center .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
-.panel-center .modal-footer { border: none; }
-
-.choice-card {
-  background: var(--sc-white);
-  border-radius: 12px;
-  border: 2px solid transparent;
-  padding: 22px;
-  cursor: pointer;
-  transition: border-color .15s ease, transform .15s ease;
-  color: var(--sc-maroon);
-  height: 100%;
-}
-.choice-card:hover { border-color: var(--sc-maroon); transform: translateY(-2px); }
-.choice-card h6 { color: var(--sc-maroon); font-weight: 800; margin-bottom: 6px; }
-
-#dropZone {
-  background: rgba(255, 255, 255, .15) !important;
-  border: 2px dashed var(--sc-white) !important;
-  color: var(--sc-white);
-}
-#dropZone.dz-active { background: rgba(255, 255, 255, .28) !important; }
-#dropZone h5 { color: var(--sc-white); }
-#dropZone .bi { color: var(--sc-white) !important; }
-
-/* =========================================================
-   Tarjetas de "Word Lists" en la página
-   ========================================================= */
-.wordlist-card {
-  background: var(--sc-salmon);
-  border-radius: 14px;
-  color: var(--sc-white);
-  border: none;
-}
-.wordlist-card h5 { color: var(--sc-white); font-weight: 800; }
-.wordlist-card .badge {
-  background: rgba(255, 255, 255, .25);
-  color: var(--sc-white);
-  font-weight: 600;
 }
 
 /* =========================================================

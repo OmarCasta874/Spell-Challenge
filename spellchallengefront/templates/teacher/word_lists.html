@@ -12,7 +12,7 @@
     <h2>WORD LISTS</h2>
     <p class="text-muted">Manage your vocabulary lists.</p>
   </div>
-  <button class="btn btn-pill-solid" data-bs-toggle="modal" data-bs-target="#createListModal">
+  <button class="btn btn-create-list" data-bs-toggle="modal" data-bs-target="#createListModal">
     + Create Word List
   </button>
 </div>
@@ -20,40 +20,49 @@
 <div class="row g-3">
 
   <div class="col-md-4">
-    <div class="card wordlist-card p-3 shadow-sm">
+    <div class="card wordlist-card p-3">
       <h5>Greetings - A1</h5>
-      <span class="badge w-fit mb-2">20 words - Beginner</span>
-      <small class="d-block mb-3">Created: Sep 3, 2026</small>
+      <div class="d-flex gap-2 mb-2">
+        <span class="badge-pill">20 words</span>
+        <span class="badge-pill">Beginner</span>
+      </div>
+      <small class="d-block mb-3 wordlist-date">Created: Sep 3, 2026</small>
       <div class="d-flex gap-2">
         <button class="btn btn-sm btn-pill-outline">VIEW</button>
         <button class="btn btn-sm btn-pill-outline">EDIT</button>
-        <button class="btn btn-sm btn-pill-solid">DELETE</button>
+        <button class="btn btn-sm btn-pill-delete">DELETE</button>
       </div>
     </div>
   </div>
 
   <div class="col-md-4">
-    <div class="card wordlist-card p-3 shadow-sm">
+    <div class="card wordlist-card p-3">
       <h5>Family & People - A1</h5>
-      <span class="badge w-fit mb-2">20 words - Beginner</span>
-      <small class="d-block mb-3">Created: Sep 2, 2026</small>
+      <div class="d-flex gap-2 mb-2">
+        <span class="badge-pill">20 words</span>
+        <span class="badge-pill">Beginner</span>
+      </div>
+      <small class="d-block mb-3 wordlist-date">Created: Sep 2, 2026</small>
       <div class="d-flex gap-2">
         <button class="btn btn-sm btn-pill-outline">VIEW</button>
         <button class="btn btn-sm btn-pill-outline">EDIT</button>
-        <button class="btn btn-sm btn-pill-solid">DELETE</button>
+        <button class="btn btn-sm btn-pill-delete">DELETE</button>
       </div>
     </div>
   </div>
 
   <div class="col-md-4">
-    <div class="card wordlist-card p-3 shadow-sm">
+    <div class="card wordlist-card p-3">
       <h5>Capitals and Countries - A1</h5>
-      <span class="badge w-fit mb-2">20 words - Beginner</span>
-      <small class="d-block mb-3">Created: Sep 5, 2026</small>
+      <div class="d-flex gap-2 mb-2">
+        <span class="badge-pill">20 words</span>
+        <span class="badge-pill">Beginner</span>
+      </div>
+      <small class="d-block mb-3 wordlist-date">Created: Sep 5, 2026</small>
       <div class="d-flex gap-2">
         <button class="btn btn-sm btn-pill-outline">VIEW</button>
         <button class="btn btn-sm btn-pill-outline">EDIT</button>
-        <button class="btn btn-sm btn-pill-solid">DELETE</button>
+        <button class="btn btn-sm btn-pill-delete">DELETE</button>
       </div>
     </div>
   </div>
@@ -63,23 +72,33 @@
 <!-- Modal 1: elegir cómo crear la lista (centrado, chico) -->
 <div class="modal fade" id="createListModal" tabindex="-1">
   <div class="modal-dialog panel-center modal-dialog-centered">
-    <div class="modal-content p-4 text-center">
+    <div class="modal-content p-4">
       <div class="modal-header">
-        <h5 class="modal-title">Create a Word List</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div>
+          <h5 class="modal-title">Create a Word List</h5>
+          <small class="modal-subtitle">Choose a method to build your list.</small>
+        </div>
+        <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">
+          <i class="bi bi-x-lg"></i>
+        </button>
       </div>
       <div class="modal-body">
-        <h6 class="mb-4">How would you like to create your list?</h6>
         <div class="row g-3">
           <div class="col-6">
             <div class="choice-card">
-              <h6>Create Manually</h6>
+              <div class="choice-card-title">
+                <i class="bi bi-pencil-square"></i>
+                <h6>Create Manually</h6>
+              </div>
               <small class="text-muted">Add words one by one.</small>
             </div>
           </div>
           <div class="col-6">
             <div class="choice-card">
-              <h6>Import from Excel</h6>
+              <div class="choice-card-title">
+                <i class="bi bi-folder"></i>
+                <h6>Import from Excel</h6>
+              </div>
               <small class="text-muted">Upload an Excel file.</small>
             </div>
           </div>

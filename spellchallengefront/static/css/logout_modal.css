@@ -1,33 +1,43 @@
 /* Modal Container */
 .logout-modal .modal-content {
-  background-color: #ffffff;
+  background-color: #7a1c1c;
   border-radius: 16px;
-  border: 2px solid #7a1c1c;
+  border: none;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
-.modal-mascot {
-  width: 90px;
-  height: auto;
-  object-fit: contain;
+.modal-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .logout-modal .modal-title {
-  color: #7a1c1c;
+  color: #ffffff;
   font-weight: 800;
   font-size: 1.5rem;
   letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.modal-title-icon {
+  width: 22px;
+  height: 22px;
+  color: #ffffff;
 }
 
 .logout-modal .modal-text {
-  color: #4a4a4a;
+  color: #ffffff;
+  font-weight: 700;
   font-size: 1rem;
 }
 
 /* Botones dentro del Modal */
 .btn-modal-cancel {
-  background-color: #6c757d;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #7a1c1c;
   font-weight: 700;
   padding: 0.5rem 1.8rem;
   border-radius: 20px;
@@ -36,13 +46,12 @@
 }
 
 .btn-modal-cancel:hover {
-  background-color: #5a6268;
-  color: #ffffff;
+  background-color: #f1f1f1;
 }
 
 .btn-modal-confirm {
-  background-color: #7a1c1c;
-  color: #ffffff;
+  background-color: #f28f89;
+  color: #7a1c1c;
   font-weight: 700;
   padding: 0.5rem 1.8rem;
   border-radius: 20px;
@@ -51,6 +60,5 @@
 }
 
 .btn-modal-confirm:hover {
-  background-color: #5c1414;
-  color: #ffffff;
+  background-color: #ec7972;
 }

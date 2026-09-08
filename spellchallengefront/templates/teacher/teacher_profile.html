@@ -11,19 +11,18 @@
   <!-- Cabecera con Avatar y Nombre del Profesor -->
   <div class="profile-header">
     <div class="avatar-wrapper">
-      <img src="{% static 'images/teacher_avatar.png' %}" alt="Avatar del profesor" class="profile-avatar">
+      <img src="{% static 'images/teacher.png' %}" alt="Avatar del profesor" class="profile-avatar">
     </div>
     <div class="user-main-info">
       <h1 class="user-fullname">{{ request.user.get_full_name|default:"JOSÉ MANUEL FLORES RUIZ" }}</h1>
-      <p class="user-subtitle">35 YEARS • English Teacher</p>
+      <p class="user-subtitle">35 YEARS</p>
+      <p class="user-subtitle">English Teacher</p>
     </div>
   </div>
 
-  <!-- Tarjeta de Configuración de Cuenta -->
+  <!-- Formulario / Configuración de Cuenta -->
   <div class="account-settings-card">
-    <h2 class="section-title">ACCOUNT SETTINGS</h2>
-    
-    <form method="POST" action="{% url 'teacher_edit_profile' %}" class="profile-form">
+    <form method="POST" action="{% url 'teacher_profile' %}" class="profile-form">
       {% csrf_token %}
       <div class="form-grid">
         <div class="form-group">
@@ -47,32 +46,14 @@
         </div>
       </div>
 
+      <h2 class="section-title">ACCOUNT SETTINGS</h2>
+
       <!-- Acciones de Perfil -->
       <div class="profile-actions">
         <button type="submit" class="btn btn-edit">EDIT PROFILE</button>
         <button type="button" class="btn btn-logout" data-bs-toggle="modal" data-bs-target="#logoutModal">LOG OUT</button>
       </div>
     </form>
-  </div>
-</div>
-
-<!-- Modal de Confirmación para Log Out con el Asistente Cuervo -->
-<div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center">
-      <div class="modal-body p-4">
-        <img src="{% static 'images/crowing_assistant.png' %}" alt="Crowing Assistant" class="modal-mascot mb-3" style="width: 85px;">
-        <h3>Log Out</h3>
-        <p>Are you sure want to log out of Spell-Challenge?</p>
-        <div class="d-flex justify-content-center gap-3 mt-4">
-          <button type="button" class="btn btn-secondary-modal" data-bs-dismiss="modal">NO</button>
-          <form method="POST" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger-modal">YES</button>
-          </form>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 {% endblock %}

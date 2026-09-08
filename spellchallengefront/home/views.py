@@ -34,12 +34,33 @@ def student_home(request):
 def student_groups(request):
     return render(request, 'student/my_groups_student.html')
 
+def teacher_competitions(request):
+    return render(request, 'teacher/competitions.html')
+
+def student_competitions(request):
+    return render(request, 'student/competitions.html')
+
+def lesson1(request):
+    return render(request, 'student/lesson1.html')
+
 def practices(request):
     return render(request, 'student/practices.html')
+
+def progress(request):
+    return render(request, 'student/progress.html')
+
+def statistics(request):
+    return render(request, 'teacher/statistics.html')
 
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+def student_profile(request):
+    return render(request, 'student/student_profile.html')
+
+def teacher_profile(request):
+    return render(request, 'teacher/teacher_profile.html')
 
 @require_POST
 def custom_logout_view(request):

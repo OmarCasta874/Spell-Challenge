@@ -2,12 +2,13 @@
 {% load static %}
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/teacher_base.css' %}"> {# o student_base.css #}
+  <link rel="stylesheet" href="{% static 'css/logout_modal.css' %}">
 {% endblock %}
 
 {% block content %}
 <nav class="navbar">
   <div class="navbar__brand">
-    <img src="{% static 'img/spell-challenge-white-logo.png' %}" alt="Spell-Challenge logo" class="navbar__logo">
+    <img src="{% static 'img/spell-challenge_white.png' %}" alt="Spell-Challenge logo" class="navbar__logo">
   </div>
 
   <ul class="navbar__nav">
@@ -27,23 +28,23 @@
       </a>
     </li>
     <li>
-      <a href="#" class="navbar__link">
+      <a href="{% url 'teacher_competitions' %}" class="navbar__link">
         <i data-lucide="trophy"></i> COMPETITIONS
       </a>
     </li>
     <li>
-      <a href="#" class="navbar__link">
+      <a href="{% url 'statistics' %}" class="navbar__link">
         <i data-lucide="bar-chart-2"></i> STATISTICS
       </a>
     </li>
     <li>
-      <a href="#" class="navbar__link">
+      <a href="{% url 'teacher_profile' %}" class="navbar__link">
         <i data-lucide="user"></i> PROFILE
       </a>
     </li>
   </ul>
 
-  <a href="{% url 'logout' %}" class="navbar__logout" aria-label="Log out">
+  <a href="{% url 'logout' %}" data-bs-target="#logoutModal" class="navbar__logout" aria-label="Log out">
     <i data-lucide="log-out"></i>
   </a>
 </nav>
@@ -57,4 +58,6 @@
 <script>
   lucide.createIcons();
 </script>
+
+{% include 'base/logout_modal.html' %}
 {% endblock %}
