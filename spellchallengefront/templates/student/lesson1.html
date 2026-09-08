@@ -1,0 +1,201 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/student_lesson1.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ENCABEZADO SUPERIOR -->
+<div class="lesson-topbar">
+  <a href="{% url 'student_practices' %}" class="back-link">← BACK</a>
+</div>
+
+<div class="lesson-body">
+
+  <!-- BARRA DE PROGRESO CON MASCOTA -->
+  <div class="lesson-progress-wrap">
+    <span class="bee-marker" id="beeMarker" style="left: 10%;">🐝</span>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width: 10%;"></div>
+    </div>
+  </div>
+
+  <div class="lesson-heading" id="lessonHeading">
+    <h2 id="lessonTitle">Exercise 1</h2>
+    <span id="lessonProgress">1/10</span>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL DEL EJERCICIO -->
+  <div class="lesson-exercise-wrap">
+
+    <!-- EJERCICIO 1: Grammar -->
+    <div id="ex1" class="exercise-card">
+      <h4 class="exercise-question">1. Choose the correct word to complete the sentence.</h4>
+      <p class="exercise-sentence">_____! My name is Emma.</p>
+      <div class="options-row">
+        <button class="option-btn">A) Goodbye</button>
+        <button class="option-btn active">B) Hello</button>
+        <button class="option-btn">C) Thanks</button>
+        <button class="option-btn">D) Sorry</button>
+      </div>
+      <button class="btn-lesson-check" onclick="nextExercise(1, 2)">CHECK</button>
+    </div>
+
+    <!-- EJERCICIO 2: Grammar -->
+    <div id="ex2" class="exercise-card d-none">
+      <h4 class="exercise-question">2. How do you respond to "How are you?"</h4>
+      <div class="options-row">
+        <button class="option-btn">A) I'm fine, thanks.</button>
+        <button class="option-btn">B) Good night.</button>
+        <button class="option-btn">C) Bye!</button>
+        <button class="option-btn">D) Nice to meet you.</button>
+      </div>
+      <button class="btn-lesson-check" onclick="nextExercise(2, 3)">CHECK</button>
+    </div>
+
+    <!-- EJERCICIO 3: Grammar -->
+    <div id="ex3" class="exercise-card d-none">
+      <h4 class="exercise-question">3. Complete: "____ to meet you!"</h4>
+      <div class="options-row">
+        <button class="option-btn">A) Good</button>
+        <button class="option-btn">B) Fine</button>
+        <button class="option-btn active">C) Nice</button>
+        <button class="option-btn">D) Hello</button>
+      </div>
+      <button class="btn-lesson-check" onclick="nextExercise(3, 4)">CHECK</button>
+    </div>
+
+    <!-- EJERCICIO 4: Grammar -->
+    <div id="ex4" class="exercise-card d-none">
+      <h4 class="exercise-question">4. What do you say before going to sleep?</h4>
+      <div class="options-row">
+        <button class="option-btn">A) Good morning</button>
+        <button class="option-btn active">B) Good night</button>
+        <button class="option-btn">C) Hello</button>
+        <button class="option-btn">D) Goodbye</button>
+      </div>
+      <button class="btn-lesson-check" onclick="nextExercise(4, 5)">CHECK</button>
+    </div>
+
+    <!-- EJERCICIO 5: Grammar -->
+    <div id="ex5" class="exercise-card d-none">
+      <h4 class="exercise-question">5. Select the formal greeting for 9:00 AM.</h4>
+      <div class="options-row">
+        <button class="option-btn active">A) Good morning</button>
+        <button class="option-btn">B) Good afternoon</button>
+        <button class="option-btn">C) Good evening</button>
+        <button class="option-btn">D) Good night</button>
+      </div>
+      <button class="btn-lesson-check" onclick="nextExercise(5, 6)">CHECK</button>
+    </div>
+
+    <!-- EJERCICIO 6: Listening -->
+    <div id="ex6" class="exercise-card d-none">
+      <h4 class="exercise-question">6. Listen and choose what you hear.</h4>
+      <button type="button" class="play-link">🔊 Play</button>
+      <div class="options-row">
+        <button class="option-btn">A) Good morning</button>
+        <button class="option-btn">B) Good night</button>
+        <button class="option-btn">C) See you</button>
+        <button class="option-btn">D) Welcome</button>
+      </div>
+      <button class="btn-lesson-check" onclick="nextExercise(6, 7)">CHECK</button>
+    </div>
+
+    <!-- EJERCICIO 7: Listening -->
+    <div id="ex7" class="exercise-card d-none">
+      <h4 class="exercise-question">7. Listen to the audio and select the option.</h4>
+      <button type="button" class="play-link">🔊 Play</button>
+      <div class="options-row">
+        <button class="option-btn">A) Nice to meet you</button>
+        <button class="option-btn">B) See you later</button>
+        <button class="option-btn">C) Good afternoon</button>
+        <button class="option-btn">D) Thank you</button>
+      </div>
+      <button class="btn-lesson-check" onclick="nextExercise(7, 8)">CHECK</button>
+    </div>
+
+    <!-- EJERCICIO 8: Listening -->
+    <div id="ex8" class="exercise-card d-none">
+      <h4 class="exercise-question">8. Which phrase did you hear?</h4>
+      <button type="button" class="play-link">🔊 Play</button>
+      <div class="options-row">
+        <button class="option-btn">A) How are you?</button>
+        <button class="option-btn">B) Good night</button>
+        <button class="option-btn">C) See you later</button>
+        <button class="option-btn">D) Thank you</button>
+      </div>
+      <button class="btn-lesson-check" onclick="nextExercise(8, 9)">CHECK</button>
+    </div>
+
+    <!-- EJERCICIO 9: Speaking -->
+    <div id="ex9" class="exercise-card d-none">
+      <h4 class="exercise-question">9. Listen and repeat the word.</h4>
+      <div class="speak-controls">
+        <button type="button" class="play-link">🔊 Play</button>
+        <button type="button" class="speak-link">🎙️ Speak</button>
+      </div>
+      <div class="target-phrase-box">" Good Morning "</div>
+      <button class="btn-lesson-check" onclick="nextExercise(9, 10)">CHECK</button>
+    </div>
+
+    <!-- EJERCICIO 10: Speaking -->
+    <div id="ex10" class="exercise-card d-none">
+      <h4 class="exercise-question">10. Final Exercise: Pronounce the phrase.</h4>
+      <div class="speak-controls">
+        <button type="button" class="play-link">🔊 Play</button>
+        <button type="button" class="speak-link">🎙️ Speak</button>
+      </div>
+      <div class="target-phrase-box">" See you later "</div>
+      <button class="btn-lesson-check" onclick="nextExercise(10, 'completed')">FINISH LESSON</button>
+    </div>
+
+    <!-- PANTALLA: LESSON COMPLETED -->
+    <div id="lessonCompleted" class="exercise-card completed-card d-none">
+      <h2 class="completed-title">Lesson Completed!</h2>
+      <p class="completed-subtitle">Great job, {{ request.user.first_name|default:"Omar" }}! Let's check your results...</p>
+
+      <div class="results-box">
+        <span class="bee-decoration bee-left">🐝</span>
+        <div class="results-total">
+          <span class="results-total-number">10/10</span>
+          <span class="results-total-label">Exercises</span>
+        </div>
+        <div class="results-breakdown">
+          <div>Grammar 5/5</div>
+          <div>Listening 3/3</div>
+          <div>Speaking 2/2</div>
+        </div>
+        <span class="bee-decoration bee-right">🐝</span>
+      </div>
+
+      <div class="completed-actions">
+        <a href="{% url 'student_practices' %}" class="btn-outline-pill">BACK TO PRACTICE</a>
+        <a href="#" class="btn-solid-pill">GO TO NEXT LESSON</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function nextExercise(currentNum, nextNum) {
+    document.getElementById('ex' + currentNum).classList.add('d-none');
+
+    if (nextNum === 'completed') {
+      document.getElementById('lessonCompleted').classList.remove('d-none');
+      document.getElementById('lessonHeading').style.display = 'none';
+    } else {
+      document.getElementById('ex' + nextNum).classList.remove('d-none');
+      document.getElementById('lessonTitle').textContent = 'Exercise ' + nextNum;
+      document.getElementById('lessonProgress').textContent = nextNum + '/10';
+
+      var pct = (nextNum / 10) * 100;
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('beeMarker').style.left = pct + '%';
+    }
+  }
+</script>
+{% endblock %}

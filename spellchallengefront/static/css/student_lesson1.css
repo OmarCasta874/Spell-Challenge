@@ -1,0 +1,286 @@
+/* static/css/student_lesson1.css */
+
+:root {
+  --sc-maroon: #7a1c1c;
+  --sc-maroon-dark: #5c1414;
+  --sc-salmon: #f2908a;
+  --sc-salmon-hover: #ec7972;
+  --sc-bee-gold: #e8b93f; /* color aproximado de la barra de progreso del mockup */
+  --sc-white: #ffffff;
+}
+
+/* =========================================================
+   Encabezado superior (barra burgundy con BACK)
+   ========================================================= */
+.lesson-topbar {
+  background-color: var(--sc-maroon);
+  padding: 1rem 1.5rem;
+}
+
+.back-link {
+  color: var(--sc-white);
+  font-weight: 700;
+  text-decoration: underline;
+  font-size: 0.95rem;
+}
+.back-link:hover { color: var(--sc-white); opacity: 0.85; }
+
+/* =========================================================
+   Cuerpo de la lección
+   ========================================================= */
+.lesson-body {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* Barra de progreso con mascota abeja */
+.lesson-progress-wrap {
+  position: relative;
+  margin-bottom: 2.5rem;
+  padding-top: 1.5rem;
+}
+
+.bee-marker {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 1.4rem;
+  transition: left 0.3s ease;
+}
+
+.progress-track {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #e9ecef;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--sc-bee-gold);
+  transition: width 0.3s ease;
+}
+
+.lesson-heading {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.lesson-heading h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #212529;
+  margin-bottom: 0.25rem;
+}
+.lesson-heading span {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #6c757d;
+}
+
+/* =========================================================
+   Tarjeta de ejercicio
+   ========================================================= */
+.exercise-card {
+  text-align: center;
+}
+
+.exercise-question {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #212529;
+  margin-bottom: 1.5rem;
+}
+
+.exercise-sentence {
+  font-size: 1.05rem;
+  color: #212529;
+  margin-bottom: 2rem;
+}
+
+/* Opciones en una sola fila, tipo pill salmón */
+.options-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.option-btn {
+  background-color: var(--sc-salmon);
+  color: var(--sc-maroon-dark);
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.option-btn:hover { background-color: var(--sc-salmon-hover); }
+
+/* Enlaces de audio (Listening) */
+.play-link {
+  background: none;
+  border: none;
+  color: var(--sc-maroon);
+  font-weight: 700;
+  text-decoration: underline;
+  font-size: 1.05rem;
+  margin: 0.5rem 0 2rem;
+  cursor: pointer;
+}
+.play-link:hover { color: var(--sc-maroon-dark); }
+
+/* Controles de Speaking (Play + Speak) */
+.speak-controls {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 0.5rem 0 1.5rem;
+}
+.speak-controls .play-link { margin: 0; }
+.speak-link {
+  background: none;
+  border: none;
+  color: var(--sc-maroon);
+  font-weight: 700;
+  font-size: 1.05rem;
+  cursor: pointer;
+}
+.speak-link:hover { color: var(--sc-maroon-dark); }
+
+.target-phrase-box {
+  background-color: #f8f9fa;
+  border: 2px dashed #ced4da;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #212529;
+  margin-bottom: 2rem;
+}
+
+/* Botón CHECK / FINISH LESSON
+   (nombrado .btn-lesson-check y no .btn-check a propósito:
+   .btn-check es una clase reservada de Bootstrap que oculta
+   el elemento vía clip-rect y pointer-events:none) */
+.btn-lesson-check {
+  background-color: var(--sc-white);
+  color: var(--sc-salmon);
+  border: 2px solid var(--sc-salmon);
+  border-radius: 999px;
+  font-weight: 800;
+  padding: 0.65rem 2.5rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.btn-lesson-check:hover {
+  background-color: var(--sc-salmon);
+  color: var(--sc-white);
+}
+
+/* =========================================================
+   Pantalla de Lesson Completed
+   ========================================================= */
+.completed-card { padding-top: 1rem; }
+
+.completed-title {
+  color: var(--sc-maroon);
+  font-weight: 800;
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.completed-subtitle {
+  color: var(--sc-maroon);
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.results-box {
+  background-color: var(--sc-salmon);
+  border-radius: 16px;
+  padding: 1.75rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  margin: 0 auto 2rem;
+  max-width: 520px;
+  position: relative;
+}
+
+.bee-decoration {
+  font-size: 2rem;
+  position: absolute;
+}
+.bee-left { left: -3.5rem; }
+.bee-right { right: -3.5rem; }
+
+.results-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: var(--sc-white);
+}
+.results-total-number {
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+.results-total-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.results-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: var(--sc-white);
+  font-weight: 700;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.completed-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.btn-outline-pill,
+.btn-solid-pill {
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 0.65rem 1.75rem;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-outline-pill {
+  background-color: var(--sc-white);
+  color: var(--sc-maroon);
+  border: 2px solid var(--sc-maroon);
+}
+.btn-outline-pill:hover { background-color: #fbeaea; color: var(--sc-maroon); }
+
+.btn-solid-pill {
+  background-color: var(--sc-salmon);
+  color: var(--sc-white);
+  border: 2px solid var(--sc-salmon);
+}
+.btn-solid-pill:hover { background-color: var(--sc-salmon-hover); color: var(--sc-white); }
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width: 576px) {
+  .options-row { flex-direction: column; }
+  .option-btn { width: 100%; }
+  .results-box { flex-direction: column; gap: 1rem; padding: 1.5rem; }
+  .bee-decoration { display: none; }
+}

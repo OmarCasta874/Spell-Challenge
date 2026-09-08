@@ -1,0 +1,148 @@
+/* static/css/teacher_profile.css */
+
+:root {
+  --primary-burgundy: #7a1c1c;
+  --hover-burgundy: #5c1414;
+  --salmon: #f28f89;
+  --salmon-hover: #ec7972;
+  --card-bg: #ffffff;
+  --text-dark: #212529;
+  --border-radius: 10px;
+}
+
+.profile-container {
+  max-width: 850px;
+  margin: 2.5rem auto;
+  padding: 0 1.5rem;
+  font-family: 'Lato', sans-serif;
+}
+
+/* Cabecera del Perfil */
+.profile-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.avatar-wrapper {
+  width: 160px;
+  height: 160px;
+  min-width: 160px;
+  border-radius: 50%;
+  background-color: var(--salmon);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-main-info {
+  text-align: left;
+}
+
+.user-fullname {
+  color: var(--primary-burgundy);
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.user-subtitle {
+  color: var(--primary-burgundy);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+/* Contenedor del Formulario (sin card) */
+.account-settings-card {
+  background: transparent;
+}
+
+.section-title {
+  color: var(--primary-burgundy);
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 0.5rem 0 1.5rem;
+  text-align: left;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  color: var(--primary-burgundy);
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1.5px solid var(--primary-burgundy);
+  border-radius: 20px;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+}
+
+.form-control[readonly] {
+  background-color: #f1f1f1;
+  cursor: not-allowed;
+}
+
+/* Botones de Acción */
+.profile-actions {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.btn {
+  padding: 0.7rem 2.2rem;
+  border-radius: 25px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-edit {
+  background-color: #ffffff;
+  color: var(--primary-burgundy);
+  border: 2px solid var(--primary-burgundy);
+}
+
+.btn-edit:hover {
+  background-color: #fbeaea;
+  transform: translateY(-1px);
+}
+
+.btn-logout {
+  background-color: var(--salmon);
+  color: var(--primary-burgundy);
+  border: none;
+}
+
+.btn-logout:hover {
+  background-color: var(--salmon-hover);
+  transform: translateY(-1px);
+}

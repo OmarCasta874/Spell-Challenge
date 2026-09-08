@@ -1,0 +1,25 @@
+<!-- Modal de Cierre de Sesión -->
+<div class="modal fade logout-modal" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-body p-4">
+        <div class="modal-title-row">
+          <h3 class="modal-title" id="logoutModalLabel">Log Out</h3>
+          <i data-lucide="log-out" class="modal-title-icon"></i>
+        </div>
+
+        <p class="modal-text mb-4">Are you sure you want to log out of <strong>Spell-Challenge</strong>?</p>
+
+        <!-- Acciones del Modal -->
+        <div class="d-flex justify-content-center gap-3">
+          <button type="button" class="btn btn-modal-cancel" data-bs-dismiss="modal">NO</button>
+
+          <form method="POST" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-modal-confirm">YES</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
