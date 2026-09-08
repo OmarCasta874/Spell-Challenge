@@ -55,24 +55,4 @@
     </form>
   </div>
 </div>
-
-<!-- Modal de Confirmación para Log Out -->
-<div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center">
-      <div class="modal-body p-4">
-        <img src="{% static 'images/crow_assistant.png' %}" alt="Crow Assistant" class="modal-mascot mb-3" style="width: 80px;">
-        <h3>Log Out</h3>
-        <p>Are you sure want to log out of Spell-Challenge?</p>
-        <div class="d-flex justify-content-center gap-3 mt-4">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">NO</button>
-          <form method="POST" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">YES</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock %}
