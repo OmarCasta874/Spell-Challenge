@@ -263,6 +263,14 @@ CREATE TABLE dificultad_juego (
     FOREIGN KEY (dificultad) REFERENCES dificultad(clave)
 ) ENGINE=InnoDB;
 
+CREATE TABLE lista_palabra (
+    lista VARCHAR(10) NOT NULL,
+    palabra VARCHAR(10) NOT NULL,
+    PRIMARY KEY (lista, palabra),
+    FOREIGN KEY (lista) REFERENCES lista(codigo),
+    FOREIGN KEY (palabra) REFERENCES palabra(codigo)
+) ENGINE=InnoDB;
+
 
 -- ============================================================
 -- CATALOGOS
@@ -775,3 +783,15 @@ INSERT INTO dificultad_juego VALUES
 ('J10', 'DI03'),
 ('J11', 'DI02'),
 ('J12', 'DI03');
+
+INSERT INTO lista_palabra VALUES
+('LISO1', 'PAL0001'),
+('LIS02', 'PAL0002'),
+('LIS03', 'PAL0003'),
+('LISO4', 'PAL0004'),
+('LISO5', 'PAL0005'),
+('LIS06', 'PAL0006'),
+('LIS07', 'PAL0007'),
+('LIS08', 'PAL0008'),
+('LIS09', 'PAL0009'),
+('LIS10', 'PAL0010');
