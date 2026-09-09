@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import logout
+from django.contrib.auth import authenticate, login as auth_login, logout
 from django.views.decorators.http import require_POST
 
 # Create your views here.
@@ -8,6 +8,34 @@ def landing(request):
     return render(request, 'base/landing.html')
 
 def login(request):
+    if request.method == 'POST':
+        correo = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        usuario = authenticate(
+            request,
+            correo=correo,
+            password=password
+        )
+        
+        if usuario is not None:
+            auth_login(request, usuario)
+            
+            tipo_usuario = usuario.tipo_usuario.nombre.strip().lower()
+            
+            if tipo_usuario == 'teacher':
+                return redirect('teacher_dashboard')
+            
+            elif tipo_usuario == 'student':
+                return redirect('student_home')
+            
+        return render(
+            request,
+            'users/login.html',
+            {
+                'error': 'Incorrect email or password.'
+            }
+        )
     return render(request, 'users/login.html')
 
 def choose_role(request):

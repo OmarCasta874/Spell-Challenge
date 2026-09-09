@@ -872,3 +872,13 @@ SHOW CREATE TABLE usuario;
 --Tipo usuario (TipoUsuario.clave): TUSR01
 --Password: jesus1234
 --Password (again): jesus1234
+
+ALTER TABLE django_admin_log
+DROP FOREIGN KEY django_admin_log_user_id_c564eba6_fk_auth_user_id;
+
+ALTER TABLE django_admin_log
+MODIFY COLUMN user_id varchar(10) NOT NULL;
+
+ALTER TABLE django_admin_log
+ADD CONSTRAINT django_admin_log_user_id_c564eba6_fk_usuario_codigo
+FOREIGN KEY (user_id) REFERENCES usuario(codigo);
