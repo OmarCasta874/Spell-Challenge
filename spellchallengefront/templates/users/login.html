@@ -16,7 +16,9 @@
     </div>
   </div>
 
-  {# {% if form.errors %}<div class="form-error">Check your email and password and try again.</div>{% endif %} #}
+  {% if error %}
+    <div class="form-error"> {{ error }} </div>
+  {% endif %}
 
   <form method="post" action="{% url 'login' %}" novalidate>
     {% csrf_token %}
