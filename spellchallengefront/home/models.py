@@ -14,6 +14,12 @@ class UsuarioManager(BaseUserManager):
         
         correo = self.normalize_email(correo)
         
+        tipo_usuario = extra_fields.get('tipo_usuario')
+        
+        if isinstance(tipo_usuario, str):
+            tipo_usuario = TipoUsuario.objects.get(clave=tipo_usuario)
+            extra_fields['tipo_usuario'] = tipo_usuario
+        
         usuario = self.model(
             correo=correo,
             **extra_fields
@@ -29,27 +35,67 @@ class UsuarioManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
         
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('El SuperUser debe tener is_staff=True. ')
+        
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('El SuperUser debe tener is_superuser=True.')
+        
         return self.create_user(
             correo,
             password,
             **extra_fields
         )
 
+#MODELO TIPO_USUARIO    
+class TipoUsuario(models.Model):
+    clave = models.CharField(
+        max_length=10,
+        primary_key=True
+    )
+    nombre = models.CharField(max_length=50)
+    descripcion = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        db_table = 'tipo_usuario'
+        
+    def __str__(self):
+        return self.nombre
+
 #MODELO USUARIO
 class Usuario(AbstractBaseUser, PermissionsMixin):
-    codigo = models.AutoField(primary_key=True)
+    codigo = models.CharField(
+        max_length=10,
+        primary_key=True
+    )
     
     nombre_pila = models.CharField(max_length=100)
-    apellidoPaterno = models.CharField(max_length=100)
-    apellidoMaterno = models.CharField(max_length=100)
+    apellidoPaterno = models.CharField(
+        max_length=100,
+        db_column='apellPaterno'
+    )
+    apellidoMaterno = models.CharField(
+        max_length=100,
+        db_column='apellMaterno'
+    )
     
     correo = models.EmailField(unique=True)
-    numero_telefono = models.CharField(max_length=20, blank=True, null=True)
+    numero_telefono = models.CharField(
+        max_length=20, 
+        blank=True, 
+        db_column='telefono'
+    )
+    
+    password = models.CharField(
+        max_length=128,
+        db_column='contraseña'
+    )
     
     tipo_usuario = models.ForeignKey(
-        'TipoUsuario',
+        TipoUsuario,
         on_delete=models.PROTECT,
         related_name='usuarios',
+        db_column='tipo_usuario',
     )
     
     is_active = models.BooleanField(default=True)
@@ -70,19 +116,6 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         
     def __str__(self):
         return self.correo
-    
-
-#MODELO TIPO_USUARIO    
-class TipoUsuario(models.Model):
-    clave = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=50)
-    descripcion = models.TextField(blank=True, null=True)
-    
-    class Meta:
-        db_table = 'tipo_usuario'
-        
-    def __str__(self):
-        return self.nombre
 
 #MODELO PROFESOR    
 class Profesor(models.Model):
@@ -211,7 +244,7 @@ class Nivel(models.Model):
         db_table = 'nivel'
         
     def __str__(self):
-        return self.numero
+        return str(self.numero)
     
 
 #MODELO PALABRA

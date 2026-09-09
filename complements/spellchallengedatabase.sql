@@ -795,3 +795,80 @@ INSERT INTO lista_palabra VALUES
 ('LIS08', 'PAL0008'),
 ('LIS09', 'PAL0009'),
 ('LIS10', 'PAL0010');
+
+SELECT * FROM usuario;
+
+SHOW TABLES LIKE 'usuario%';
+
+SHOW TABLES LIKE '%groups%';
+
+SHOW TABLES LIKE '%permission%';
+
+SHOW CREATE TABLE auth_user;
+
+SELECT correo, COUNT(*) AS cantidad
+FROM usuario
+GROUP BY correo
+HAVING COUNT(*) > 1;
+
+SHOW CREATE TABLE auth_group;
+
+SHOW CREATE TABLE auth_permission;
+
+SHOW CREATE TABLE auth_user_groups;
+
+SHOW CREATE TABLE auth_user_user_permissions;
+
+--MODIFICAR TABLA USUARIO EN PHPMYADMIN
+ALTER TABLE usuario
+ADD COLUMN last_login DATETIME(6) NULL,
+ADD COLUMN is_superuser TINYINT(1) NOT NULL DEFAULT 0,
+ADD COLUMN is_staff TINYINT(1) NOT NULL DEFAULT 0,
+ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1;
+
+--CREAR TABLAS EN PHPMYADMIN
+CREATE TABLE usuario_groups (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    usuario_id VARCHAR(10) NOT NULL,
+    group_id INT NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY usuario_groups_usuario_id_group_id_uniq (usuario_id, group_id),
+    KEY usuario_groups_group_id_fk (group_id),
+    CONSTRAINT usuario_groups_group_id_fk
+        FOREIGN KEY (group_id) REFERENCES auth_group(id),
+    CONSTRAINT usuario_groups_usuario_id_fk
+        FOREIGN KEY (usuario_id) REFERENCES usuario(codigo)
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE usuario_user_permissions (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    usuario_id VARCHAR(10) NOT NULL,
+    permission_id INT NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY usuario_user_permissions_usuario_id_permission_id_uniq
+        (usuario_id, permission_id),
+    KEY usuario_user_permissions_permission_id_fk (permission_id),
+    CONSTRAINT usuario_user_permissions_permission_id_fk
+        FOREIGN KEY (permission_id) REFERENCES auth_permission(id),
+    CONSTRAINT usuario_user_permissions_usuario_id_fk
+        FOREIGN KEY (usuario_id) REFERENCES usuario(codigo)
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_general_ci;
+
+--MODIFICAR TABLA DE USUARIO
+ALTER TABLE usuario
+ADD UNIQUE KEY usuario_correo_unique (correo);
+
+SHOW CREATE TABLE usuario;
+
+--CREACIÓN DE SUPERUSER
+--Correo: jesus.omar@spell-challenge.usa
+--Nombre pila: Jesus Omar
+--ApellidoPaterno: Castañon
+--ApellidoMaterno: Castañon
+--Tipo usuario (TipoUsuario.clave): TUSR01
+--Password: jesus1234
+--Password (again): jesus1234
