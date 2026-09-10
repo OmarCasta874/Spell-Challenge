@@ -34,57 +34,98 @@
 }
 
 .group-card {
-  border: 2px solid #1a1a1a;
-  border-radius: 6px;
+  background: #fff;
+  border: none;
+  border-radius: 10px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .group-card-header {
-  background: #fff;
-  padding: 0.75rem 1rem;
-  border-bottom: 2px solid #1a1a1a;
+  background: #7a1f2b;
+  padding: 0.9rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
 }
 
-.group-card-header h5 {
-  margin: 0;
-  color: #7a1f2b;
+.group-card-header-text h5 {
+  margin: 0 0 0.15rem;
+  color: #fff;
   font-weight: 800;
+  font-size: 1rem;
+}
+
+.group-teacher {
+  margin: 0;
+  color: #f2c9ce;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.group-avatar {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 50%;
+  background: #d9d9d9;
 }
 
 .group-card-body {
-  background: #f28f89;
+  background: #fff;
   padding: 1rem;
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 0.75rem;
+}
+
+.group-stats {
+  display: flex;
+  gap: 1rem;
 }
 
 .group-stat {
-  color: #fff;
-  font-weight: 700;
-  margin: 0 0 0.5rem;
+  color: #8a8a8a;
+  font-weight: 600;
+  font-size: 0.85rem;
 }
 
-.view-group-link {
+.group-actions {
+  display: flex;
+  gap: 0.5rem;
   margin-top: auto;
-  align-self: flex-end;
-  color: #fff;
+}
+
+.group-btn {
+  border-radius: 20px;
   font-weight: 700;
-  text-decoration: underline;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.9rem;
+  cursor: pointer;
+  border: 2px solid #7a1f2b;
+  background: #fff;
+  color: #7a1f2b;
 }
 
-.view-group-link i {
-  width: 16px;
-  height: 16px;
+.group-btn-view:hover,
+.group-btn-edit:hover {
+  background: #7a1f2b;
+  color: #fff;
 }
 
-.view-group-link:hover {
-  color: #f0f0f0;
+.group-btn-delete {
+  border: 2px solid #f28f89;
+  background: #f28f89;
+  color: #fff;
+}
+
+.group-btn-delete:hover {
+  background: #e0574f;
+  border-color: #e0574f;
 }
 
 /* CREATE NEW GROUP MODAL */
