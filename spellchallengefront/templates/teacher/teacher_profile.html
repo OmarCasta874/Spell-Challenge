@@ -3,15 +3,16 @@
 
 {% block extra_css %}
   {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/teacher_base.css' %}">
   <link rel="stylesheet" href="{% static 'css/teacher_profile.css' %}">
 {% endblock %}
 
-{% block content %}
+{% block teacher_content %}
 <div class="profile-container">
   <!-- Cabecera con Avatar y Nombre del Profesor -->
   <div class="profile-header">
     <div class="avatar-wrapper">
-      <img src="{% static 'images/teacher.png' %}" alt="Avatar del profesor" class="profile-avatar">
+      <img src="{% static 'img/teacher.png' %}" alt="Avatar del profesor" class="profile-avatar">
     </div>
     <div class="user-main-info">
       <h1 class="user-fullname">{{ request.user.get_full_name|default:"JOSÉ MANUEL FLORES RUIZ" }}</h1>
@@ -27,17 +28,17 @@
       <div class="form-grid">
         <div class="form-group">
           <label for="first_name">First Name:</label>
-          <input type="text" id="first_name" name="first_name" value="{{ request.user.first_name|default:'José Manuel' }}" class="form-control">
+          <input type="text" id="first_name" name="first_name" value="{{ request.user.first_name|default:'José Manuel' }}" class="form-control" readonly>
         </div>
 
         <div class="form-group">
           <label for="last_name">Last Name:</label>
-          <input type="text" id="last_name" name="last_name" value="{{ request.user.last_name|default:'Flores Ruiz' }}" class="form-control">
+          <input type="text" id="last_name" name="last_name" value="{{ request.user.last_name|default:'Flores Ruiz' }}" class="form-control" readonly>
         </div>
 
         <div class="form-group">
           <label for="email">Email Address:</label>
-          <input type="email" id="email" name="email" value="{{ request.user.email|default:'jose.manuel@spell-challenge.usa' }}" class="form-control">
+          <input type="email" id="email" name="email" value="{{ request.user.email|default:'jose.manuel@spell-challenge.usa' }}" class="form-control" readonly>
         </div>
 
         <div class="form-group">
