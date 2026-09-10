@@ -20,6 +20,5 @@ urlpatterns = [
     path('practices/', views.practices, name='student_practices'),
     path('student_profile', views.student_profile, name='student_profile'),
     path('teacher_profile', views.teacher_profile, name='teacher_profile'),
-    path('logout/', views.logout_view, name='logout'),
-    path('logout_ask/', views.custom_logout_view, name='logout_ask'),
+    path('logout/', views.custom_logout_view, name='logout'),
 ]
