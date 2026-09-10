@@ -1,0 +1,63 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/admin_base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/logout_modal.css' %}">
+{% endblock %}
+
+{% block content %}
+<nav class="navbar">
+  <div class="navbar__brand">
+    <img src="{% static 'img/spell-challenge_white.png' %}" alt="Spell-Challenge logo" class="navbar__logo">
+  </div>
+
+  <ul class="navbar__nav">
+    <li>
+      <a href="{% url 'admin_dashboard' %}" class="navbar__link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+        <i data-lucide="layout-dashboard"></i> DASHBOARD
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'admin_teachers' %}" class="navbar__link {% if request.resolver_match.url_name == 'admin_teachers' %}active{% endif %}">
+        <i data-lucide="users"></i> TEACHERS
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'admin_users' %}" class="navbar__link {% if request.resolver_match.url_name == 'admin_users' %}active{% endif %}">
+        <i data-lucide="clipboard"></i> USERS
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'admin_academy_management' %}" class="navbar__link {% if request.resolver_match.url_name == 'admin_academy_management' %}active{% endif %}">
+        <i data-lucide="home"></i> ACADEMY MANAGEMENT
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'admin_backups' %}" class="navbar__link {% if request.resolver_match.url_name == 'admin_backups' %}active{% endif %}">
+        <i data-lucide="book-open"></i> BACKUPS
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'admin_profile' %}" class="navbar__link {% if request.resolver_match.url_name == 'admin_profile' %}active{% endif %}">
+        <i data-lucide="user"></i> PROFILE
+      </a>
+    </li>
+  </ul>
+
+  <a href="{% url 'logout' %}" data-bs-target="#logoutModal" class="navbar__logout" aria-label="Log out">
+    <i data-lucide="log-out"></i>
+  </a>
+</nav>
+
+<main class="app-main">
+  {% block admin_content %}{% endblock %}
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  lucide.createIcons();
+</script>
+
+{% include 'base/logout_modal.html' %}
+{% endblock content %}

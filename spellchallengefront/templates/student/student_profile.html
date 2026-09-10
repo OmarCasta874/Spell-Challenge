@@ -15,7 +15,11 @@
       <img src="{% static 'img/student.png' %}" alt="Avatar del estudiante" class="profile-avatar">
     </div>
     <div class="user-main-info">
-      <h1 class="user-fullname">{{ request.user.get_full_name|default:"JESÚS OMAR CASTAÑON CASTAÑON" }}</h1>
+      <h1 class="user-fullname">
+        {{ request.user.nombre_pila }}
+        {{ request.user.apellidoPaterno }}
+        {{ request.user.apellidoMaterno }}
+      </h1>
       <p class="user-subtitle">20 YEARS • English Student</p>
     </div>
   </div>
@@ -29,22 +33,22 @@
       <div class="form-grid">
         <div class="form-group">
           <label for="first_name">First Name:</label>
-          <input type="text" id="first_name" name="first_name" value="{{ request.user.first_name|default:'Jesús Omar' }}" class="form-control" readonly>
+          <input type="text" id="first_name" name="first_name" value="{{ request.user.nombre_pila }}" class="form-control" readonly>
         </div>
 
         <div class="form-group">
           <label for="last_name">Last Name:</label>
-          <input type="text" id="last_name" name="last_name" value="{{ request.user.last_name|default:'Castañon Castañon' }}" class="form-control" readonly>
+          <input type="text" id="last_name" name="last_name" value="{{ request.user.apellidoPaterno }} {{ request.user.apellidoMaterno }}" class="form-control" readonly>
         </div>
 
         <div class="form-group">
           <label for="email">Email Address:</label>
-          <input type="email" id="email" name="email" value="{{ request.user.email|default:'jesus.omar@spell-challenge.usa' }}" class="form-control" readonly>
+          <input type="email" id="email" name="email" value="{{ request.user.correo}}" class="form-control" readonly>
         </div>
 
         <div class="form-group">
           <label for="role">Role:</label>
-          <input type="text" id="role" name="role" value="Student" class="form-control" readonly>
+          <input type="text" id="role" name="role" value="{{ request.user.tipo_usuario.nombre }}" class="form-control" readonly>
         </div>
       </div>
 
