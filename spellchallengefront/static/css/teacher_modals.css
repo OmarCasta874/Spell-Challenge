@@ -293,6 +293,76 @@
 }
 
 /* =========================================================
+   Modal "Create a Word List" (List Information) — centrado
+   ========================================================= */
+#createListModal .modal-header {
+  justify-content: center;
+  position: relative;
+}
+#createListModal .modal-title {
+  text-align: center;
+  width: 100%;
+  font-size: 1.6rem;
+}
+#createListModal .btn-close-custom {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+#createListModal .section-title-form {
+  color: var(--sc-maroon);
+  font-weight: 800;
+  font-size: 1.05rem;
+  margin-bottom: 16px;
+}
+
+#createListModal .form-label {
+  color: var(--sc-maroon);
+  font-weight: 700;
+  font-size: .95rem;
+  margin-bottom: 6px;
+}
+
+#createListModal .form-control,
+#createListModal .form-select {
+  border: 2px solid var(--sc-maroon);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+#createListModal .form-control:focus,
+#createListModal .form-select:focus {
+  border-color: var(--sc-maroon-dark);
+  box-shadow: 0 0 0 3px rgba(122, 18, 32, .15);
+}
+
+#createListModal .form-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6a6a6a;
+  font-size: .85rem;
+  margin: 4px 0 4px;
+}
+#createListModal .form-hint i {
+  color: var(--sc-maroon);
+}
+
+/* Botón "Cancel" claro, relleno salmón tenue (distinto del
+   outline-light que se usa sobre fondo salmón en los paneles) */
+.btn-pill-light {
+  border: none;
+  background: rgba(242, 144, 138, .35);
+  color: var(--sc-maroon);
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 8px 24px;
+}
+.btn-pill-light:hover {
+  background: rgba(242, 144, 138, .5);
+}
+
+/* =========================================================
    Responsive: en pantallas chicas el panel derecho ocupa todo
    ========================================================= */
 @media (max-width: 640px) {

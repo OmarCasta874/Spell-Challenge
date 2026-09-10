@@ -102,11 +102,13 @@
   border: 1.5px solid var(--primary-burgundy);
   border-radius: 20px;
   font-size: 0.95rem;
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
   color: var(--text-dark);
 }
 
 .form-control[readonly] {
-  background-color: #f1f1f1;
+  background-color: #ffffff;
   cursor: not-allowed;
 }
 

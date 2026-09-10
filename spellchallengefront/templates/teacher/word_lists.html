@@ -69,40 +69,54 @@
 
 </div>
 
-<!-- Modal 1: elegir cómo crear la lista (centrado, chico) -->
-<div class="modal fade" id="createListModal" tabindex="-1">
+<!-- Modal 1: Create a Word List (List Information) -->
+<div class="modal fade" id="createListModal" tabindex="-1" aria-labelledby="createListModalLabel" aria-hidden="true">
   <div class="modal-dialog panel-center modal-dialog-centered">
     <div class="modal-content p-4">
       <div class="modal-header">
-        <div>
-          <h5 class="modal-title">Create a Word List</h5>
-          <small class="modal-subtitle">Choose a method to build your list.</small>
-        </div>
+        <h5 class="modal-title" id="createListModalLabel">Create a Word List</h5>
         <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
       <div class="modal-body">
-        <div class="row g-3">
-          <div class="col-6">
-            <div class="choice-card">
-              <div class="choice-card-title">
-                <i class="bi bi-pencil-square"></i>
-                <h6>Create Manually</h6>
-              </div>
-              <small class="text-muted">Add words one by one.</small>
-            </div>
+        <form id="formCreateList">
+          <h6 class="section-title-form">List Information</h6>
+
+          <div class="mb-3">
+            <label for="newListName" class="form-label">List Name:</label>
+            <input type="text" class="form-control" id="newListName" placeholder="Ej: Greetings" required>
           </div>
-          <div class="col-6">
-            <div class="choice-card">
-              <div class="choice-card-title">
-                <i class="bi bi-folder"></i>
-                <h6>Import from Excel</h6>
-              </div>
-              <small class="text-muted">Upload an Excel file.</small>
-            </div>
+
+          <div class="mb-3">
+            <label for="newListCategory" class="form-label">Category:</label>
+            <select class="form-select" id="newListCategory" required>
+              <option value="" selected disabled>Select a Category</option>
+              <option value="greetings">Greetings</option>
+              <option value="family">Family & People</option>
+              <option value="geography">Countries & Capitals</option>
+            </select>
           </div>
-        </div>
+
+          <div class="mb-2">
+            <label for="newListLevel" class="form-label">Level:</label>
+            <select class="form-select" id="newListLevel" required>
+              <option value="" selected disabled>Select a Level</option>
+              <option value="A1">A1 - Beginner</option>
+              <option value="A2">A2 - Elementary</option>
+              <option value="B1">B1 - Intermediate</option>
+            </select>
+          </div>
+
+          <p class="form-hint">
+            <i class="bi bi-lightbulb"></i>
+            Examples and definitions generated automatically will adapt to this level.
+          </p>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-pill-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-pill-solid" data-bs-toggle="modal" data-bs-target="#chooseMethodModal">Continue</button>
       </div>
     </div>
   </div>
