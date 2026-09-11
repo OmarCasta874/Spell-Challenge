@@ -27,9 +27,8 @@
   <!-- Formulario / Datos de la cuenta -->
   <div class="account-settings-card">
     <h2 class="section-title">ACCOUNT SETTINGS</h2>
-    
-    <form method="POST" action="{% url 'student_profile' %}" class="profile-form">
-      {% csrf_token %}
+
+    <div class="profile-form">
       <div class="form-grid">
         <div class="form-group">
           <label for="first_name">First Name:</label>
@@ -54,10 +53,10 @@
 
       <!-- Acciones principales -->
       <div class="profile-actions">
-        <button type="submit" class="btn btn-edit">Edit Profile</button>
+        <a href="{% url 'edit_student_profile' %}" class="btn btn-edit">Edit Profile</a>
         <button type="button" class="btn btn-logout" data-bs-toggle="modal" data-bs-target="#logoutModal">Log Out</button>
       </div>
-    </form>
+    </div>
   </div>
 </div>
 {% endblock %}
