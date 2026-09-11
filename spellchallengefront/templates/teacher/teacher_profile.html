@@ -27,8 +27,7 @@
 
   <!-- Formulario / Configuración de Cuenta -->
   <div class="account-settings-card">
-    <form method="POST" action="{% url 'teacher_profile' %}" class="profile-form">
-      {% csrf_token %}
+    <div class="profile-form">
       <div class="form-grid">
         <div class="form-group">
           <label for="first_name">First Name:</label>
@@ -55,10 +54,10 @@
 
       <!-- Acciones de Perfil -->
       <div class="profile-actions">
-        <button type="submit" class="btn btn-edit">EDIT PROFILE</button>
+        <a href="{% url 'edit_teacher_profile' %}" class="btn btn-edit">EDIT PROFILE</a>
         <button type="button" class="btn btn-logout" data-bs-toggle="modal" data-bs-target="#logoutModal">LOG OUT</button>
       </div>
-    </form>
+    </div>
   </div>
 </div>
 {% endblock %}

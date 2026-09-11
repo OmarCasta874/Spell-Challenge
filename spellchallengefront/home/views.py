@@ -132,9 +132,19 @@ def student_profile(request):
     return render(request, 'student/student_profile.html')
 
 @never_cache
+@role_required('student')
+def edit_student_profile(request):
+    return render(request, 'student/edit_student_profile.html')
+
+@never_cache
 @role_required('teacher')
 def teacher_profile(request):
     return render(request, 'teacher/teacher_profile.html')
+
+@never_cache
+@role_required('teacher')
+def edit_teacher_profile(request):
+    return render(request, 'teacher/edit_teacher_profile.html')
 
 @require_POST
 def custom_logout_view(request):

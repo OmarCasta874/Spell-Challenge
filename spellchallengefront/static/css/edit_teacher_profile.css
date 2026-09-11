@@ -1,0 +1,140 @@
+.edit-profile-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Avatar */
+.avatar-edit-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.avatar-edit-circle {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #f28f89;
+}
+
+.avatar-edit-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-edit-icon {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: #7a1f2b;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+}
+
+.avatar-edit-icon i {
+  width: 16px;
+  height: 16px;
+}
+
+.avatar-edit-text {
+  margin-top: 10px;
+  color: #7a1f2b;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* Formulario */
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  color: #7a1f2b;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #7a1f2b;
+  border-radius: 20px;
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  color: #333;
+}
+
+.form-control:disabled {
+  color: #7a1f2b;
+  background-color: #ffffff;
+  opacity: 1;
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-field .form-control {
+  padding-right: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #7a1f2b;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-password i {
+  width: 18px;
+  height: 18px;
+}
+
+/* Acciones */
+.edit-profile-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.btn-cancel {
+  padding: 10px 28px;
+  border-radius: 20px;
+  border: 1.5px solid #7a1f2b;
+  background-color: #ffffff;
+  color: #7a1f2b;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.btn-save {
+  padding: 10px 28px;
+  border-radius: 20px;
+  border: none;
+  background-color: #f28f89;
+  color: #ffffff;
+  font-weight: 700;
+}
