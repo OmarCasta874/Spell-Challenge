@@ -53,8 +53,8 @@ class TipoUsuario(models.Model):
         max_length=10,
         primary_key=True
     )
-    nombre = models.CharField(max_length=50)
-    descripcion = models.TextField(blank=True, null=True)
+    nombre = models.CharField(max_length=30)
+    descripcion = models.CharField(max_length=100)
     
     class Meta:
         db_table = 'tipo_usuario'
@@ -69,20 +69,19 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         primary_key=True
     )
     
-    nombre_pila = models.CharField(max_length=100)
+    nombre_pila = models.CharField(max_length=30)
     apellidoPaterno = models.CharField(
-        max_length=100,
+        max_length=30,
         db_column='apellPaterno'
     )
     apellidoMaterno = models.CharField(
-        max_length=100,
+        max_length=30,
         db_column='apellMaterno'
     )
     
     correo = models.EmailField(unique=True)
     numero_telefono = models.CharField(
         max_length=20, 
-        blank=True, 
         db_column='telefono'
     )
     
@@ -96,6 +95,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         on_delete=models.PROTECT,
         related_name='usuarios',
         db_column='tipo_usuario',
+        to_field='clave'
     )
     
     is_active = models.BooleanField(default=True)
@@ -119,81 +119,115 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
 #MODELO PROFESOR    
 class Profesor(models.Model):
-    clave = models.AutoField(primary_key=True)
-    
-    nombre_pila = models.CharField(max_length=100)
-    apellidoPaterno = models.CharField(max_length=100)
-    apellidoMaterno = models.CharField(max_length=100)
-    
+    clave = models.CharField(max_length=10, primary_key=True)
+    nombre_pila = models.CharField(max_length=30)
+    apellidoPaterno = models.CharField(
+        max_length=100,
+        db_column='apellPaterno'
+    )
+    apellidoMaterno = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        db_column='apellMaterno'
+    )
     usuario = models.OneToOneField(
         Usuario,
         on_delete=models.CASCADE,
-        related_name='profesor'
+        related_name='profesor',
+        db_column='usuario',
+        to_field='codigo'
     )
-    
+
     class Meta:
         db_table = 'profesor'
-        
+
     def __str__(self):
         return f"{self.nombre_pila} {self.apellidoPaterno}"
     
     
 #MODELO ALUMNO    
 class Alumno(models.Model):
-    matricula = models.CharField(max_length=20, primary_key=True)
-    
-    nombre_pila = models.CharField(max_length=100)
-    apellidoPaterno = models.CharField(max_length=100)
-    apellidoMaterno = models.CharField(max_length=100)
-    
+    matricula = models.CharField(max_length=10, primary_key=True)
+    nombre_pila = models.CharField(
+        max_length=30,
+        db_column='nombrePila'
+    )
+    apellidoPaterno = models.CharField(
+        max_length=100,
+        db_column='apellPaterno'
+    )
+    apellidoMaterno = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        db_column='apellMaterno'
+    )
     usuario = models.OneToOneField(
         Usuario,
         on_delete=models.CASCADE,
-        related_name='alumno'
+        related_name='alumno',
+        db_column='usuario',
+        to_field='codigo'
     )
-    
     nivel = models.ForeignKey(
         'Nivel',
         on_delete=models.PROTECT,
-        related_name='alumnos'
+        related_name='alumnos',
+        db_column='nivel',
+        to_field='codigo'
     )
-    
     carrera = models.ForeignKey(
         'Carrera',
         on_delete=models.PROTECT,
-        related_name='alumnos'
+        related_name='alumnos',
+        db_column='carrera',
+        to_field='clave'
     )
-    
+
     class Meta:
         db_table = 'alumno'
-        
+
     def __str__(self):
         return f"{self.matricula} - {self.nombre_pila} {self.apellidoPaterno}"
     
 #MODELO ADMINISTRADOR
 class Administrador(models.Model):
-    codigo = models.AutoField(primary_key=True)
-    
-    nombre = models.CharField(max_length=100)
-    
+    clave = models.CharField(max_length=10, primary_key=True)
+    nombre_pila = models.CharField(
+        max_length=30,
+        db_column='nombre_pila'
+    )
+    apellidoPaterno = models.CharField(
+        max_length=30,
+        db_column='apellPaterno'
+    )
+    apellidoMaterno = models.CharField(
+        max_length=30,
+        blank=True,
+        null=True,
+        db_column='apellMaterno'
+    )
     usuario = models.OneToOneField(
         Usuario,
         on_delete=models.CASCADE,
-        related_name='administrador'
+        related_name='administrador',
+        db_column='usuario',
+        to_field='codigo'
     )
-    
+
     class Meta:
         db_table = 'administrador'
-        
+
     def __str__(self):
-        return self.nombre
+        return f"{self.nombre_pila} {self.apellidoPaterno}"
     
     
 #MODELO CARRERA
 class Carrera(models.Model):
-    clave = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=150)
-    descripcion = models.TextField(blank=True, null=True)
+    clave = models.CharField(max_length=10, primary_key=True)
+    nombre = models.CharField(max_length=30)
+    descripcion = models.CharField(max_length=255)
     
     class Meta:
         db_table = 'carrera'
@@ -204,16 +238,20 @@ class Carrera(models.Model):
 
 #MODELO GRUPO
 class Grupo(models.Model):
-    codigo = models.AutoField(primary_key=True)
+    codigo = models.CharField(max_length=10, primary_key=True)
     
-    nombre = models.CharField(max_length=100)
-    fecha_creacion = models.DateField()
-    ciclo = models.CharField(max_length=50)
+    nombre = models.CharField(max_length=50)
+    fecha_creacion = models.DateField(
+        db_column='fechaCreacion'
+    )
+    ciclo = models.CharField(max_length=100)
     
     profesor = models.ForeignKey(
         Profesor,
         on_delete=models.PROTECT,
-        related_name='profesores'
+        related_name='grupos',
+        db_column='profesor',
+        to_field='clave'
     )
     
     class Meta:
@@ -225,8 +263,8 @@ class Grupo(models.Model):
 
 #MODELO CATEGORIA
 class Categoria(models.Model):
-    codigo = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=100)
+    codigo = models.CharField(max_length=10, primary_key=True)
+    nombre = models.CharField(max_length=30)
     
     class Meta:
         db_table = 'categoria'
@@ -237,68 +275,69 @@ class Categoria(models.Model):
 
 #MODELO NIVEL
 class Nivel(models.Model):
-    numero = models.AutoField(primary_key=True)
-    descripcion = models.TextField(blank=True, null=True)
+    codigo = models.CharField(max_length=2, primary_key=True)
+    descripcion = models.CharField(max_length=100)
     
     class Meta:
         db_table = 'nivel'
         
     def __str__(self):
-        return str(self.numero)
+        return self.codigo
     
 
 #MODELO PALABRA
 class Palabra(models.Model):
-    codigo = models.AutoField(primary_key=True)
-    
-    texto = models.CharField(max_length=100)
-    significado = models.CharField(max_length=100)
+    codigo = models.CharField(max_length=10, primary_key=True)
+    significado = models.CharField(max_length=50)
     pronunciacion = models.CharField(max_length=100)
-    
     imagen = models.ImageField(
         upload_to='palabras/imagenes/',
-        blank=True,
-        null=True
+        max_length=100
     )
-    
     audio = models.FileField(
-        upload_to='palabras/audios',
-        blank=True,
-        null=True
+        upload_to='palabras/audios/',
+        max_length=100
     )
-    
-    nivel = models.ForeignKey(
-        Nivel,
-        on_delete=models.PROTECT,
-        related_name='palabras'
-    )
-    
     categoria = models.ForeignKey(
         Categoria,
         on_delete=models.PROTECT,
-        related_name='palabras'
+        related_name='palabras',
+        db_column='categoria',
+        to_field='codigo'
     )
-    
+    nivel = models.ForeignKey(
+        Nivel,
+        on_delete=models.PROTECT,
+        related_name='palabras',
+        db_column='nivel',
+        to_field='codigo'
+    )
+
     class Meta:
         db_table = 'palabra'
-        
+
     def __str__(self):
-        return str(self.texto)
+        return self.significado
     
 
 #MODELO LISTA
 class Lista(models.Model):
-    codigo = models.AutoField(primary_key=True)
+    codigo = models.CharField(max_length=10, primary_key=True)
     
-    nombre = models.CharField(max_length=100)
+    nombre = models.CharField(max_length=30)
     fecha_asignacion = models.DateField()
-    fecha_limite = models.DateField()
-    numero_letras = models.PositiveIntegerField()
+    fecha_limite = models.DateField(
+        blank=True,
+        null=True
+    )
+    numero_letras = models.IntegerField()
     
     profesor = models.ForeignKey(
         Profesor,
         on_delete=models.PROTECT,
-        related_name='listas'
+        related_name='listas',
+        db_column='profesor',
+        to_field='clave'
     )
     
     class Meta:
@@ -313,113 +352,122 @@ class Lista_Palabra(models.Model):
     lista = models.ForeignKey(
         Lista,
         on_delete=models.CASCADE,
-        related_name='lista_palabras'
+        related_name='lista_palabras',
+        db_column='lista',
+        to_field='codigo'
     )
     
     palabra = models.ForeignKey(
         Palabra,
         on_delete=models.CASCADE,
-        related_name='lista_palabras'
+        related_name='lista_palabras',
+        db_column='palabra',
+        to_field='codigo'
+    )
+    
+    pk = models.CompositePrimaryKey(
+        'lista',
+        'palabra'
     )
     
     class Meta:
         db_table = 'lista_palabra'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['lista', 'palabra'],
-                name='unique_lista_palabra'
-            )
-        ]
 
 #MODELO LISTA_GRUPO
 class Lista_Grupo(models.Model):
     lista = models.ForeignKey(
         Lista,
         on_delete=models.CASCADE,
-        related_name='lista_grupos'
+        related_name='lista_grupos',
+        db_column='lista',
+        to_field='codigo'
     )
     
     grupo = models.ForeignKey(
         Grupo,
         on_delete=models.CASCADE,
-        related_name='lista_grupos'
+        related_name='lista_grupos',
+        db_column='grupo',
+        to_field='codigo'
+    )
+    
+    pk = models.CompositePrimaryKey(
+        'lista',
+        'grupo'
     )
     
     class Meta:
         db_table = 'lista_grupo'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['lista', 'grupo'],
-                name='unique_lista_grupo'
-            )
-        ]
 
 #MODELO GRUPO_ALUMNO
 class Grupo_Alumno(models.Model):
     grupo = models.ForeignKey(
         Grupo,
         on_delete=models.CASCADE,
-        related_name='grupo_alumnos'
+        related_name='grupo_alumnos',
+        db_column='grupo',
+        to_field='codigo'
     )
     
     alumno = models.ForeignKey(
         Alumno,
         on_delete=models.CASCADE,
-        related_name='grupo_alumnos'
+        related_name='grupo_alumnos',
+        db_column='alumno',
+        to_field='matricula'
+    )
+    
+    pk = models.CompositePrimaryKey(
+        'grupo',
+        'alumno'
     )
     
     class Meta:
         db_table = 'grupo_alumno'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['grupo', 'alumno'],
-                name='unique_grupo_alumno'
-            )
-        ]
 
 #MODELO PROCESO_LISTA
 class Proceso_Lista(models.Model):
     lista = models.ForeignKey(
         Lista,
         on_delete=models.CASCADE,
-        related_name='procesos'
+        related_name='procesos',
+        db_column='lista',
+        to_field='codigo'
     )
     
     alumno = models.ForeignKey(
         Alumno,
         on_delete=models.CASCADE,
-        related_name='procesos_lista'
+        related_name='procesos_lista',
+        db_column='alumno',
+        to_field='matricula'
     )
     
-    porcentaje_aciertos = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        default=0
+    porcentaje_aciertos = models.FloatField(
+        db_column='porcent_aciert'
     )
     
-    lista_desbloqueada = models.BooleanField(default=False)
+    lista_desbloqueada = models.CharField(
+        max_length=10
+    )
     
-    fecha_completado = models.DateField(
-        blank=True,
-        null=True
+    fecha_completado = models.DateField()
+    
+    pk = models.CompositePrimaryKey(
+        'lista',
+        'alumno'
     )
     
     class Meta:
         db_table = 'proceso_lista'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['lista', 'alumno'],
-                name='unique_proceso_lista'
-            )
-        ]
 
 #MODELO JUEGO
 class Juego(models.Model):
-    clave = models.AutoField(primary_key=True)
+    clave = models.CharField(max_length=10, primary_key=True)
     
-    nombre = models.CharField(max_length=100)
-    descripcion = models.TextField(blank=True, null=True)
-    mecanica = models.TextField(blank=True, null=True)
+    nombre = models.CharField(max_length=30)
+    descripcion = models.CharField(max_length=255)
+    mecanica = models.CharField(max_length=30)
     
     class Meta:
         db_table = 'juego'
@@ -429,10 +477,10 @@ class Juego(models.Model):
 
 #MODELO DIFICULTAD
 class Dificultad(models.Model):
-    clave = models.AutoField(primary_key=True)
+    clave = models.CharField(max_length=10, primary_key=True)
     
-    nombre = models.CharField(max_length=50)
-    descripcion = models.TextField(blank=True, null=True)
+    nombre = models.CharField(max_length=30)
+    descripcion = models.CharField(max_length=100)
     
     class Meta:
         db_table = 'dificultad'
@@ -446,51 +494,56 @@ class Dificultad_Juego(models.Model):
     juego = models.ForeignKey(
         Juego,
         on_delete=models.CASCADE,
-        related_name='dificultades'
+        related_name='dificultades',
+        db_column='juego',
+        to_field='clave'
     )
     
     dificultad = models.ForeignKey(
         Dificultad,
         on_delete=models.CASCADE,
-        related_name='juegos'
+        related_name='juegos',
+        db_column='dificultad',
+        to_field='clave'
+    )
+    
+    pk = models.CompositePrimaryKey(
+        'juego',
+        'dificultad'
     )
     
     class Meta:
         db_table = 'dificultad_juego'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['juego', 'dificultad'],
-                name='unique_juego_dificultad'
-            )
-        ]
     
 
 #MODELO PRACTICA_SESION
 class Practica_Sesion(models.Model):
-    clave = models.AutoField(primary_key=True)
+    clave = models.CharField(max_length=10, primary_key=True)
     
     fecha = models.DateField()
     duracion = models.DurationField()
-    porcentaje_aciertos = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        default=0
+    porcentaje_aciertos = models.FloatField(
+        db_column='porcent_aciertos'
     )
     
-    puntos_obtenidos = models.PositiveIntegerField(
-        default=0
+    puntos_obtenidos = models.FloatField(
+        db_column='puntos_obt'
     )
     
     juego = models.ForeignKey(
         Juego,
         on_delete=models.PROTECT,
-        related_name='practicas'
+        related_name='practicas',
+        db_column='juego',
+        to_field='clave'
     )
     
     lista = models.ForeignKey(
         Lista,
         on_delete=models.PROTECT,
-        related_name='practicas'
+        related_name='practicas',
+        db_column='lista',
+        to_field='codigo'
     )
     
     class Meta:
@@ -505,49 +558,54 @@ class Alumno_Practica(models.Model):
     alumno = models.ForeignKey(
         Alumno,
         on_delete=models.CASCADE,
-        related_name='practicas'
+        related_name='practicas',
+        db_column='alumno',
+        to_field='matricula'
     )
     
     practica_sesion = models.ForeignKey(
         Practica_Sesion,
         on_delete=models.CASCADE,
-        related_name='alumnos'
+        related_name='alumnos',
+        db_column='practica_sesion',
+        to_field='clave'
+    )
+    
+    pk = models.CompositePrimaryKey(
+        'alumno',
+        'practica_sesion'
     )
     
     class Meta:
         db_table = 'alumno_practica'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['alumno', 'practica_sesion'],
-                name='unique_alumno_practica'
-            )
-        ]
 
 #MODELO INTENTO_PALABRA
 class Intento_Palabra(models.Model):
-    clave = models.AutoField(primary_key=True)
+    clave = models.CharField(max_length=10, primary_key=True)
     
-    acertado = models.BooleanField(default=False)
+    acertado = models.IntegerField()
     
-    tiempo_respuesta = models.DurationField(
+    tiempo_respuesta = models.TimeField(
         blank=True,
         null=True
     )
     
-    numero_intentos = models.PositiveIntegerField(
-        default=1
-    )
+    numero_intentos = models.IntegerField()
     
     practica_sesion = models.ForeignKey(
         Practica_Sesion,
         on_delete=models.CASCADE,
-        related_name='intentos'
+        related_name='intentos',
+        db_column='practica_sesion',
+        to_field='clave'
     )
     
     palabra = models.ForeignKey(
         Palabra,
         on_delete=models.PROTECT,
-        related_name='intentos'
+        related_name='intentos',
+        db_column='palabra',
+        to_field='codigo'
     )
     
     class Meta:
@@ -559,17 +617,22 @@ class Intento_Palabra(models.Model):
 
 #MODELO RANGO
 class Rango(models.Model):
-    codigo = models.AutoField(primary_key=True)
+    codigo = models.CharField(max_length=10, primary_key=True)
     
-    nombre = models.CharField(max_length=100)
+    nombre = models.CharField(max_length=30)
     
-    minimo = models.PositiveIntegerField()
-    maximo = models.PositiveIntegerField()
+    minimo = models.IntegerField()
+    maximo = models.IntegerField(
+        blank=True,
+        null=True
+    )
     
     alumno = models.ForeignKey(
         Alumno,
         on_delete=models.PROTECT,
-        related_name='rangos'
+        related_name='rangos',
+        db_column='alumno',
+        to_field='matricula'
     )
     
     class Meta:
@@ -577,40 +640,23 @@ class Rango(models.Model):
         
     def __str__(self):
         return self.nombre
-    
-#MODELO TIPO_RANKING
-class TipoRanking(models.Model):
-    codigo = models.AutoField(primary_key=True)
-    
-    nombre = models.CharField(max_length=100)
-    descripcion = models.TextField(blank=True, null=True)
-    
-    class Meta:
-        db_table = 'tipo_ranking'
-        
-    def __str__(self):
-        return self.nombre
 
 #MODELO RANKING
 class Ranking(models.Model):
-    codigo = models.AutoField(primary_key=True)
+    codigo = models.CharField(max_length=10, primary_key=True)
     
-    nombre = models.CharField(max_length=100)
+    nombre = models.CharField(max_length=30)
     posicion = models.PositiveIntegerField()
-    periodo = models.CharField(max_length=100)
+    periodo = models.CharField(max_length=20)
     
-    puntos = models.PositiveIntegerField(default=0)
+    puntos = models.IntegerField()
     
     alumno = models.ForeignKey(
         Alumno,
         on_delete=models.CASCADE,
-        related_name='rankings'
-    )
-    
-    tipo_ranking = models.ForeignKey(
-        TipoRanking,
-        on_delete=models.PROTECT,
-        related_name='rankings'
+        related_name='rankings',
+        db_column='alumno',
+        to_field='matricula'
     )
     
     class Meta:
@@ -619,14 +665,37 @@ class Ranking(models.Model):
     def __str__(self):
         return f"{self.nombre} - {self.posicion}"
     
+#MODELO TIPO_RANKING
+class TipoRanking(models.Model):
+    codigo = models.CharField(max_length=10, primary_key=True)
+    
+    nombre = models.CharField(max_length=30)
+    descripcion = models.CharField(max_length=50)
+    ranking = models.ForeignKey(
+        Ranking,
+        on_delete=models.PROTECT,
+        related_name='tipos_ranking',
+        db_column='ranking',
+        to_field='codigo'
+    )
+    
+    class Meta:
+        db_table = 'tipo_ranking'
+        
+    def __str__(self):
+        return self.nombre
+    
 
 #MODELO INSIGNIA
 class Insignia(models.Model):
-    clave = models.AutoField(primary_key=True)
+    clave = models.CharField(max_length=10, primary_key=True)
     
-    nombre = models.CharField(max_length=100)
-    descripcion = models.TextField(blank=True, null=True)
-    criterio_obtencion = models.TextField(blank=True, null=True)
+    nombre = models.CharField(max_length=30)
+    descripcion = models.CharField(max_length=100)
+    criterio_obtencion = models.CharField(
+        max_length=50,
+        db_column='crit_obtencion'
+    )
     
     class Meta:
         db_table = 'insignia'
@@ -639,39 +708,48 @@ class Alumno_Insignia(models.Model):
     alumno = models.ForeignKey(
         Alumno,
         on_delete=models.CASCADE,
-        related_name='insignias'
+        related_name='insignias',
+        db_column='alumno',
+        to_field='matricula'
     )
     
     insignia = models.ForeignKey(
         Insignia,
         on_delete=models.CASCADE,
-        related_name='alumnos'
+        related_name='alumnos',
+        db_column='insignia',
+        to_field='clave'
     )
     
-    fecha_obtenida = models.DateField()
+    fecha_obtenida = models.DateField(
+        blank=True,
+        null=True,
+        db_column='fecha_obtencion'
+    )
+    
+    pk = models.CompositePrimaryKey(
+        'alumno',
+        'insignia'
+    )
     
     class Meta:
         db_table = 'alumno_insignia'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['alumno', 'insignia'],
-                name='unique_alumno_insignia'
-            )
-        ]
-
+        
 #MODELO REPORTE
 class Reporte(models.Model):
-    codigo = models.AutoField(primary_key=True)
+    codigo = models.CharField(max_length=10, primary_key=True)
     
     fecha_generacion = models.DateField(
-        auto_now_add=True
+        db_column='fecha_genera'
     )
-    tipo_reporte = models.CharField(max_length=100)
+    tipo_reporte = models.CharField(max_length=30)
     
     profesor = models.ForeignKey(
         Profesor,
         on_delete=models.PROTECT,
-        related_name='reportes'
+        related_name='reportes',
+        db_column='profesor',
+        to_field='clave'
     )
     
     class Meta:

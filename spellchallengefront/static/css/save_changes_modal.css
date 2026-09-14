@@ -1,0 +1,80 @@
+.save-changes-content {
+  background-color: #f28f89;
+  border: none;
+  border-radius: 20px;
+  padding: 3.5rem 2rem 2rem;
+  position: relative;
+  text-align: center;
+  overflow: visible;
+}
+
+.save-changes-avatar-wrap {
+  position: absolute;
+  top: -55px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background-color: #f28f89;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.save-changes-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.save-changes-body {
+  padding: 0;
+}
+
+.save-changes-title {
+  color: #ffffff;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+
+.save-changes-text {
+  color: #ffffff;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.save-changes-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn-save-no {
+  padding: 10px 28px;
+  border-radius: 20px;
+  border: 2px solid #ffffff;
+  background-color: transparent;
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn-save-no:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.btn-save-yes {
+  padding: 10px 28px;
+  border-radius: 20px;
+  border: none;
+  background-color: #7a1f2b;
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn-save-yes:hover {
+  background-color: #5c1620;
+}
