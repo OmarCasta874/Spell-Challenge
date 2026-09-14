@@ -5,6 +5,7 @@
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'css/student_base.css' %}">
   <link rel="stylesheet" href="{% static 'css/cancel_modal.css' %}">
+  <link rel="stylesheet" href="{% static 'css/save_changes_modal.css' %}">
   <link rel="stylesheet" href="{% static 'css/edit_student_profile.css' %}">
 {% endblock %}
 
@@ -24,7 +25,7 @@
   </div>
 
   <!-- Formulario -->
-  <form method="POST" action="{% url 'edit_student_profile' %}" class="edit-profile-form">
+  <form method="POST" action="{% url 'edit_student_profile' %}" class="edit-profile-form" id="editStudentProfileForm">
     {% csrf_token %}
 
     <div class="form-grid-3">
@@ -69,11 +70,12 @@
     <!-- Acciones -->
     <div class="edit-profile-actions">
       <button type="button" class="btn btn-cancel" data-bs-toggle="modal" data-bs-target="#cancelModal">CANCEL</button>
-      <button type="submit" class="btn btn-save">SAVE CHANGES</button>
+      <button type="button" class="btn btn-save" data-bs-toggle="modal" data-bs-target="#saveChangesModal">SAVE CHANGES</button>
     </div>
   </form>
 
   {% include 'base/cancel_modal.html' with avatar_img='img/student.png' cancel_url='student_profile' %}
+  {% include 'base/save_changes_modal.html' with avatar_img='img/student.png' form_id='editStudentProfileForm' %}
 
 </div>
 {% endblock %}

@@ -49,6 +49,11 @@
   transition: left 0.3s ease;
 }
 
+.lesson-progress-wrap img {
+  width: 20px;
+  height: 20px;
+}
+
 .progress-track {
   height: 8px;
   border-radius: 4px;

@@ -2,25 +2,11 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/teacher_base.css' %}"> {# o student_base.css #}
+<link rel="stylesheet" href="{% static 'css/teacher_base.css' %}">
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 {% endblock %}
 
 {% block teacher_content %}
-<div class="row mb-4 align-items-center bg-white p-4 rounded shadow-sm">
-  <div class="col-md-8">
-    <h2>Welcome Back, Diego!</h2>
-    <p class="text-muted">Here is an overview of your classes and activities!</p>
-    <div class="alert alert-info d-flex align-items-center">
-      <img src="{% static 'img/crowing-left.png' %}" alt="Crowing" width="50" class="me-3">
-      <div>
-        <strong>Welcome to Spell-Challenge</strong><br>
-        My name is Crowing and I'll be your personal assistant...
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="stat-cards-row">
   <div class="stat-card">
     <div class="stat-icon"><i data-lucide="users"></i></div>
@@ -44,89 +30,115 @@
   </div>
 </div>
 
+<div class="level-distribution-card">
+  <div class="level-distribution-header">
+    <h5 class="overview-title">Students by level</h5>
+    <span class="level-distribution-subtitle">86 students across 4 groups</span>
+  </div>
+
+  <div class="level-bar">
+    <div class="level-segment level-a1" style="width: 5.8%;"></div>
+    <div class="level-segment level-a2" style="width: 22.1%;"></div>
+    <div class="level-segment level-b1" style="width: 33.7%;"></div>
+    <div class="level-segment level-b2" style="width: 25.6%;"></div>
+    <div class="level-segment level-c1" style="width: 10.5%;"></div>
+    <div class="level-segment level-c2" style="width: 2.3%;"></div>
+  </div>
+
+  <ul class="level-legend">
+    <li><span class="legend-dot level-a1"></span> A1 - 5</li>
+    <li><span class="legend-dot level-a2"></span> A2 - 19</li>
+    <li><span class="legend-dot level-b1"></span> B1 - 29</li>
+    <li><span class="legend-dot level-b2"></span> B2 - 22</li>
+    <li><span class="legend-dot level-c1"></span> C1 - 9</li>
+    <li><span class="legend-dot level-c2"></span> C2 - 2</li>
+  </ul>
+</div>
+
 <div class="dashboard-overview-row">
 
   <div class="overview-card">
-    <h5 class="overview-title">Student Performance &amp; Group Overview</h5>
+    <h5 class="overview-title">Student Performance</h5>
+    <p class="overview-subtitle">Average score by group</p>
 
-    <div class="overview-content">
-      <div class="pie-section">
-        <h6 class="section-subtitle">Group Overview</h6>
+    <div class="bar-row">
+      <span class="bar-label">GROUP 3A</span>
+      <div class="bar-track"><div class="bar-fill" style="width: 85%;"></div></div>
+      <span class="bar-value">85%</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">GROUP 4B</span>
+      <div class="bar-track"><div class="bar-fill" style="width: 71%;"></div></div>
+      <span class="bar-value">71%</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">GROUP 2A</span>
+      <div class="bar-track"><div class="bar-fill" style="width: 98%;"></div></div>
+      <span class="bar-value">98%</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">GROUP 1C</span>
+      <div class="bar-track"><div class="bar-fill" style="width: 58%;"></div></div>
+      <span class="bar-value">58%</span>
+    </div>
 
-        <div class="pie-chart-wrapper">
-          <div class="pie-chart"></div>
-          <span class="pie-label pie-label-1">62.5%</span>
-          <span class="pie-label pie-label-2">17.5%</span>
-          <span class="pie-label pie-label-3">12.5%</span>
-          <span class="pie-label pie-label-4">7.5%</span>
-        </div>
+    <div class="average-score-badge">
+      <i data-lucide="star"></i> AVERAGE SCORE: 78%
+    </div>
 
-        <ul class="pie-legend">
-          <li><span class="legend-swatch legend-green"></span> Group 3A</li>
-          <li><span class="legend-swatch legend-yellow"></span> Group 4B</li>
-          <li><span class="legend-swatch legend-red"></span> Group 2A</li>
-          <li><span class="legend-swatch legend-orange"></span> Group 1C</li>
-        </ul>
-      </div>
+    <hr class="overview-divider">
 
-      <div class="bars-section">
-        <h6 class="section-subtitle">Student Performance</h6>
+    <h5 class="overview-title">Most Challenging Words</h5>
+    <p class="overview-subtitle">Highest miss rate this week, across your groups</p>
 
-        <div class="bar-row">
-          <span class="bar-label">GROUP 3A</span>
-          <div class="bar-track"><div class="bar-fill" style="width: 85%;"></div></div>
-          <span class="bar-value">85%</span>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">GROUP 4B</span>
-          <div class="bar-track"><div class="bar-fill" style="width: 71%;"></div></div>
-          <span class="bar-value">71%</span>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">GROUP 2A</span>
-          <div class="bar-track"><div class="bar-fill" style="width: 98%;"></div></div>
-          <span class="bar-value">98%</span>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">GROUP 1C</span>
-          <div class="bar-track"><div class="bar-fill" style="width: 58%;"></div></div>
-          <span class="bar-value">58%</span>
-        </div>
-
-        <p class="average-score">Average Score: 78%</p>
-      </div>
+    <div class="bar-row">
+      <span class="bar-label">necessary</span>
+      <div class="bar-track"><div class="bar-fill" style="width: 62%;"></div></div>
+      <span class="bar-value">62%</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">rhythm</span>
+      <div class="bar-track"><div class="bar-fill" style="width: 58%;"></div></div>
+      <span class="bar-value">58%</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">conscience</span>
+      <div class="bar-track"><div class="bar-fill" style="width: 54%;"></div></div>
+      <span class="bar-value">54%</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">bureaucracy</span>
+      <div class="bar-track"><div class="bar-fill" style="width: 49%;"></div></div>
+      <span class="bar-value">49%</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">Wednesday</span>
+      <div class="bar-track"><div class="bar-fill" style="width: 45%;"></div></div>
+      <span class="bar-value">45%</span>
     </div>
   </div>
 
   <div class="activity-card">
     <h5 class="overview-title">Recent Learning Activity</h5>
+    <p class="overview-subtitle">Latest updates across your groups</p>
 
-    <table class="activity-table">
-      <thead>
-        <tr>
-          <th>Activity Name</th>
-          <th>Description</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Group 3A improved its average score</td>
-          <td>Average increased from 78% to 85%</td>
-          <td>Sep 3rd, 2026</td>
-        </tr>
-        <tr>
-          <td>Group 2A completed a practice session</td>
-          <td>Average score: 91%</td>
-          <td>Sep 3rd, 2026</td>
-        </tr>
-        <tr>
-          <td>Group 4B competition results are available</td>
-          <td>Group 4B - Basic Challenge</td>
-          <td>Sep 3rd, 2026</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="activity-list">
+      <div class="activity-item">
+        <p class="activity-title">Group 3A improved its average score</p>
+        <p class="activity-desc">Average increased from 78% to 85%</p>
+        <p class="activity-date">Sep 3rd, 2026</p>
+      </div>
+      <div class="activity-item">
+        <p class="activity-title">Group 2A completed a practice session</p>
+        <p class="activity-desc">Average score: 91%</p>
+        <p class="activity-date">Sep 3rd, 2026</p>
+      </div>
+      <div class="activity-item">
+        <p class="activity-title">Group 4B competition results are available</p>
+        <p class="activity-desc">Group 4B - Basic Challenge</p>
+        <p class="activity-date">Sep 3rd, 2026</p>
+      </div>
+    </div>
   </div>
 
 </div>

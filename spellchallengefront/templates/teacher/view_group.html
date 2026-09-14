@@ -1,0 +1,74 @@
+{% extends 'teacher/teacher_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/teacher_base.css' %}">
+<link rel="stylesheet" href="{% static 'css/view_group.css' %}">
+{% endblock %}
+
+{% block teacher_content %}
+
+<div class="view-group-header">
+  <a href="{% url 'my_groups' %}" class="back-link">
+    <i data-lucide="arrow-left"></i>
+  </a>
+  <div class="view-group-titles">
+    <h2 class="view-group-title">{{ group_name }}</h2>
+    <p class="view-group-subtitle">Teacher. {{ teacher_name }}</p>
+  </div>
+</div>
+
+<div class="view-group-row">
+
+  <div class="students-table-wrap">
+    <table class="students-table">
+      <thead>
+        <tr>
+          <th>Enrollment</th>
+          <th>Student</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+        <tr>
+          <td>{{ student.enrollment }}</td>
+          <td>{{ student.name }}</td>
+          <td><a href="#" class="student-btn-view">VIEW</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="wordlist-table-wrap">
+    <table class="wordlist-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Word</th>
+          <th>Meaning</th>
+          <th>Pronunciation</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for word in word_list %}
+        <tr>
+          <td>{{ word.number }}</td>
+          <td>{{ word.word }}</td>
+          <td>{{ word.meaning }}</td>
+          <td>{{ word.pronunciation }}</td>
+          <td class="wordlist-actions">
+            <a href="#" class="wordlist-btn">VIEW</a>
+            <a href="#" class="wordlist-btn">LISTEN</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -117,6 +117,13 @@
   color: #fff;
 }
 
+.group-btn-view {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .group-btn-delete {
   border: 2px solid #f28f89;
   background: #f28f89;

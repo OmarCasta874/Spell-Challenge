@@ -1,106 +1,153 @@
 /* home.css — Student */
 
-.continue-lesson-banner {
-  background: #f28f89;
-  border: 2px solid #1a1a1a;
-  border-radius: 6px;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.continue-lesson-text {
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  color: #111;
-  margin: 0;
-}
-
-.go-to-practice-link {
-  align-self: flex-end;
-  color: #7a1f2b;
-  font-weight: 800;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.go-to-practice-link i { width: 16px; height: 16px; }
-.go-to-practice-link:hover { color: #5c1620; }
-
 .home-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
 }
 
-.section-heading {
-  font-weight: 800;
-  color: #111;
-  margin-bottom: 1rem;
+/* PRACTICE PROGRESS CARD */
+.practice-progress-card {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
-.progress-stats-row {
+.welcome-text {
+  font-size: 0.8rem;
+  color: #777;
+  margin: 0 0 0.25rem;
+}
+
+.current-unit-title {
+  font-weight: 800;
+  color: #7a1f2b;
+  margin: 0 0 0.15rem;
+}
+
+.current-unit-subtitle {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0 0 1rem;
+}
+
+.practice-progress-label {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #111;
+  text-transform: uppercase;
+  margin: 0 0 0.4rem;
+}
+
+.practice-progress-track {
+  background: #fbe4e3;
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.practice-progress-fill {
+  height: 100%;
+  background: #7a1f2b;
+  border-radius: 4px;
+}
+
+.continue-link {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.3rem;
+  color: #d45951;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.continue-link i { width: 14px; height: 14px; }
+.continue-link:hover { color: #7a1f2b; }
+
+/* UNIT STAT CARDS */
+.unit-stats-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-bottom: 1.25rem;
 }
 
-.progress-stat-card {
-  background: #f28f89;
-  border: 2px solid #1a1a1a;
-  border-radius: 6px;
+.unit-stat-card {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   padding: 0.9rem 1rem;
 }
 
-.progress-stat-label {
+.unit-stat-label {
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #111;
-  margin: 0 0 0.4rem;
+  text-transform: uppercase;
+  margin: 0 0 0.35rem;
 }
 
-.progress-stat-value {
+.unit-stat-value {
   font-weight: 800;
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   color: #111;
   margin: 0;
 }
 
-.level-progress-wrapper { margin-top: 0.5rem; }
+/* UNIT 2 PROGRESS CARD */
+.unit2-progress-card {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  padding: 1.25rem 1.5rem;
+}
+
+.unit2-title {
+  font-weight: 800;
+  color: #7a1f2b;
+  margin: 0 0 0.15rem;
+}
+
+.unit2-subtitle {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0 0 1rem;
+}
 
 .level-progress-labels {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-weight: 700;
   color: #111;
+  font-size: 0.85rem;
   margin-bottom: 0.35rem;
 }
 
+.level-progress-mid {
+  color: #7a1f2b;
+  font-weight: 800;
+}
+
 .level-progress-track {
-  background: #e3e3e3;
-  border: 1px solid #1a1a1a;
+  background: #fbe4e3;
   border-radius: 4px;
-  height: 10px;
+  height: 8px;
   overflow: hidden;
 }
 
 .level-progress-fill {
   height: 100%;
-  background: #2e7d32;
+  background: #7a1f2b;
+  border-radius: 4px;
 }
 
-.level-progress-score {
-  color: #2e7d32;
-  font-weight: 700;
-  margin-top: 0.5rem;
-}
-
+/* MINI-GAMES */
 .mini-games-header {
   display: flex;
   justify-content: space-between;
@@ -116,45 +163,65 @@
 
 .mini-games-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
 .mini-game-card {
-  background: #f28f89;
-  border: 2px solid #1a1a1a;
-  border-radius: 6px;
-  padding: 1rem;
+  background: #fbe4e3;
+  border-radius: 10px;
+  padding: 1.25rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: space-between;
   gap: 0.75rem;
+  min-height: 110px;
 }
 
 .mini-game-title {
   font-weight: 800;
   color: #111;
+  font-size: 0.85rem;
   margin: 0;
 }
 
 .play-link {
   color: #7a1f2b;
   font-weight: 800;
+  font-size: 0.8rem;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 
-.play-link i { width: 16px; height: 16px; }
+.play-link i { width: 14px; height: 14px; }
 .play-link:hover { color: #5c1620; }
 
+.mini-game-card-view-all {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.view-all-games-link {
+  color: #111;
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.view-all-games-link:hover { color: #7a1f2b; }
+
+/* LEADERBOARD */
 .leaderboard-card {
-  background: #f28f89;
-  border: 2px solid #1a1a1a;
-  border-radius: 6px;
-  padding: 1.25rem;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  padding: 1.25rem 1.5rem;
 }
 
 .leaderboard-header {
@@ -170,18 +237,19 @@
   gap: 0.5rem;
 }
 
-.leaderboard-title-group i { width: 20px; height: 20px; color: #111; }
+.leaderboard-title-group i { width: 20px; height: 20px; color: #7a1f2b; }
 
 .leaderboard-title {
   font-weight: 800;
-  color: #111;
+  color: #7a1f2b;
   margin: 0;
 }
 
 .leaderboard-column-label {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #111;
+  color: #888;
+  text-transform: uppercase;
 }
 
 .leaderboard-list {
@@ -195,7 +263,7 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.5rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid #eee;
 }
 
 .leaderboard-item:last-child { border-bottom: none; }
@@ -247,9 +315,8 @@
 .view-leaderboard-link:hover { color: #5c1620; }
 
 /* RESPONSIVE */
-
 @media (max-width: 992px) {
   .home-row { grid-template-columns: 1fr; }
-  .progress-stats-row { grid-template-columns: 1fr 1fr; }
+  .unit-stats-row { grid-template-columns: 1fr 1fr; }
   .mini-games-row { grid-template-columns: 1fr; }
 }

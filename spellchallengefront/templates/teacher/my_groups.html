@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/teacher_base.css' %}"> {# o student_base.css #}
+<link rel="stylesheet" href="{% static 'css/teacher_base.css' %}">
 <link rel="stylesheet" href="{% static 'css/my_groups.css' %}">
 {% endblock %}
 
@@ -29,7 +29,7 @@
         <span class="group-stat">5 Lists</span>
       </div>
       <div class="group-actions">
-        <button class="group-btn group-btn-view">VIEW</button>
+        <a href="{% url 'view_group' 1 %}" class="group-btn group-btn-view">VIEW</a>
         <button class="group-btn group-btn-edit">EDIT</button>
         <button class="group-btn group-btn-delete">DELETE</button>
       </div>
@@ -50,7 +50,7 @@
         <span class="group-stat">3 Lists</span>
       </div>
       <div class="group-actions">
-        <button class="group-btn group-btn-view">VIEW</button>
+        <a href="{% url 'view_group' 2 %}" class="group-btn group-btn-view">VIEW</a>
         <button class="group-btn group-btn-edit">EDIT</button>
         <button class="group-btn group-btn-delete">DELETE</button>
       </div>
@@ -71,7 +71,7 @@
         <span class="group-stat">2 Lists</span>
       </div>
       <div class="group-actions">
-        <button class="group-btn group-btn-view">VIEW</button>
+        <a href="{% url 'view_group' 3 %}" class="group-btn group-btn-view">VIEW</a>
         <button class="group-btn group-btn-edit">EDIT</button>
         <button class="group-btn group-btn-delete">DELETE</button>
       </div>
