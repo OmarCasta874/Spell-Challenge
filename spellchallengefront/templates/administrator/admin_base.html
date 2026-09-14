@@ -1,8 +1,9 @@
 {% extends 'base/base.html' %}
 {% load static %}
+
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/admin_base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/logout_modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin_base.css' %}">
+<link rel="stylesheet" href="{% static 'css/logout_modal.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -60,4 +61,4 @@
 </script>
 
 {% include 'base/logout_modal.html' %}
-{% endblock content %}
+{% endblock%}

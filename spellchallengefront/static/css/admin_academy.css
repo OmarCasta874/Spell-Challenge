@@ -1,0 +1,69 @@
+/* PESTAÑAS EN ACADEMY MANAGEMENT */
+
+.academy-tabs-nav {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 0.8rem 1.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+    color: var(--primary-red);
+}
+
+.tab-btn.active {
+    color: var(--primary-red);
+    border-bottom-color: var(--primary-red);
+    background-color: rgba(122, 28, 28, 0.03);
+    border-radius: 8px 8px 0 0;
+}
+
+/* TABS CONTENT TOGGLE */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.tab-header-actions h3 {
+    color: var(--primary-red);
+    font-size: 1.1rem;
+}
+
+/* PILLS & BADGES */
+.count-pill {
+    background-color: #F0F4F8;
+    color: #336699;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.level-large {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.7rem;
+    background-color: var(--primary-red);
+    color: #FFF;
+}

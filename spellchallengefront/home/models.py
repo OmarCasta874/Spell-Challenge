@@ -6,6 +6,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseU
 
 # MODELOS DJANGO SPELL-CHALLENGE
 
+
 class UsuarioManager(BaseUserManager):
     
     def create_user(self, correo, password=None, **extra_fields):
@@ -758,3 +759,4 @@ class Reporte(models.Model):
     def __str__(self):
         return f"{self.tipo_reporte} - {self.codigo}"
     
+

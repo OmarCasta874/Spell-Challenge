@@ -50,6 +50,9 @@ def login(request):
             elif tipo_usuario == 'student':
                 return redirect('student_home')
             
+            elif tipo_usuario == 'administrator':
+                return redirect('admin_gen_panel')
+            
         return render(
             request,
             'users/login.html',
@@ -188,3 +191,33 @@ def edit_teacher_profile(request):
 def custom_logout_view(request):
     logout(request)
     return redirect('login')
+
+@never_cache
+@role_required('administrator')
+def gen_panel(request):
+    return render(request, 'administrator/gen_panel.html')
+
+@never_cache
+@role_required('administrator')
+def admin_teachers(request):
+    return render(request, 'administrator/teachers.html')
+
+@never_cache
+@role_required('administrator')
+def admin_users(request):
+    return render(request, 'administrator/users.html')
+
+@never_cache
+@role_required('administrator')
+def admin_academy(request):
+    return render(request, 'administrator/academy.html')
+
+@never_cache
+@role_required('administrator')
+def admin_backups(request):
+    return render(request, 'administrator/backups.html')
+
+@never_cache
+@role_required('administrator')
+def admin_profile(request):
+    return render(request, 'administrator/admin_profile.html')

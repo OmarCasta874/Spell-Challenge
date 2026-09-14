@@ -1,0 +1,213 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_teachers.css' %}">
+{% endblock %}
+
+{% block title %}Teacher Management - Spell-Challenge Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Teachers</h1>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('addTeacherModal')">
+        + Add New Teacher
+    </button>
+</div>
+
+<!-- FILTERS AND SEARCH BAR -->
+<div class="panel-card filter-card">
+    <form method="GET" action="{% url 'admin_teachers' %}" class="filter-form">
+        <div class="search-box">
+            <input 
+                type="text" 
+                name="search" 
+                placeholder="Search by name or email..." 
+                value="{{ search_query }}"
+                class="form-input"
+            >
+        </div>
+        
+        <div class="filter-group">
+            <select name="group" class="form-select">
+                <option value="ALL" {% if group_filter == 'ALL' %}selected{% endif %}>All Groups</option>
+                {% for g in available_groups %}
+                    <option value="{{ g }}" {% if group_filter == g %}selected{% endif %}>{{ g }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="status" class="form-select">
+                <option value="ALL" {% if status_filter == 'ALL' %}selected{% endif %}>All Statuses</option>
+                <option value="ACTIVE" {% if status_filter == 'ACTIVE' %}selected{% endif %}>Active</option>
+                <option value="INACTIVE" {% if status_filter == 'INACTIVE' %}selected{% endif %}>Inactive</option>
+            </select>
+
+            <button type="submit" class="btn btn-secondary">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- TEACHERS DATA TABLE -->
+<div class="panel-card table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Teacher</th>
+                <th>Email</th>
+                <th>Assigned Groups</th>
+                <th>Students</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in teachers %}
+            <tr>
+                <td class="user-cell">
+                    <div class="user-avatar">{{ t.full_name|slice:":2"|upper }}</div>
+                    <strong>{{ t.full_name }}</strong>
+                </td>
+                <td>{{ t.email }}</td>
+                <td>
+                    {% for grp in t.assigned_groups %}
+                        <span class="group-tag">{{ grp }}</span>
+                    {% empty %}
+                        <span class="text-muted">No groups</span>
+                    {% endfor %}
+                </td>
+                <td>{{ t.students_count }}</td>
+                <td>
+                    <span class="status-badge status-{{ t.status|lower }}">
+                        {{ t.status }}
+                    </span>
+                </td>
+                <td class="actions-cell text-right">
+                    <button 
+                        class="btn-icon btn-edit" 
+                        onclick="openEditModal({{ t.id }}, '{{ t.full_name }}', '{{ t.email }}', '{{ t.status }}')"
+                        title="Edit Teacher"
+                    >
+                        ✏️
+                    </button>
+                    <button 
+                        class="btn-icon btn-delete" 
+                        onclick="openDeleteModal({{ t.id }}, '{{ t.full_name }}')"
+                        title="Delete Teacher"
+                    >
+                        🗑️
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="empty-table-msg">
+                    No teachers found matching the criteria.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: ADD / EDIT TEACHER                  -->
+<!-- ========================================== -->
+<div id="teacherModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Add New Teacher</h3>
+            <button class="modal-close" onclick="closeModal('teacherModal')">&times;</button>
+        </div>
+        <form method="POST" action="#" id="teacherForm">
+            {% csrf_token %}
+            <input type="hidden" id="teacherId" name="teacher_id">
+            
+            <div class="modal-body">
+                <div class="form-field">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="full_name" class="form-input" required placeholder="e.g. Prof. Alex Smith">
+                </div>
+                
+                <div class="form-field">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-input" required placeholder="teacher@spellchallenge.com">
+                </div>
+
+                <div class="form-field">
+                    <label for="status">Account Status</label>
+                    <select id="teacherStatus" name="status" class="form-select">
+                        <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('teacherModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: DELETE CONFIRMATION                 -->
+<!-- ========================================== -->
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h3>Delete Teacher</h3>
+            <button class="modal-close" onclick="closeModal('deleteModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete <strong id="deleteTeacherName"></strong>?</p>
+            <p class="warning-text">This action will unassign their active groups and cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancel</button>
+            <form method="POST" action="#" id="deleteForm" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Confirm Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    function openEditModal(id, name, email, status) {
+        document.getElementById('modalTitle').innerText = 'Edit Teacher';
+        document.getElementById('teacherId').value = id;
+        document.getElementById('fullName').value = name;
+        document.getElementById('email').value = email;
+        document.getElementById('teacherStatus').value = status;
+        
+        openModal('teacherModal');
+    }
+
+    function openDeleteModal(id, name) {
+        document.getElementById('deleteTeacherName').innerText = name;
+        // Configurar la URL o ID en el form de borrado
+        openModal('deleteModal');
+    }
+
+    // Cerrar al hacer click fuera del modal
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal-overlay')) {
+            event.target.classList.remove('active');
+        }
+    }
+</script>
+{% endblock %}
+

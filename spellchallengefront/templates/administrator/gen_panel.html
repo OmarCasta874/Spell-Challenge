@@ -1,0 +1,120 @@
+{% extends 'administrator/admin_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_base.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
+{% endblock %}
+
+{% block title %}Dashboard General - Spell-Challenge Admin{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>General Panel</h1>
+    <p class="welcome-text">Welcome back, <strong>{{ admin_name }}</strong>!</p>
+</div>
+
+<!-- TOP METRIC CARDS -->
+<div class="metrics-grid">
+    <div class="metric-card">
+        <span class="metric-label">Active Teachers</span>
+        <span class="metric-value">{{ active_teachers }}</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric-label">Registered Users</span>
+        <span class="metric-value">{{ registered_users }}</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric-label">Total Groups</span>
+        <span class="metric-value">{{ total_groups }}</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric-label">Last Backup</span>
+        <span class="metric-value subtext">{{ last_backup }}</span>
+    </div>
+</div>
+
+<!-- MIDDLE SECTION: USERS OVERVIEW & LEVEL DISTRIBUTION -->
+<div class="dashboard-row grid-2-col">
+    <!-- Users Overview Ratio -->
+    <div class="panel-card">
+        <h3>Users Overview</h3>
+        <div class="progress-bar-container">
+            <div class="bar-fill students-bar" style="width: {{ students_pct }}%;">{{ students_pct }}%</div>
+            <div class="bar-fill teachers-bar" style="width: {{ teachers_pct }}%;">{{ teachers_pct }}%</div>
+        </div>
+        <div class="legend-row">
+            <span class="legend-item"><span class="dot student-dot"></span> Students ({{ students_pct }}%)</span>
+            <span class="legend-item"><span class="dot teacher-dot"></span> Teachers ({{ teachers_pct }}%)</span>
+        </div>
+    </div>
+
+    <!-- Students by Level -->
+    <div class="panel-card">
+        <h3>Students by Level</h3>
+        <div class="level-badges-container">
+            {% for item in students_by_level %}
+                <div class="level-badge">
+                    <span class="level-title">{{ item.level }}</span>
+                    <span class="level-count">{{ item.count }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- BOTTOM SECTION: PERFORMANCE & RECENT ACTIVITY -->
+<div class="dashboard-row grid-3-col">
+    <!-- Student Performance per Group -->
+    <div class="panel-card">
+        <h3>Student Performance</h3>
+        <p class="subtitle">Average score by group</p>
+        <div class="group-scores-list">
+            {% for g in group_scores %}
+                <div class="score-row">
+                    <span class="group-name">{{ g.group }}</span>
+                    <div class="score-bar-bg">
+                        <div class="score-bar-fill" style="width: {{ g.score }}%;"></div>
+                    </div>
+                    <span class="score-val">{{ g.score }}%</span>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="total-avg-badge">
+            AVERAGE SCORE: <strong>{{ average_score_total }}%</strong>
+        </div>
+    </div>
+
+    <!-- Most Challenging Words -->
+    <div class="panel-card">
+        <h3>Most Challenging Words</h3>
+        <p class="subtitle">Highest miss rate this week, across your groups</p>
+        <div class="words-miss-list">
+            {% for word in challenging_words %}
+                <div class="word-miss-item">
+                    <span class="word-name">{{ word.word }}</span>
+                    <span class="miss-rate-tag">{{ word.miss_rate }}%</span>
+                </div>
+            {% endfor %}
+        </div>
+        <p class="footer-note">{{ registered_users }} students across {{ total_groups }} groups</p>
+    </div>
+
+    <!-- Recent Learning Activity -->
+    <div class="panel-card">
+        <h3>Recent Activity</h3>
+        <p class="subtitle">Latest updates across your groups</p>
+        <div class="activity-timeline">
+            {% for act in recent_activities %}
+                <div class="activity-item {{ act.type }}">
+                    <div class="activity-content">
+                        <strong>{{ act.title }}</strong>
+                        <p>{{ act.desc }}</p>
+                        <span class="activity-date">{{ act.date }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

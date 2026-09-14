@@ -1,0 +1,226 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_backups.css' %}">
+{% endblock %}
+
+{% block title %}Backups & Recovery - Spell-Challenge Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Database & System Backups</h1>
+        <p class="subtitle">Manage system snapshots, automated schedules, and data recovery points</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('createBackupModal')">
+        💾 Generate New Backup
+    </button>
+</div>
+
+<!-- CARDS DE ESTADO DE ALMACENAMIENTO Y CONFIGURACIÓN -->
+<div class="dashboard-row grid-3-col mb-15">
+    <div class="metric-card">
+        <span class="metric-label">Database Size</span>
+        <span class="metric-value">{{ db_size }}</span>
+        <span class="card-sub-info">Media files: {{ media_size }}</span>
+    </div>
+
+    <div class="metric-card">
+        <span class="metric-label">Automated Schedule</span>
+        <span class="metric-value text-success">
+            {% if auto_backup_enabled %}Active{% else %}Disabled{% endif %}
+        </span>
+        <span class="card-sub-info">{{ frequency }}</span>
+    </div>
+
+    <div class="metric-card">
+        <span class="metric-label">Last Backup Saved</span>
+        <span class="metric-value subtext">{{ last_backup_date }}</span>
+        <span class="card-sub-info">{{ total_backups }} total snapshots archived</span>
+    </div>
+</div>
+
+<!-- HISTORIAL DE BACKUPS -->
+<div class="panel-card table-card">
+    <div class="panel-header-title">
+        <h3>Available Backup Snapshots</h3>
+    </div>
+    
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Snapshot Name / File</th>
+                <th>Created Date</th>
+                <th>File Size</th>
+                <th>Backup Type</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in backups %}
+            <tr>
+                <td>
+                    <div class="file-cell">
+                        <span class="file-icon">📁</span>
+                        <div>
+                            <strong>{{ b.filename }}</strong>
+                            <div class="text-muted-date">ID: {{ b.id }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ b.created_at }}</td>
+                <td><strong>{{ b.size }}</strong></td>
+                <td>
+                    <span class="type-tag type-{{ b.type|lower }}">{{ b.type }}</span>
+                </td>
+                <td>
+                    <span class="status-badge status-active">
+                        ✓ {{ b.status }}
+                    </span>
+                </td>
+                <td class="actions-cell text-right">
+                    <button class="btn-action-link text-primary" title="Download File">
+                        ⬇️ Download
+                    </button>
+                    <button 
+                        class="btn-action-link text-warning" 
+                        onclick="openRestoreModal('{{ b.filename }}', '{{ b.created_at }}')" 
+                        title="Restore Database"
+                    >
+                        🔄 Restore
+                    </button>
+                    <button 
+                        class="btn-icon" 
+                        onclick="openModal('deleteBackupModal')" 
+                        title="Delete Snapshot"
+                    >
+                        🗑️
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="empty-table-msg">
+                    No backups found in system storage.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: GENERAR BACKUP MANUAL              -->
+<!-- ========================================== -->
+<div id="createBackupModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Generate New System Backup</h3>
+            <button class="modal-close" onclick="closeModal('createBackupModal')">&times;</button>
+        </div>
+        <form method="POST" action="#">
+            {% csrf_token %}
+            <div class="modal-body">
+                <p class="modal-description">Select what components you want to include in this backup snapshot:</p>
+                
+                <div class="checkbox-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="include_db" checked disabled>
+                        <span><strong>Database Schema & Records</strong> (Required)</span>
+                    </label>
+
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="include_media" checked>
+                        <span>Include Uploaded Audio & Media files</span>
+                    </label>
+
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="include_logs">
+                        <span>Include System Activity Logs</span>
+                    </label>
+                </div>
+
+                <div class="form-field mt-1">
+                    <label>Snapshot Description / Note</label>
+                    <input type="text" class="form-input" placeholder="e.g. Manual backup before system maintenance">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('createBackupModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Start Backup Process</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: RESTAURAR BASE DE DATOS             -->
+<!-- ========================================== -->
+<div id="restoreModal" class="modal-overlay">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h3>Restore System Backup</h3>
+            <button class="modal-close" onclick="closeModal('restoreModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>You are about to restore the database from: <br><strong id="restoreFileName" class="text-primary"></strong></p>
+            <div class="alert-box alert-danger">
+                <strong>⚠️ Warning:</strong> This will overwrite all active user progress, new scores, and system modifications recorded after <span id="restoreFileDate"></span>.
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('restoreModal')">Cancel</button>
+            <form method="POST" action="#" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Confirm & Restore Data</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: CONFIRMAR ELIMINACIÓN               -->
+<!-- ========================================== -->
+<div id="deleteBackupModal" class="modal-overlay">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h3>Delete Snapshot</h3>
+            <button class="modal-close" onclick="closeModal('deleteBackupModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to permanently delete this backup file?</p>
+            <p class="warning-text">This file will be permanently removed from server storage.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteBackupModal')">Cancel</button>
+            <button type="button" class="btn btn-danger">Delete File</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function openRestoreModal(fileName, fileDate) {
+        document.getElementById('restoreFileName').innerText = fileName;
+        document.getElementById('restoreFileDate').innerText = fileDate;
+        openModal('restoreModal');
+    }
+
+    window.onclick = function(e) {
+        if (e.target.classList.contains('modal-overlay')) {
+            e.target.classList.remove('active');
+        }
+    }
+</script>
+{% endblock %}
