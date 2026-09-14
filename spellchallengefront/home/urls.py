@@ -24,4 +24,10 @@ urlpatterns = [
     path('edit_student_profile', views.edit_student_profile, name='edit_student_profile'),
     path('teacher_profile', views.teacher_profile, name='teacher_profile'),
     path('logout/', views.custom_logout_view, name='logout'),
+    path('admin-panel/', views.gen_panel, name='admin_gen_panel'),
+    path('admin_teachers/', views.admin_teachers, name='admin_teachers'),
+    path('admin_panel/users/', views.admin_users, name='admin_users'),
+    path('academy/', views.admin_academy, name='admin_academy'),
+    path('backups/', views.admin_backups, name='admin_backups'),
+    path('admin_profile/', views.admin_profile, name='admin_profile'),
 ]

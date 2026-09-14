@@ -1,0 +1,273 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_users.css' %}">
+{% endblock %}
+
+{% block title %}User Management - Spell-Challenge Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Users</h1>
+        <p class="subtitle">Overview of students, teachers, and system administrators ({{ total_count }} total)</p>
+    </div>
+    <button class="btn btn-primary" onclick="openCreateUserModal()">
+        + Register New User
+    </button>
+</div>
+
+<!-- BARRA DE BÚSQUEDA Y FILTROS AVANZADOS -->
+<div class="panel-card filter-card">
+    <form method="GET" action="{% url 'admin_users' %}" class="filter-form">
+        <div class="search-box">
+            <input 
+                type="text" 
+                name="search" 
+                placeholder="Search user by name or email..." 
+                value="{{ search_query }}"
+                class="form-input"
+            >
+        </div>
+        
+        <div class="filter-group">
+            <select name="role" class="form-select">
+                <option value="ALL" {% if role_filter == 'ALL' %}selected{% endif %}>All Roles</option>
+                <option value="STUDENT" {% if role_filter == 'STUDENT' %}selected{% endif %}>Student</option>
+                <option value="TEACHER" {% if role_filter == 'TEACHER' %}selected{% endif %}>Teacher</option>
+                <option value="ADMIN" {% if role_filter == 'ADMIN' %}selected{% endif %}>Administrator</option>
+            </select>
+
+            <select name="group" class="form-select">
+                <option value="ALL" {% if group_filter == 'ALL' %}selected{% endif %}>All Groups</option>
+                {% for g in available_groups %}
+                    <option value="{{ g }}" {% if group_filter == g %}selected{% endif %}>{{ g }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="status" class="form-select">
+                <option value="ALL" {% if status_filter == 'ALL' %}selected{% endif %}>All Statuses</option>
+                <option value="ACTIVE" {% if status_filter == 'ACTIVE' %}selected{% endif %}>Active</option>
+                <option value="INACTIVE" {% if status_filter == 'INACTIVE' %}selected{% endif %}>Inactive</option>
+            </select>
+
+            <button type="submit" class="btn btn-secondary">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- TABLA PRINCIPAL DE USUARIOS -->
+<div class="panel-card table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Group / Scope</th>
+                <th>Level</th>
+                <th>Status</th>
+                <th>Joined Date</th>
+                <th class="text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td class="user-cell">
+                    <div class="user-avatar avatar-{{ u.role|lower }}">
+                        {{ u.full_name|slice:":2"|upper }}
+                    </div>
+                    <div>
+                        <strong>{{ u.full_name }}</strong>
+                        <div class="user-email-sub">{{ u.email }}</div>
+                    </div>
+                </td>
+                <td>
+                    <span class="role-badge role-{{ u.role|lower }}">
+                        {{ u.role }}
+                    </span>
+                </td>
+                <td>
+                    <span class="group-tag">{{ u.group }}</span>
+                </td>
+                <td>
+                    {% if u.level != 'N/A' %}
+                        <span class="level-pill">{{ u.level }}</span>
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="status-badge status-{{ u.status|lower }}">
+                        {{ u.status }}
+                    </span>
+                </td>
+                <td class="text-muted-date">{{ u.date_joined }}</td>
+                <td class="actions-cell text-right">
+                    <button 
+                        class="btn-icon btn-edit" 
+                        onclick="openEditUserModal({{ u.id }}, '{{ u.full_name }}', '{{ u.email }}', '{{ u.role }}', '{{ u.status }}')"
+                        title="Edit User"
+                    >
+                        ✏️
+                    </button>
+                    <button 
+                        class="btn-icon btn-delete" 
+                        onclick="openDeleteUserModal({{ u.id }}, '{{ u.full_name }}')"
+                        title="Delete User"
+                    >
+                        🗑️
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="empty-table-msg">
+                    No users found matching your selected filters.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: CREAR / EDITAR USUARIO              -->
+<!-- ========================================== -->
+<div id="userModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="userModalTitle">Register New User</h3>
+            <button class="modal-close" onclick="closeModal('userModal')">&times;</button>
+        </div>
+        <form method="POST" action="#" id="userForm">
+            {% csrf_token %}
+            <input type="hidden" id="userId" name="user_id">
+            
+            <div class="modal-body">
+                <div class="form-field">
+                    <label for="userFullName">Full Name</label>
+                    <input type="text" id="userFullName" name="full_name" class="form-input" required placeholder="e.g. Maria Perez">
+                </div>
+                
+                <div class="form-field">
+                    <label for="userEmail">Email Address</label>
+                    <input type="email" id="userEmail" name="email" class="form-input" required placeholder="user@spellchallenge.com">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field flex-1">
+                        <label for="userRole">System Role</label>
+                        <select id="userRole" name="role" class="form-select" onchange="toggleStudentFields()">
+                            <option value="STUDENT">Student</option>
+                            <option value="TEACHER">Teacher</option>
+                            <option value="ADMIN">Administrator</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field flex-1">
+                        <label for="userStatus">Account Status</label>
+                        <select id="userStatus" name="status" class="form-select">
+                            <option value="ACTIVE">Active</option>
+                            <option value="INACTIVE">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-field" id="groupSelectContainer">
+                    <label for="userGroup">Assigned Group</label>
+                    <select id="userGroup" name="group" class="form-select">
+                        <option value="">-- Select Group --</option>
+                        {% for g in available_groups %}
+                            <option value="{{ g }}">{{ g }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('userModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: ELIMINAR USUARIO                    -->
+<!-- ========================================== -->
+<div id="deleteUserModal" class="modal-overlay">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h3>Delete User Account</h3>
+            <button class="modal-close" onclick="closeModal('deleteUserModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to permanently delete <strong id="deleteUserName"></strong>?</p>
+            <p class="warning-text">This action will remove their historical scores, competition records, and login access.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteUserModal')">Cancel</button>
+            <form method="POST" action="#" id="deleteUserForm" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Confirm Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    function openCreateUserModal() {
+        document.getElementById('userModalTitle').innerText = 'Register New User';
+        document.getElementById('userId').value = '';
+        document.getElementById('userForm').reset();
+        toggleStudentFields();
+        openModal('userModal');
+    }
+
+    function openEditUserModal(id, name, email, role, status) {
+        document.getElementById('userModalTitle').innerText = 'Edit User Profile';
+        document.getElementById('userId').value = id;
+        document.getElementById('userFullName').value = name;
+        document.getElementById('userEmail').value = email;
+        document.getElementById('userRole').value = role;
+        document.getElementById('userStatus').value = status;
+        
+        toggleStudentFields();
+        openModal('userModal');
+    }
+
+    function openDeleteUserModal(id, name) {
+        document.getElementById('deleteUserName').innerText = name;
+        openModal('deleteUserModal');
+    }
+
+    function toggleStudentFields() {
+        const role = document.getElementById('userRole').value;
+        const groupContainer = document.getElementById('groupSelectContainer');
+        
+        if (role === 'ADMIN') {
+            groupContainer.style.display = 'none';
+        } else {
+            groupContainer.style.display = 'block';
+        }
+    }
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal-overlay')) {
+            event.target.classList.remove('active');
+        }
+    }
+</script>
+{% endblock %}

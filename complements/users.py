@@ -12,3 +12,7 @@
 #Para entrar al sistema como Student (por ahora), se va a utilizar:
 #email = 2026100001@ut-tijuana.edu.mx
 #password = Student12345
+
+#para entrar como admin, se va a tomar:
+#email = diego.sanchez@beemail.com
+#contraseña = Admin1234

@@ -1,0 +1,285 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_academy.css' %}">
+{% endblock %}
+
+{% block title %}Academy Management - Spell-Challenge Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Academy Management</h1>
+        <p class="subtitle">Configure academic programs, class groups, and proficiency levels</p>
+    </div>
+</div>
+
+<!-- NAVEGACIÓN ENTRE PESTAÑAS (TABS) -->
+<div class="academy-tabs-nav">
+    <button class="tab-btn {% if active_tab == 'careers' %}active{% endif %}" onclick="switchTab('careers')">
+        🎓 Careers / Programs
+    </button>
+    <button class="tab-btn {% if active_tab == 'groups' %}active{% endif %}" onclick="switchTab('groups')">
+        👥 Groups
+    </button>
+    <button class="tab-btn {% if active_tab == 'levels' %}active{% endif %}" onclick="switchTab('levels')">
+        📊 Proficiency Levels
+    </button>
+</div>
+
+<!-- ========================================== -->
+<!-- PESTAÑA 1: CAREERS                         -->
+<!-- ========================================== -->
+<div id="tab-careers" class="tab-content {% if active_tab == 'careers' %}active{% endif %}">
+    <div class="tab-header-actions">
+        <h3>Academic Programs</h3>
+        <button class="btn btn-primary" onclick="openModal('careerModal')">+ Add New Program</button>
+    </div>
+
+    <div class="panel-card table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Program Name</th>
+                    <th>Active Groups</th>
+                    <th>Students</th>
+                    <th>Status</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in careers %}
+                <tr>
+                    <td><strong>{{ c.code }}</strong></td>
+                    <td>{{ c.name }}</td>
+                    <td><span class="count-pill">{{ c.groups_count }} groups</span></td>
+                    <td>{{ c.students_count }} students</td>
+                    <td>
+                        <span class="status-badge status-{{ c.status|lower }}">{{ c.status }}</span>
+                    </td>
+                    <td class="actions-cell text-right">
+                        <button class="btn-icon" onclick="openModal('careerModal')" title="Edit">✏️</button>
+                        <button class="btn-icon" onclick="openModal('deleteAcademyModal')" title="Delete">🗑️</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- PESTAÑA 2: GROUPS                          -->
+<!-- ========================================== -->
+<div id="tab-groups" class="tab-content {% if active_tab == 'groups' %}active{% endif %}">
+    <div class="tab-header-actions">
+        <h3>Class Groups</h3>
+        <button class="btn btn-primary" onclick="openModal('groupModal')">+ Add New Group</button>
+    </div>
+
+    <div class="panel-card table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Group</th>
+                    <th>Program / Career</th>
+                    <th>Assigned Teacher</th>
+                    <th>Level</th>
+                    <th>Students</th>
+                    <th>Status</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for g in groups %}
+                <tr>
+                    <td><strong>{{ g.name }}</strong></td>
+                    <td>{{ g.career }}</td>
+                    <td>{{ g.teacher }}</td>
+                    <td><span class="level-pill">{{ g.level }}</span></td>
+                    <td>{{ g.students_count }}</td>
+                    <td><span class="status-badge status-{{ g.status|lower }}">{{ g.status }}</span></td>
+                    <td class="actions-cell text-right">
+                        <button class="btn-icon" onclick="openModal('groupModal')" title="Edit">✏️</button>
+                        <button class="btn-icon" onclick="openModal('deleteAcademyModal')" title="Delete">🗑️</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- PESTAÑA 3: LEVELS                          -->
+<!-- ========================================== -->
+<div id="tab-levels" class="tab-content {% if active_tab == 'levels' %}active{% endif %}">
+    <div class="tab-header-actions">
+        <h3>CEFR Proficiency Levels</h3>
+        <button class="btn btn-primary" onclick="openModal('levelModal')">+ Add New Level</button>
+    </div>
+
+    <div class="panel-card table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Level Code</th>
+                    <th>Description / Designation</th>
+                    <th>Vocabulary Bank</th>
+                    <th>Active Groups</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in levels %}
+                <tr>
+                    <td><span class="level-pill level-large">{{ l.code }}</span></td>
+                    <td><strong>{{ l.name }}</strong></td>
+                    <td>{{ l.words_count }} words assigned</td>
+                    <td>{{ l.groups_count }} groups</td>
+                    <td class="actions-cell text-right">
+                        <button class="btn-icon" onclick="openModal('levelModal')" title="Edit">✏️</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: ADD/EDIT CAREER                     -->
+<!-- ========================================== -->
+<div id="careerModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Program / Career</h3>
+            <button class="modal-close" onclick="closeModal('careerModal')">&times;</button>
+        </div>
+        <form method="POST" action="#">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-field">
+                    <label>Program Code</label>
+                    <input type="text" class="form-input" placeholder="e.g. DSMP" required>
+                </div>
+                <div class="form-field">
+                    <label>Program Full Name</label>
+                    <input type="text" class="form-input" placeholder="e.g. Desarrollo de Software Multiplataforma" required>
+                </div>
+                <div class="form-field">
+                    <label>Status</label>
+                    <select class="form-select">
+                        <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('careerModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Program</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: ADD/EDIT GROUP                      -->
+<!-- ========================================== -->
+<div id="groupModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Class Group</h3>
+            <button class="modal-close" onclick="closeModal('groupModal')">&times;</button>
+        </div>
+        <form method="POST" action="#">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-field">
+                    <label>Group Name</label>
+                    <input type="text" class="form-input" placeholder="e.g. Group 3A" required>
+                </div>
+                <div class="form-field">
+                    <label>Career / Program</label>
+                    <select class="form-select">
+                        {% for c in careers %}
+                            <option value="{{ c.id }}">{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Assigned Teacher</label>
+                    <select class="form-select">
+                        {% for t in available_teachers %}
+                            <option value="{{ t }}">{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Level</label>
+                    <select class="form-select">
+                        {% for l in levels %}
+                            <option value="{{ l.code }}">{{ l.code }} - {{ l.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('groupModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Group</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: CONFIRM DELETE                      -->
+<!-- ========================================== -->
+<div id="deleteAcademyModal" class="modal-overlay">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h3>Delete Record</h3>
+            <button class="modal-close" onclick="closeModal('deleteAcademyModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to remove this academic record?</p>
+            <p class="warning-text">This may unassign students and affect historical reporting.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteAcademyModal')">Cancel</button>
+            <button type="button" class="btn btn-danger">Confirm Delete</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function switchTab(tabName) {
+        // Ocultar todos los contenidos de pestañas
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        // Desactivar botones
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+        // Activar la seleccionada
+        document.getElementById('tab-' + tabName).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    window.onclick = function(e) {
+        if (e.target.classList.contains('modal-overlay')) {
+            e.target.classList.remove('active');
+        }
+    }
+</script>
+{% endblock %}

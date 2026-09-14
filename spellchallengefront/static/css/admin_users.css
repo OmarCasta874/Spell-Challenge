@@ -1,0 +1,64 @@
+/* EXTENSIONES PARA USERS MANAGEMENT */
+
+.user-email-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.text-muted-date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+/* AVATARS POR ROL */
+.avatar-student { background-color: var(--accent-salmon); }
+.avatar-teacher { background-color: #336699; }
+.avatar-admin { background-color: var(--primary-red); }
+
+/* BADGES DE ROL */
+.role-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.role-student {
+    background-color: #FFF0ED;
+    color: #D9534F;
+    border: 1px solid #FAD2CE;
+}
+
+.role-teacher {
+    background-color: #EBF3FA;
+    color: #2B6CB0;
+    border: 1px solid #BEE3F8;
+}
+
+.role-admin {
+    background-color: #F7E6E6;
+    color: var(--primary-red);
+    border: 1px solid #E2B8B8;
+}
+
+/* LEVEL PILLS */
+.level-pill {
+    background-color: #F2EFE9;
+    color: var(--text-dark);
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
