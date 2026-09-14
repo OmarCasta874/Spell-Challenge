@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
 from functools import wraps
+from .models import Grupo, Palabra
 
 # Create your views here.
 
@@ -76,6 +77,43 @@ def dashboard(request):
 @role_required('teacher')
 def my_groups(request):
     return render(request, 'teacher/my_groups.html')
+
+@never_cache
+@role_required('teacher')
+def view_groups(request, group_id):
+    grupo = get_object_or_404(Grupo, pk=group_id)
+    
+    students = [
+        {
+            'enrollment': ga.alumno.matricula,
+            'name': f"{ga.alumno.nombre_pila} {ga.alumno.apellidoPaterno} {ga.alumno.apellidoMatermo}",
+        }
+        for ga in grupo.grupo_alumnos.select_related('alumno').all()
+    ]
+    
+    listas_ids = grupo.lista_grupos.values_list('lista_id', flat=True)
+    palabras = Palabra.objects.filter(
+        lista_palabras__lista_id__in=listas_ids
+    ).distinct()
+    
+    word_list = [
+        {
+            'number': i,
+            'word': p.texto,
+            'meaning': p.significado,
+            'pronunciation': p.pronunciacion,
+        }
+        for i, p in enumerate(palabras, start=1)
+    ]
+    
+    context = {
+        'group_name': grupo.nombre,
+        'teacher_name': f"{grupo.profesor.nombre_pila} {grupo.profesor.apellidoPaterno} {grupo.profesor.apellidoMaterno}",
+        'students': students,
+        'word_list': word_list,
+    }
+    
+    return render(request, 'teacher/view_group.html', context)
 
 @never_cache
 @role_required('teacher')

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/student_base.css' %}"> {# o teacher_base.css #}
+<link rel="stylesheet" href="{% static 'css/student_base.css' %}">
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
 {% endblock %}
 
@@ -10,38 +10,45 @@
 
 <div class="home-row">
   <div class="home-col-left">
-    <div class="continue-lesson-banner">
-      <p class="continue-lesson-text">Continue a lesson or start a new one?</p>
-      <a href="{% url 'student_practices' %}" class="go-to-practice-link">
-        GO TO PRACTICE <i data-lucide="arrow-right"></i>
-      </a>
-    </div>
-    <h5 class="section-heading">Progress Overview</h5>
+    <div class="practice-progress-card">
+      <p class="welcome-text">Welcome back Eric!</p>
+      <h3 class="current-unit-title">Unit 1 - Beginning</h3>
+      <p class="current-unit-subtitle">Practice 4 of 15 &middot; Exercise 2 of 4</p>
 
-    <div class="progress-stats-row">
-      <div class="progress-stat-card">
-        <p class="progress-stat-label">Completed Lessons:</p>
-        <h3 class="progress-stat-value">0</h3>
+      <p class="practice-progress-label">PRACTICE PROGRESS</p>
+      <div class="practice-progress-track">
+        <div class="practice-progress-fill" style="width: 50%;"></div>
       </div>
-      <div class="progress-stat-card">
-        <p class="progress-stat-label">Completed Units:</p>
-        <h3 class="progress-stat-value">0</h3>
-      </div>
-      <div class="progress-stat-card">
-        <p class="progress-stat-label">Current English Level:</p>
-        <h3 class="progress-stat-value">A1</h3>
-      </div>
+      <a href="{% url 'student_practices' %}" class="continue-link">CONTINUE <i data-lucide="arrow-right"></i></a>
     </div>
 
-    <div class="level-progress-wrapper">
+    <div class="unit-stats-row">
+      <div class="unit-stat-card">
+        <p class="unit-stat-label">UNIT</p>
+        <h3 class="unit-stat-value">A1</h3>
+      </div>
+      <div class="unit-stat-card">
+        <p class="unit-stat-label">PRACTICES</p>
+        <h3 class="unit-stat-value">3/15</h3>
+      </div>
+      <div class="unit-stat-card">
+        <p class="unit-stat-label">EXERCISES</p>
+        <h3 class="unit-stat-value">12/60</h3>
+      </div>
+    </div>
+
+    <div class="unit2-progress-card">
+      <h5 class="unit2-title">Progress in Unit 2</h5>
+      <p class="unit2-subtitle">Keep going to unlock Unit 2 (A2)</p>
+
       <div class="level-progress-labels">
-        <span>A1</span>
         <span>A2</span>
+        <span class="level-progress-mid">22%</span>
+        <span>B1</span>
       </div>
       <div class="level-progress-track">
-        <div class="level-progress-fill" style="width: 10%;"></div>
+        <div class="level-progress-fill" style="width: 22%;"></div>
       </div>
-      <p class="level-progress-score">Score: 0%</p>
     </div>
   </div>
 
@@ -59,6 +66,9 @@
       <div class="mini-game-card">
         <h6 class="mini-game-title">MISSING LETTERS</h6>
         <a href="#" class="play-link">PLAY <i data-lucide="arrow-right"></i></a>
+      </div>
+      <div class="mini-game-card mini-game-card-view-all">
+        <a href="#" class="view-all-games-link">VIEW ALL GAMES</a>
       </div>
     </div>
 

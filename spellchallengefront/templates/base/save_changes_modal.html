@@ -1,0 +1,22 @@
+{% load static %}
+<div class="modal fade" id="saveChangesModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content save-changes-content">
+
+      <div class="save-changes-avatar-wrap">
+        <img src="{% static avatar_img %}" alt="Avatar" class="save-changes-avatar">
+      </div>
+
+      <div class="modal-body save-changes-body">
+        <h3 class="save-changes-title">Save Changes</h3>
+        <p class="save-changes-text">Are you sure you want to save changes?. All applied changes will be saved.</p>
+
+        <div class="save-changes-actions">
+          <button type="button" class="btn-save-no" data-bs-dismiss="modal">NO</button>
+          <button type="submit" form="{{ form_id }}" class="btn-save-yes">YES</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

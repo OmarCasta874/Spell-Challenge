@@ -9,6 +9,7 @@ urlpatterns = [
     path('signup/teacher/', views.signup_teacher, name='signup_teacher'),
     path('dashboard/', views.dashboard, name='teacher_dashboard'),
     path('mygroups/', views.my_groups, name='teacher_groups'),
+    path('mygroups/<int:group_id>/', views.view_groups, name='view_group'),
     path('word_lists/', views.word_lists, name='teacher_word_lists'),
     path('home/', views.student_home, name='student_home'),
     path('mygroups_student/', views.student_groups, name='student_groups'),

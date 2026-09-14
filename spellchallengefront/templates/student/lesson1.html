@@ -16,7 +16,9 @@
 
   <!-- BARRA DE PROGRESO CON MASCOTA -->
   <div class="lesson-progress-wrap">
-    <span class="bee-marker" id="beeMarker" style="left: 10%;">🐝</span>
+    <span class="bee-marker" id="beeMarker" style="left: 10%;">
+      <img src="{% static 'img/beenary-left.png' %}" class="bee-progress">
+    </span>
     <div class="progress-track">
       <div class="progress-fill" id="progressFill" style="width: 10%;"></div>
     </div>
@@ -155,7 +157,7 @@
     <!-- PANTALLA: LESSON COMPLETED -->
     <div id="lessonCompleted" class="exercise-card completed-card d-none">
       <h2 class="completed-title">Lesson Completed!</h2>
-      <p class="completed-subtitle">Great job, {{ request.user.first_name|default:"Omar" }}! Let's check your results...</p>
+      <p class="completed-subtitle">Great job, {{ request.user.nombre_pila }}! Let's check your results...</p>
 
       <div class="results-box">
         <span class="bee-decoration bee-left">🐝</span>
