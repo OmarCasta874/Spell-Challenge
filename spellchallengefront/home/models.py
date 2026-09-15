@@ -522,7 +522,7 @@ class Practica_Sesion(models.Model):
     clave = models.CharField(max_length=10, primary_key=True)
     
     fecha = models.DateField()
-    duracion = models.DurationField()
+    duracion = models.TimeField()
     porcentaje_aciertos = models.FloatField(
         db_column='porcent_aciertos'
     )

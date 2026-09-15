@@ -9,12 +9,14 @@
 {% block teacher_content %}
 
 <div class="view-group-header">
-  <a href="{% url 'my_groups' %}" class="back-link">
+  <a href="{% url 'teacher_groups' %}" class="back-link">
     <i data-lucide="arrow-left"></i>
   </a>
   <div class="view-group-titles">
-    <h2 class="view-group-title">{{ group_name }}</h2>
-    <p class="view-group-subtitle">Teacher. {{ teacher_name }}</p>
+    <h2 class="view-group-title">{{ grupo_nombre }}</h2>
+    <p class="view-group-subtitle">
+      Teacher. {{ grupo.profesor.nombre_pila }} {{ grupo.profesor.apellidoPaterno }}
+    </p>
   </div>
 </div>
 
@@ -32,9 +34,17 @@
       <tbody>
         {% for student in students %}
         <tr>
-          <td>{{ student.enrollment }}</td>
-          <td>{{ student.name }}</td>
+          <td>{{ student.matricula }}</td>
+          <td>
+            {{ student.nombre_pila }}
+            {{ student.apellidoPaterno }}
+            {{ student.apellidoMaterno }}
+          </td>
           <td><a href="#" class="student-btn-view">VIEW</a></td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="3">No students in this group. </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -55,14 +65,18 @@
       <tbody>
         {% for word in word_list %}
         <tr>
-          <td>{{ word.number }}</td>
-          <td>{{ word.word }}</td>
-          <td>{{ word.meaning }}</td>
-          <td>{{ word.pronunciation }}</td>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ word.significado }}</td>
+          <td>---</td>
+          <td>{{ word.pronunciacion }}</td>
           <td class="wordlist-actions">
             <a href="#" class="wordlist-btn">VIEW</a>
             <a href="#" class="wordlist-btn">LISTEN</a>
           </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5"> No words assigned to this group. </td>
         </tr>
         {% endfor %}
       </tbody>

@@ -11,41 +11,46 @@
 {% block admin_content %}
 <div class="dashboard-header">
     <h1>General Panel</h1>
-    <p class="welcome-text">Welcome back, <strong>{{ admin_name }}</strong>!</p>
 </div>
 
 <!-- TOP METRIC CARDS -->
 <div class="metrics-grid">
     <div class="metric-card">
-        <span class="metric-label">Active Teachers</span>
+        <i data-lucide="users" class="metric-icon"></i>
+        <span class="metric-label">active teachers:</span>
         <span class="metric-value">{{ active_teachers }}</span>
     </div>
     <div class="metric-card">
-        <span class="metric-label">Registered Users</span>
+        <i data-lucide="clipboard" class="metric-icon"></i>
+        <span class="metric-label">Registered users:</span>
         <span class="metric-value">{{ registered_users }}</span>
     </div>
     <div class="metric-card">
-        <span class="metric-label">Total Groups</span>
+        <i data-lucide="home" class="metric-icon"></i>
+        <span class="metric-label">Total groups:</span>
         <span class="metric-value">{{ total_groups }}</span>
     </div>
     <div class="metric-card">
-        <span class="metric-label">Last Backup</span>
-        <span class="metric-value subtext">{{ last_backup }}</span>
+        <i data-lucide="book-open" class="metric-icon"></i>
+        <span class="metric-label">Last backup:</span>
+        <span class="metric-value">{{ last_backup }}</span>
     </div>
 </div>
 
 <!-- MIDDLE SECTION: USERS OVERVIEW & LEVEL DISTRIBUTION -->
 <div class="dashboard-row grid-2-col">
-    <!-- Users Overview Ratio -->
+    <!-- Users Overview -->
     <div class="panel-card">
         <h3>Users Overview</h3>
-        <div class="progress-bar-container">
-            <div class="bar-fill students-bar" style="width: {{ students_pct }}%;">{{ students_pct }}%</div>
-            <div class="bar-fill teachers-bar" style="width: {{ teachers_pct }}%;">{{ teachers_pct }}%</div>
+        <div class="pie-chart-row">
+            <div class="pie-chart" style="background: conic-gradient(var(--primary-red) 0% {{ students_pct }}%, var(--accent-salmon) {{ students_pct }}% 100%);">
+                <span class="pie-label pie-label-students">{{ students_pct }}%</span>
+                <span class="pie-label pie-label-teachers">{{ teachers_pct }}%</span>
+            </div>
         </div>
         <div class="legend-row">
-            <span class="legend-item"><span class="dot student-dot"></span> Students ({{ students_pct }}%)</span>
-            <span class="legend-item"><span class="dot teacher-dot"></span> Teachers ({{ teachers_pct }}%)</span>
+            <span class="legend-item"><span class="swatch swatch-students"></span> Students</span>
+            <span class="legend-item"><span class="swatch swatch-teachers"></span> Teachers</span>
         </div>
     </div>
 
@@ -100,18 +105,14 @@
         <p class="footer-note">{{ registered_users }} students across {{ total_groups }} groups</p>
     </div>
 
-    <!-- Recent Learning Activity -->
-    <div class="panel-card">
+    <!-- Recent Activity -->
+    <div class="panel-card activity-panel-salmon">
         <h3>Recent Activity</h3>
-        <p class="subtitle">Latest updates across your groups</p>
-        <div class="activity-timeline">
+        <div class="activity-list">
             {% for act in recent_activities %}
-                <div class="activity-item {{ act.type }}">
-                    <div class="activity-content">
-                        <strong>{{ act.title }}</strong>
-                        <p>{{ act.desc }}</p>
-                        <span class="activity-date">{{ act.date }}</span>
-                    </div>
+                <div class="activity-row">
+                    <strong class="activity-title">{{ act.title }}</strong>
+                    <span class="activity-date">{{ act.date }}</span>
                 </div>
             {% endfor %}
         </div>

@@ -13,7 +13,7 @@
     <div>
         <h1>Teachers</h1>
     </div>
-    <button class="btn btn-primary" onclick="openModal('addTeacherModal')">
+    <button class="btn btn-primary" onclick="openAddModal()">
         + Add New Teacher
     </button>
 </div>
@@ -178,6 +178,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script>
     function openModal(modalId) {
         document.getElementById(modalId).classList.add('active');
@@ -185,6 +186,13 @@
 
     function closeModal(modalId) {
         document.getElementById(modalId).classList.remove('active');
+    }
+
+    function openAddModal() {
+        document.getElementById('modalTitle').innerText = 'Add New Teacher';
+        document.getElementById('teacherForm').reset();
+        document.getElementById('teacherId').value = '';
+        openModal('teacherModal');
     }
 
     function openEditModal(id, name, email, status) {
@@ -199,11 +207,9 @@
 
     function openDeleteModal(id, name) {
         document.getElementById('deleteTeacherName').innerText = name;
-        // Configurar la URL o ID en el form de borrado
         openModal('deleteModal');
     }
 
-    // Cerrar al hacer click fuera del modal
     window.onclick = function(event) {
         if (event.target.classList.contains('modal-overlay')) {
             event.target.classList.remove('active');

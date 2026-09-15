@@ -11,12 +11,12 @@
   <div class="stat-card">
     <div class="stat-icon"><i data-lucide="users"></i></div>
     <p class="stat-label">Groups:</p>
-    <h3 class="stat-value">4</h3>
+    <h3 class="stat-value">{{ total_groups }}</h3>
   </div>
   <div class="stat-card">
     <div class="stat-icon"><i data-lucide="clipboard-list"></i></div>
     <p class="stat-label">Lists:</p>
-    <h3 class="stat-value">12</h3>
+    <h3 class="stat-value">{{ total_lists }}</h3>
   </div>
   <div class="stat-card">
     <div class="stat-icon"><i data-lucide="award"></i></div>
@@ -26,32 +26,34 @@
   <div class="stat-card">
     <div class="stat-icon"><i data-lucide="user"></i></div>
     <p class="stat-label">Students:</p>
-    <h3 class="stat-value">86</h3>
+    <h3 class="stat-value">{{ total_students }}</h3>
   </div>
 </div>
 
 <div class="level-distribution-card">
   <div class="level-distribution-header">
     <h5 class="overview-title">Students by level</h5>
-    <span class="level-distribution-subtitle">86 students across 4 groups</span>
+    <span class="level-distribution-subtitle">
+      {{ total_students }} students across {{ total_groups }} groups
+    </span>
   </div>
 
   <div class="level-bar">
-    <div class="level-segment level-a1" style="width: 5.8%;"></div>
-    <div class="level-segment level-a2" style="width: 22.1%;"></div>
-    <div class="level-segment level-b1" style="width: 33.7%;"></div>
-    <div class="level-segment level-b2" style="width: 25.6%;"></div>
-    <div class="level-segment level-c1" style="width: 10.5%;"></div>
-    <div class="level-segment level-c2" style="width: 2.3%;"></div>
+    <div class="level-segment level-a1" style="width: {{ level.percentages.A1 }}%;"></div>
+    <div class="level-segment level-a2" style="width: {{ level.percentages.A2 }}%;"></div>
+    <div class="level-segment level-b1" style="width: {{ level.percentages.B1 }}%;"></div>
+    <div class="level-segment level-b2" style="width: {{ level.percentages.B2 }}%;"></div>
+    <div class="level-segment level-c1" style="width: {{ level.percentages.C1 }}%;"></div>
+    <div class="level-segment level-c2" style="width: {{ level.percentages.C2 }}%;"></div>
   </div>
 
   <ul class="level-legend">
-    <li><span class="legend-dot level-a1"></span> A1 - 5</li>
-    <li><span class="legend-dot level-a2"></span> A2 - 19</li>
-    <li><span class="legend-dot level-b1"></span> B1 - 29</li>
-    <li><span class="legend-dot level-b2"></span> B2 - 22</li>
-    <li><span class="legend-dot level-c1"></span> C1 - 9</li>
-    <li><span class="legend-dot level-c2"></span> C2 - 2</li>
+    <li><span class="legend-dot level-a1"></span> A1 - {{ level_counts.A1 }}</li>
+    <li><span class="legend-dot level-a2"></span> A2 - {{ level_counts.A2 }}</li>
+    <li><span class="legend-dot level-b1"></span> B1 - {{ level_counts.B1 }}</li>
+    <li><span class="legend-dot level-b2"></span> B2 - {{ level_counts.B2 }}</li>
+    <li><span class="legend-dot level-c1"></span> C1 - {{ level_counts.C1 }}</li>
+    <li><span class="legend-dot level-c2"></span> C2 - {{ level_counts.C2 }}</li>
   </ul>
 </div>
 
@@ -61,61 +63,44 @@
     <h5 class="overview-title">Student Performance</h5>
     <p class="overview-subtitle">Average score by group</p>
 
+    {% for group in group_performance %}
     <div class="bar-row">
-      <span class="bar-label">GROUP 3A</span>
-      <div class="bar-track"><div class="bar-fill" style="width: 85%;"></div></div>
-      <span class="bar-value">85%</span>
-    </div>
-    <div class="bar-row">
-      <span class="bar-label">GROUP 4B</span>
-      <div class="bar-track"><div class="bar-fill" style="width: 71%;"></div></div>
-      <span class="bar-value">71%</span>
-    </div>
-    <div class="bar-row">
-      <span class="bar-label">GROUP 2A</span>
-      <div class="bar-track"><div class="bar-fill" style="width: 98%;"></div></div>
-      <span class="bar-value">98%</span>
-    </div>
-    <div class="bar-row">
-      <span class="bar-label">GROUP 1C</span>
-      <div class="bar-track"><div class="bar-fill" style="width: 58%;"></div></div>
-      <span class="bar-value">58%</span>
+      <span class="bar-label">{{ group.nombre }}</span>
+
+      <div class="bar-track">
+        <div class="bar-fill"
+            style="width: {{ group.average }}%;"></div>
+      </div>
+
+      <span class="bar-value">{{ group.average }}%</span>
     </div>
 
+    {% empty %}
+
+    <p>No groups available.</p>
+    {% endfor %}
+
     <div class="average-score-badge">
-      <i data-lucide="star"></i> AVERAGE SCORE: 78%
+      <i data-lucide="star"></i> AVERAGE SCORE: {{ average_score }}%
     </div>
 
     <hr class="overview-divider">
 
     <h5 class="overview-title">Most Challenging Words</h5>
-    <p class="overview-subtitle">Highest miss rate this week, across your groups</p>
+    <p class="overview-subtitle">Highest miss rate across your groups</p>
 
-    <div class="bar-row">
-      <span class="bar-label">necessary</span>
-      <div class="bar-track"><div class="bar-fill" style="width: 62%;"></div></div>
-      <span class="bar-value">62%</span>
-    </div>
-    <div class="bar-row">
-      <span class="bar-label">rhythm</span>
-      <div class="bar-track"><div class="bar-fill" style="width: 58%;"></div></div>
-      <span class="bar-value">58%</span>
-    </div>
-    <div class="bar-row">
-      <span class="bar-label">conscience</span>
-      <div class="bar-track"><div class="bar-fill" style="width: 54%;"></div></div>
-      <span class="bar-value">54%</span>
-    </div>
-    <div class="bar-row">
-      <span class="bar-label">bureaucracy</span>
-      <div class="bar-track"><div class="bar-fill" style="width: 49%;"></div></div>
-      <span class="bar-value">49%</span>
-    </div>
-    <div class="bar-row">
-      <span class="bar-label">Wednesday</span>
-      <div class="bar-track"><div class="bar-fill" style="width: 45%;"></div></div>
-      <span class="bar-value">45%</span>
-    </div>
+    {% for word in challenging_words %}
+      <div class="bar-row">
+        <span class="bar-label">{{ word.word }}</span>
+        <div class="bar-track">
+          <div class="bar-fill"
+              style="width: {{ word.miss_rate }}%;"></div>
+        </div>
+        <span class="bar-value">{{ word.miss_rate }}%</span>
+      </div>
+      {% empty %}
+      <p>No practice data available yet.</p>
+    {% endfor %}
   </div>
 
   <div class="activity-card">

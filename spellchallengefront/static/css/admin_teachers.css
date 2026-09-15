@@ -55,7 +55,7 @@
 
 .btn:hover { opacity: 0.9; }
 
-.btn-primary { background-color: var(--primary-red); color: #FFF; }
+.btn-primary { background-color: #7a1f2b; color: #FFF; }
 .btn-secondary { background-color: #E2D8CE; color: var(--text-dark); }
 .btn-danger { background-color: #D9381E; color: #FFF; }
 
