@@ -27,7 +27,7 @@ urlpatterns = [
     path('admin-panel/', views.gen_panel, name='admin_gen_panel'),
     path('admin_teachers/', views.admin_teachers, name='admin_teachers'),
     path('admin_panel/users/', views.admin_users, name='admin_users'),
-    path('academy/', views.admin_academy, name='admin_academy'),
-    path('backups/', views.admin_backups, name='admin_backups'),
+    path('admin_academy_management/', views.admin_academy, name='admin_academy_management'),
+    path('admin_backups/', views.admin_backups, name='admin_backups'),
     path('admin_profile/', views.admin_profile, name='admin_profile'),
 ]

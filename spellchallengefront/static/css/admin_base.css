@@ -58,6 +58,8 @@ body {
 }
 
 .navbar__logout {
+  background-color: #7a1f2b;
+  border: none;
   display: flex;
   align-items: center;
   color: #fff;

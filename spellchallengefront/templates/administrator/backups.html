@@ -1,13 +1,14 @@
-{% extends 'admin/admin_base.html' %}
+{% extends 'administrator/admin_base.html' %}
 {% load static %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_base.css' %}">
 <link rel="stylesheet" href="{% static 'css/admin_backups.css' %}">
 {% endblock %}
 
 {% block title %}Backups & Recovery - Spell-Challenge Admin{% endblock %}
 
-{% block content %}
+{% block admin_content %}
 <div class="page-header">
     <div>
         <h1>Database & System Backups</h1>
