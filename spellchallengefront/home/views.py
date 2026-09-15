@@ -4,7 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
 from functools import wraps
-from .models import Grupo, Palabra
+from django.db.models import Count, Avg, Q
+from home.models import Usuario, TipoUsuario, Profesor, Alumno, Administrador, Grupo, Palabra
+from home.models import Carrera, Categoria, Alumno_Insignia, Alumno_Practica, Lista_Grupo, Grupo_Alumno
+from home.models import Nivel, Dificultad, Dificultad_Juego, Insignia, Intento_Palabra, Lista, Lista_Palabra
+from home.models import Proceso_Lista, Rango, Ranking, Reporte, TipoRanking, UsuarioManager, Juego, Practica_Sesion
 
 # Create your views here.
 
@@ -74,49 +78,162 @@ def signup_teacher(request):
 @never_cache
 @role_required('teacher')
 def dashboard(request):
-    return render(request, 'teacher/dashboard.html')
+    profesor = request.user.profesor
+    
+    grupos = Grupo.objects.filter(profesor=profesor)
+    
+    total_groups = grupos.count()
+    
+    total_lists = Lista_Grupo.objects.filter(
+        grupo__in=grupos
+    ).values('lista').distinct().count()
+    
+    total_students = Grupo_Alumno.objects.filter(
+        grupo__in=grupos
+    ).values('alumno').distinct().count()
+    
+    students_by_level = Alumno.objects.filter(
+            grupo_alumnos__grupo__in=grupos
+        ).values(
+            'nivel__codigo'
+        ).annotate(
+            total=Count('matricula')
+        ).order_by('nivel__codigo')
+    
+    level_counts = {
+        'A1': 0,
+        'A2': 0,
+        'B1': 0,
+        'B2': 0,
+        'C1': 0,
+        'C2': 0,
+    }
+    
+    for level in students_by_level:
+        level_counts[level['nivel__codigo']] = level['total']
+        
+    level_percentages = {}
+    
+    for level, count in level_counts.items():
+        if total_students > 0:
+            level_percentages[level] = round(
+                (count / total_students) * 100,
+                1
+            )
+        else:
+            level_percentages[level] = 0
+            
+    group_performance = []
+    
+    for grupo in grupos:
+        average = Practica_Sesion.objects.filter(
+            alumnos__alumno__grupo_alumnos__grupo=grupo
+        ).aggregate(
+            average=Avg('porcentaje_aciertos')
+        )['average']
+        
+        group_performance.append({
+            'nombre': grupo.nombre,
+            'average': round(average, 1) if average is not None else 0
+        })
+        
+    all_performance = Practica_Sesion.objects.filter(
+        alumnos__alumno__grupo_alumnos__grupo__in=grupos
+    ).aggregate(
+        average=Avg('porcentaje_aciertos')
+    )['average']
+    
+    average_score = round(
+        all_performance, 1
+    ) if all_performance is not None else 0
+    
+    challenging_words = (
+        Intento_Palabra.objects
+        .filter(
+            practica_sesion__alumnos__alumno__grupo_alumnos__grupo__in=grupos
+        )
+        .values(
+            'palabra__significado'
+        )
+        .annotate(
+            total_attempts=Count('clave'),
+            failed_attempts=Count(
+                'clave',
+                filter=Q(acertado=0)
+            )
+        )
+    )
+    
+    challenging_words_data = []
+    
+    for word in challenging_words:
+        miss_rate = (
+            (word['failed_attempts'] / word['total_attempts']) * 100
+        )
+        
+        challenging_words_data.append({
+            'word': word['palabra__significado'],
+            'miss_rate': round(miss_rate, 1)
+        })
+        
+    challenging_words_data.sort(
+        key=lambda x: x['miss_rate'],
+        reverse=True
+    )
+    
+    challenging_words_data = challenging_words_data[:5]
+    
+    return render(
+        request, 
+        'teacher/dashboard.html',
+        {
+            'total_groups': total_groups,
+            'total_lists': total_lists,
+            'total_students': total_students,
+            'level_counts': level_counts,
+            'level_percentages': level_percentages,
+            'group_performance': group_performance,
+            'average_score': average_score,
+            'challenging_words': challenging_words_data,
+        }
+    )
 
 @never_cache
 @role_required('teacher')
 def my_groups(request):
-    return render(request, 'teacher/my_groups.html')
+    profesor = request.user.profesor
+    grupos = Grupo.objects.filter(profesor=profesor)
+    
+    return render(
+        request, 
+        'teacher/my_groups.html',
+        {
+            'grupos': grupos
+        }
+    )
 
 @never_cache
 @role_required('teacher')
 def view_groups(request, group_id):
-    grupo = get_object_or_404(Grupo, pk=group_id)
+    grupo = get_object_or_404(Grupo, codigo=group_id)
     
-    students = [
-        {
-            'enrollment': ga.alumno.matricula,
-            'name': f"{ga.alumno.nombre_pila} {ga.alumno.apellidoPaterno} {ga.alumno.apellidoMatermo}",
-        }
-        for ga in grupo.grupo_alumnos.select_related('alumno').all()
-    ]
+    students = Alumno.objects.filter(
+        grupo_alumnos__grupo=grupo
+    )
     
-    listas_ids = grupo.lista_grupos.values_list('lista_id', flat=True)
-    palabras = Palabra.objects.filter(
-        lista_palabras__lista_id__in=listas_ids
+    word_list = Palabra.objects.filter(
+        lista_palabras__lista__lista_grupos__grupo=grupo
     ).distinct()
     
-    word_list = [
+    return render(
+        request, 
+        'teacher/view_group.html', 
         {
-            'number': i,
-            'word': p.texto,
-            'meaning': p.significado,
-            'pronunciation': p.pronunciacion,
+            'grupo': grupo,
+            'students': students,
+            'word_list': word_list,
         }
-        for i, p in enumerate(palabras, start=1)
-    ]
-    
-    context = {
-        'group_name': grupo.nombre,
-        'teacher_name': f"{grupo.profesor.nombre_pila} {grupo.profesor.apellidoPaterno} {grupo.profesor.apellidoMaterno}",
-        'students': students,
-        'word_list': word_list,
-    }
-    
-    return render(request, 'teacher/view_group.html', context)
+    )
 
 @never_cache
 @role_required('teacher')
@@ -126,7 +243,66 @@ def word_lists(request):
 @never_cache
 @role_required('student')
 def student_home(request):
-    return render(request, 'student/home.html')
+    alumno = request.user.alumno
+    
+    grupo_actual = (
+        Grupo.objects
+        .filter(grupo_alumnos__alumno=alumno)
+        .first()
+    )
+    
+    leaderboard = []
+    
+    if grupo_actual:
+        leaderboard = (
+            Alumno.objects
+            .filter(grupo_alumnos__grupo=grupo_actual)
+            .annotate(
+                average_score=Avg(
+                    'practicas__practica_sesion__porcentaje_aciertos'
+                )
+            )
+            .order_by('-average_score')[:4]
+        )
+    
+    proceso_actual = (
+        Proceso_Lista.objects
+        .filter(alumno=alumno)
+        .select_related('lista')
+        .order_by('-fecha_completado')
+        .first()
+    )
+    
+    practica_actual = None
+    
+    if proceso_actual:
+        practica_actual = (
+            Practica_Sesion.objects
+            .filter(
+                lista=proceso_actual.lista,
+                alumnos__alumno=alumno
+            )
+            .select_related('juego')
+            .order_by('-fecha')
+            .first()
+        )
+        
+    mini_games = Juego.objects.filter(
+        nombre__in=['Hangman', 'Missing Letters']
+    )
+    
+    return render(
+        request, 
+        'student/home.html',
+        {
+            'alumno': alumno,
+            'proceso_actual': proceso_actual,
+            'practica_actual': practica_actual,
+            'mini_games': mini_games,
+            'grupo_actual': grupo_actual,
+            'leaderboard': leaderboard,
+        }
+    )
 
 @never_cache
 @role_required('student')

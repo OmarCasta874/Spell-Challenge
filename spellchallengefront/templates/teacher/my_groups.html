@@ -15,68 +15,51 @@
 </div>
 
 <div class="groups-row">
-  <div class="group-card">
-    <div class="group-card-header">
-      <div class="group-card-header-text">
-        <h5>Group 3A - English</h5>
-        <p class="group-teacher">Prof. Luis F.</p>
-      </div>
-      <div class="group-avatar"></div>
-    </div>
-    <div class="group-card-body">
-      <div class="group-stats">
-        <span class="group-stat">24 students</span>
-        <span class="group-stat">5 Lists</span>
-      </div>
-      <div class="group-actions">
-        <a href="{% url 'view_group' 1 %}" class="group-btn group-btn-view">VIEW</a>
-        <button class="group-btn group-btn-edit">EDIT</button>
-        <button class="group-btn group-btn-delete">DELETE</button>
-      </div>
-    </div>
-  </div>
+
+  {% for grupo in grupos %}
 
   <div class="group-card">
     <div class="group-card-header">
       <div class="group-card-header-text">
-        <h5>Group 4C - English</h5>
-        <p class="group-teacher">Prof. Luis F.</p>
+        <h5>{{ grupo.nombre }}</h5>
+        <p class="group-teacher">
+          Prof. {{ grupo.profesor.nombre_pila }} {{ grupo.profesor.apellidoPaterno }}
+        </p>
       </div>
       <div class="group-avatar"></div>
     </div>
     <div class="group-card-body">
       <div class="group-stats">
-        <span class="group-stat">28 students</span>
-        <span class="group-stat">3 Lists</span>
+        <span class="group-stat">
+          {{ grupo.grupo_alumnos.count }} students
+        </span>
+        <span class="group-stat">
+          {{ grupo.lista_grupos.count }} Lists
+        </span>
       </div>
       <div class="group-actions">
-        <a href="{% url 'view_group' 2 %}" class="group-btn group-btn-view">VIEW</a>
-        <button class="group-btn group-btn-edit">EDIT</button>
-        <button class="group-btn group-btn-delete">DELETE</button>
+        <a href="{% url 'view_group' grupo.codigo %}"
+           class="group-btn group-btn-view">
+          VIEW
+        </a>
+        <button class="group-btn group-btn-edit">
+          EDIT
+        </button>
+        <button class="group-btn group-btn-delete">
+          DELETE
+        </button>
       </div>
     </div>
   </div>
 
-  <div class="group-card">
-    <div class="group-card-header">
-      <div class="group-card-header-text">
-        <h5>Group 2A - English</h5>
-        <p class="group-teacher">Prof. Luis F.</p>
-      </div>
-      <div class="group-avatar"></div>
-    </div>
-    <div class="group-card-body">
-      <div class="group-stats">
-        <span class="group-stat">23 students</span>
-        <span class="group-stat">2 Lists</span>
-      </div>
-      <div class="group-actions">
-        <a href="{% url 'view_group' 3 %}" class="group-btn group-btn-view">VIEW</a>
-        <button class="group-btn group-btn-edit">EDIT</button>
-        <button class="group-btn group-btn-delete">DELETE</button>
-      </div>
-    </div>
+  {% empty %}
+
+  <div class="empty-groups">
+    <p>You do not have any groups yet.</p>
   </div>
+
+  {% endfor %}
+
 </div>
 
 <div class="modal fade" id="createGroupModal" tabindex="-1">

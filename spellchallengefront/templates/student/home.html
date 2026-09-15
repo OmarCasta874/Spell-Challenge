@@ -11,13 +11,15 @@
 <div class="home-row">
   <div class="home-col-left">
     <div class="practice-progress-card">
-      <p class="welcome-text">Welcome back Eric!</p>
-      <h3 class="current-unit-title">Unit 1 - Beginning</h3>
+      <p class="welcome-text">Welcome back {{ alumno.nombre_pila }}!</p>
+      <h3 class="current-unit-title">
+        {{ proceso_actual.lista.nombre }}
+      </h3>
       <p class="current-unit-subtitle">Practice 4 of 15 &middot; Exercise 2 of 4</p>
 
-      <p class="practice-progress-label">PRACTICE PROGRESS</p>
+      <p class="practice-progress-label">PRACTICE PROGRESS - {{ proceso_actual.porcentaje_aciertos }}</p>
       <div class="practice-progress-track">
-        <div class="practice-progress-fill" style="width: 50%;"></div>
+        <div class="practice-progress-fill" style="width: {{ proceso_actual.porcentaje_aciertos }}%;"></div>
       </div>
       <a href="{% url 'student_practices' %}" class="continue-link">CONTINUE <i data-lucide="arrow-right"></i></a>
     </div>
@@ -25,7 +27,7 @@
     <div class="unit-stats-row">
       <div class="unit-stat-card">
         <p class="unit-stat-label">UNIT</p>
-        <h3 class="unit-stat-value">A1</h3>
+        <h3 class="unit-stat-value">{{ alumno.nivel.codigo }}</h3>
       </div>
       <div class="unit-stat-card">
         <p class="unit-stat-label">PRACTICES</p>
@@ -59,14 +61,12 @@
     </div>
 
     <div class="mini-games-row">
+      {% for game in mini_games %}
       <div class="mini-game-card">
-        <h6 class="mini-game-title">HANGMAN</h6>
+        <h6 class="mini-game-title">{{ game.nombre|upper }}</h6>
         <a href="#" class="play-link">PLAY <i data-lucide="arrow-right"></i></a>
       </div>
-      <div class="mini-game-card">
-        <h6 class="mini-game-title">MISSING LETTERS</h6>
-        <a href="#" class="play-link">PLAY <i data-lucide="arrow-right"></i></a>
-      </div>
+      {% endfor %}
       <div class="mini-game-card mini-game-card-view-all">
         <a href="#" class="view-all-games-link">VIEW ALL GAMES</a>
       </div>
@@ -76,34 +76,53 @@
       <div class="leaderboard-header">
         <div class="leaderboard-title-group">
           <i data-lucide="bar-chart-2"></i>
-          <h5 class="leaderboard-title">Group 3A Leaderboard</h5>
+          <h5 class="leaderboard-title">
+            {% if grupo_actual %}
+              {{ grupo_actual.nombre }} Leaderboard
+            {% else %}
+              Group Leaderboard
+            {% endif %}
+          </h5>
         </div>
         <span class="leaderboard-column-label">AVERAGE SCORE%</span>
       </div>
 
       <ul class="leaderboard-list">
+        {% for student in leaderboard %}
         <li class="leaderboard-item">
-          <span class="rank-icon rank-gold"><i data-lucide="star"></i></span>
-          <span class="leaderboard-name">#1 - Sánchez Hernández Diego</span>
-          <span class="leaderboard-score">86%</span>
+          {% if forloop.counter == 1 %}
+            <span class="rank-icon rank-gold">
+              <i data-lucide="star"></i>
+            </span>
+          {% elif forloop.counter == 2 %}
+            <span class="rank-icon rank-silver">
+              <i data-lucide="star"></i>
+            </span>
+          {% elif forloop.counter == 3 %}
+            <span class="rank-icon rank-bronze">
+              <i data-lucide="star"></i>
+            </span>
+          {% else %}
+            <span class="rank-icon rank-plain"></span>
+          {% endif %}
+          <span class="leaderboard-name">
+            #{{ forloop.counter }} -
+            {{ student.nombre_pila }}
+            {{ student.apellidoPaterno }}
+            {{ student.apellidoMaterno }}
+          </span>
+          <span class="leaderboard-score">
+            {{ student.average_score|floatformat:1 }}%
+          </span>
         </li>
+        {% empty %}
         <li class="leaderboard-item">
-          <span class="rank-icon rank-silver"><i data-lucide="star"></i></span>
-          <span class="leaderboard-name">#2 - Castañon Castañon Jesús Omar</span>
-          <span class="leaderboard-score">85%</span>
+          <span class="leaderboard-name">
+            No leaderboard data available yet.
+          </span>
         </li>
-        <li class="leaderboard-item">
-          <span class="rank-icon rank-bronze"><i data-lucide="star"></i></span>
-          <span class="leaderboard-name">#3 - Villegas Hernández Josué Alberto</span>
-          <span class="leaderboard-score">83%</span>
-        </li>
-        <li class="leaderboard-item">
-          <span class="rank-icon rank-plain"></span>
-          <span class="leaderboard-name">#4 - Aycardo Balcázar Eric</span>
-          <span class="leaderboard-score">82%</span>
-        </li>
+        {% endfor %}
       </ul>
-
       <a href="#" class="view-leaderboard-link">VIEW LEADERBOARD <i data-lucide="arrow-right"></i></a>
     </div>
   </div>
