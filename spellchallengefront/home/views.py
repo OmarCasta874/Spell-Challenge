@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -371,7 +372,113 @@ def custom_logout_view(request):
 @never_cache
 @role_required('administrator')
 def gen_panel(request):
-    return render(request, 'administrator/gen_panel.html')
+    active_teachers = Usuario.objects.filter(
+        tipo_usuario__clave='TUSR02',
+        is_active=True
+    ).count()
+    
+    registered_users = Usuario.objects.filter(
+        is_active=True
+    ).count()
+    
+    total_groups = Grupo.objects.count()
+    total_students = Alumno.objects.count()
+    total_teachers = Profesor.objects.count()
+    
+    total_users_for_chart = total_students + total_teachers
+    
+    if total_users_for_chart > 0:
+        students_pct = round(
+            (total_students / total_users_for_chart) * 100
+        )
+        teachers_pct = 100 - students_pct
+    else:
+        students_pct = 0
+        teachers_pct = 0
+        
+    students_by_level = (
+        Nivel.objects
+        .annotate(count=Count('alumnos'))
+        .order_by('codigo')
+    )
+    
+    challenging_words = (
+        Palabra.objects
+        .annotate(
+            total_attempts=Count('intentos'),
+            incorrect_attempts=Count(
+                'intentos',
+                filter=Q(intentos__acertado=0)
+            )
+        )
+        .filter(total_attempts__gt=0)
+    )
+    
+    challenging_words_data = []
+    
+    for word in challenging_words:
+        miss_rate = round(
+            (word.incorrect_attempts / word.total_attempts) * 100
+        )
+        
+        challenging_words_data.append({
+            'word': word.significado,
+            'miss_rate': miss_rate,
+        })
+        
+    challenging_words_data.sort(
+        key=lambda x: x['miss_rate'],
+        reverse=True
+    )
+    
+    challenging_words_data = challenging_words_data[:5]
+    
+    group_scores = (
+        Grupo.objects
+        .annotate(
+            average_score=Avg(
+                'grupo_alumnos__alumno__practicas__practica_sesion__porcentaje_aciertos'
+            )
+        )
+        .order_by('nombre')
+    )
+    
+    group_scores_data = []
+    
+    for group in group_scores:
+        score = round(group.average_score or 0)
+        
+        group_scores_data.append({
+            'group': group.nombre,
+            'score': score,
+        })
+        
+    if group_scores_data:
+        average_score_total = round(
+            sum(group['score'] for group in group_scores_data)
+            / len(group_scores_data)
+        )
+    else: 
+        average_score_total = 0
+    
+    context = {
+        'active_teachers': active_teachers,
+        'registered_users': registered_users,
+        'total_groups': total_groups,
+        'total_students': total_students,
+        'students_pct': students_pct,
+        'teachers_pct': teachers_pct,
+        'students_by_level': students_by_level,
+        'challenging_words': challenging_words_data,
+        'group_scores': group_scores_data,
+        'average_score_total': average_score_total,
+    }
+    
+    return render(
+        request, 
+        'administrator/gen_panel.html',
+        context
+    )
 
 @never_cache
 @role_required('administrator')
@@ -397,3 +504,41 @@ def admin_backups(request):
 @role_required('administrator')
 def admin_profile(request):
     return render(request, 'administrator/admin_profile.html')
+
+@never_cache
+@role_required('student')
+def group_view(request):
+    return render(request, 'student/group_view.html')
+
+@never_cache
+@role_required('student')
+def leave_group(request, group_id):
+    if request.method == 'POST':
+        messages.success(request, 'You have left the group successfully.')
+        return redirect('my_groups_student')
+    
+@never_cache
+@role_required('student')
+def mini_games_view(request):
+    return render(request, 'student/mini_games.html')
+
+@never_cache
+@role_required('student')
+def hangman_game_view(request):
+    return render(request, 'student/hangman_game.html')
+
+@never_cache
+@role_required('student')
+def missing_letters_game_view(request):
+    return render(request, 'student/missing_letters_game.html')
+    
+@never_cache
+@role_required('student')
+def student_competitions_view(request):
+    # Genera la lista de panales del 1 al 30
+    beehives = list(range(1, 31))
+    
+    context = {
+        'beehives': beehives,
+    }
+    return render(request, 'student/competitions_selecting.html', context)

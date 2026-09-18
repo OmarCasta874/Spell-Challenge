@@ -1,0 +1,118 @@
+/* ESTILOS PARA LA INTERFAZ DE JUEGO HANGMAN */
+.game-play-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.game-stats {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #700000;
+    display: flex;
+    gap: 1.5rem;
+}
+
+.hangman-board {
+    background-color: #FFF;
+    border: 2px solid #E8B8B8;
+    border-radius: 12px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hint-box {
+    background-color: #FDE8E8;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    width: 100%;
+}
+
+.hint-label {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #700000;
+    text-transform: uppercase;
+}
+
+.hint-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-top: 0.3rem;
+}
+
+/* CASILLAS DE LETRAS DE LA PALABRA */
+.word-display-container {
+    display: flex;
+    gap: 0.8rem;
+    margin: 2rem 0;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.letter-slot {
+    width: 45px;
+    height: 55px;
+    border-bottom: 4px solid #700000;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #700000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+}
+
+/* TECLADO VIRTUAL */
+.virtual-keyboard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    max-width: 650px;
+    margin-top: 1rem;
+}
+
+.key-btn {
+    width: 40px;
+    height: 45px;
+    border: 1.5px solid #700000;
+    background-color: #FFF;
+    color: #700000;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.key-btn:hover:not(:disabled) {
+    background-color: #FDE8E8;
+}
+
+.key-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.key-btn.correct {
+    background-color: #28a745 !important;
+    color: #FFF !important;
+    border-color: #28a745 !important;
+}
+
+.key-btn.wrong {
+    background-color: #D9534F !important;
+    color: #FFF !important;
+    border-color: #D9534F !important;
+}

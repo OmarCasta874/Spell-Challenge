@@ -17,7 +17,7 @@
 <div class="metrics-grid">
     <div class="metric-card">
         <i data-lucide="users" class="metric-icon"></i>
-        <span class="metric-label">active teachers:</span>
+        <span class="metric-label">Active teachers:</span>
         <span class="metric-value">{{ active_teachers }}</span>
     </div>
     <div class="metric-card">
@@ -31,9 +31,9 @@
         <span class="metric-value">{{ total_groups }}</span>
     </div>
     <div class="metric-card">
-        <i data-lucide="book-open" class="metric-icon"></i>
-        <span class="metric-label">Last backup:</span>
-        <span class="metric-value">{{ last_backup }}</span>
+        <i data-lucide="graduation-cap" class="metric-icon"></i>
+        <span class="metric-label">Total students:</span>
+        <span class="metric-value">{{ total_students }}</span>
     </div>
 </div>
 
@@ -60,7 +60,7 @@
         <div class="level-badges-container">
             {% for item in students_by_level %}
                 <div class="level-badge">
-                    <span class="level-title">{{ item.level }}</span>
+                    <span class="level-title">{{ item.codigo }}</span>
                     <span class="level-count">{{ item.count }}</span>
                 </div>
             {% endfor %}
@@ -93,7 +93,7 @@
     <!-- Most Challenging Words -->
     <div class="panel-card">
         <h3>Most Challenging Words</h3>
-        <p class="subtitle">Highest miss rate this week, across your groups</p>
+        <p class="subtitle">Highest miss rate across all practice sessions</p>
         <div class="words-miss-list">
             {% for word in challenging_words %}
                 <div class="word-miss-item">
@@ -102,7 +102,6 @@
                 </div>
             {% endfor %}
         </div>
-        <p class="footer-note">{{ registered_users }} students across {{ total_groups }} groups</p>
     </div>
 
     <!-- Recent Activity -->
@@ -111,8 +110,8 @@
         <div class="activity-list">
             {% for act in recent_activities %}
                 <div class="activity-row">
-                    <strong class="activity-title">{{ act.title }}</strong>
-                    <span class="activity-date">{{ act.date }}</span>
+                    <strong class="activity-title">Teacher created: Ana Lopez</strong>
+                    <span class="activity-date">3 days ago</span>
                 </div>
             {% endfor %}
         </div>

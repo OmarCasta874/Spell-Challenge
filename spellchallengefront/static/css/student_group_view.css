@@ -1,0 +1,68 @@
+/* DISPOSICIÓN DE LA VISTA DE GRUPO EN 2 COLUMNAS */
+.group-view-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 992px) {
+    .group-view-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.btn-back-link {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #700000;
+    text-decoration: none;
+}
+
+.btn-back-link:hover {
+    color: var(--primary-red);
+}
+
+/* TABLA DE COLOR ROJO / GUINDA (MOCKUP) */
+.header-red-table thead th,
+.data-table.red-theme-table thead th {
+    background-color: #D9534F !important;
+    color: #FFFFFF !important;
+}
+
+/* BOTONES OVALADOS (PILL BUTTONS) DEL MOCKUP */
+.btn-pill-action {
+    border: 2px solid #D9534F;
+    background: transparent;
+    color: #D9534F;
+    border-radius: 20px;
+    padding: 0.15rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-pill-action:hover {
+    background-color: #D9534F;
+    color: #FFF;
+}
+
+.btn-pill-solid {
+    background-color: #D9534F;
+    color: #FFF;
+}
+
+.btn-pill-solid:hover {
+    background-color: #B92C28;
+}
+
+.actions-group {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+}
+
+.compact-table th, .compact-table td {
+    padding: 0.5rem 0.8rem;
+}

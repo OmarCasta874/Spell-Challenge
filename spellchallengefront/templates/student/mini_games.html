@@ -1,0 +1,114 @@
+{% extends 'student/base_student.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/student_base.css' %}"> 
+<link rel="stylesheet" href="{% static 'css/mini_games.css' %}">
+{% endblock %}
+
+{% block title %}Mini Games - Spell-Challenge Student{% endblock %}
+
+{% block content %}
+<div class="games-container text-center">
+    
+    <!-- ENCABEZADO -->
+    <h1 class="main-title">MINI GAMES</h1>
+    <p class="sub-title">Practice English. Have Fun!</p>
+
+    <!-- PRIMERA FILA: JUEGOS DISPONIBLES -->
+    <div class="games-row">
+        <!-- HANGMAN -->
+        <div class="game-card-pink">
+            <h3>HANGMAN</h3>
+            <button class="btn-pill-play" onclick="openGameModal('HANGMAN', 'Guess the hidden word before running out of attempts!')">
+                PLAY
+            </button>
+        </div>
+
+        <!-- MISSING LETTERS -->
+        <div class="game-card-pink">
+            <h3>MISSING LETTERS</h3>
+            <button class="btn-pill-play" onclick="openGameModal('MISSING LETTERS', 'Fill in the missing characters to complete the vocabulary words.')">
+                PLAY
+            </button>
+        </div>
+    </div>
+
+    <!-- SECCIÓN COMING SOON -->
+    <h2 class="section-title mt-3">COMING SOON...</h2>
+
+    <!-- SEGUNDA FILA: TARJETAS BLOQUEADAS -->
+    <div class="games-row-locked">
+        <div class="game-card-locked">
+            <div class="lock-icon">🔒</div>
+            <span>Coming Soon...</span>
+        </div>
+        <div class="game-card-locked">
+            <div class="lock-icon">🔒</div>
+            <span>Coming Soon...</span>
+        </div>
+        <div class="game-card-locked">
+            <div class="lock-icon">🔒</div>
+            <span>Coming Soon...</span>
+        </div>
+        <div class="game-card-locked">
+            <div class="lock-icon">🔒</div>
+            <span>Coming Soon...</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: CONFIRMACIÓN PARA INICIAR JUEGO    -->
+<!-- ========================================== -->
+<div id="gameModal" class="modal-overlay">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h3 id="gTitle" style="color: #700000; margin: 0;">Game Title</h3>
+            <button class="modal-close" onclick="closeModal('gameModal')">&times;</button>
+        </div>
+        <div class="modal-body text-center" style="padding: 1.5rem 1rem;">
+            <p id="gDescription" style="font-size: 1rem; color: #333; margin: 0;"></p>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: center; gap: 1rem; padding-bottom: 1rem;">
+            <button type="button" class="btn-pill-play" style="position: static; padding: 0.4rem 1.8rem;" onclick="startGame()">
+                START
+            </button>
+            <button type="button" class="btn" style="background: #CCC; color: #333; border-radius: 20px; padding: 0.4rem 1.2rem; cursor: pointer; border: none;" onclick="closeModal('gameModal')">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function openGameModal(title, description) {
+        document.getElementById('gTitle').innerText = title;
+        document.getElementById('gDescription').innerText = description;
+        openModal('gameModal');
+    }
+
+    function startGame() {
+        const game = document.getElementById('gTitle').innerText;
+        alert('Starting ' + game + '...');
+        closeModal('gameModal');
+    }
+
+    window.onclick = function(e) {
+        if (e.target.classList.contains('modal-overlay')) {
+            e.target.classList.remove('active');
+        }
+    }
+</script>
+{% endblock %}

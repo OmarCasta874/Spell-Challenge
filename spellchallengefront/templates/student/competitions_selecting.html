@@ -1,0 +1,77 @@
+{% extends 'student/base_student.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/competitions_select.css' %}">
+{% endblock %}
+
+{% block title %}Competitions - Select Beehive{% endblock %}
+
+{% block content %}
+<div class="competition-select-container">
+
+    <!-- LOGO Y ENCABEZADO -->
+    <div class="competition-header text-center">
+        <div class="competition-logo-wrap">
+            <img src="{% static 'images/spell_challenge_logo.png' %}" alt="Spell Challenge Logo" class="competition-logo">
+        </div>
+        <h2 class="competition-title">SELECT A BEEHIVE</h2>
+    </div>
+
+    <!-- REJILLA DE COLMENAS / BEEHIVES EN FORMA DE PANAL -->
+    <div class="honeycomb-grid">
+        {% for number in beehives %}
+            <button class="beehive-cell" data-hive="{{ number }}" onclick="selectBeehive(this.dataset.hive)">
+                <span class="beehive-number">{{ number }}</span>
+            </button>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- MODAL DE CONFIRMACIÓN -->
+<div id="confirmBeehiveModal" class="modal-overlay">
+    <div class="modal-content modal-small text-center">
+        <div class="modal-header">
+            <h3 style="margin: 0; color: #700000;">Beehive Confirmation</h3>
+            <button class="modal-close" onclick="closeModal('confirmBeehiveModal')">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 1.5rem 1rem;">
+            <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">You selected <strong>Beehive #<span id="selectedHiveNum"></span></strong></p>
+            <p style="font-size: 0.9rem; color: #666;">Do you want to enter this competition slot?</p>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: center; gap: 1rem;">
+            <button type="button" class="btn-pill-play" style="position: static; padding: 0.4rem 1.8rem;" onclick="enterBeehive()">
+                Enter
+            </button>
+            <button type="button" class="btn" style="background: #CCC; color: #333; border-radius: 20px; padding: 0.4rem 1.2rem; border: none; font-weight: bold; cursor: pointer;" onclick="closeModal('confirmBeehiveModal')">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentHive = null;
+
+    function selectBeehive(number) {
+        currentHive = number;
+        document.getElementById('selectedHiveNum').innerText = number;
+        document.getElementById('confirmBeehiveModal').classList.add('active');
+    }
+
+    function enterBeehive() {
+        if (currentHive) {
+            // Lógica para redirigir a la sala de espera o inicio del duelo
+            alert(`Entering Beehive #${currentHive}...`);
+            closeModal('confirmBeehiveModal');
+        }
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+</script>
+{% endblock %}

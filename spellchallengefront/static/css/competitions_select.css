@@ -1,0 +1,83 @@
+/* ESTILOS PARA LA PANTALLA DE SELECCIÓN DE COMPETITIONS (PANAL) */
+.competition-select-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.competition-logo-wrap {
+    margin-bottom: 0.5rem;
+}
+
+.competition-logo {
+    max-width: 180px;
+    height: auto;
+}
+
+.competition-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #222;
+    letter-spacing: 1px;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+}
+
+/* CONTENEDOR FLEX/GRID DE LOS HEXÁGONOS */
+.honeycomb-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 850px;
+    gap: 10px;
+    margin: 0 auto;
+}
+
+/* DISEÑO HEXAGONAL (BEEHIVE) */
+.beehive-cell {
+    position: relative;
+    width: 65px;
+    height: 75px;
+    background-color: #E6DC00;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    outline: none;
+}
+
+.beehive-cell::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    background-color: #E6DC00;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    z-index: 1;
+}
+
+.beehive-cell:hover {
+    transform: scale(1.1);
+    background-color: #700000;
+}
+
+.beehive-cell:hover::before {
+    background-color: #FFF200;
+}
+
+.beehive-number {
+    position: relative;
+    z-index: 2;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #1A1A1A;
+    text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;
+}
