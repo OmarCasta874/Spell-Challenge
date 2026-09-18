@@ -140,56 +140,190 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3 id="userModalTitle">Register New User</h3>
-            <button class="modal-close" onclick="closeModal('userModal')">&times;</button>
+            <button
+                class="modal-close"
+                onclick="closeModal('userModal')"
+                type="button"
+            >
+                &times;
+            </button>
         </div>
-        <form method="POST" action="#" id="userForm">
+        <form method="POST" action="{% url 'admin_users' %}" id="userForm">
             {% csrf_token %}
             <input type="hidden" id="userId" name="user_id">
-            
+            <input type="hidden" id="formAction" name="action" value="add_user">
             <div class="modal-body">
+                <!-- USER CODE -->
                 <div class="form-field">
-                    <label for="userFullName">Full Name</label>
-                    <input type="text" id="userFullName" name="full_name" class="form-input" required placeholder="e.g. Maria Perez">
+                    <label for="userCode">Student Code</label>
+                    <input
+                        type="text"
+                        id="userCode"
+                        name="user_code"
+                        class="form-input"
+                        required
+                        maxlength="10"
+                        placeholder="e.g. ALUM001"
+                    >
                 </div>
-                
+                <!-- FIRST NAME -->
+                <div class="form-field">
+                    <label for="firstName">First Name</label>
+                    <input
+                        type="text"
+                        id="firstName"
+                        name="first_name"
+                        class="form-input"
+                        required
+                        maxlength="30"
+                        placeholder="e.g. Maria"
+                    >
+                </div>
+                <!-- LAST NAME -->
+                <div class="form-field">
+                    <label for="lastName">Last Name</label>
+                    <input
+                        type="text"
+                        id="lastName"
+                        name="last_name"
+                        class="form-input"
+                        required
+                        maxlength="30"
+                        placeholder="e.g. Perez"
+                    >
+                </div>
+                <!-- SECOND LAST NAME -->
+                <div class="form-field">
+                    <label for="secondLastName">Second Last Name</label>
+                    <input
+                        type="text"
+                        id="secondLastName"
+                        name="second_last_name"
+                        class="form-input"
+                        maxlength="30"
+                        placeholder="e.g. Lopez"
+                    >
+                </div>
+                <!-- EMAIL -->
                 <div class="form-field">
                     <label for="userEmail">Email Address</label>
-                    <input type="email" id="userEmail" name="email" class="form-input" required placeholder="user@spellchallenge.com">
+                    <input
+                        type="email"
+                        id="userEmail"
+                        name="email"
+                        class="form-input"
+                        required
+                        placeholder="student@spellchallenge.com"
+                    >
                 </div>
-
+                <!-- PHONE -->
+                <div class="form-field">
+                    <label for="userPhone">Phone Number</label>
+                    <input
+                        type="tel"
+                        id="userPhone"
+                        name="phone"
+                        class="form-input"
+                        required
+                        maxlength="20"
+                        placeholder="e.g. 6641234567"
+                    >
+                </div>
+                <!-- PASSWORD -->
+                <div class="form-field">
+                    <label for="userPassword">Password</label>
+                    <input
+                        type="password"
+                        id="userPassword"
+                        name="password"
+                        class="form-input"
+                        required
+                        placeholder="Enter a temporary password"
+                    >
+                </div>
+                <!-- ROLE + STATUS -->
                 <div class="form-row">
                     <div class="form-field flex-1">
                         <label for="userRole">System Role</label>
-                        <select id="userRole" name="role" class="form-select" onchange="toggleStudentFields()">
+                        <select
+                            id="userRole"
+                            name="role"
+                            class="form-select"
+                            onchange="toggleRoleFields()"
+                        >
                             <option value="STUDENT">Student</option>
                             <option value="TEACHER">Teacher</option>
                             <option value="ADMIN">Administrator</option>
                         </select>
                     </div>
-
                     <div class="form-field flex-1">
                         <label for="userStatus">Account Status</label>
-                        <select id="userStatus" name="status" class="form-select">
+                        <select
+                            id="userStatus"
+                            name="status"
+                            class="form-select"
+                        >
                             <option value="ACTIVE">Active</option>
                             <option value="INACTIVE">Inactive</option>
                         </select>
                     </div>
                 </div>
+                <!-- STUDENT FIELDS -->
+                <div id="studentFields">
+                    <!-- LEVEL -->
+                    <div class="form-field">
+                        <label for="userLevel">English Level</label>
 
-                <div class="form-field" id="groupSelectContainer">
-                    <label for="userGroup">Assigned Group</label>
-                    <select id="userGroup" name="group" class="form-select">
-                        <option value="">-- Select Group --</option>
-                        {% for g in available_groups %}
-                            <option value="{{ g }}">{{ g }}</option>
-                        {% endfor %}
-                    </select>
+                        <select
+                            id="userLevel"
+                            name="level"
+                            class="form-select"
+                        >
+                            <option value="">-- Select Level --</option>
+                            {% for level in available_levels %}
+                                <option value="{{ level.codigo }}">
+                                    {{ level.codigo }} - {{ level.descripcion }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <!-- CAREER -->
+                    <div class="form-field">
+                        <label for="userCareer">Career</label>
+                        <select
+                            id="userCareer"
+                            name="career"
+                            class="form-select"
+                        >
+                            <option value="">-- Select Career --</option>
+                            {% for career in available_careers %}
+                                <option value="{{ career.clave }}">
+                                    {{ career.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <!-- GROUP -->
+                    <div class="form-field">
+                        <label for="userGroup">Assigned Group</label>
+                        <select id="userGroup" name="group" class="form-select">
+                            <option value="">-- No Group --</option>
+                            {% for g in available_groups %}
+                                <option value="{{ g }}">
+                                    {{ g }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
             </div>
-
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('userModal')">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save User</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('userModal')">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Save User
+                </button>
             </div>
         </form>
     </div>
@@ -233,7 +367,7 @@
         document.getElementById('userModalTitle').innerText = 'Register New User';
         document.getElementById('userId').value = '';
         document.getElementById('userForm').reset();
-        toggleStudentFields();
+        toggleRoleFields();
         openModal('userModal');
     }
 
@@ -254,14 +388,14 @@
         openModal('deleteUserModal');
     }
 
-    function toggleStudentFields() {
+    function toggleRoleFields() {
         const role = document.getElementById('userRole').value;
-        const groupContainer = document.getElementById('groupSelectContainer');
-        
-        if (role === 'ADMIN') {
-            groupContainer.style.display = 'none';
+        const studentFields = document.getElementById('studentFields');
+
+        if (role === 'STUDENT') {
+            studentFields.style.display = 'block';
         } else {
-            groupContainer.style.display = 'block';
+            studentFields.style.display = 'none';
         }
     }
 

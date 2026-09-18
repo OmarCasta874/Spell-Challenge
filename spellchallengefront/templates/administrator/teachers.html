@@ -86,16 +86,24 @@
                 </td>
                 <td class="actions-cell text-right">
                     <button 
-                        class="btn-icon btn-edit" 
-                        onclick="openEditModal({{ t.id }}, '{{ t.full_name }}', '{{ t.email }}', '{{ t.status }}')"
+                        class="btn-icon btn-edit"
+                        onclick="openEditModal(
+                            '{{ t.id|escapejs }}',
+                            '{{ t.full_name|escapejs }}',
+                            '{{ t.email|escapejs }}',
+                            '{{ t.status|escapejs }}'
+                        )"
                         title="Edit Teacher"
                     >
                         ✏️
                     </button>
                     <button 
-                        class="btn-icon btn-delete" 
-                        onclick="openDeleteModal({{ t.id }}, '{{ t.full_name }}')"
-                        title="Delete Teacher"
+                        class="btn-icon btn-delete"
+                        onclick="openDeleteModal(
+                            '{{ t.id|escapejs }}',
+                            '{{ t.full_name|escapejs }}'
+                        )"
+                        title="Deactivate Teacher"
                     >
                         🗑️
                     </button>
@@ -121,33 +129,102 @@
             <h3 id="modalTitle">Add New Teacher</h3>
             <button class="modal-close" onclick="closeModal('teacherModal')">&times;</button>
         </div>
-        <form method="POST" action="#" id="teacherForm">
+
+        <form method="POST" action="{% url 'admin_teachers' %}" id="teacherForm">
             {% csrf_token %}
             <input type="hidden" id="teacherId" name="teacher_id">
-            
+            <input type="hidden" id="formAction" name="action" value="add_teacher">
+
             <div class="modal-body">
                 <div class="form-field">
-                    <label for="fullName">Full Name</label>
-                    <input type="text" id="fullName" name="full_name" class="form-input" required placeholder="e.g. Prof. Alex Smith">
+                    <label for="teacherCode">Teacher Code</label>
+                    <input
+                        type="text"
+                        id="teacherCode"
+                        name="teacher_code"
+                        class="form-input"
+                        required
+                        maxlength="10"
+                        placeholder="e.g. PROF001"
+                    >
                 </div>
-                
+                <div class="form-field">
+                    <label for="firstName">First Name</label>
+                    <input
+                        type="text"
+                        id="firstName"
+                        name="first_name"
+                        class="form-input"
+                        required
+                        maxlength="30"
+                        placeholder="e.g. Alex"
+                    >
+                </div>
+                <div class="form-field">
+                    <label for="lastName">Last Name</label>
+                    <input
+                        type="text"
+                        id="lastName"
+                        name="last_name"
+                        class="form-input"
+                        required
+                        maxlength="30"
+                        placeholder="e.g. Smith"
+                    >
+                </div>
+                <div class="form-field">
+                    <label for="secondLastName">Second Last Name</label>
+                    <input
+                        type="text"
+                        id="secondLastName"
+                        name="second_last_name"
+                        class="form-input"
+                        maxlength="30"
+                        placeholder="e.g. Johnson"
+                    >
+                </div>
                 <div class="form-field">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-input" required placeholder="teacher@spellchallenge.com">
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="form-input"
+                        required
+                        placeholder="teacher@spellchallenge.com"
+                    >
                 </div>
-
                 <div class="form-field">
-                    <label for="status">Account Status</label>
-                    <select id="teacherStatus" name="status" class="form-select">
-                        <option value="ACTIVE">Active</option>
-                        <option value="INACTIVE">Inactive</option>
-                    </select>
+                    <label for="phone">Phone Number</label>
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        class="form-input"
+                        required
+                        maxlength="20"
+                        placeholder="e.g. 6641234567"
+                    >
+                </div>
+                <div class="form-field">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="form-input"
+                        required
+                        placeholder="Enter a temporary password"
+                    >
                 </div>
             </div>
-
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('teacherModal')">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('teacherModal')">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Save Teacher
+                </button>
             </div>
         </form>
     </div>
@@ -159,18 +236,21 @@
 <div id="deleteModal" class="modal-overlay">
     <div class="modal-content modal-small">
         <div class="modal-header">
-            <h3>Delete Teacher</h3>
+            <h3>Deactivate Teacher</h3>
             <button class="modal-close" onclick="closeModal('deleteModal')">&times;</button>
         </div>
         <div class="modal-body">
-            <p>Are you sure you want to delete <strong id="deleteTeacherName"></strong>?</p>
-            <p class="warning-text">This action will unassign their active groups and cannot be undone.</p>
+            <p>Are you sure you want to deactivate <strong id="deleteTeacherName"></strong>?</p>
+            <p class="warning-text">
+                The teacher will no longer be able to access the system,
+                but their information and group history will be preserved.
+            </p>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancel</button>
             <form method="POST" action="#" id="deleteForm" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                <button type="submit" class="btn btn-danger">Confirm Deactivate</button>
             </form>
         </div>
     </div>
@@ -191,7 +271,13 @@
     function openAddModal() {
         document.getElementById('modalTitle').innerText = 'Add New Teacher';
         document.getElementById('teacherForm').reset();
+
         document.getElementById('teacherId').value = '';
+        document.getElementById('formAction').value = 'add_teacher';
+
+        document.getElementById('teacherCode').disabled = false;
+        document.getElementById('password').required = true;
+        
         openModal('teacherModal');
     }
 
