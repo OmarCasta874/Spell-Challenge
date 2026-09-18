@@ -29,8 +29,42 @@
         <span class="group-stat">5 Lists</span>
       </div>
       <div class="group-actions">
-        <button class="group-btn group-btn-view">VIEW</button>
-        <button class="group-btn group-btn-leave">LEAVE GROUP</button>
+        <a href="{% url 'student_group_view' group_id=group.id %}" class="btn-pill-action">
+        VIEW
+        </a>
+        <button type="button" class="btn-pill-action btn-pill-danger" onclick="openModal('leaveGroupModal')">
+    LEAVE GROUP
+</button>
+<!-- ========================================== -->
+<!-- MODAL: LEAVE GROUP                         -->
+<!-- ========================================== -->
+<div id="leaveGroupModal" class="modal-overlay">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h3 style="color: var(--primary-red, #D9534F);">Leave Group</h3>
+            <button class="modal-close" onclick="closeModal('leaveGroupModal')">&times;</button>
+        </div>
+        <div class="modal-body text-center">
+            <p style="font-size: 1.1rem; margin-bottom: 1rem;">
+                Are you sure you want to leave <strong>Group 3A - English</strong>?
+            </p>
+            <p class="text-muted" style="font-size: 0.9rem;">
+                You will lose access to the group's word lists and progress.
+            </p>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: center; gap: 1rem;">
+            <form method="POST" action="{% url 'student_leave_group' group_id=1 %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" style="background-color: #D9534F; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 5px; cursor: pointer;">
+                    Yes, Leave
+                </button>
+            </form>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('leaveGroupModal')" style="padding: 0.5rem 1.2rem; border-radius: 5px; cursor: pointer;">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
       </div>
     </div>
   </div>

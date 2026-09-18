@@ -52,13 +52,20 @@
 }
 
 .practice-path {
+  /* Ajustes del zig zag */
+  --zz-amp: 36px;    /* cuánto sube/baja cada nodo respecto al centro */
+  --zz-thick: 12px;  /* grosor de la línea que une los nodos */
+
   display: flex;
   align-items: center;
   gap: 0;
   padding: 0 1rem;
+  min-height: calc(var(--zz-amp) * 2 + 90px);
 }
 
 .path-node-wrap {
+  position: relative;
+  z-index: 1;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -66,8 +73,10 @@
   transition: transform 0.2s;
 }
 
-.node-high { transform: translateY(-14px); }
-.node-low  { transform: translateY(14px); }
+/* Zig zag automático: los nodos son los hijos impares del recorrido
+   (1, 3, 5, 7...) y alternan arriba / abajo. */
+.practice-path > .path-node-wrap:nth-child(4n + 1) { transform: translateY(calc(var(--zz-amp) * -1)); }
+.practice-path > .path-node-wrap:nth-child(4n + 3) { transform: translateY(var(--zz-amp)); }
 
 .path-node {
   border-radius: 50%;
@@ -109,12 +118,35 @@
   opacity: 1;
 }
 
+/* Conectores diagonales: la caja abarca de un nodo al siguiente y
+   clip-path recorta solo la franja diagonal. Se adapta a cualquier ancho. */
 .path-connector {
   flex: 1;
-  height: 12px;
+  min-width: 60px;
+  height: calc(var(--zz-amp) * 2 + var(--zz-thick));
   background: #d9d9d9;
   border-radius: 6px;
   margin: 0 -6px;
+}
+
+/* nodo alto -> nodo bajo (baja) */
+.practice-path > .path-connector:nth-child(4n + 2) {
+  clip-path: polygon(
+    0 0,
+    0 var(--zz-thick),
+    100% 100%,
+    100% calc(100% - var(--zz-thick))
+  );
+}
+
+/* nodo bajo -> nodo alto (sube) */
+.practice-path > .path-connector:nth-child(4n) {
+  clip-path: polygon(
+    0 100%,
+    0 calc(100% - var(--zz-thick)),
+    100% 0,
+    100% var(--zz-thick)
+  );
 }
 
 .connector-active {

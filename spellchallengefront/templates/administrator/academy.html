@@ -12,62 +12,38 @@
 <div class="page-header">
     <div>
         <h1>Academy Management</h1>
-        <p class="subtitle">Configure academic programs, class groups, and proficiency levels</p>
+        <p class="subtitle">Manage careers, groups and English levels.</p>
     </div>
 </div>
 
-<!-- NAVEGACIÓN ENTRE PESTAÑAS (TABS) -->
 <div class="academy-tabs-nav">
-    <button class="tab-btn {% if active_tab == 'careers' %}active{% endif %}" onclick="switchTab('careers')">
-        🎓 Careers / Programs
-    </button>
-    <button class="tab-btn {% if active_tab == 'groups' %}active{% endif %}" onclick="switchTab('groups')">
-        👥 Groups
-    </button>
-    <button class="tab-btn {% if active_tab == 'levels' %}active{% endif %}" onclick="switchTab('levels')">
-        📊 Proficiency Levels
-    </button>
+    <div class="tabs-pills">
+        <button class="tab-btn {% if active_tab == 'careers' %}active{% endif %}" onclick="switchTab('careers', this)">Careers</button>
+        <button class="tab-btn {% if active_tab == 'groups' %}active{% endif %}" onclick="switchTab('groups', this)">Groups</button>
+        <button class="tab-btn {% if active_tab == 'levels' %}active{% endif %}" onclick="switchTab('levels', this)">Levels</button>
+    </div>
+    <button class="btn btn-primary" id="addAcademyBtn" onclick="openAddModal()">+ Add Level</button>
 </div>
 
 <!-- ========================================== -->
 <!-- PESTAÑA 1: CAREERS                         -->
 <!-- ========================================== -->
 <div id="tab-careers" class="tab-content {% if active_tab == 'careers' %}active{% endif %}">
-    <div class="tab-header-actions">
-        <h3>Academic Programs</h3>
-        <button class="btn btn-primary" onclick="openModal('careerModal')">+ Add New Program</button>
-    </div>
-
-    <div class="panel-card table-card">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Program Name</th>
-                    <th>Active Groups</th>
-                    <th>Students</th>
-                    <th>Status</th>
-                    <th class="text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for c in careers %}
-                <tr>
-                    <td><strong>{{ c.code }}</strong></td>
-                    <td>{{ c.name }}</td>
-                    <td><span class="count-pill">{{ c.groups_count }} groups</span></td>
-                    <td>{{ c.students_count }} students</td>
-                    <td>
-                        <span class="status-badge status-{{ c.status|lower }}">{{ c.status }}</span>
-                    </td>
-                    <td class="actions-cell text-right">
-                        <button class="btn-icon" onclick="openModal('careerModal')" title="Edit">✏️</button>
-                        <button class="btn-icon" onclick="openModal('deleteAcademyModal')" title="Delete">🗑️</button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="academy-cards-grid">
+        {% for c in careers %}
+        <div class="academy-card">
+            <div class="academy-card-top">
+                <div class="academy-card-code">{{ c.code }}</div>
+                <span class="status-badge status-{{ c.status|lower }}">{{ c.status }}</span>
+            </div>
+            <div class="academy-card-name">{{ c.name }}</div>
+            <div class="academy-card-meta">{{ c.groups_count }} groups · {{ c.students_count }} students</div>
+            <div class="academy-card-actions">
+                <button class="btn-pill-outline" onclick="openModal('careerModal')">EDIT</button>
+                <button class="btn-pill-solid" onclick="openModal('deleteAcademyModal')">DELETE</button>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -75,41 +51,21 @@
 <!-- PESTAÑA 2: GROUPS                          -->
 <!-- ========================================== -->
 <div id="tab-groups" class="tab-content {% if active_tab == 'groups' %}active{% endif %}">
-    <div class="tab-header-actions">
-        <h3>Class Groups</h3>
-        <button class="btn btn-primary" onclick="openModal('groupModal')">+ Add New Group</button>
-    </div>
-
-    <div class="panel-card table-card">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Group</th>
-                    <th>Program / Career</th>
-                    <th>Assigned Teacher</th>
-                    <th>Level</th>
-                    <th>Students</th>
-                    <th>Status</th>
-                    <th class="text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for g in groups %}
-                <tr>
-                    <td><strong>{{ g.name }}</strong></td>
-                    <td>{{ g.career }}</td>
-                    <td>{{ g.teacher }}</td>
-                    <td><span class="level-pill">{{ g.level }}</span></td>
-                    <td>{{ g.students_count }}</td>
-                    <td><span class="status-badge status-{{ g.status|lower }}">{{ g.status }}</span></td>
-                    <td class="actions-cell text-right">
-                        <button class="btn-icon" onclick="openModal('groupModal')" title="Edit">✏️</button>
-                        <button class="btn-icon" onclick="openModal('deleteAcademyModal')" title="Delete">🗑️</button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="academy-cards-grid">
+        {% for g in groups %}
+        <div class="academy-card">
+            <div class="academy-card-top">
+                <div class="academy-card-code">{{ g.name }}</div>
+                <span class="status-badge status-{{ g.status|lower }}">{{ g.status }}</span>
+            </div>
+            <div class="academy-card-name">{{ g.career }}</div>
+            <div class="academy-card-meta">Teacher: {{ g.teacher }} · Level {{ g.level }} · {{ g.students_count }} students</div>
+            <div class="academy-card-actions">
+                <button class="btn-pill-outline" onclick="openModal('groupModal')">EDIT</button>
+                <button class="btn-pill-solid" onclick="openModal('deleteAcademyModal')">DELETE</button>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -117,36 +73,18 @@
 <!-- PESTAÑA 3: LEVELS                          -->
 <!-- ========================================== -->
 <div id="tab-levels" class="tab-content {% if active_tab == 'levels' %}active{% endif %}">
-    <div class="tab-header-actions">
-        <h3>CEFR Proficiency Levels</h3>
-        <button class="btn btn-primary" onclick="openModal('levelModal')">+ Add New Level</button>
-    </div>
-
-    <div class="panel-card table-card">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Level Code</th>
-                    <th>Description / Designation</th>
-                    <th>Vocabulary Bank</th>
-                    <th>Active Groups</th>
-                    <th class="text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for l in levels %}
-                <tr>
-                    <td><span class="level-pill level-large">{{ l.code }}</span></td>
-                    <td><strong>{{ l.name }}</strong></td>
-                    <td>{{ l.words_count }} words assigned</td>
-                    <td>{{ l.groups_count }} groups</td>
-                    <td class="actions-cell text-right">
-                        <button class="btn-icon" onclick="openModal('levelModal')" title="Edit">✏️</button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="academy-cards-grid">
+        {% for l in levels %}
+        <div class="academy-card">
+            <div class="academy-card-code">{{ l.code }}</div>
+            <div class="academy-card-name">{{ l.name }}</div>
+            <div class="academy-card-meta">{{ l.groups_count }} groups</div>
+            <div class="academy-card-actions">
+                <button class="btn-pill-outline" onclick="openModal('levelModal')">EDIT</button>
+                <button class="btn-pill-solid" onclick="openModal('deleteAcademyModal')">DELETE</button>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -254,19 +192,59 @@
         </div>
     </div>
 </div>
+
+<div id="levelModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Proficiency Level</h3>
+            <button class="modal-close" onclick="closeModal('levelModal')">&times;</button>
+        </div>
+        <form method="POST" action="#">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-field">
+                    <label>Level Code</label>
+                    <input type="text" class="form-input" placeholder="e.g. A1" required>
+                </div>
+                <div class="form-field">
+                    <label>Designation</label>
+                    <input type="text" class="form-input" placeholder="e.g. Beginner" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('levelModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Level</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    function switchTab(tabName) {
-        // Ocultar todos los contenidos de pestañas
+    const addBtnConfig = {
+        careers: { label: '+ Add Program', modal: 'careerModal' },
+        groups:  { label: '+ Add Group',   modal: 'groupModal' },
+        levels:  { label: '+ Add Level',   modal: 'levelModal' }
+    };
+
+    function switchTab(tabName, btnEl) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        // Desactivar botones
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
 
-        // Activar la seleccionada
         document.getElementById('tab-' + tabName).classList.add('active');
-        event.currentTarget.classList.add('active');
+        btnEl.classList.add('active');
+
+        const config = addBtnConfig[tabName];
+        const addBtn = document.getElementById('addAcademyBtn');
+        addBtn.textContent = config.label;
+        addBtn.setAttribute('data-modal', config.modal);
+    }
+
+    function openAddModal() {
+        const modalId = document.getElementById('addAcademyBtn').getAttribute('data-modal');
+        openModal(modalId);
     }
 
     function openModal(id) {

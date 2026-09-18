@@ -1,0 +1,240 @@
+{% extends 'student/base_student.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/student_base.css' %}">
+<link rel="stylesheet" href="{% static 'css/missing_letters_game.css' %}">
+{% endblock %}
+
+{% block title %}Missing Letters Game - Spell-Challenge Student{% endblock %}
+
+{% block content %}
+<div class="game-play-container">
+    
+    <!-- ENCABEZADO Y REGRESO -->
+    <div class="game-header flex-align-center">
+        <a href="{% url 'student_mini_games' %}" class="btn-back-link">
+            ← MISSING LETTERS
+        </a>
+        <div class="game-stats">
+            <span>Score: <strong id="score">0</strong></span>
+            <span>Attempts Left: <strong id="attempts" style="color: #D9534F;">3</strong></span>
+        </div>
+    </div>
+
+    <!-- AREA PRINCIPAL DEL JUEGO -->
+    <div class="missing-board panel-card">
+        
+        <!-- PISTA / SIGNIFICADO -->
+        <div class="hint-box mb-1 text-center">
+            <span class="hint-label">Clue (Meaning):</span>
+            <p id="wordHint" class="hint-text">Loading hint...</p>
+        </div>
+
+        <!-- ESPACIO DE LA PALABRA CON LETRAS FALTANTES -->
+        <div id="wordDisplay" class="word-display-container">
+            <!-- Las casillas e inputs se generarán con JS -->
+        </div>
+
+        <!-- OPCIONES DE LETRAS / BANCO DE OPCIONES -->
+        <div class="options-container text-center mt-1">
+            <p class="sub-label">Select or type the missing letters:</p>
+            <div id="letterBank" class="virtual-keyboard">
+                <!-- Botones de opciones generados con JS -->
+            </div>
+        </div>
+
+        <!-- ACCIONES Y CONTROLES -->
+        <div class="game-actions mt-2 text-center">
+            <button class="btn-pill-play" onclick="playAudioHint()" style="position: static; padding: 0.5rem 1.5rem;">
+                🔊 Listen Word
+            </button>
+            <button class="btn" onclick="checkAnswer()" style="background: #28a745; color: #FFF; border-radius: 20px; padding: 0.5rem 1.5rem; border: none; cursor: pointer; font-weight: bold; margin-left: 0.5rem;">
+                Submit Answer ✓
+            </button>
+            <button class="btn" onclick="nextWord()" style="background: #700000; color: #FFF; border-radius: 20px; padding: 0.5rem 1.5rem; border: none; cursor: pointer; font-weight: bold; margin-left: 0.5rem;">
+                Skip ➔
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: RESULTADO                           -->
+<!-- ========================================== -->
+<div id="resultModal" class="modal-overlay">
+    <div class="modal-content modal-small text-center">
+        <div class="modal-header">
+            <h3 id="resTitle" style="margin: 0; color: #700000;">Game Over</h3>
+            <button class="modal-close" onclick="closeModal('resultModal')">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 1.5rem 1rem;">
+            <p id="resMessage" style="font-size: 1.1rem; margin-bottom: 0.5rem;"></p>
+            <p style="font-size: 0.95rem; color: #555;">The word was: <strong id="resWord" style="color: #700000;"></strong></p>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: center; gap: 1rem;">
+            <button type="button" class="btn-pill-play" style="position: static; padding: 0.4rem 1.8rem;" onclick="resetGame()">
+                Try Again
+            </button>
+            <a href="{% url 'student_mini_games' %}" class="btn" style="background: #CCC; color: #333; border-radius: 20px; padding: 0.4rem 1.2rem; text-decoration: none; font-weight: bold;">
+                Exit Game
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const vocabularyList = [
+        { word: 'GREETING', meaning: 'A polite word or sign of welcome.', missingIndices: [1, 4], audio: 'Greeting' },
+        { word: 'WELCOME', meaning: 'Used to greet someone arriving at a place.', missingIndices: [2, 5], audio: 'Welcome' },
+        { word: 'PRONUNCIATION', meaning: 'The way in which a word is spoken.', missingIndices: [3, 7, 10], audio: 'Pronunciation' },
+        { word: 'SPELLING', meaning: 'The process or activity of writing or naming the letters of a word.', missingIndices: [2, 5], audio: 'Spelling' }
+    ];
+
+    let currentWordIndex = 0;
+    let selectedWord = '';
+    let currentItem = null;
+    let attemptsLeft = 3;
+    let score = 0;
+
+    function initGame() {
+        currentItem = vocabularyList[currentWordIndex];
+        selectedWord = currentItem.word.toUpperCase();
+        document.getElementById('wordHint').innerText = currentItem.meaning;
+        attemptsLeft = 3;
+        
+        document.getElementById('attempts').innerText = attemptsLeft;
+        document.getElementById('score').innerText = score;
+
+        renderWordSlots();
+        renderLetterBank();
+    }
+
+    function renderWordSlots() {
+        const container = document.getElementById('wordDisplay');
+        container.innerHTML = '';
+
+        selectedWord.split('').forEach((letter, index) => {
+            const slot = document.createElement('div');
+            if (currentItem.missingIndices.includes(index)) {
+                slot.className = 'letter-slot input-slot';
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.maxLength = 1;
+                input.dataset.index = index;
+                input.className = 'missing-input';
+                input.onkeyup = (e) => handleInputAutoTab(e, input);
+                slot.appendChild(input);
+            } else {
+                slot.className = 'letter-slot';
+                slot.innerText = letter;
+            }
+            container.appendChild(slot);
+        });
+    }
+
+    function renderLetterBank() {
+        const bank = document.getElementById('letterBank');
+        bank.innerHTML = '';
+
+        // Extraer letras faltantes reales + distractores
+        const missingLetters = currentItem.missingIndices.map(i => selectedWord[i]);
+        const distractors = ['A', 'E', 'I', 'O', 'U', 'R', 'S', 'T'].filter(l => !missingLetters.includes(l)).slice(0, 4);
+        const options = [...missingLetters, ...distractors].sort(() => Math.random() - 0.5);
+
+        options.forEach(letter => {
+            const btn = document.createElement('button');
+            btn.className = 'key-btn';
+            btn.innerText = letter;
+            btn.onclick = () => insertLetterToEmptyInput(letter);
+            bank.appendChild(btn);
+        });
+    }
+
+    function handleInputAutoTab(e, currentInput) {
+        currentInput.value = currentInput.value.toUpperCase();
+        if (currentInput.value && e.key !== 'Backspace') {
+            const inputs = document.querySelectorAll('.missing-input');
+            const currentIndex = Array.from(inputs).indexOf(currentInput);
+            if (currentIndex < inputs.length - 1) {
+                inputs[currentIndex + 1].focus();
+            }
+        }
+    }
+
+    function insertLetterToEmptyInput(letter) {
+        const inputs = document.querySelectorAll('.missing-input');
+        for (let input of inputs) {
+            if (!input.value) {
+                input.value = letter;
+                const event = new KeyboardEvent('keyup', { key: letter });
+                input.dispatchEvent(event);
+                break;
+            }
+        }
+    }
+
+    function checkAnswer() {
+        const inputs = document.querySelectorAll('.missing-input');
+        let isCorrect = true;
+
+        inputs.forEach(input => {
+            const index = parseInt(input.dataset.index);
+            if (input.value.toUpperCase() !== selectedWord[index]) {
+                isCorrect = false;
+                input.style.borderColor = '#D9534F';
+            } else {
+                input.style.borderColor = '#28a745';
+            }
+        });
+
+        if (isCorrect) {
+            score += 15;
+            document.getElementById('score').innerText = score;
+            showResult(true);
+        } else {
+            attemptsLeft--;
+            document.getElementById('attempts').innerText = attemptsLeft;
+            if (attemptsLeft === 0) {
+                showResult(false);
+            }
+        }
+    }
+
+    function showResult(isWin) {
+        document.getElementById('resTitle').innerText = isWin ? '🎉 Great Job!' : '❌ Game Over';
+        document.getElementById('resMessage').innerText = isWin ? 'You completed the word correctly!' : 'You ran out of attempts.';
+        document.getElementById('resWord').innerText = selectedWord;
+        document.getElementById('resultModal').classList.add('active');
+    }
+
+    function resetGame() {
+        closeModal('resultModal');
+        initGame();
+    }
+
+    function nextWord() {
+        currentWordIndex = (currentWordIndex + 1) % vocabularyList.length;
+        initGame();
+    }
+
+    function playAudioHint() {
+        const word = currentItem.audio;
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'en-US';
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', initGame);
+</script>
+{% endblock %}
