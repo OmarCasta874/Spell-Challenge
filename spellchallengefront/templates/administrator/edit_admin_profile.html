@@ -1,0 +1,74 @@
+{% extends 'administrator/admin_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/admin_base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/edit_admin_profile.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/save_changes_modal.css' %}">
+{% endblock %}
+
+{% block title %}Edit Profile - Spell-Challenge Admin{% endblock %}
+
+{% block admin_content %}
+<form method="POST" action="{% url 'edit_admin_profile' %}" id="editAdminProfileForm">
+    {% csrf_token %}
+
+    <div class="edit-avatar-wrap">
+        <label for="avatarUpload" class="edit-avatar-circle">
+            <span class="avatar-camera-icon">📷</span>
+            <span class="avatar-camera-text">Change profile picture</span>
+        </label>
+        <input type="file" id="avatarUpload" name="avatar" accept="image/*" hidden>
+    </div>
+
+    <div class="form-row-3">
+        <div class="form-field">
+            <label>First Name:</label>
+            <input type="text" name="first_name" class="form-input" value="{{ admin.first_name }}" required>
+        </div>
+        <div class="form-field">
+            <label>Last Name:</label>
+            <input type="text" name="last_name" class="form-input" value="{{ admin.last_name }}" required>
+        </div>
+        <div class="form-field">
+            <label>Age:</label>
+            <input type="number" name="age" class="form-input" value="{{ admin.age }}">
+        </div>
+    </div>
+
+    <div class="form-row-3">
+        <div class="form-field">
+            <label>Email Address:</label>
+            <input type="email" name="email" class="form-input" value="{{ admin.email }}" required>
+        </div>
+        <div class="form-field">
+            <label>Password:</label>
+            <div class="password-field-wrap">
+                <input type="password" name="password" id="adminPassword" class="form-input" value="{{ admin.password }}">
+                <button type="button" class="password-toggle-btn" onclick="togglePassword()" aria-label="Show password">👁️</button>
+            </div>
+        </div>
+        <div class="form-field">
+            <label>Role:</label>
+            <input type="text" class="form-input" value="Administrator" disabled>
+        </div>
+    </div>
+
+    <div class="edit-form-actions">
+        <a href="{% url 'admin_profile' %}" class="btn btn-cancel">CANCEL</a>
+        <button type="button" class="btn btn-save" data-bs-toggle="modal" data-bs-target="#saveChangesModal">SAVE CHANGES</button>
+    </div>
+</form>
+
+{% include 'base/save_changes_modal.html' with avatar_img='img/admin.png' form_id='editAdminProfileForm' %}
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    function togglePassword() {
+        const input = document.getElementById('adminPassword');
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+</script>
+{% endblock %}

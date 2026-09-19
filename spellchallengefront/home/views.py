@@ -487,10 +487,6 @@ def admin_teachers(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         
-        print("POST RECIBIDO")
-        print("ACTION: ",action)
-        print("DATOS:", request.POST)
-        
         if action == 'add_teacher':
             teacher_code = request.POST.get('teacher_code', '').strip()
             first_name = request.POST.get('first_name', '').strip()
@@ -545,10 +541,6 @@ def admin_teachers(request):
                     'Teacher created successfully.'
                 )
             except Exception as e:
-                print("ERROR AL CREAR TEACHER: ")
-                print(type(e).__name__)
-                print(str(e))
-                
                 messages.error(
                     request,
                     f'Error creating teacher: {str(e)}'
@@ -642,6 +634,157 @@ def admin_users(request):
     role_filter = request.GET.get('role', 'ALL')
     group_filter = request.GET.get('group', 'ALL')
     status_filter = request.GET.get('status', 'ALL')
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'add_user':
+            
+            user_code = request.POST.get('user_code', '').strip()
+            first_name = request.POST.get('first_name', '').strip()
+            last_name = request.POST.get('last_name', '').strip()
+            second_last_name = request.POST.get('second_last_name', '').strip()
+            email = request.POST.get('email', '').strip()
+            phone = request.POST.get('phone', '').strip()
+            password = request.POST.get('password', '').strip()
+            role = request.POST.get('role', 'STUDENT')
+            status = request.POST.get('status', 'ACTIVE')
+            
+            if Usuario.objects.filter(codigo=user_code).exists():
+                messages.error(
+                    request,
+                    'A user with this code already exists.'
+                )
+                return redirect('admin_users')
+            
+            if Usuario.objects.filter(correo=email).exists():
+                messages.error(
+                    request,
+                    'A user with this email already exists.'
+                )
+                return redirect('admin_users')
+            
+            try:
+                with transaction.atomic():
+                    if role == 'STUDENT':
+                        level_code = request.POST.get('level')
+                        career_code = request.POST.get('career')
+                        
+                        tipo_student = TipoUsuario.objects.get(
+                            clave='TUSR01'
+                        )
+                        
+                        level = Nivel.objects.get(
+                            codigo=level_code
+                        )
+                        
+                        career = Carrera.objects.get(
+                            clave=career_code
+                        )
+                        
+                        usuario = Usuario.objects.create_user(
+                            correo=email,
+                            password=password,
+                            codigo=user_code,
+                            nombre_pila=first_name,
+                            apellidoPaterno=last_name,
+                            apellidoMaterno=second_last_name,
+                            numero_telefono=phone,
+                            tipo_usuario=tipo_student,
+                            is_active=(status == 'ACTIVE'),
+                            is_staff=False,
+                        )
+                        
+                        Alumno.objects.create(
+                            matricula=user_code,
+                            nombre_pila=first_name,
+                            apellidoPaterno=last_name,
+                            apellidoMaterno=second_last_name,
+                            usuario=usuario,
+                            nivel=level,
+                            carrera=career,
+                        )
+                        
+                        messages.success(
+                            request,
+                            'Student registered successfully.'
+                        )
+                        
+                    elif role == 'TEACHER':
+                        
+                        tipo_teacher = TipoUsuario.objects.get(
+                            clave='TUSR02'
+                        )
+                        
+                        usuario = Usuario.objects.create_user(
+                            correo=email,
+                            password=password,
+                            codigo=user_code,
+                            nombre_pila=first_name,
+                            apellidoPaterno=last_name,
+                            apellidoMaterno=second_last_name,
+                            numero_telefono=phone,
+                            tipo_usuario=tipo_teacher,
+                            is_active=(status == 'ACTIVE'),
+                            is_staff=False,
+                        )
+                        
+                        Profesor.objects.create(
+                            clave=user_code,
+                            nombre_pila=first_name,
+                            apellidoPaterno=last_name,
+                            apellidoMaterno=second_last_name,
+                            usuario=usuario,
+                        )
+                        
+                        messages.success(
+                            request,
+                            'Teacher registered successfully. '
+                        )
+                        
+                    elif role == 'ADMIN':
+                        tipo_admin = TipoUsuario.objects.get(
+                            clave='TUSR03'
+                        )
+                        
+                        usuario = Usuario.objects.create_user(
+                            correo=email,
+                            password=password,
+                            codigo=user_code,
+                            nombre_pila=first_name,
+                            apellidoPaterno=last_name,
+                            apellidoMaterno=second_last_name,
+                            numero_telefono=phone,
+                            tipo_usuario=tipo_admin,
+                            is_active=(status == 'ACTIVE'),
+                            is_staff=False,
+                        )
+                        
+                        Administrador.objects.create(
+                            clave=user_code,
+                            nombre_pila=first_name,
+                            apellidoPaterno=last_name,
+                            apellidoMaterno=second_last_name,
+                            usuario=usuario,
+                        )
+                        
+                        messages.success(
+                            request,
+                            'Administrator registered successfully.'
+                        )
+                        
+                    else:
+                        messages.error(
+                            request,
+                            'This role is not available yet.'
+                        )
+            except Exception as e:
+                messages.error(
+                    request,
+                    f'Error registering user: {str(e)}'
+                )
+                
+            return redirect('admin_users')
     
     users = Usuario.objects.select_related(
         'tipo_usuario'
@@ -754,6 +897,9 @@ def admin_users(request):
         .order_by('nombre')
     )
     
+    available_levels = Nivel.objects.order_by('codigo')
+    available_careers = Carrera.objects.order_by('nombre')
+    
     context = {
         'users': users_data,
         'total_count': len(users_data),
@@ -762,6 +908,8 @@ def admin_users(request):
         'group_filter': group_filter,
         'status_filter': status_filter,
         'available_groups': available_groups,
+        'available_levels': available_levels,
+        'available_careers': available_careers,
     }
     
     return render(
@@ -822,3 +970,8 @@ def student_competitions_view(request):
         'beehives': beehives,
     }
     return render(request, 'student/competitions_selecting.html', context)
+
+@never_cache
+@role_required('administrator')
+def edit_admin_profile(request):
+    return render(request, 'administrator/edit_admin_profile.html')

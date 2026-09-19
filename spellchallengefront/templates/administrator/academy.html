@@ -222,6 +222,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script>
     const addBtnConfig = {
         careers: { label: '+ Add Program', modal: 'careerModal' },

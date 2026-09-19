@@ -177,3 +177,113 @@
     font-size: 0.75rem;
     font-weight: 700;
 }
+
+.filter-group .form-select {
+    display: inline-block;
+    width: auto;
+    min-width: 160px;
+}
+
+.filter-group .btn-secondary {
+    flex-shrink: 0;
+}
+
+/* ===== BARRA DE BÚSQUEDA Y FILTROS ===== */
+
+.filter-card {
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+}
+
+.search-box {
+    flex: 1;
+    min-width: 240px;
+}
+
+.filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.form-input,
+.form-select {
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.55rem 0.9rem;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.85rem;
+    color: #333;
+    background-color: #ffffff;
+}
+
+.search-box .form-input {
+    width: 100%;
+}
+
+.filter-group .form-select {
+    min-width: 140px;
+}
+
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    border-color: #7a1f2b;
+}
+
+.filter-group .btn-secondary {
+    border-radius: 8px;
+    padding: 0.55rem 1.2rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    background-color: #ffffff;
+    color: #7a1f2b;
+    border: 1px solid #7a1f2b;
+    cursor: pointer;
+}
+
+.filter-group .btn-secondary:hover {
+    background-color: #fdf2f2;
+}
+
+/* ===== BOTONES PILL DE ACCIONES (View / Edit / Delete) ===== */
+
+.btn-pill-outline,
+.btn-pill-solid {
+    border-radius: 20px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    margin-left: 0.4rem;
+}
+
+.btn-pill-outline {
+    background-color: #ffffff;
+    color: #7a1f2b;
+    border: 2px solid #7a1f2b;
+}
+
+.btn-pill-outline:hover {
+    background-color: #fdf2f2;
+}
+
+.btn-pill-solid {
+    background-color: #7a1f2b;
+    color: #ffffff;
+    border: 2px solid #7a1f2b;
+}
+
+.btn-pill-solid:hover {
+    background-color: #5c1620;
+}
