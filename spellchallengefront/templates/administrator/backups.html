@@ -14,31 +14,30 @@
         <h1>Database & System Backups</h1>
         <p class="subtitle">Manage system snapshots, automated schedules, and data recovery points</p>
     </div>
-    <button class="btn btn-primary" onclick="openModal('createBackupModal')">
-        💾 Generate New Backup
-    </button>
+    <div class="header-actions">
+        <button class="btn btn-secondary" onclick="submitBackup()">
+            Submit Backup
+        </button>
+        <button class="btn btn-primary" onclick="openModal('createBackupModal')">
+            + Create Backup
+        </button>
+    </div>
 </div>
 
-<!-- CARDS DE ESTADO DE ALMACENAMIENTO Y CONFIGURACIÓN -->
 <div class="dashboard-row grid-3-col mb-15">
     <div class="metric-card">
-        <span class="metric-label">Database Size</span>
-        <span class="metric-value">{{ db_size }}</span>
-        <span class="card-sub-info">Media files: {{ media_size }}</span>
+        <span class="metric-label">Last Backup</span>
+        <span class="metric-value">{{ last_backup_date }}</span>
     </div>
 
     <div class="metric-card">
-        <span class="metric-label">Automated Schedule</span>
-        <span class="metric-value text-success">
-            {% if auto_backup_enabled %}Active{% else %}Disabled{% endif %}
-        </span>
-        <span class="card-sub-info">{{ frequency }}</span>
+        <span class="metric-label">Total Backups</span>
+        <span class="metric-value">{{ total_backups }}</span>
     </div>
 
     <div class="metric-card">
-        <span class="metric-label">Last Backup Saved</span>
-        <span class="metric-value subtext">{{ last_backup_date }}</span>
-        <span class="card-sub-info">{{ total_backups }} total snapshots archived</span>
+        <span class="metric-label">Auto-Backup</span>
+        <span class="metric-value">{{ frequency }}</span>
     </div>
 </div>
 
@@ -51,53 +50,39 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Snapshot Name / File</th>
-                <th>Created Date</th>
-                <th>File Size</th>
-                <th>Backup Type</th>
-                <th>Status</th>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Size</th>
+                <th>Type</th>
                 <th class="text-right">Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for b in backups %}
             <tr>
-                <td>
-                    <div class="file-cell">
-                        <span class="file-icon">📁</span>
-                        <div>
-                            <strong>{{ b.filename }}</strong>
-                            <div class="text-muted-date">ID: {{ b.id }}</div>
-                        </div>
-                    </div>
-                </td>
-                <td>{{ b.created_at }}</td>
-                <td><strong>{{ b.size }}</strong></td>
+                <td><strong class="text-primary">{{ b.filename }}</strong></td>
+                <td>{{ b.created_at|date:"M d, Y" }}</td>
+                <td>{{ b.created_at|time:"h:i A" }}</td>
+                <td>{{ b.size }}</td>
                 <td>
                     <span class="type-tag type-{{ b.type|lower }}">{{ b.type }}</span>
                 </td>
-                <td>
-                    <span class="status-badge status-active">
-                        ✓ {{ b.status }}
-                    </span>
-                </td>
                 <td class="actions-cell text-right">
-                    <button class="btn-action-link text-primary" title="Download File">
-                        ⬇️ Download
-                    </button>
+                    <button class="btn-pill-outline" title="Download File">DOWNLOAD</button>
                     <button 
-                        class="btn-action-link text-warning" 
+                        class="btn-pill-outline" 
                         onclick="openRestoreModal('{{ b.filename }}', '{{ b.created_at }}')" 
                         title="Restore Database"
                     >
-                        🔄 Restore
+                        RESTORE
                     </button>
                     <button 
-                        class="btn-icon" 
+                        class="btn-pill-solid" 
                         onclick="openModal('deleteBackupModal')" 
                         title="Delete Snapshot"
                     >
-                        🗑️
+                        DELETE
                     </button>
                 </td>
             </tr>
@@ -203,6 +188,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script>
     function openModal(id) {
         document.getElementById(id).classList.add('active');
@@ -216,6 +202,11 @@
         document.getElementById('restoreFileName').innerText = fileName;
         document.getElementById('restoreFileDate').innerText = fileDate;
         openModal('restoreModal');
+    }
+
+    function submitBackup() {
+        // Pendiente de definir funcionalidad
+        console.log('Submit Backup: funcionalidad aún no definida');
     }
 
     window.onclick = function(e) {

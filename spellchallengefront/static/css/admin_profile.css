@@ -1,108 +1,66 @@
-/* ESTILOS DE PERFIL DE ADMINISTRADOR */
+/* PERFIL DE ADMINISTRADOR — mismo patrón que teacher_profile / student_profile */
 
-.profile-layout {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 1.5rem;
-    align-items: start;
-}
-
-@media (max-width: 900px) {
-    .profile-layout {
-        grid-template-columns: 1fr;
-    }
-}
-
-.align-center {
+.profile-header {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    padding: 2rem 1.5rem;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .avatar-large {
-    position: relative;
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background-color: var(--primary-red);
+    background-color: #f28f89;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1rem;
-    border: 3px solid #FFF;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    overflow: hidden;
 }
 
 .avatar-initials {
-    color: #FFF;
-    font-size: 2.2rem;
+    color: #ffffff;
+    font-size: 2rem;
     font-weight: 700;
 }
 
 .avatar-large img {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
     object-fit: cover;
 }
 
-.avatar-upload-btn {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    background: #FFF;
-    border: 1px solid var(--border-color);
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-    transition: transform 0.2s;
-}
-
-.avatar-upload-btn:hover {
-    transform: scale(1.1);
+.profile-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
 }
 
 .profile-name {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-color);
-    margin-bottom: 0.3rem;
+    color: #7a1f2b;
+    margin: 0 0 0.3rem;
 }
 
-.profile-meta-list {
-    width: 100%;
-    margin-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-    padding-top: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    font-size: 0.85rem;
+.profile-subtext {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #7a1f2b;
+    margin: 0;
 }
 
-.meta-item {
-    display: flex;
-    justify-content: space-between;
-}
-
-.meta-label {
-    color: var(--text-muted);
-}
-
-/* FORMULARIOS INTERNOS */
-.panel-body-form {
-    padding: 1.5rem;
+/* FORMULARIO */
+.profile-form {
+    max-width: 700px;
 }
 
 .form-row-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 @media (max-width: 600px) {
@@ -111,55 +69,68 @@
     }
 }
 
-.form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    margin-bottom: 1rem;
-}
-
 .form-field label {
+    display: block;
     font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-color);
+    font-weight: 700;
+    color: #7a1f2b;
+    margin-bottom: 0.4rem;
 }
 
-.form-input {
-    padding: 0.65rem 0.8rem;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
+.form-field .form-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.6rem 0.9rem;
+    border: 2px solid #7a1f2b;
+    border-radius: 8px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
     font-size: 0.9rem;
-    outline: none;
-    transition: border-color 0.2s;
+    color: #333;
+    background-color: #ffffff;
 }
 
-.form-input:focus {
-    border-color: var(--primary-red);
+.section-title {
+    color: #7a1f2b;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 1rem 0 1.2rem;
 }
 
-.form-actions-right {
+/* BOTONES */
+.profile-actions {
     display: flex;
-    justify-content: flex-end;
-    margin-top: 1rem;
-}
-
-/* LISTA DE SESIONES */
-.session-list {
-    padding: 1rem 1.5rem;
-}
-
-.session-item {
-    display: flex;
-    align-items: center;
     gap: 1rem;
-    padding: 0.8rem 0;
 }
 
-.session-icon {
-    font-size: 1.5rem;
-}
-
-.session-details {
-    flex: 1;
+.btn-edit {
+    background-color: #ffffff;
+    color: #7a1f2b;
+    border: 2px solid #7a1f2b;
+    border-radius: 20px;
+    padding: 0.6rem 1.6rem;
+    font-weight: 700;
     font-size: 0.85rem;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.btn-edit:hover {
+    background-color: #fdf2f2;
+}
+
+.btn-logout {
+    background-color: #f28f89;
+    color: #ffffff;
+    border: 2px solid #f28f89;
+    border-radius: 20px;
+    padding: 0.6rem 1.6rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.btn-logout:hover {
+    background-color: #e97b74;
 }

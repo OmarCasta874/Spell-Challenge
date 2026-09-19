@@ -22,6 +22,7 @@ urlpatterns = [
     path('student_profile', views.student_profile, name='student_profile'),
     path('edit_teacher_profile', views.edit_teacher_profile, name='edit_teacher_profile'),
     path('edit_student_profile', views.edit_student_profile, name='edit_student_profile'),
+    path('edit_admin_profile', views.edit_admin_profile, name='edit_admin_profile'),
     path('teacher_profile', views.teacher_profile, name='teacher_profile'),
     path('logout/', views.custom_logout_view, name='logout'),
     path('admin-panel/', views.gen_panel, name='admin_gen_panel'),

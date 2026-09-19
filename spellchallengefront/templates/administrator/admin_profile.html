@@ -9,136 +9,49 @@
 {% block title %}Admin Profile - Spell-Challenge Admin{% endblock %}
 
 {% block admin_content %}
-<div class="page-header">
-    <div>
-        <h1>Account Settings</h1>
-        <p class="subtitle">Manage your personal profile, credentials, and active administrative sessions</p>
+<div class="profile-header">
+    <div class="avatar-large">
+        {% if admin.avatar_url %}
+            <img src="{{ admin.avatar_url }}" alt="Profile Picture">
+        {% else %}
+            <span class="avatar-initials">{{ admin.first_name|first }}{{ admin.last_name|first }}</span>
+        {% endif %}
+    </div>
+    <div class="profile-header-info">
+        <h1 class="profile-name">{{ admin.first_name }} {{ admin.last_name }}</h1>
+        <p class="profile-subtext">{{ admin.age }} YEARS</p>
+        <p class="profile-subtext">Administrator</p>
     </div>
 </div>
 
-<div class="profile-layout grid-2-col">
-    <!-- BARRA LATERAL: CARD DE INFORMACIÓN RESUMIDA -->
-    <div class="profile-sidebar">
-        <div class="panel-card text-center align-center">
-            <div class="avatar-large">
-                {% if admin.avatar_url %}
-                    <img src="{{ admin.avatar_url }}" alt="Profile Picture">
-                {% else %}
-                    <span class="avatar-initials">{{ admin.first_name|first }}{{ admin.last_name|first }}</span>
-                {% endif %}
-                <button class="avatar-upload-btn" title="Change picture">📷</button>
-            </div>
-            
-            <h2 class="profile-name">{{ admin.first_name }} {{ admin.last_name }}</h2>
-            <span class="type-tag type-automatic mb-1">{{ admin.role }}</span>
-            <p class="text-muted-date">{{ admin.email }}</p>
-
-            <div class="profile-meta-list">
-                <div class="meta-item">
-                    <span class="meta-label">Username:</span>
-                    <strong>@{{ admin.username }}</strong>
-                </div>
-                <div class="meta-item">
-                    <span class="meta-label">Member Since:</span>
-                    <span>{{ admin.joined_date }}</span>
-                </div>
-                <div class="meta-item">
-                    <span class="meta-label">Last Login:</span>
-                    <span>{{ admin.last_login }}</span>
-                </div>
-            </div>
+<div class="profile-form">
+    <div class="form-row-2">
+        <div class="form-field">
+            <label>First Name</label>
+            <input type="text" class="form-input" value="{{ admin.first_name }}" readonly>
+        </div>
+        <div class="form-field">
+            <label>Last Name</label>
+            <input type="text" class="form-input" value="{{ admin.last_name }}" readonly>
         </div>
     </div>
 
-    <!-- SECCIÓN PRINCIPAL: FORMULARIOS DE CONFIGURACIÓN -->
-    <div class="profile-content">
-        <!-- FORMULARIO 1: INFORMACIÓN PERSONAL -->
-        <div class="panel-card mb-15">
-            <div class="panel-header-title">
-                <h3>Personal Information</h3>
-            </div>
-            
-            <form method="POST" action="#" class="panel-body-form">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="update_info">
-
-                <div class="form-row-2">
-                    <div class="form-field">
-                        <label>First Name</label>
-                        <input type="text" name="first_name" class="form-input" value="{{ admin.first_name }}" required>
-                    </div>
-                    <div class="form-field">
-                        <label>Last Name</label>
-                        <input type="text" name="last_name" class="form-input" value="{{ admin.last_name }}" required>
-                    </div>
-                </div>
-
-                <div class="form-row-2">
-                    <div class="form-field">
-                        <label>Email Address</label>
-                        <input type="email" name="email" class="form-input" value="{{ admin.email }}" required>
-                    </div>
-                    <div class="form-field">
-                        <label>Phone Number</label>
-                        <input type="text" name="phone" class="form-input" value="{{ admin.phone }}">
-                    </div>
-                </div>
-
-                <div class="form-actions-right">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
+    <div class="form-row-2">
+        <div class="form-field">
+            <label>Email Address</label>
+            <input type="email" class="form-input" value="{{ admin.email }}" readonly>
         </div>
-
-        <!-- FORMULARIO 2: CAMBIO DE CONTRASEÑA -->
-        <div class="panel-card mb-15">
-            <div class="panel-header-title">
-                <h3>Change Password</h3>
-            </div>
-            
-            <form method="POST" action="#" class="panel-body-form">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="change_password">
-
-                <div class="form-field">
-                    <label>Current Password</label>
-                    <input type="password" name="current_password" class="form-input" placeholder="••••••••••••" required>
-                </div>
-
-                <div class="form-row-2">
-                    <div class="form-field">
-                        <label>New Password</label>
-                        <input type="password" name="new_password" class="form-input" placeholder="Min. 8 characters" required>
-                    </div>
-                    <div class="form-field">
-                        <label>Confirm New Password</label>
-                        <input type="password" name="confirm_password" class="form-input" placeholder="Repeat new password" required>
-                    </div>
-                </div>
-
-                <div class="form-actions-right">
-                    <button type="submit" class="btn btn-secondary">Update Password</button>
-                </div>
-            </form>
+        <div class="form-field">
+            <label>Role</label>
+            <input type="text" class="form-input" value="Administrator" readonly>
         </div>
+    </div>
 
-        <!-- SECCIÓN 3: SESIONES ACTIVAS -->
-        <div class="panel-card">
-            <div class="panel-header-title">
-                <h3>Active Sessions & Devices</h3>
-            </div>
-            
-            <div class="session-list">
-                <div class="session-item">
-                    <div class="session-icon">💻</div>
-                    <div class="session-details">
-                        <strong>Chrome on Windows (This Device)</strong>
-                        <p class="text-muted-date">Tijuana, MX • IP: 189.210.XX.XX</p>
-                    </div>
-                    <span class="status-badge status-active">Active Now</span>
-                </div>
-            </div>
-        </div>
+    <h2 class="section-title">ACCOUNT SETTINGS</h2>
+
+    <div class="profile-actions">
+        <a href="{% url 'edit_admin_profile' %}" class="btn btn-edit">EDIT PROFILE</a>
+        <button type="button" class="btn btn-logout" data-bs-toggle="modal" data-bs-target="#logoutModal">LOG OUT</button>
     </div>
 </div>
 {% endblock %}

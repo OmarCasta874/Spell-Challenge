@@ -107,18 +107,25 @@
                 <td class="text-muted-date">{{ u.date_joined }}</td>
                 <td class="actions-cell text-right">
                     <button 
-                        class="btn-icon btn-edit" 
-                        onclick="openEditUserModal({{ u.id }}, '{{ u.full_name }}', '{{ u.email }}', '{{ u.role }}', '{{ u.status }}')"
-                        title="Edit User"
+                        class="btn-pill-outline" 
+                        onclick="openViewUserModal({{ u.id }}, '{{ u.full_name }}', '{{ u.email }}', '{{ u.role }}', '{{ u.status }}')"
+                        type="button"
                     >
-                        ✏️
+                        VIEW
                     </button>
                     <button 
-                        class="btn-icon btn-delete" 
-                        onclick="openDeleteUserModal({{ u.id }}, '{{ u.full_name }}')"
-                        title="Delete User"
+                        class="btn-pill-outline" 
+                        onclick="openEditUserModal({{ u.id }}, '{{ u.full_name }}', '{{ u.email }}', '{{ u.role }}', '{{ u.status }}')"
+                        type="button"
                     >
-                        🗑️
+                        EDIT
+                    </button>
+                    <button 
+                        class="btn-pill-solid" 
+                        onclick="openDeleteUserModal({{ u.id }}, '{{ u.full_name }}')"
+                        type="button"
+                    >
+                        DELETE
                     </button>
                 </td>
             </tr>
@@ -306,7 +313,11 @@
                     <!-- GROUP -->
                     <div class="form-field">
                         <label for="userGroup">Assigned Group</label>
-                        <select id="userGroup" name="group" class="form-select">
+                        <select
+                            id="userGroup"
+                            name="group"
+                            class="form-select"
+                        >
                             <option value="">-- No Group --</option>
                             {% for g in available_groups %}
                                 <option value="{{ g }}">
@@ -315,6 +326,10 @@
                             {% endfor %}
                         </select>
                     </div>
+                </div>
+                <!-- TEACHER FIELDS -->
+                <div id="teacherFields" style="display: none;">
+
                 </div>
             </div>
             <div class="modal-footer">
@@ -354,6 +369,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script>
     function openModal(modalId) {
         document.getElementById(modalId).classList.add('active');
@@ -363,23 +379,52 @@
         document.getElementById(modalId).classList.remove('active');
     }
 
+    function setUserFormReadOnly(readOnly) {
+        const form = document.getElementById('userForm');
+        form.querySelectorAll('input, select').forEach(el => {
+            if (el.type === 'hidden') return;
+            el.disabled = readOnly;
+        });
+        document.querySelector('#userModal .modal-footer button[type="submit"]').style.display = readOnly ? 'none' : 'inline-block';
+    }
+
+    function fillUserForm(id, name, email, role, status) {
+        document.getElementById('userId').value = id;
+
+        const nameParts = name.trim().split(' ');
+        document.getElementById('firstName').value = nameParts[0] || '';
+        document.getElementById('lastName').value = nameParts[1] || '';
+        document.getElementById('secondLastName').value = nameParts[2] || '';
+
+        document.getElementById('userEmail').value = email;
+        document.getElementById('userRole').value = role;
+        document.getElementById('userStatus').value = status;
+
+        toggleRoleFields();
+    }
+
     function openCreateUserModal() {
         document.getElementById('userModalTitle').innerText = 'Register New User';
-        document.getElementById('userId').value = '';
         document.getElementById('userForm').reset();
+        document.getElementById('userId').value = '';
+        document.getElementById('formAction').value = 'add_user';
         toggleRoleFields();
+        setUserFormReadOnly(false);
         openModal('userModal');
     }
 
     function openEditUserModal(id, name, email, role, status) {
         document.getElementById('userModalTitle').innerText = 'Edit User Profile';
-        document.getElementById('userId').value = id;
-        document.getElementById('userFullName').value = name;
-        document.getElementById('userEmail').value = email;
-        document.getElementById('userRole').value = role;
-        document.getElementById('userStatus').value = status;
-        
-        toggleStudentFields();
+        document.getElementById('formAction').value = 'edit_user';
+        fillUserForm(id, name, email, role, status);
+        setUserFormReadOnly(false);
+        openModal('userModal');
+    }
+
+    function openViewUserModal(id, name, email, role, status) {
+        document.getElementById('userModalTitle').innerText = 'View User Profile';
+        fillUserForm(id, name, email, role, status);
+        setUserFormReadOnly(true);
         openModal('userModal');
     }
 
@@ -391,11 +436,17 @@
     function toggleRoleFields() {
         const role = document.getElementById('userRole').value;
         const studentFields = document.getElementById('studentFields');
+        const teacherFields = document.getElementById('teacherFields');
 
         if (role === 'STUDENT') {
             studentFields.style.display = 'block';
+            teacherFields.style.display = 'none';
+        } else if (role === 'TEACHER') {
+            studentFields.style.display = 'none';
+            teacherFields.style.display = 'block';
         } else {
             studentFields.style.display = 'none';
+            teacherFields.style.display = 'none';
         }
     }
 
