@@ -1184,3 +1184,8 @@ def edit_admin_profile(request):
             'admin': admin
         }
     )
+    
+@never_cache
+@role_required('student')
+def student_practice_english(request):
+    return render(request, 'student/practice_your_english.html')

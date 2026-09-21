@@ -35,4 +35,5 @@ urlpatterns = [
     path('student/leave_groups/<str:group_id>/', views.leave_group, name='student_leave_group'),
     path('student/mini-games/', views.mini_games_view, name='student_mini_games'),
     path('student/competitions_select/', views.student_competitions_view, name='student_competitions_select'),
+    path('student/practice_your_english/', views.student_practice_english, name='practice_your_english'),
 ]

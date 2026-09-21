@@ -264,3 +264,98 @@
   border-radius: 20px;
   cursor: not-allowed;
 }
+
+/* --- UNIT DROPDOWN --- */
+.unit-dropdown {
+  position: relative;
+}
+
+.unit-badge {
+  background: #4a1014;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.unit-dropdown-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  width: 420px;
+  max-width: 90vw;
+  background: #4a1014;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  padding: 1.25rem 1.5rem 1.5rem;
+  z-index: 50;
+}
+
+.unit-dropdown-panel.active {
+  display: block;
+}
+
+.unit-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.unit-dropdown-title {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+}
+
+.unit-dropdown-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.unit-dropdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.unit-option {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-align: left;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.unit-option:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* --- BOTÓN PESAS (Practice Your English) --- */
+.dumbbell-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7a1f2b;
+  text-decoration: none;
+}
+
+.dumbbell-btn i {
+  width: 22px;
+  height: 22px;
+  color: #7a1f2b;
+}

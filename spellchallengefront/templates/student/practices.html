@@ -2,15 +2,39 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/student_base.css' %}"> {# o teacher_base.css #}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'css/practice.css' %}">
 {% endblock %}
 
 {% block student_content %}
 
 <div class="practice-header">
-  <span class="unit-badge">Unit #1: A1 - BEGINNER</span>
+
+  <div class="unit-dropdown">
+    <button class="unit-badge" onclick="toggleUnitDropdown()">
+      <span id="currentUnitLabel">Unit #1: A1 - BEGINNER</span>
+    </button>
+
+    <div class="unit-dropdown-panel" id="unitDropdownPanel">
+      <div class="unit-dropdown-header">
+        <span class="unit-dropdown-title">UNITS</span>
+        <button class="unit-dropdown-close" onclick="toggleUnitDropdown()">&times;</button>
+      </div>
+      <div class="unit-dropdown-list">
+        <button class="unit-option" data-unit="1" onclick="selectUnit(this)">UNIT #1: A1 Begineer</button>
+        <button class="unit-option" data-unit="2" onclick="selectUnit(this)">UNIT #2: A2 Begineer-Intermediate</button>
+        <button class="unit-option" data-unit="3" onclick="selectUnit(this)">UNIT #3: B1 Intermediate</button>
+        <button class="unit-option" data-unit="4" onclick="selectUnit(this)">UNIT #4: B2 Intermediate-Advanced</button>
+        <button class="unit-option" data-unit="5" onclick="selectUnit(this)">UNIT #5: C1 Advanced #1</button>
+        <button class="unit-option" data-unit="6" onclick="selectUnit(this)">UNIT #6: C2 Advanced #2</button>
+      </div>
+    </div>
+</div>
+
   <div class="practice-header-icons">
+    <a href="{% url 'practice_your_english' %}" class="dumbbell-btn" title="Practice Your English">
+      <i data-lucide="dumbbell"></i>
+    </a>
     <i data-lucide="bar-chart-2"></i>
     <i data-lucide="bell" class="notification-bell"></i>
   </div>
@@ -129,3 +153,25 @@
 </div>
 
 {% endblock student_content %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  function toggleUnitDropdown() {
+    document.getElementById('unitDropdownPanel').classList.toggle('active');
+  }
+
+  function selectUnit(button) {
+    const unitText = button.textContent.trim();
+    document.getElementById('currentUnitLabel').textContent = unitText;
+    toogleUnitDropdown();
+  }
+
+  document.addEventListener('click', function (event) {
+    const wrapper = document.querySelector('.unit-dropdown');
+    if (wrapper && !wrapper.contains(event.target)) {
+      document.getElementById('unitDropdownPanel').classList.remove('active');
+    }
+  });
+</script>
+{% endblock %}
