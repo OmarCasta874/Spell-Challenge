@@ -4,64 +4,55 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/student_base.css' %}"> 
 <link rel="stylesheet" href="{% static 'css/mini_games.css' %}">
+<link rel="stylesheet" href="{% static 'css/hangman_modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/missing_letters_modal.css' %}">
 {% endblock %}
 
 {% block title %}Mini Games - Spell-Challenge Student{% endblock %}
 
-{% block content %}
+{% block student_content %}
 <div class="games-container text-center">
-    
-    <!-- ENCABEZADO -->
+
     <h1 class="main-title">MINI GAMES</h1>
     <p class="sub-title">Practice English. Have Fun!</p>
 
-    <!-- PRIMERA FILA: JUEGOS DISPONIBLES -->
     <div class="games-row">
-        <!-- HANGMAN -->
         <div class="game-card-pink">
             <h3>HANGMAN</h3>
-            <button class="btn-pill-play" onclick="openGameModal('HANGMAN', 'Guess the hidden word before running out of attempts!')">
-                PLAY
-            </button>
+            <button class="btn-pill-play" onclick="openHangmanModal()">PLAY</button>
         </div>
 
-        <!-- MISSING LETTERS -->
         <div class="game-card-pink">
             <h3>MISSING LETTERS</h3>
-            <button class="btn-pill-play" onclick="openGameModal('MISSING LETTERS', 'Fill in the missing characters to complete the vocabulary words.')">
+            <button class="btn-pill-play" onclick="openMissingModal()">
                 PLAY
             </button>
         </div>
     </div>
 
-    <!-- SECCIÓN COMING SOON -->
-    <h2 class="section-title mt-3">COMING SOON...</h2>
+    <h2 class="section-title">COMING SOON...</h2>
 
-    <!-- SEGUNDA FILA: TARJETAS BLOQUEADAS -->
     <div class="games-row-locked">
         <div class="game-card-locked">
-            <div class="lock-icon">🔒</div>
+            <i data-lucide="lock" class="lock-icon"></i>
             <span>Coming Soon...</span>
         </div>
         <div class="game-card-locked">
-            <div class="lock-icon">🔒</div>
+            <i data-lucide="lock" class="lock-icon"></i>
             <span>Coming Soon...</span>
         </div>
         <div class="game-card-locked">
-            <div class="lock-icon">🔒</div>
+            <i data-lucide="lock" class="lock-icon"></i>
             <span>Coming Soon...</span>
         </div>
         <div class="game-card-locked">
-            <div class="lock-icon">🔒</div>
+            <i data-lucide="lock" class="lock-icon"></i>
             <span>Coming Soon...</span>
         </div>
     </div>
 
 </div>
 
-<!-- ========================================== -->
-<!-- MODAL: CONFIRMACIÓN PARA INICIAR JUEGO    -->
-<!-- ========================================== -->
 <div id="gameModal" class="modal-overlay">
     <div class="modal-content modal-small">
         <div class="modal-header">
@@ -81,9 +72,12 @@
         </div>
     </div>
 </div>
+{% include 'student/hangman_modal.html' %}
+{% include 'student/missing_letters_modal.html' %}
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script>
     function openModal(id) {
         document.getElementById(id).classList.add('active');
@@ -110,5 +104,296 @@
             e.target.classList.remove('active');
         }
     }
+
+    const hangman_vocabularyList = [
+        { word: 'DOG', meaning: "It's known as man's best friend.", audio: 'Dog' },
+        { word: 'HELLO', meaning: 'A common greeting used to begin a conversation.', audio: 'Hello' },
+        { word: 'TEACHER', meaning: 'A person who helps students to acquire knowledge.', audio: 'Teacher' }
+    ];
+
+    let hangman_currentWordIndex = 0;
+    let hangman_selectedWord = '';
+    let hangman_guessedLetters = [];
+    let hangman_attemptsLeft = 5;
+    let hangman_score = 0;
+
+    function hangman_initGame() {
+        const item = hangman_vocabularyList[hangman_currentWordIndex];
+        hangman_selectedWord = item.word.toUpperCase();
+        document.getElementById('hangmanHint').innerText = item.meaning;
+        hangman_guessedLetters = [];
+        hangman_attemptsLeft = 5;
+
+        hangman_renderHearts();
+        hangman_renderWordDisplay();
+        hangman_renderKeyboard();
+    }
+
+    function hangman_renderHearts() {
+        const container = document.getElementById('hangmanHearts');
+        container.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const icon = document.createElement('i');
+            icon.setAttribute('data-lucide', 'heart');
+            if (i >= hangman_attemptsLeft) icon.classList.add('lost');
+            container.appendChild(icon);
+        }
+        lucide.createIcons();
+    }
+
+    function hangman_renderWordDisplay() {
+        const container = document.getElementById('hangmanWordDisplay');
+        container.innerHTML = '';
+        hangman_selectedWord.split('').forEach(letter => {
+            const letterBox = document.createElement('div');
+            letterBox.className = 'letter-slot';
+            letterBox.innerText = hangman_guessedLetters.includes(letter) ? letter : '';
+            container.appendChild(letterBox);
+        });
+    }
+
+    function hangman_renderKeyboard() {
+        const keyboard = document.getElementById('hangmanKeyboard');
+        keyboard.innerHTML = '';
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter => {
+            const btn = document.createElement('button');
+            btn.className = 'key-btn';
+            btn.innerText = letter;
+            btn.disabled = hangman_guessedLetters.includes(letter);
+            btn.onclick = () => hangman_handleGuess(letter, btn);
+            keyboard.appendChild(btn);
+        });
+    }
+
+    function hangman_handleGuess(letter, btnElement) {
+        hangman_guessedLetters.push(letter);
+        btnElement.disabled = true;
+
+        if (hangman_selectedWord.includes(letter)) {
+            btnElement.classList.add('correct');
+            hangman_renderWordDisplay();
+            hangman_checkWin();
+        } else {
+            btnElement.classList.add('wrong');
+            hangman_attemptsLeft--;
+            hangman_renderHearts();
+            if (hangman_attemptsLeft === 0) hangman_showResult(false);
+        }
+    }
+
+    function hangman_checkWin() {
+        const isWon = hangman_selectedWord.split('').every(l => hangman_guessedLetters.includes(l));
+        if (isWon) {
+            hangman_score += 10;
+            hangman_showResult(true);
+        }
+    }
+
+    function hangman_showResult(isWin) {
+        document.getElementById('hangmanResTitle').innerText = isWin ? '🎉 Excellent!' : '❌ Game Over';
+        document.getElementById('hangmanResMessage').innerText = isWin ? 'You guessed the word correctly!' : 'You ran out of attempts.';
+        document.getElementById('hangmanResWord').innerText = hangman_selectedWord;
+        openModal('hangmanResultModal');
+    }
+
+    function hangman_resetGame() {
+        closeModal('hangmanResultModal');
+        hangman_initGame();
+    }
+
+    function hangman_exitGame() {
+        closeModal('hangmanResultModal');
+        closeModal('hangmanModal');
+    }
+
+    function hangman_playAudioHint() {
+        const word = hangman_vocabularyList[hangman_currentWordIndex].audio;
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'en-US';
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function openHangmanModal() {
+        hangman_initGame();
+        openModal('hangmanModal');
+    }
+
+    const missing_vocabularyList = [
+        { word: 'COMPUTER', meaning: 'An electronic device for processing data.', audio: 'Computer' },
+        { word: 'GREETING', meaning: 'A polite word or sign of welcome.', audio: 'Greeting' },
+        { word: 'WELCOME', meaning: 'Used to greet someone arriving at a place.', audio: 'Welcome' },
+        { word: 'SPELLING', meaning: 'The process of writing or naming the letters of a word.', audio: 'Spelling' }
+    ];
+
+    let missing_currentItem = null;
+    let missing_selectedWord = '';
+    let missing_missingIndices = [];
+    let missing_filledMap = {};
+    let missing_completedWords = 0;
+    let missing_timeLeft = 60;
+    let missing_timerInterval = null;
+
+    function missing_initGame() {
+        missing_completedWords = 0;
+        missing_timeLeft = 60;
+        document.getElementById('missingCompletedCount').innerText = missing_completedWords;
+        missing_updateTimerDisplay();
+        missing_loadNewWord();
+        missing_startTimer();
+    }
+
+    function missing_startTimer() {
+        clearInterval(missing_timerInterval);
+        missing_timerInterval = setInterval(() => {
+            missing_timeLeft--;
+            missing_updateTimerDisplay();
+            if (missing_timeLeft <= 0) {
+                clearInterval(missing_timerInterval);
+                missing_endGame();
+            }
+        }, 1000);
+    }
+
+    function missing_updateTimerDisplay() {
+        const mins = String(Math.floor(missing_timeLeft / 60)).padStart(2, '0');
+        const secs = String(missing_timeLeft % 60).padStart(2, '0');
+        const el = document.getElementById('missingTimer');
+        el.innerText = `${mins}:${secs}`;
+        el.parentElement.classList.toggle('warning', missing_timeLeft <= 10);
+    }
+
+    function missing_loadNewWord() {
+        missing_currentItem = missing_vocabularyList[Math.floor(Math.random() * missing_vocabularyList.length)];
+        missing_selectedWord = missing_currentItem.word.toUpperCase();
+
+        // Selecciona ~40% de letras al azar como huecos
+        missing_missingIndices = [];
+        missing_selectedWord.split('').forEach((_, i) => {
+            if (Math.random() < 0.4) missing_missingIndices.push(i);
+        });
+        if (missing_missingIndices.length === 0) missing_missingIndices.push(0);
+
+        missing_filledMap = {};
+        missing_renderWordSlots();
+        missing_renderLetterBank();
+    }
+
+    function missing_renderWordSlots() {
+        const container = document.getElementById('missingWordDisplay');
+        container.innerHTML = '';
+        missing_selectedWord.split('').forEach((letter, index) => {
+            const span = document.createElement('span');
+            if (missing_missingIndices.includes(index)) {
+                span.className = 'blank-letter';
+                span.dataset.index = index;
+                span.innerText = '_';
+            } else {
+                span.className = 'fixed-letter';
+                span.innerText = letter;
+            }
+            container.appendChild(span);
+        });
+    }
+
+    function missing_renderLetterBank() {
+        const bank = document.getElementById('missingLetterBank');
+        bank.innerHTML = '';
+
+        // Una entrada de letra por cada hueco (repite si la palabra la necesita 2+ veces)
+        const neededLetters = missing_missingIndices.map(i => missing_selectedWord[i]);
+        const distractors = ['A', 'E', 'I', 'O', 'U', 'R', 'S', 'T', 'N']
+            .filter(l => !neededLetters.includes(l)).slice(0, 4);
+        const options = [...neededLetters, ...distractors].sort(() => Math.random() - 0.5);
+
+        options.forEach(letter => {
+            const btn = document.createElement('button');
+            btn.className = 'key-btn';
+            btn.innerText = letter;
+            btn.onclick = () => missing_handleLetterClick(letter, btn);
+            bank.appendChild(btn);
+        });
+    }
+
+    function missing_handleLetterClick(letter, btnElement) {
+        const nextBlank = document.querySelector('.blank-letter:not(.filled)');
+        if (!nextBlank) return;
+
+        const index = parseInt(nextBlank.dataset.index);
+        nextBlank.innerText = letter;
+        nextBlank.classList.add('filled');
+        missing_filledMap[index] = letter;
+        btnElement.disabled = true;
+
+        const allFilled = missing_missingIndices.every(i => missing_filledMap[i]);
+        if (allFilled) missing_checkWord();
+    }
+
+    function missing_checkWord() {
+        const isCorrect = missing_missingIndices.every(
+            i => missing_filledMap[i] === missing_selectedWord[i]
+        );
+
+        if (isCorrect) {
+            missing_completedWords++;
+            document.getElementById('missingCompletedCount').innerText = missing_completedWords;
+            setTimeout(missing_loadNewWord, 500);
+        } else {
+            document.querySelectorAll('.blank-letter').forEach(el => el.classList.add('filled'));
+            setTimeout(() => {
+                missing_filledMap = {};
+                missing_renderWordSlots();
+                missing_renderLetterBank();
+            }, 700);
+        }
+    }
+
+    function missing_skipWord() {
+        missing_loadNewWord();
+    }
+
+    function missing_endGame() {
+        document.getElementById('missingFinalScore').innerText = missing_completedWords + ' words';
+        openModal('missingResultModal');
+    }
+
+    function missing_resetGame() {
+        closeModal('missingResultModal');
+        missing_initGame();
+    }
+
+    function missing_exitGame() {
+        clearInterval(missing_timerInterval);
+        closeModal('missingResultModal');
+        closeModal('missingModal');
+    }
+
+    function missing_playAudioHint() {
+        const word = missing_currentItem.audio;
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'en-US';
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function openMissingModal() {
+        missing_initGame();
+        openModal('missingModal');
+    }
+
+    function mini_games_checkAutoOpen() {
+        const params = new URLSearchParams(window.location.search);
+        const game = params.get('game');
+
+        if (game === 'hangman') {
+            openHangmanModal();
+        } else if (game === 'missing-letters') {
+            openMissingModal();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', mini_games_checkAutoOpen);
 </script>
 {% endblock %}

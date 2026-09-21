@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
+{{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static 'css/admin_base.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/admin_profile.css' %}">
 {% endblock %}
@@ -11,15 +12,15 @@
 {% block admin_content %}
 <div class="profile-header">
     <div class="avatar-large">
-        {% if admin.avatar_url %}
-            <img src="{{ admin.avatar_url }}" alt="Profile Picture">
-        {% else %}
-            <span class="avatar-initials">{{ admin.first_name|first }}{{ admin.last_name|first }}</span>
-        {% endif %}
+        <span class="avatar-initials">
+            {{ admin.nombre_pila|first }}{{ admin.apellidoPaterno|first }}
+        </span>
     </div>
     <div class="profile-header-info">
-        <h1 class="profile-name">{{ admin.first_name }} {{ admin.last_name }}</h1>
-        <p class="profile-subtext">{{ admin.age }} YEARS</p>
+        <h1 class="profile-name">
+            {{ admin.nombre_pila }} {{ admin.apellidoPaterno }}
+            {{ admin.apellidoMaterno|default:"" }}
+        </h1>
         <p class="profile-subtext">Administrator</p>
     </div>
 </div>
@@ -28,18 +29,18 @@
     <div class="form-row-2">
         <div class="form-field">
             <label>First Name</label>
-            <input type="text" class="form-input" value="{{ admin.first_name }}" readonly>
+            <input type="text" class="form-input" value="{{ admin.nombre_pila }}" readonly>
         </div>
         <div class="form-field">
             <label>Last Name</label>
-            <input type="text" class="form-input" value="{{ admin.last_name }}" readonly>
+            <input type="text" class="form-input" value="{{ admin.apellidoPaterno }} {{ admin.apellidoMaterno }}" readonly>
         </div>
     </div>
 
     <div class="form-row-2">
         <div class="form-field">
             <label>Email Address</label>
-            <input type="email" class="form-input" value="{{ admin.email }}" readonly>
+            <input type="email" class="form-input" value="{{ admin.usuario.correo }}" readonly>
         </div>
         <div class="form-field">
             <label>Role</label>

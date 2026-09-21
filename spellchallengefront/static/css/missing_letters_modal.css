@@ -1,0 +1,153 @@
+/* ===== MISSING LETTERS MODAL (tema oscuro, fiel al mockup) ===== */
+.missing-theme {
+    background-color: #7a1f2b;
+    max-width: 620px;
+    width: 92%;
+    padding: 1.5rem 2rem;
+    border-radius: 16px;
+    color: #FFF;
+}
+
+.missing-header {
+    margin-bottom: 0.5rem;
+}
+
+.missing-title {
+    text-align: center;
+    color: #FFF;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin: 0.3rem 0 1rem;
+}
+
+.missing-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+}
+
+.missing-timer-box {
+    background-color: #3a0f16;
+    border-radius: 6px;
+    padding: 0.4rem 1.2rem;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.missing-timer-box.warning {
+    color: #ffb3b3;
+}
+
+.missing-completed {
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: right;
+}
+
+.missing-completed span {
+    display: block;
+    font-size: 1.3rem;
+}
+
+.missing-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.missing-bee {
+    width: 60px;
+    height: auto;
+}
+
+.missing-word-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.missing-subtitle {
+    font-weight: 700;
+    margin: 0;
+}
+
+.missing-word-display {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.missing-word-display .fixed-letter,
+.missing-word-display .blank-letter {
+    font-size: 1.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    min-width: 20px;
+    text-align: center;
+}
+
+.missing-word-display .blank-letter {
+    border-bottom: 3px solid #FFF;
+}
+
+.missing-word-display .blank-letter.filled {
+    border-bottom: 3px solid #f28f89;
+}
+
+.missing-letter-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1.2rem;
+}
+
+.missing-letter-bank .key-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background-color: #f28f89;
+    color: #7a1f2b;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.missing-letter-bank .key-btn:hover:not(:disabled) {
+    background-color: #FFF;
+}
+
+.missing-letter-bank .key-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.missing-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.btn-skip {
+    background: transparent;
+    border: 1.5px solid #FFF;
+    color: #FFF;
+    border-radius: 20px;
+    padding: 0.5rem 1.4rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-skip:hover {
+    background: #FFF;
+    color: #7a1f2b;
+}

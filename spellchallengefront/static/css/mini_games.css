@@ -1,4 +1,56 @@
-/* ESTILOS FIELES A LA MAQUETA MINI GAMES */
+/* ===== MODAL BASE (Mini Games) ===== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #FFF;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.modal-small {
+    max-width: 380px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: #700000;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-body {
+    padding: 1rem 1.2rem;
+}
+
+.modal-footer {
+    padding: 0 1.2rem 1.2rem;
+}
+
 .games-container {
     max-width: 1100px;
     margin: 0 auto;
@@ -10,14 +62,21 @@
     font-size: 2.2rem;
     font-weight: 700;
     letter-spacing: 1px;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.4rem;
 }
 
-.sub-title, .section-title {
+.sub-title {
     color: #700000;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 700;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+.section-title {
+    color: #700000;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 2.5rem 0 1.5rem;
 }
 
 .games-row {
@@ -25,20 +84,19 @@
     gap: 2rem;
     justify-content: flex-start;
     flex-wrap: wrap;
+    margin-bottom: 1rem;
 }
 
-/* TARJETA ROSA / ROSADA (JUEGOS ACTIVOS) */
+/* TARJETA ROSA (JUEGOS ACTIVOS) */
 .game-card-pink {
-    background-color: #FDE8E8;
-    border: 1px solid #E8B8B8;
+    background-color: #FDE1E1;
     border-radius: 12px;
-    width: 220px;
-    height: 140px;
+    width: 240px;
+    height: 150px;
     position: relative;
     padding: 1.2rem;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     align-items: flex-start;
 }
 
@@ -52,18 +110,23 @@
 
 /* BOTÓN OVALADO PLAY */
 .btn-pill-play {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
     border: 1.5px solid #700000;
     background: #FFF;
     color: #700000;
     border-radius: 20px;
-    padding: 0.2rem 1.2rem;
+    padding: 0.3rem 1.4rem;
     font-size: 0.85rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+/* centrado abajo, solo dentro de la tarjeta de juego */
+.game-card-pink .btn-pill-play {
+    position: absolute;
+    left: 50%;
+    bottom: 15px;
+    transform: translateX(-50%);
 }
 
 .btn-pill-play:hover {
@@ -74,26 +137,36 @@
 /* FILA COMING SOON / BLOQUEADOS */
 .games-row-locked {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
 }
 
 .game-card-locked {
-    background-color: #FDE8E8;
-    border: 1px solid #E8B8B8;
+    background-color: #FDE1E1;
     border-radius: 12px;
-    height: 130px;
+    height: 140px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 0.6rem;
+}
+
+.game-card-locked span {
     color: #000;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
 }
 
 .lock-icon {
-    font-size: 2.2rem;
-    margin-bottom: 0.3rem;
-    opacity: 0.7;
+    width: 34px;
+    height: 34px;
+    stroke: #333;
+    stroke-width: 1.5;
+}
+
+@media (max-width: 900px) {
+    .games-row-locked {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

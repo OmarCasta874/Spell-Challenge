@@ -1,0 +1,67 @@
+{% load static %}
+<div id="missingModal" class="modal-overlay">
+    <div class="modal-content missing-theme">
+
+        <div class="missing-header">
+            <button type="button" class="btn-back-modal" onclick="missing_exitGame()">
+                <i data-lucide="arrow-left"></i> Mini Games
+            </button>
+        </div>
+
+        <h2 class="missing-title">MISSING LETTERS</h2>
+
+        <div class="missing-top-row">
+            <div class="missing-timer-box">
+                <span id="missingTimer">01:00</span>
+            </div>
+            <div class="missing-completed">
+                Completed Words:
+                <span id="missingCompletedCount">0</span>
+            </div>
+        </div>
+
+        <div class="missing-body">
+            <img src="{% static 'img/crowing-left.png' %}" alt="Bee mascot" class="missing-bee">
+            <div class="missing-word-col">
+                <p class="missing-subtitle">Complete the word</p>
+                <div id="missingWordDisplay" class="missing-word-display">
+                    <!-- casillas generadas por JS -->
+                </div>
+            </div>
+        </div>
+
+        <div id="missingLetterBank" class="missing-letter-bank">
+            <!-- botones de letras generados por JS -->
+        </div>
+
+        <div class="missing-actions">
+            <button type="button" class="btn-pill-play" onclick="missing_playAudioHint()">
+                🔊 Listen Word
+            </button>
+            <button type="button" class="btn-skip" onclick="missing_skipWord()">
+                Skip ➔
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="missingResultModal" class="modal-overlay">
+    <div class="modal-content modal-small text-center">
+        <div class="modal-header">
+            <h3 style="margin: 0; color: #700000;">⏰ Time's Up!</h3>
+            <button class="modal-close" onclick="closeModal('missingResultModal')">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 1.5rem 1rem;">
+            <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">You completed:</p>
+            <p style="font-size: 2rem; font-weight: 800; color: #700000;" id="missingFinalScore">0 words</p>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: center; gap: 1rem;">
+            <button type="button" class="btn-pill-play" style="position: static; padding: 0.4rem 1.8rem;" onclick="missing_resetGame()">
+                Try Again
+            </button>
+            <button type="button" class="btn" style="background: #CCC; color: #333; border-radius: 20px; padding: 0.4rem 1.2rem; cursor: pointer; border: none;" onclick="missing_exitGame()">
+                Exit Game
+            </button>
+        </div>
+    </div>
+</div>

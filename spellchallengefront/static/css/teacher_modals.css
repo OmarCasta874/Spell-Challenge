@@ -371,3 +371,31 @@
   .panel-right .modal-body,
   .panel-right .modal-footer { padding-left: 20px; padding-right: 20px; }
 }
+
+/* =========================================================
+   Form controls dentro de cualquier modal .panel-center
+   (antes solo existían para #createListModal específicamente)
+   ========================================================= */
+.panel-center .form-label {
+  color: var(--sc-maroon);
+  font-weight: 700;
+  font-size: .95rem;
+  margin-bottom: 6px;
+}
+.panel-center .form-control,
+.panel-center .form-select {
+  border: 2px solid var(--sc-maroon);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.panel-center .form-control:focus,
+.panel-center .form-select:focus {
+  border-color: var(--sc-maroon-dark);
+  box-shadow: 0 0 0 3px rgba(122, 18, 32, .15);
+}
+
+/* Ancho específico del modal Create Competition (más campos
+   que el choice modal, necesita más espacio horizontal) */
+#createCompetitionModal .modal-dialog.panel-center {
+  max-width: 660px;
+}
