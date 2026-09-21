@@ -22,7 +22,7 @@
 
 <div class="view-group-row">
 
-  <div class="students-table-wrap">
+  <div class="students-table-wrap panel-border-red">
     <table class="students-table">
       <thead>
         <tr>
@@ -40,7 +40,19 @@
             {{ student.apellidoPaterno }}
             {{ student.apellidoMaterno }}
           </td>
-          <td><a href="#" class="student-btn-view">VIEW</a></td>
+          <td>
+            <button
+              type="button"
+              class="student-btn-view"
+              onclick="openClassmateModal(
+                  '{{ student.matricula }}',
+                  '{{ student.nombre_pila|escapejs }} {{ student.apellidoPaterno|escapejs }} {{ student.apellidoMaterno|escapejs }}',
+                  '{{ student.edad }}',
+                  '{{ student.email|escapejs }}'
+              )">
+              VIEW
+            </button>
+          </td>
         </tr>
         {% empty %}
         <tr>
@@ -66,12 +78,26 @@
         {% for word in word_list %}
         <tr>
           <td>{{ forloop.counter }}</td>
+          <td>{{ word.word }}</td>
           <td>{{ word.significado }}</td>
-          <td>---</td>
           <td>{{ word.pronunciacion }}</td>
           <td class="wordlist-actions">
-            <a href="#" class="wordlist-btn">VIEW</a>
-            <a href="#" class="wordlist-btn">LISTEN</a>
+            <button
+              type="button"
+              class="wordlist-btn"
+              onclick="openWordModal(
+                  '{{ word.word|escapejs }}',
+                  '{{ word.significado|escapejs }}',
+                  '{{ word.pronunciacion|escapejs }}'
+              )">
+              VIEW
+            </button>
+            <button
+              type="button"
+              class="wordlist-btn"
+              onclick="playAudio('{{ word.word|escapejs }}')">
+              LISTEN
+            </button>
           </td>
         </tr>
         {% empty %}
@@ -85,4 +111,84 @@
 
 </div>
 
+<!-- MODAL: VIEW CLASSMATE -->
+<div id="classmateModal" class="modal-overlay">
+  <div class="modal-content classmate-theme">
+    <button class="modal-close" onclick="closeModal('classmateModal')">&times;</button>
+    <h3 class="classmate-modal-title">View Classmate</h3>
+
+    <img src="{% static 'img/student.png' %}" alt="Student avatar" class="classmate-avatar">
+
+    <h4 id="cmName" class="classmate-name"></h4>
+    <p id="cmAge" class="classmate-detail"></p>
+    <p id="cmEmail" class="classmate-detail"></p>
+    <p id="cmEnrollment" class="classmate-enrollment"></p>
+
+    <button type="button" class="btn-accept" onclick="closeModal('classmateModal')">ACCEPT</button>
+  </div>
+</div>
+
+<!-- MODAL: WORD DETAILS -->
+<div id="wordModal" class="modal-overlay">
+  <div class="modal-content modal-small">
+    <div class="modal-header">
+      <h3>Word Details</h3>
+      <button class="modal-close" onclick="closeModal('wordModal')">&times;</button>
+    </div>
+    <div class="modal-body text-center">
+      <h2 id="wWord" style="color: #7a1f2b; font-size: 2rem;"></h2>
+      <p id="wPhonetic" style="font-style: italic; color: #8a8a8a;"></p>
+      <p class="mt-1"><strong>Meaning:</strong> <span id="wMeaning"></span></p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-pill-action btn-pill-solid" onclick="playAudio(document.getElementById('wWord').innerText)">🔊 Listen Audio</button>
+      <button type="button" class="btn-pill-close" onclick="closeModal('wordModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function openClassmateModal(enrollment, name, age, email) {
+        document.getElementById('cmName').innerText = name;
+        document.getElementById('cmAge').innerText = age + ' years';
+        document.getElementById('cmEmail').innerText = email;
+        document.getElementById('cmEnrollment').innerText = enrollment;
+        openModal('classmateModal');
+    }
+
+    function openWordModal(word, meaning, phonetic) {
+        document.getElementById('wWord').innerText = word;
+        document.getElementById('wMeaning').innerText = meaning;
+        document.getElementById('wPhonetic').innerText = phonetic;
+        openModal('wordModal');
+    }
+
+    function playAudio(word) {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'en-US';
+            window.speechSynthesis.speak(utterance);
+        } else {
+            alert('Playing pronunciation for: ' + word);
+        }
+    }
+
+    window.onclick = function(e) {
+        if (e.target.classList.contains('modal-overlay')) {
+            e.target.classList.remove('active');
+        }
+    }
+</script>
 {% endblock %}

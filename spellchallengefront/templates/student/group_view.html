@@ -1,4 +1,4 @@
-{% extends 'student/base_student.html' %}
+{% extends 'student/student_base.html' %}
 {% load static %}
 
 {% block extra_css %}
@@ -6,26 +6,23 @@
 <link rel="stylesheet" href="{% static 'css/student_group_view.css' %}">
 {% endblock %}
 
-{% block title %}Group 3A - English - Spell-Challenge Student{% endblock %}
+{% block title %} {{ group.nombre }} - Spell-Challenge Student{% endblock %}
 
-{% block content %}
-<!-- EMBEBIDO DE TODOS LOS DATOS DEL MOCKUP -->
-{% with group_title="Group 3A - English" teacher_name="José Manuel Flores Ruiz" teacher_email="jose.manuel@spell-challenge.usa" %}
-
+{% block student_content %}
 <!-- ENCABEZADO CON BOTÓN DE REGRESO -->
 <div class="page-header flex-align-center mb-15">
-    <a href="{% url 'student_my_groups' %}" class="btn-back-link">
-        ← {{ group_title }}
+    <a href="{% url 'student_groups' %}" class="btn-back-link">
+        ← {{ group.nombre }}
     </a>
 </div>
 
-<!-- CONTENEDOR EN 2 COLUMNAS (MOCKUP EXACTO) -->
+<!-- CONTENEDOR EN 2 COLUMNAS -->
 <div class="group-view-grid">
     
     <!-- COLUMNA IZQUIERDA: PROFESOR Y TABLA DE COMPAÑEROS -->
     <div class="left-column">
         <!-- TARJETA INFORMACIÓN DEL PROFESOR -->
-        <div class="panel-card mb-1">
+        <div class="panel-card panel-border-red mb-1">
             <table class="data-table compact-table">
                 <thead>
                     <tr>
@@ -43,7 +40,7 @@
         </div>
 
         <!-- TABLA DE COMPAÑEROS (CLASSMATES) -->
-        <div class="panel-card table-card">
+        <div class="panel-card table-card panel-border-red">
             <div class="table-responsive">
                 <table class="data-table">
                     <thead>
@@ -54,97 +51,34 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for classmate in classmates %}
                         <tr>
-                            <td>0324108104</td>
-                            <td>Diego Sanchez Hernandez</td>
+                            <td>{{ classmate.matricula }}</td>
+                            <td>
+                                {{ classmate.nombre_pila }}
+                                {{ classmate.apellidoPaterno }}
+                                {{ classmate.apellidoMaterno|default:"" }}
+                            </td>
                             <td class="text-center">
-                                <button class="btn-pill-action" onclick="openClassmateModal('Diego Sanchez Hernandez', '0324108104')">VIEW</button>
+                                <button
+                                    class="btn-pill-action"
+                                    onclick="openClassmateModal(
+                                        '{{ classmate.matricula }}',
+                                        '{{ classmate.nombre_pila|escapejs }} {{ classmate.apellidoPaterno|escapejs }} {{ classmate.apellidoMaterno|default:""|escapejs }}',
+                                        '{{ classmate.edad }}',
+                                        '{{ classmate.email|escapejs }}'
+                                    )">
+                                    VIEW
+                                </button>
                             </td>
                         </tr>
+                        {% empty %}
                         <tr>
-                            <td>0324108106</td>
-                            <td>Joshua Gibram Gonzalez Alvarado</td>
-                            <td class="text-center">
-                                <button class="btn-pill-action" onclick="openClassmateModal('Joshua Gibram Gonzalez Alvarado', '0324108106')">VIEW</button>
+                            <td colspan="3" class="text-center text-muted">
+                                No classmates found.
                             </td>
                         </tr>
-                        <tr>
-                            <td>0324108107</td>
-                            <td>Josue Alverto Villegas Hernandez</td>
-                            <td class="text-center">
-                                <button class="btn-pill-action" onclick="openClassmateModal('Josue Alverto Villegas Hernandez', '0324108107')">VIEW</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>0324108108</td>
-                            <td>Dulce Aurora de la Cruz Enriquez</td>
-                            <td class="text-center">
-                                <button class="btn-pill-action" onclick="openClassmateModal('Dulce Aurora de la Cruz Enriquez', '0324108108')">VIEW</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>0324108109</td>
-                            <td>Aline Aketzali Lucido Muñoz</td>
-                            <td class="text-center">
-                                <button class="btn-pill-action" onclick="openClassmateModal('Aline Aketzali Lucido Muñoz', '0324108109')">VIEW</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>0324108110</td>
-                            <td>Jonathan Rafael Garcia Lopez</td>
-                            <td class="text-center">
-                                <button class="btn-pill-action" onclick="openClassmateModal('Jonathan Rafael Garcia Lopez', '0324108110')">VIEW</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>0324108111</td>
-                            <td>Gaston Garcia Lopez</td>
-                            <td class="text-center">
-                                <button class="btn-pill-action" onclick="openClassmateModal('Gaston Garcia Lopez', '0324108111')">VIEW</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>0324108112</td>
-                            <td>Dulce Daniela Alvarado Aguilar</td>
-                            <td class="text-center">
-                                <button class="btn-pill-action" onclick="openClassmateModal('Dulce Daniela Alvarado Aguilar', '0324108112')">VIEW</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>0324108113</td>
-                            <td>Roberto Abdel Flores Galindo</td>
-                            <td class="text-center">
-                                <button class="btn-pill-action" onclick="openClassmateModal('Roberto Abdel Flores Galindo', '0324108113')">VIEW</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>0324108114</td>
-                            <td>Leonardo Sebastian Mejia Arrollo</td>
-                            <td class="text-center">
-                                <button class="btn-pill-action" onclick="openClassmateModal('Leonardo Sebastian Mejia Arrollo', '0324108114')">VIEW</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>0324108115</td>
-                            <td>Karina Itzel Reyes Inda</td>
-                            <td class="text-center">
-                                <button class="btn-pill-action" onclick="openClassmateModal('Karina Itzel Reyes Inda', '0324108115')">VIEW</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>0324108116</td>
-                            <td>Chloe Ramirez Reyes</td>
-                            <td class="text-center">
-                                <button class="btn-pill-action" onclick="openClassmateModal('Chloe Ramirez Reyes', '0324108116')">VIEW</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>0324108117</td>
-                            <td>Estela Patricia Reyes Vichiqui</td>
-                            <td class="text-center">
-                                <button class="btn-pill-action" onclick="openClassmateModal('Estela Patricia Reyes Vichiqui', '0324108117')">VIEW</button>
-                            </td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -166,74 +100,61 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for word in words %}
                         <tr>
-                            <td><strong>1</strong></td>
-                            <td><strong>Hello</strong></td>
-                            <td>Greeting</td>
-                            <td>/həˈloʊ/</td>
+                            <td><strong>{{ forloop.counter }}</strong></td>
+                            <td><strong>{{ word.word }}</strong></td>
+                            <td>{{ word.meaning }}</td>
+                            <td>{{ word.pronunciation }}</td>
                             <td class="text-center actions-group">
-                                <button class="btn-pill-action btn-pill-outline" onclick="openWordModal('Hello', 'Greeting', '/həˈloʊ/')">VIEW</button>
-                                <button class="btn-pill-action btn-pill-solid" onclick="playAudio('Hello')">LISTEN</button>
+                                <button
+                                    class="btn-pill-action"
+                                    onclick="openWordModal(
+                                        '{{ word.word|escapejs }}',
+                                        '{{ word.meaning|escapejs }}',
+                                        '{{ word.pronunciation|escapejs }}'
+                                    )">
+                                    VIEW
+                                </button>
+                                <button
+                                    class="btn-pill-action btn-pill-solid"
+                                    onclick="playAudio('{{ word.word|escapejs }}')">
+                                    LISTEN
+                                </button>
                             </td>
                         </tr>
+                        {% empty %}
                         <tr>
-                            <td><strong>2</strong></td>
-                            <td><strong>Hi</strong></td>
-                            <td>Greeting</td>
-                            <td>/haɪ/</td>
-                            <td class="text-center actions-group">
-                                <button class="btn-pill-action btn-pill-outline" onclick="openWordModal('Hi', 'Greeting', '/haɪ/')">VIEW</button>
-                                <button class="btn-pill-action btn-pill-solid" onclick="playAudio('Hi')">LISTEN</button>
+                            <td colspan="5" class="text-center text-muted">
+                                No words assigned to this group.
                             </td>
                         </tr>
-                        <tr>
-                            <td><strong>3</strong></td>
-                            <td><strong>Welcome</strong></td>
-                            <td>Greeting</td>
-                            <td>/ˈwelkəm/</td>
-                            <td class="text-center actions-group">
-                                <button class="btn-pill-action btn-pill-outline" onclick="openWordModal('Welcome', 'Greeting', '/ˈwelkəm/')">VIEW</button>
-                                <button class="btn-pill-action btn-pill-solid" onclick="playAudio('Welcome')">LISTEN</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>4</strong></td>
-                            <td><strong>Hey</strong></td>
-                            <td>Greeting</td>
-                            <td>/heɪ/</td>
-                            <td class="text-center actions-group">
-                                <button class="btn-pill-action btn-pill-outline" onclick="openWordModal('Hey', 'Greeting', '/heɪ/')">VIEW</button>
-                                <button class="btn-pill-action btn-pill-solid" onclick="playAudio('Hey')">LISTEN</button>
-                            </td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-
 </div>
 
-<!-- MODAL 1: INFORMACIÓN DEL COMPAÑERO        -->
+<!-- MODAL: VIEW CLASSMATE -->
 <div id="classmateModal" class="modal-overlay">
-    <div class="modal-content modal-small">
-        <div class="modal-header">
-            <h3>Classmate Details</h3>
-            <button class="modal-close" onclick="closeModal('classmateModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <p><strong>Name:</strong> <span id="cmName"></span></p>
-            <p><strong>Enrollment:</strong> <span id="cmEnrollment"></span></p>
-            <hr class="my-1">
-            <p class="text-muted">Group: Group 3A - English</p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('classmateModal')">Close</button>
-        </div>
-    </div>
+  <div class="modal-content classmate-theme">
+    <button class="modal-close" onclick="closeModal('classmateModal')">&times;</button>
+    <h3 class="classmate-modal-title">View Classmate</h3>
+
+    <img src="{% static 'img/student.png' %}" alt="Student avatar" class="classmate-avatar">
+
+    <h4 id="cmName" class="classmate-name"></h4>
+    <p id="cmAge" class="classmate-detail"></p>
+    <p id="cmEmail" class="classmate-detail"></p>
+    <p id="cmEnrollment" class="classmate-enrollment"></p>
+
+    <button type="button" class="btn-accept" onclick="closeModal('classmateModal')">ACCEPT</button>
+  </div>
 </div>
 
-<!-- MODAL 2: DETALLE DE PALABRA               -->
+<!-- MODAL: WORD DETAILS -->
 <div id="wordModal" class="modal-overlay">
     <div class="modal-content modal-small">
         <div class="modal-header">
@@ -241,21 +162,21 @@
             <button class="modal-close" onclick="closeModal('wordModal')">&times;</button>
         </div>
         <div class="modal-body text-center">
-            <h2 id="wWord" style="color: var(--primary-red); font-size: 2rem;"></h2>
-            <p id="wPhonetic" style="font-style: italic; color: var(--text-muted);"></p>
+            <h2 id="wWord" style="color: #7a1f2b; font-size: 2rem;"></h2>
+            <p id="wPhonetic" style="font-style: italic; color: #8a8a8a;"></p>
             <p class="mt-1"><strong>Meaning:</strong> <span id="wMeaning"></span></p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-primary" onclick="playAudio(document.getElementById('wWord').innerText)">🔊 Listen Audio</button>
-            <button type="button" class="btn btn-secondary" onclick="closeModal('wordModal')">Close</button>
+            <button type="button" class="btn-pill-action btn-pill-solid" onclick="playAudio(document.getElementById('wWord').innerText)">🔊 Listen Audio</button>
+            <button type="button" class="btn-pill-close" onclick="closeModal('wordModal')">Close</button>
         </div>
     </div>
 </div>
 
-{% endwith %}
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script>
     function openModal(id) {
         document.getElementById(id).classList.add('active');
@@ -265,8 +186,10 @@
         document.getElementById(id).classList.remove('active');
     }
 
-    function openClassmateModal(name, enrollment) {
+    function openClassmateModal(enrollment, name, age, email) {
         document.getElementById('cmName').innerText = name;
+        document.getElementById('cmAge').innerText = age + ' years';
+        document.getElementById('cmEmail').innerText = email;
         document.getElementById('cmEnrollment').innerText = enrollment;
         openModal('classmateModal');
     }

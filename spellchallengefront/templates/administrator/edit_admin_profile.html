@@ -21,30 +21,26 @@
         <input type="file" id="avatarUpload" name="avatar" accept="image/*" hidden>
     </div>
 
-    <div class="form-row-3">
+    <div class="form-row-2">
         <div class="form-field">
             <label>First Name:</label>
-            <input type="text" name="first_name" class="form-input" value="{{ admin.first_name }}" required>
+            <input type="text" name="first_name" class="form-input" value="{{ admin.nombre_pila }}" required>
         </div>
         <div class="form-field">
             <label>Last Name:</label>
-            <input type="text" name="last_name" class="form-input" value="{{ admin.last_name }}" required>
-        </div>
-        <div class="form-field">
-            <label>Age:</label>
-            <input type="number" name="age" class="form-input" value="{{ admin.age }}">
+            <input type="text" name="last_name" class="form-input" value="{{ admin.apellidoPaterno }}" required>
         </div>
     </div>
 
     <div class="form-row-3">
         <div class="form-field">
             <label>Email Address:</label>
-            <input type="email" name="email" class="form-input" value="{{ admin.email }}" required>
+            <input type="email" name="email" class="form-input" value="{{ admin.usuario.correo }}" required>
         </div>
         <div class="form-field">
             <label>Password:</label>
             <div class="password-field-wrap">
-                <input type="password" name="password" id="adminPassword" class="form-input" value="{{ admin.password }}">
+                <input type="password" name="password" id="adminPassword" class="form-input" placeholder="Leave blank to keep current password">
                 <button type="button" class="password-toggle-btn" onclick="togglePassword()" aria-label="Show password">👁️</button>
             </div>
         </div>

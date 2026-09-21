@@ -1,0 +1,157 @@
+/* ===== HANGMAN MODAL (tema oscuro, fiel al mockup) ===== */
+.hangman-theme {
+    background-color: #7a1f2b;
+    max-width: 560px;
+    width: 92%;
+    padding: 1.5rem 2rem;
+    border-radius: 16px;
+    color: #FFF;
+}
+
+.hangman-header {
+    margin-bottom: 0.5rem;
+}
+
+.btn-back-modal {
+    background: none;
+    border: none;
+    color: #FFF;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.btn-back-modal .lucide {
+    width: 16px;
+    height: 16px;
+}
+
+.hangman-title {
+    text-align: center;
+    color: #FFF;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin: 0.3rem 0 1.5rem;
+}
+
+.hangman-body {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.hangman-mascot-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.hangman-bee {
+    width: 64px;
+    height: auto;
+}
+
+.hangman-hearts {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.hangman-hearts .lucide {
+    width: 18px;
+    height: 18px;
+    color: #D9534F;
+    fill: #D9534F;
+    transition: opacity 0.2s ease;
+}
+
+.hangman-hearts .lucide.lost {
+    opacity: 0.3;
+    fill: none;
+}
+
+.hangman-clue-box {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    flex: 1;
+}
+
+.hangman-clue-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #FFF;
+}
+
+.hangman-clue-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0.5rem 0 1rem;
+}
+
+.hangman-word-display {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.hangman-word-display .letter-slot {
+    width: 24px;
+    border-bottom: 3px solid #FFF;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #FFF;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.hangman-keyboard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.hangman-keyboard .key-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background-color: #f28f89;
+    color: #7a1f2b;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.hangman-keyboard .key-btn:hover:not(:disabled) {
+    background-color: #FFF;
+}
+
+.hangman-keyboard .key-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.hangman-keyboard .key-btn.correct {
+    background-color: #28a745 !important;
+    color: #FFF !important;
+}
+
+.hangman-keyboard .key-btn.wrong {
+    background-color: #3a0f16 !important;
+    color: #FFF !important;
+}
+
+.hangman-actions {
+    text-align: center;
+    margin-top: 1.2rem;
+}

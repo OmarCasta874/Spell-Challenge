@@ -64,7 +64,7 @@
       {% for game in mini_games %}
       <div class="mini-game-card">
         <h6 class="mini-game-title">{{ game.nombre|upper }}</h6>
-        <a href="#" class="play-link">PLAY <i data-lucide="arrow-right"></i></a>
+        <a href="{% url 'student_mini_games' %}?game={{ game.nombre|slugify }}" class="play-link">PLAY <i data-lucide="arrow-right"></i></a>
       </div>
       {% endfor %}
       <div class="mini-game-card mini-game-card-view-all">

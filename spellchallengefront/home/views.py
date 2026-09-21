@@ -309,7 +309,51 @@ def student_home(request):
 @never_cache
 @role_required('student')
 def student_groups(request):
-    return render(request, 'student/my_groups_student.html')
+    alumno = get_object_or_404(
+        Alumno,
+        usuario=request.user
+    )
+    
+    grupos = (
+        Grupo.objects
+        .filter(grupo_alumnos__alumno=alumno)
+        .select_related('profesor')
+        .prefetch_related(
+            'grupo_alumnos__alumno',
+            'lista_grupos'
+        )
+        .distinct()
+    )
+    
+    groups = []
+    
+    for grupo in grupos:
+        teacher = grupo.profesor
+        
+        teacher_name = (
+            f"{teacher.nombre_pila} "
+            f"{teacher.apellidoPaterno} "
+            f"{teacher.apellidoMaterno}"
+        ).strip()
+        
+        student_count = grupo.grupo_alumnos.count()
+        list_count = grupo.lista_grupos.count()
+        
+        groups.append({
+            'id': grupo.codigo,
+            'nombre': grupo.nombre,
+            'teacher_name': teacher_name,
+            'student_count': student_count,
+            'list_count': list_count,
+        })
+    
+    return render(
+        request, 
+        'student/my_groups_student.html',
+        {
+            'groups': groups
+        }
+    )
 
 @never_cache
 @role_required('teacher')
@@ -921,7 +965,84 @@ def admin_users(request):
 @never_cache
 @role_required('administrator')
 def admin_academy(request):
-    return render(request, 'administrator/academy.html')
+    carreras = Carrera.objects.all().order_by('clave')
+    
+    careers = []
+    
+    for carrera in carreras:
+        careers.append({
+            'code': carrera.clave,
+            'name': carrera.nombre,
+            'status': 'ACTIVE',
+            'groups_count': 0,
+            'students_count': 0,
+        })
+        
+    niveles = Nivel.objects.all().order_by('codigo')
+    
+    levels = []
+    
+    for nivel in niveles:
+        levels.append({
+            'code': nivel.codigo,
+            'name': nivel.descripcion,
+            'groups_count': 0,
+        })
+        
+    grupos = (
+        Grupo.objects
+        .select_related('profesor')
+        .prefetch_related('grupo_alumnos')
+        .order_by('nombre')
+    )
+    
+    groups = []
+    
+    for grupo in grupos:
+        teacher = grupo.profesor
+        
+        teacher_name = (
+            f"{teacher.nombre_pila} "
+            f"{teacher.apellidoPaterno} "
+            f"{teacher.apellidoMaterno or ''}"
+        ).strip()
+        
+        groups.append({
+            'name': grupo.nombre,
+            'career': 'Not assigned',
+            'teacher': teacher_name,
+            'level': 'Not assigned',
+            'students_count': grupo.grupo_alumnos.count(),
+            'status': 'ACTIVE',
+        })
+        
+    profesores = Profesor.objects.all().order_by(
+        'nombre_pila',
+        'apellidoPaterno'
+    )
+    
+    available_teachers = []
+    
+    for profesor in profesores:
+        teacher_name = (
+            f"{profesor.nombre_pila} "
+            f"{profesor.apellidoPaterno} "
+            f"{profesor.apellidoMaterno or ''}"
+        ).strip()
+        
+        available_teachers.append(teacher_name)
+    
+    return render(
+        request, 
+        'administrator/academy.html',
+        {
+            'active_tab': 'careers',
+            'careers': careers,
+            'groups': groups,
+            'levels': levels,
+            'available_teachers': available_teachers,
+        }
+    )
 
 @never_cache
 @role_required('administrator')
@@ -931,34 +1052,90 @@ def admin_backups(request):
 @never_cache
 @role_required('administrator')
 def admin_profile(request):
-    return render(request, 'administrator/admin_profile.html')
+    admin = get_object_or_404(
+        Administrador.objects.select_related('usuario'),
+        usuario=request.user
+    )
+    
+    return render(
+        request, 
+        'administrator/admin_profile.html',
+        {
+            'admin': admin
+        }
+    )
 
 @never_cache
 @role_required('student')
-def group_view(request):
-    return render(request, 'student/group_view.html')
+def group_view(request, group_id):
+    grupo = get_object_or_404(
+        Grupo.objects.select_related(
+            'profesor__usuario'
+        ),
+        codigo=group_id
+    )
+    
+    classmates = (
+        Alumno.objects
+        .filter(grupo_alumnos__grupo=grupo)
+        .select_related('usuario')
+    )
+    
+    lista_palabras = (
+        Lista_Palabra.objects
+        .filter(lista__lista_grupos__grupo=grupo)
+        .select_related(
+            'palabra',
+            'palabra__categoria'
+        )
+        .distinct()
+    )
+    
+    teacher = grupo.profesor
+    
+    teacher_name = (
+        f"{teacher.nombre_pila} "
+        f"{teacher.apellidoPaterno} "
+        f"{teacher.apellidoMaterno or ''}"
+    ).strip()
+    
+    teacher_email = teacher.usuario.correo
+    
+    words = []
+    
+    for item in lista_palabras:
+        palabra = item.palabra
+        
+        words.append({
+            'word': palabra.codigo,
+            'meaning': palabra.significado,
+            'pronunciation': palabra.pronunciacion,
+            'audio': palabra.audio,
+        })
+    
+    return render(
+        request, 
+        'student/group_view.html',
+        {
+            'group': grupo,
+            'teacher_name': teacher_name,
+            'teacher_email': teacher_email,
+            'classmates': classmates,
+            'words': words,
+        }
+    )
 
 @never_cache
 @role_required('student')
 def leave_group(request, group_id):
     if request.method == 'POST':
         messages.success(request, 'You have left the group successfully.')
-        return redirect('my_groups_student')
+        return redirect('mygroups_student')
     
 @never_cache
 @role_required('student')
 def mini_games_view(request):
     return render(request, 'student/mini_games.html')
-
-@never_cache
-@role_required('student')
-def hangman_game_view(request):
-    return render(request, 'student/hangman_game.html')
-
-@never_cache
-@role_required('student')
-def missing_letters_game_view(request):
-    return render(request, 'student/missing_letters_game.html')
     
 @never_cache
 @role_required('student')
@@ -974,4 +1151,36 @@ def student_competitions_view(request):
 @never_cache
 @role_required('administrator')
 def edit_admin_profile(request):
-    return render(request, 'administrator/edit_admin_profile.html')
+    admin = get_object_or_404(
+        Administrador.objects.select_related('usuario'),
+        usuario=request.user
+    )
+    
+    if request.method == 'POST':
+        admin.nombre_pila = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        admin.apellidoPaterno = last_name
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+        admin.usuario.correo = email
+        
+        if password:
+            admin.usuario.set_password(password)
+            
+        admin.save()
+        admin.usuario.save()
+        
+        messages.success(
+            request,
+            'Your profile has been updated successfully.'
+        )
+        
+        return redirect('admin_profile')
+    
+    return render(
+        request, 
+        'administrator/edit_admin_profile.html',
+        {
+            'admin': admin
+        }
+    )

@@ -139,6 +139,169 @@
   color: #ffffff;
 }
 
+/* ===== MODAL BASE ===== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #FFF;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.modal-small {
+    max-width: 380px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: #7a1f2b;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-body {
+    padding: 1rem 1.2rem;
+}
+
+.modal-footer {
+    padding: 0 1.2rem 1.2rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.btn-pill-action {
+    border: 2px solid #D9534F;
+    background: transparent;
+    color: #D9534F;
+    border-radius: 20px;
+    padding: 0.4rem 1.2rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-pill-solid {
+    background-color: #D9534F;
+    color: #FFF;
+}
+
+.btn-pill-solid:hover {
+    background-color: #B92C28;
+}
+
+.btn-pill-close {
+    background: #CCC;
+    color: #333;
+    border: none;
+    border-radius: 20px;
+    padding: 0.45rem 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-pill-close:hover {
+    background: #BBB;
+}
+
+/* ===== CLASSMATE MODAL (tema guinda/salmón, fiel al mockup) ===== */
+.classmate-theme {
+    max-width: 420px;
+    background: linear-gradient(180deg, #d9585c 0%, #c1454a 100%);
+    color: #FFF;
+    text-align: center;
+    padding: 2rem 1.5rem 1.5rem;
+    position: relative;
+}
+
+.classmate-theme .modal-close {
+    position: absolute;
+    top: 0.8rem;
+    right: 1rem;
+    color: #FFF;
+    font-size: 1.6rem;
+}
+
+.classmate-modal-title {
+    font-weight: 800;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+}
+
+.classmate-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #FFF;
+    padding: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.classmate-name {
+    font-weight: 800;
+    font-size: 1.3rem;
+    margin: 0.3rem 0;
+}
+
+.classmate-detail {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0.15rem 0;
+}
+
+.classmate-enrollment {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    margin-top: 0.5rem;
+}
+
+.btn-accept {
+    background: #FFF;
+    color: #7a1f2b;
+    border: none;
+    border-radius: 20px;
+    padding: 0.5rem 2rem;
+    font-weight: 800;
+    margin-top: 1.2rem;
+    cursor: pointer;
+}
+
+.btn-accept:hover {
+    background: #f2c9ce;
+}
+
+/* ===== BORDE ROJO EN TABLA DE STUDENTS ===== */
+.panel-border-red {
+    border: 3px solid #D9534F;
+    border-radius: 10px;
+    padding: 0.5rem;
+}
+
 /* RESPONSIVE */
 @media (max-width: 992px) {
   .view-group-row {

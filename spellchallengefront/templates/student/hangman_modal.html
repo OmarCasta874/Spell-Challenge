@@ -1,0 +1,61 @@
+{% load static %}
+<div id="hangmanModal" class="modal-overlay">
+    <div class="modal-content hangman-theme">
+
+        <div class="hangman-header">
+            <button type="button" class="btn-back-modal" onclick="closeModal('hangmanModal')">
+                <i data-lucide="arrow-left"></i> Mini Games
+            </button>
+        </div>
+
+        <h2 class="hangman-title">HANGMAN</h2>
+
+        <div class="hangman-body">
+            <div class="hangman-mascot-col">
+                <img src="{% static 'img/beenary-left.png' %}" alt="Bee mascot" class="hangman-bee">
+                <div id="hangmanHearts" class="hangman-hearts">
+                    <!-- 5 corazones generados por JS -->
+                </div>
+            </div>
+
+            <div class="hangman-clue-box">
+                <span class="hangman-clue-label">CLUE</span>
+                <p id="hangmanHint" class="hangman-clue-text">Loading hint...</p>
+                <div id="hangmanWordDisplay" class="hangman-word-display">
+                    <!-- letras generadas por JS -->
+                </div>
+            </div>
+        </div>
+
+        <div id="hangmanKeyboard" class="hangman-keyboard">
+            <!-- teclado generado por JS -->
+        </div>
+
+        <div class="hangman-actions">
+            <button type="button" class="btn-pill-play" onclick="hangman_playAudioHint()">
+                🔊 Listen Word
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="hangmanResultModal" class="modal-overlay">
+    <div class="modal-content modal-small text-center">
+        <div class="modal-header">
+            <h3 id="hangmanResTitle" style="margin: 0; color: #700000;">Game Over</h3>
+            <button class="modal-close" onclick="closeModal('hangmanResultModal')">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 1.5rem 1rem;">
+            <p id="hangmanResMessage" style="font-size: 1.1rem; margin-bottom: 0.5rem;"></p>
+            <p style="font-size: 0.95rem; color: #555;">The word was: <strong id="hangmanResWord" style="color: #700000;"></strong></p>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: center; gap: 1rem;">
+            <button type="button" class="btn-pill-play" style="position: static; padding: 0.4rem 1.8rem;" onclick="hangman_resetGame()">
+                Try Again
+            </button>
+            <button type="button" class="btn" style="background: #CCC; color: #333; border-radius: 20px; padding: 0.4rem 1.2rem; cursor: pointer; border: none;" onclick="hangman_exitGame()">
+                Exit Game
+            </button>
+        </div>
+    </div>
+</div>

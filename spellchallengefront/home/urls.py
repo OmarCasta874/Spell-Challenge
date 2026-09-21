@@ -31,10 +31,8 @@ urlpatterns = [
     path('admin_academy_management/', views.admin_academy, name='admin_academy_management'),
     path('admin_backups/', views.admin_backups, name='admin_backups'),
     path('admin_profile/', views.admin_profile, name='admin_profile'),
-    path('student/group_view/', views.group_view, name='student_group_view'),
-    path('student/leave_groups/', views.leave_group, name='student_leave_group'),
+    path('student/group_view/<str:group_id>/', views.group_view, name='student_group_view'),
+    path('student/leave_groups/<str:group_id>/', views.leave_group, name='student_leave_group'),
     path('student/mini-games/', views.mini_games_view, name='student_mini_games'),
-    path('student/mini-games/hangman/', views.hangman_game_view, name='student_hangman_game'),
-    path('student/mini-games/missing-letters/', views.missing_letters_game_view, name='student_missing_letters_game'),
     path('student/competitions_select/', views.student_competitions_view, name='student_competitions_select'),
 ]
