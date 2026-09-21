@@ -126,6 +126,9 @@
             <span class="achievement-counter">0/1</span>
           </div>
         </div>
+        <button class="view-achievements-btn" data-bs-toggle="modal" data-bs-target="#achievementsModal">
+          <i data-lucide="arrow-right"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -167,5 +170,76 @@
       <button class="btn-view-all">View All Competitions</button> <!-- -->
     </div>
   </section>
+</div>
+
+<!-- MODAL DE ACHIEVEMENTS -->
+<div class="modal fade" id="achievementsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content achievements-modal">
+
+      <div class="modal-header achievements-modal-header">
+        <div class="achievements-modal-header-text">
+          <h5 class="modal-title">ACHIEVEMENTS</h5>
+          <span class="achievements-modal-count">{{ achievements_earned|default:2 }} / {{ achievements_total|default:20 }} ACHIEVEMENTS</span>
+        </div>
+        <button type="button" class="btn-close achievements-modal-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body achievements-modal-body">
+        <div class="achievements-modal-grid">
+
+          <div class="achievement-tile achievement-tile-done">
+            <h4 class="achievement-tile-title">50 Correct Answers</h4>
+            <p class="achievement-tile-desc">50 correct words</p>
+            <span class="achievement-tile-counter">50/50</span>
+          </div>
+
+          <div class="achievement-tile achievement-tile-done">
+            <h4 class="achievement-tile-title">No Mistakes</h4>
+            <p class="achievement-tile-desc">No mistakes in a list completed</p>
+            <i data-lucide="check" class="achievement-tile-check"></i>
+          </div>
+
+          <div class="achievement-tile">
+            <h4 class="achievement-tile-title">Maximum Speed</h4>
+            <p class="achievement-tile-desc">5 lessons completed in less than 1 minute</p>
+            <span class="achievement-tile-counter">0/5</span>
+          </div>
+
+          <div class="achievement-tile">
+            <h4 class="achievement-tile-title">Early Bird</h4>
+            <p class="achievement-tile-desc">Doing a lesson before 7 am</p>
+            <span class="achievement-tile-counter">0/1</span>
+          </div>
+
+          <div class="achievement-tile">
+            <h4 class="achievement-tile-title">Listening Master</h4>
+            <p class="achievement-tile-desc">No mistakes in 3 audio games</p>
+            <span class="achievement-tile-counter">0/3</span>
+          </div>
+
+          <div class="achievement-tile">
+            <h4 class="achievement-tile-title">100 Correct Answers</h4>
+            <p class="achievement-tile-desc">100 correct words</p>
+            <span class="achievement-tile-counter">50/100</span>
+          </div>
+
+          <div class="achievement-tile">
+            <h4 class="achievement-tile-title">Silver Student</h4>
+            <p class="achievement-tile-desc">Reach weekly ranking second place</p>
+            <span class="achievement-tile-counter">0/1</span>
+          </div>
+
+          <div class="achievement-tile">
+            <h4 class="achievement-tile-title">Weekly Champion</h4>
+            <p class="achievement-tile-desc">Ranking weekly first place</p>
+            <span class="achievement-tile-counter">0/1</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 {% endblock %}
