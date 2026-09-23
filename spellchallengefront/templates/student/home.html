@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'css/student_base.css' %}">
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
 {% endblock %}
@@ -125,7 +126,96 @@
         </li>
         {% endfor %}
       </ul>
-      <a href="#" class="view-leaderboard-link">VIEW LEADERBOARD <i data-lucide="arrow-right"></i></a>
+      <button type="button" class="view-leaderboard-link" data-bs-toggle="modal" data-bs-target="#leaderboardModal">
+        VIEW LEADERBOARD <i data-lucide="arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+<!-- MODAL: FULL LEADERBOARD -->
+<div class="modal fade" id="leaderboardModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content leaderboard-modal-content">
+
+      <div class="modal-header leaderboard-modal-header">
+        <i data-lucide="bar-chart-2"></i>
+        <h5 class="modal-title leaderboard-modal-title">
+          {% if grupo_actual %}{{ grupo_actual.nombre|upper }}{% else %}GROUP{% endif %} LEADERBOARD
+        </h5>
+        <button type="button" class="btn-close leaderboard-modal-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body leaderboard-modal-body">
+
+        <!-- TOP 3 -->
+        <div class="lb-top3-row">
+          <div class="lb-top3-item">
+            <span class="lb-star lb-star-silver"><i data-lucide="star"></i></span>
+            <p class="lb-top3-name">Castañón<br>Castañón<br>Jesús Omar</p>
+            <p class="lb-top3-score">320%</p>
+          </div>
+          <div class="lb-top3-item lb-top3-first">
+            <span class="lb-star lb-star-gold"><i data-lucide="star"></i></span>
+            <p class="lb-top3-name">Sanchez<br>Hernandez<br>Diego</p>
+            <p class="lb-top3-score">375%</p>
+          </div>
+          <div class="lb-top3-item">
+            <span class="lb-star lb-star-bronze"><i data-lucide="star"></i></span>
+            <p class="lb-top3-name">Villegas<br>Hernandez<br>Josué Alberto</p>
+            <p class="lb-top3-score">290%</p>
+          </div>
+        </div>
+
+        <hr class="lb-divider">
+
+        <!-- POSICIONES 4-7 -->
+        <div class="lb-rest-grid">
+          <div class="lb-rest-item">
+            <span class="lb-rank-circle">4</span>
+            <div class="lb-rest-text">
+              <p class="lb-rest-name">Aycardo Balcázar Eric</p>
+              <p class="lb-rest-score">275%</p>
+            </div>
+          </div>
+          <div class="lb-rest-item">
+            <span class="lb-rank-circle">5</span>
+            <div class="lb-rest-text">
+              <p class="lb-rest-name">Cardoza Pérez Brandon</p>
+              <p class="lb-rest-score">250%</p>
+            </div>
+          </div>
+          <div class="lb-rest-item">
+            <span class="lb-rank-circle">6</span>
+            <div class="lb-rest-text">
+              <p class="lb-rest-name">Flores Ojeda Alvaro Alejandro</p>
+              <p class="lb-rest-score">215%</p>
+            </div>
+          </div>
+          <div class="lb-rest-item">
+            <span class="lb-rank-circle">7</span>
+            <div class="lb-rest-text">
+              <p class="lb-rest-name">Diaz Sebastián</p>
+              <p class="lb-rest-score">180%</p>
+            </div>
+          </div>
+        </div>
+
+        <hr class="lb-divider">
+
+        <!-- YOUR POSITION -->
+        <div class="lb-your-position">
+          <p class="lb-your-position-label">YOUR POSITION</p>
+          <div class="lb-rest-item">
+            <span class="lb-rank-circle">12</span>
+            <div class="lb-rest-text">
+              <p class="lb-rest-name">{{ alumno.nombre_pila }} {{ alumno.apellidoPaterno }} {{ alumno.apellidoMaterno }}</p>
+              <p class="lb-rest-score">15%</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
     </div>
   </div>
 </div>

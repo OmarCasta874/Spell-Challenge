@@ -1,0 +1,111 @@
+.pye-header {
+  margin-bottom: 8px;
+}
+
+.pye-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #7a1f2b;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.pye-back-link:hover {
+  text-decoration: underline;
+}
+
+.pye-back-link i {
+  width: 18px;
+  height: 18px;
+}
+
+.pye-title {
+  color: #7a1f2b;
+  font-weight: 800;
+  font-size: 1.75rem;
+  margin: 8px 0 32px;
+}
+
+.pye-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.pye-column-label {
+  color: #7a1f2b;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.pye-card {
+  background-color: #7a1f2b;
+  border-radius: 14px;
+  padding: 20px;
+  color: #fff;
+  min-height: 160px;
+}
+
+.pye-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.pye-card-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.pye-practice-btn {
+  background-color: #fff;
+  color: #7a1f2b;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pye-practice-btn:hover {
+  background-color: #f28f89;
+  color: #fff;
+}
+
+.pye-word-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pye-word-list li {
+  font-weight: 600;
+  padding: 6px 0;
+}
+
+.pye-match-pair {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pye-match-pill {
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid #fff;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 8px 18px;
+  border-radius: 20px;
+}
+
+@media (max-width: 900px) {
+  .pye-grid {
+    grid-template-columns: 1fr;
+  }
+}

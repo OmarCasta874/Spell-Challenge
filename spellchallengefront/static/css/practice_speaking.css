@@ -1,0 +1,217 @@
+:root {
+  --sc-maroon: #7a1c1c;
+  --sc-maroon-dark: #5c1414;
+  --sc-salmon: #f2908a;
+  --sc-salmon-hover: #ec7972;
+  --sc-bee-gold: #e8b93f;
+  --sc-white: #ffffff;
+}
+
+/* =========================================================
+   Topbar
+   ========================================================= */
+.pk-topbar {
+  background-color: var(--sc-maroon);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.pk-back-link {
+  color: var(--sc-white);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+.pk-back-link:hover { opacity: 0.85; }
+
+.pk-topbar-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--sc-white);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  font-size: 0.95rem;
+}
+
+/* =========================================================
+   Cuerpo
+   ========================================================= */
+.pk-body {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+/* Barra de progreso con Beenary */
+.pk-progress-wrap {
+  position: relative;
+  margin-bottom: 2.5rem;
+  padding-top: 1.6rem;
+}
+
+.pk-bee-marker {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  transition: left 0.3s ease;
+}
+
+.pk-bee-img {
+  width: 28px;
+  height: 28px;
+}
+
+.pk-progress-track {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #d9d9d9;
+  overflow: hidden;
+}
+
+.pk-progress-fill {
+  height: 100%;
+  background-color: var(--sc-bee-gold);
+  transition: width 0.3s ease;
+}
+
+/* =========================================================
+   Tarjeta de ejercicio
+   ========================================================= */
+.pk-exercise-card {
+  text-align: center;
+}
+
+.pk-counter {
+  color: var(--sc-maroon);
+  font-weight: 800;
+  font-size: 1.15rem;
+  margin-bottom: 0.6rem;
+}
+
+.pk-word {
+  color: var(--sc-maroon);
+  font-weight: 800;
+  font-size: 1.15rem;
+  margin-bottom: 2rem;
+}
+
+.pk-speak-btn {
+  background: none;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--sc-maroon);
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+.pk-speak-btn:hover { color: var(--sc-maroon-dark); }
+.pk-speak-btn:disabled { opacity: 0.5; cursor: default; }
+
+.pk-speak-btn i {
+  width: 26px;
+  height: 26px;
+}
+
+/* =========================================================
+   Pantalla Lesson Completed
+   ========================================================= */
+.pk-completed-card {
+  text-align: center;
+  padding-top: 1rem;
+}
+
+.pk-completed-title {
+  color: var(--sc-maroon);
+  font-weight: 800;
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.pk-completed-subtitle {
+  color: var(--sc-maroon);
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.pk-results-box {
+  background-color: var(--sc-salmon);
+  border-radius: 16px;
+  padding: 1.75rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  margin: 0 auto 2rem;
+  max-width: 480px;
+  position: relative;
+}
+
+.pk-bee-decoration {
+  width: 64px;
+  height: 64px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.pk-bee-left { left: -4rem; }
+.pk-bee-right { right: -4rem; }
+
+.pk-results-text {
+  color: var(--sc-white);
+  text-align: center;
+}
+.pk-results-lead {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+.pk-results-score {
+  font-weight: 800;
+  font-size: 1.3rem;
+}
+
+.pk-completed-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.pk-btn-outline-pill,
+.pk-btn-solid-pill {
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 0.65rem 1.75rem;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-block;
+  border: 2px solid var(--sc-maroon);
+  cursor: pointer;
+}
+
+.pk-btn-outline-pill {
+  background-color: var(--sc-white);
+  color: var(--sc-maroon);
+}
+.pk-btn-outline-pill:hover { background-color: #fbeaea; }
+
+.pk-btn-solid-pill {
+  background-color: var(--sc-salmon);
+  color: var(--sc-white);
+  border-color: var(--sc-salmon);
+}
+.pk-btn-solid-pill:hover { background-color: var(--sc-salmon-hover); }
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width: 576px) {
+  .pk-results-box { flex-direction: column; gap: 1rem; padding: 1.5rem; }
+  .pk-bee-decoration { position: static; transform: none; width: 48px; height: 48px; }
+}
