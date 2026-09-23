@@ -1,0 +1,131 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'css/match_words.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="mw-topbar">
+  <a href="{% url 'practice_your_english' %}" class="mw-back-link">← BACK</a>
+  <span class="mw-topbar-title">MATCH THE WORDS</span>
+</div>
+
+<div class="mw-body">
+
+  <div id="mwGame">
+
+    <!-- BARRA DE PROGRESO CON BEENARY -->
+    <div class="mw-progress-wrap" id="mwProgressWrap">
+      <span class="mw-bee-marker" id="mwBeeMarker" style="left: 0%;">
+        <img src="{% static 'img/beenary-left.png' %}" class="mw-bee-img">
+      </span>
+      <div class="mw-progress-track">
+        <div class="mw-progress-fill" id="mwProgressFill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <div class="mw-columns">
+
+      <div class="mw-column">
+        <p class="mw-column-title">WORDS</p>
+        <button class="mw-item" data-word="apple" onclick="mwSelectWord(this)">APPLE</button>
+        <button class="mw-item" data-word="tiger" onclick="mwSelectWord(this)">TIGER</button>
+        <button class="mw-item" data-word="saxophone" onclick="mwSelectWord(this)">SAXOPHONE</button>
+        <button class="mw-item" data-word="doctor" onclick="mwSelectWord(this)">DOCTOR</button>
+      </div>
+
+      <div class="mw-column">
+        <p class="mw-column-title">CATEGORIES</p>
+        <button class="mw-item" data-category="animals" onclick="mwSelectCategory(this)">ANIMALS</button>
+        <button class="mw-item" data-category="music" onclick="mwSelectCategory(this)">MUSIC</button>
+        <button class="mw-item" data-category="jobs" onclick="mwSelectCategory(this)">JOBS</button>
+        <button class="mw-item" data-category="fruits" onclick="mwSelectCategory(this)">FRUITS</button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- PANTALLA: LESSON COMPLETED -->
+  <div id="mwCompleted" class="mw-completed-card d-none">
+    <h2 class="mw-completed-title">Lesson Completed!</h2>
+    <p class="mw-completed-subtitle">Great job, {{ request.user.nombre_pila }}! Let's check your results...</p>
+
+    <div class="mw-results-box">
+      <img src="{% static 'img/beenary-left.png' %}" class="mw-bee-decoration mw-bee-left">
+
+      <div class="mw-results-text">
+        <p class="mw-results-lead">Excellent! You got...</p>
+        <p class="mw-results-score">4/4 MATCHES</p>
+      </div>
+
+      <img src="{% static 'img/beenary-right.png' %}" class="mw-bee-decoration mw-bee-right">
+    </div>
+
+    <div class="mw-completed-actions">
+      <a href="{% url 'practice_your_english' %}" class="mw-btn-outline-pill">BACK TO PRACTICE ENGLISH</a>
+      <button type="button" class="mw-btn-solid-pill" onclick="mwRepeatLesson()">REPEAT LESSON</button>
+    </div>
+  </div>
+
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  var mwSelectedWordBtn = null;
+  var mwMatchedCount = 0;
+  var mwTotalPairs = 4;
+
+  function mwSelectWord(btn) {
+    if (btn.classList.contains('mw-item-matched')) return;
+
+    if (mwSelectedWordBtn) {
+      mwSelectedWordBtn.classList.remove('mw-item-selected');
+    }
+    mwSelectedWordBtn = btn;
+    btn.classList.add('mw-item-selected');
+  }
+
+  function mwSelectCategory(btn) {
+    if (btn.classList.contains('mw-item-matched')) return;
+    if (!mwSelectedWordBtn) return;
+
+    mwSelectedWordBtn.classList.remove('mw-item-selected');
+    mwSelectedWordBtn.classList.add('mw-item-matched');
+    btn.classList.add('mw-item-matched');
+    mwSelectedWordBtn = null;
+
+    mwMatchedCount++;
+    var pct = (mwMatchedCount / mwTotalPairs) * 100;
+    document.getElementById('mwProgressFill').style.width = pct + '%';
+    document.getElementById('mwBeeMarker').style.left = pct + '%';
+
+    if (mwMatchedCount === mwTotalPairs) {
+      setTimeout(function () {
+        document.getElementById('mwGame').classList.add('d-none');
+        document.getElementById('mwCompleted').classList.remove('d-none');
+      }, 400);
+    }
+  }
+
+  function mwRepeatLesson() {
+    document.querySelectorAll('.mw-item').forEach(function (item) {
+      item.classList.remove('mw-item-matched', 'mw-item-selected');
+    });
+    mwSelectedWordBtn = null;
+    mwMatchedCount = 0;
+
+    document.getElementById('mwProgressFill').style.width = '0%';
+    document.getElementById('mwBeeMarker').style.left = '0%';
+
+    document.getElementById('mwCompleted').classList.add('d-none');
+    document.getElementById('mwGame').classList.remove('d-none');
+  }
+</script>
+{% endblock %}

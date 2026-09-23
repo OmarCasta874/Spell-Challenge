@@ -1,0 +1,113 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'css/practice_speaking.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="pk-topbar">
+  <a href="{% url 'practice_your_english' %}" class="pk-back-link">← BACK</a>
+  <span class="pk-topbar-title">PRACTICE SPEAKING</span>
+</div>
+
+<div class="pk-body">
+
+  <div id="pkExercises">
+
+    <!-- BARRA DE PROGRESO CON BEENARY -->
+    <div class="pk-progress-wrap" id="pkProgressWrap">
+      <span class="pk-bee-marker" id="pkBeeMarker" style="left: 0%;">
+        <img src="{% static 'img/beenary-left.png' %}" class="pk-bee-img">
+      </span>
+      <div class="pk-progress-track">
+        <div class="pk-progress-fill" id="pkProgressFill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <div class="pk-exercise-card">
+      <p class="pk-counter" id="pkCounter">Words: 1/10</p>
+      <p class="pk-word" id="pkWord">"Photography"</p>
+
+      <button type="button" class="pk-speak-btn" id="pkSpeakBtn" onclick="pkSpeak()">
+        <i data-lucide="mic"></i> Speak
+      </button>
+    </div>
+
+  </div>
+
+  <!-- PANTALLA: LESSON COMPLETED -->
+  <div id="pkCompleted" class="pk-completed-card d-none">
+    <h2 class="pk-completed-title">Lesson Completed!</h2>
+    <p class="pk-completed-subtitle">Great job, {{ request.user.nombre_pila }}! Let's check your results...</p>
+
+    <div class="pk-results-box">
+      <img src="{% static 'img/beenary-left.png' %}" class="pk-bee-decoration pk-bee-left">
+
+      <div class="pk-results-text">
+        <p class="pk-results-lead">Excellent! Your Speaking is improving...</p>
+        <p class="pk-results-score">10/10 EXERCISES</p>
+      </div>
+
+      <img src="{% static 'img/beenary-right.png' %}" class="pk-bee-decoration pk-bee-right">
+    </div>
+
+    <div class="pk-completed-actions">
+      <a href="{% url 'practice_your_english' %}" class="pk-btn-outline-pill">BACK TO PRACTICE ENGLISH</a>
+      <button type="button" class="pk-btn-solid-pill" onclick="pkRepeatLesson()">REPEAT LESSON</button>
+    </div>
+  </div>
+
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  var pkWords = [
+    'Photography', 'Mountain', 'Loyalty', 'Umbrella', 'Journey',
+    'Kitchen', 'Freedom', 'Rhythm', 'Whisper', 'Adventure'
+  ];
+  var pkCurrentIndex = 0;
+  var pkTotal = 10;
+
+  function pkSpeak() {
+    var btn = document.getElementById('pkSpeakBtn');
+    btn.disabled = true;
+
+    // Simulación de grabación/validación, sin lógica real aún
+    setTimeout(function () {
+      pkCurrentIndex++;
+
+      var pct = (pkCurrentIndex / pkTotal) * 100;
+      document.getElementById('pkProgressFill').style.width = pct + '%';
+      document.getElementById('pkBeeMarker').style.left = pct + '%';
+
+      if (pkCurrentIndex === pkTotal) {
+        document.getElementById('pkExercises').classList.add('d-none');
+        document.getElementById('pkCompleted').classList.remove('d-none');
+      } else {
+        document.getElementById('pkCounter').textContent = 'Words: ' + (pkCurrentIndex + 1) + '/' + pkTotal;
+        document.getElementById('pkWord').textContent = '"' + pkWords[pkCurrentIndex] + '"';
+        btn.disabled = false;
+      }
+    }, 600);
+  }
+
+  function pkRepeatLesson() {
+    pkCurrentIndex = 0;
+
+    document.getElementById('pkProgressFill').style.width = '0%';
+    document.getElementById('pkBeeMarker').style.left = '0%';
+    document.getElementById('pkCounter').textContent = 'Words: 1/10';
+    document.getElementById('pkWord').textContent = '"' + pkWords[0] + '"';
+    document.getElementById('pkSpeakBtn').disabled = false;
+
+    document.getElementById('pkCompleted').classList.add('d-none');
+    document.getElementById('pkExercises').classList.remove('d-none');
+  }
+</script>
+{% endblock %}

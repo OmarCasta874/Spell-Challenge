@@ -36,4 +36,7 @@ urlpatterns = [
     path('student/mini-games/', views.mini_games_view, name='student_mini_games'),
     path('student/competitions_select/', views.student_competitions_view, name='student_competitions_select'),
     path('student/practice_your_english/', views.student_practice_english, name='practice_your_english'),
+    path('student/practice_spelling/', views.practice_spelling, name='practice_spelling'),
+    path('student/match_words/', views.student_match_words, name='match_words'),
+    path('student/practice_speaking/', views.practice_speaking, name='practice_speaking'),
 ]

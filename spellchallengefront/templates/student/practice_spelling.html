@@ -1,0 +1,150 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'css/practice_spelling.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="ps-topbar">
+  <a href="{% url 'practice_your_english' %}" class="ps-back-link">← BACK</a>
+  <span class="ps-topbar-title">PRACTICE SPELLING</span>
+</div>
+
+<div class="ps-body">
+
+  <div id="psExercises">
+
+    <!-- BARRA DE PROGRESO CON BEENARY -->
+    <div class="ps-progress-wrap" id="psProgressWrap">
+      <span class="ps-bee-marker" id="psBeeMarker" style="left: 0%;">
+        <img src="{% static 'img/beenary-left.png' %}" class="ps-bee-img">
+      </span>
+      <div class="ps-progress-track">
+        <div class="ps-progress-fill" id="psProgressFill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- EJERCICIO 1 -->
+    <div id="psEx1" class="ps-exercise-card">
+      <h2 class="ps-heading">LISTEN AND SPELL</h2>
+      <p class="ps-counter">1/3</p>
+
+      <div class="ps-controls-row">
+        <button type="button" class="ps-control-link">
+          <i data-lucide="volume-2"></i> <span class="ps-underline">Play</span>
+        </button>
+        <button type="button" class="ps-control-link">
+          <i data-lucide="mic"></i> <span>Speak</span>
+        </button>
+      </div>
+
+      <div class="ps-dashes"></div>
+
+      <button class="ps-check-btn" onclick="psNextExercise(1, 2)">CHECK</button>
+    </div>
+
+    <!-- EJERCICIO 2 -->
+    <div id="psEx2" class="ps-exercise-card d-none">
+      <h2 class="ps-heading">LISTEN AND SPELL</h2>
+      <p class="ps-counter">2/3</p>
+
+      <div class="ps-controls-row">
+        <button type="button" class="ps-control-link">
+          <i data-lucide="volume-2"></i> <span class="ps-underline">Play</span>
+        </button>
+        <button type="button" class="ps-control-link">
+          <i data-lucide="mic"></i> <span>Speak</span>
+        </button>
+      </div>
+
+      <div class="ps-dashes"></div>
+
+      <button class="ps-check-btn" onclick="psNextExercise(2, 3)">CHECK</button>
+    </div>
+
+    <!-- EJERCICIO 3 -->
+    <div id="psEx3" class="ps-exercise-card d-none">
+      <h2 class="ps-heading">LISTEN AND SPELL</h2>
+      <p class="ps-counter">3/3</p>
+
+      <div class="ps-controls-row">
+        <button type="button" class="ps-control-link">
+          <i data-lucide="volume-2"></i> <span class="ps-underline">Play</span>
+        </button>
+        <button type="button" class="ps-control-link">
+          <i data-lucide="mic"></i> <span>Speak</span>
+        </button>
+      </div>
+
+      <div class="ps-dashes"></div>
+
+      <button class="ps-check-btn" onclick="psNextExercise(3, 'completed')">CHECK</button>
+    </div>
+
+  </div>
+
+  <!-- PANTALLA: LESSON COMPLETED -->
+  <div id="psCompleted" class="ps-completed-card d-none">
+    <h2 class="ps-completed-title">Lesson Completed!</h2>
+    <p class="ps-completed-subtitle">Great job, {{ request.user.nombre_pila }}! Let's check your results...</p>
+
+    <div class="ps-results-box">
+      <img src="{% static 'img/beenary-left.png' %}" class="ps-bee-decoration ps-bee-left">
+
+      <div class="ps-results-total">
+        <span class="ps-results-total-number">3/3</span>
+        <span class="ps-results-total-label">Exercises</span>
+      </div>
+
+      <div class="ps-results-breakdown">
+        <div><span>Exercise 1</span><span>100%</span></div>
+        <div><span>Exercise 2</span><span>100%</span></div>
+        <div><span>Exercise 3</span><span>100%</span></div>
+      </div>
+
+      <img src="{% static 'img/beenary-right.png' %}" class="ps-bee-decoration ps-bee-right">
+    </div>
+
+    <div class="ps-completed-actions">
+      <a href="{% url 'practice_your_english' %}" class="ps-btn-outline-pill">BACK TO PRACTICE ENGLISH</a>
+      <button type="button" class="ps-btn-solid-pill" onclick="psRepeatLesson()">REPEAT LESSON</button>
+    </div>
+  </div>
+
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  function psNextExercise(currentNum, nextNum) {
+    document.getElementById('psEx' + currentNum).classList.add('d-none');
+
+    if (nextNum === 'completed') {
+      document.getElementById('psProgressWrap').style.display = 'none';
+      document.getElementById('psCompleted').classList.remove('d-none');
+    } else {
+      document.getElementById('psEx' + nextNum).classList.remove('d-none');
+
+      var pct = ((nextNum - 1) / 3) * 100;
+      document.getElementById('psProgressFill').style.width = pct + '%';
+      document.getElementById('psBeeMarker').style.left = pct + '%';
+    }
+  }
+
+  function psRepeatLesson() {
+    document.getElementById('psCompleted').classList.add('d-none');
+    document.getElementById('psEx3').classList.add('d-none');
+    document.getElementById('psEx2').classList.add('d-none');
+    document.getElementById('psEx1').classList.remove('d-none');
+
+    document.getElementById('psProgressWrap').style.display = '';
+    document.getElementById('psProgressFill').style.width = '0%';
+    document.getElementById('psBeeMarker').style.left = '0%';
+  }
+</script>
+{% endblock %}

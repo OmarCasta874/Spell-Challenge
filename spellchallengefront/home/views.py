@@ -1189,3 +1189,18 @@ def edit_admin_profile(request):
 @role_required('student')
 def student_practice_english(request):
     return render(request, 'student/practice_your_english.html')
+
+@never_cache
+@role_required('student')
+def practice_spelling(request):
+    return render(request, 'student/practice_spelling.html')
+
+@never_cache
+@role_required('student')
+def student_match_words(request):
+    return render(request, 'student/match_words.html')
+
+@never_cache
+@role_required('student')
+def practice_speaking(request):
+    return render(request, 'student/practice_speaking.html')

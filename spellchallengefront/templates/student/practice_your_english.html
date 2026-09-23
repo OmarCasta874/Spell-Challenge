@@ -1,1 +1,68 @@
-<!-- Pendiente hacer HTML -->
+{% extends 'student/student_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/practice_your_english.css' %}">
+{% endblock %}
+
+{% block student_content %}
+
+<div class="pye-header">
+  <a href="{% url 'student_practices' %}" class="pye-back-link">
+    <i data-lucide="arrow-left"></i>
+    BACK
+  </a>
+</div>
+
+<h1 class="pye-title">PRACTICE YOUR ENGLISH</h1>
+
+<div class="pye-grid">
+
+  <div class="pye-column">
+    <p class="pye-column-label">SPELLING:</p>
+    <div class="pye-card">
+      <div class="pye-card-header">
+        <span class="pye-card-title">3 Words</span>
+        <a href="{% url 'practice_spelling' %}" class="pye-practice-btn">PRACTICE</a>
+      </div>
+      <ul class="pye-word-list">
+        <li>Apologize</li>
+        <li>Customs</li>
+        <li>Embarrassment</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="pye-column">
+    <p class="pye-column-label">VOCABULARY:</p>
+    <div class="pye-card">
+      <div class="pye-card-header">
+        <span class="pye-card-title">Match the Words</span>
+        <a href="{% url 'match_words' %}" class="pye-practice-btn">PRACTICE</a>
+      </div>
+      <div class="pye-match-pair">
+        <span class="pye-match-pill">CAT</span>
+        <span class="pye-match-pill">ANIMALS</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pye-column">
+    <p class="pye-column-label">SPEAKING:</p>
+    <div class="pye-card">
+      <div class="pye-card-header">
+        <span class="pye-card-title">10 Words</span>
+        <a href="{% url 'practice_speaking' %}" class="pye-practice-btn">PRACTICE</a>
+      </div>
+      <ul class="pye-word-list">
+        <li>Photography</li>
+        <li>Mountain</li>
+        <li>Loyalty</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+{% endblock student_content %}

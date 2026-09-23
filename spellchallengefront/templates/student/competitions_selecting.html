@@ -79,10 +79,10 @@
         <img src="{% static 'img/beenary-left.png' %}" alt="" class="word-modal-bee word-modal-bee-left">
         <div class="modal-content modal-small text-center word-modal-theme">
             <div class="word-modal-inner">
-                <h2 class="word-modal-word">{{ current_word.texto|default:"SOMNAMBULISM" }}</h2>
+                <h2 class="word-modal-word" id="currentWordText">WORD</h2>
             </div>
-            <p class="word-modal-def">{{ current_word.significado|default:"The act to walk while asleep" }}</p>
-            <p class="word-modal-example">{{ current_word.ejemplo|default:"Somnambulism can be dangerous" }}</p>
+            <p class="word-modal-def" id="currentWordDef">Definition</p>
+            <p class="word-modal-example" id="currentWordExample">Example</p>
             <button type="button" class="btn-word-next" onclick="finishWordModal()">
                 NEXT
             </button>
@@ -104,10 +104,49 @@
         document.getElementById('confirmBeehiveModal').classList.add('active');
     }
 
+    const wordBank = [
+        { texto: "CAT", significado: "A small domesticated animal", ejemplo: "The cat is sleeping." },
+        { texto: "APPLE", significado: "A round fruit with red or green skin", ejemplo: "I ate an apple." },
+        { texto: "CUSTOMS", significado: "The official department that administers duties on imports", ejemplo: "We passed through customs." },
+        { texto: "APOLOGIZE", significado: "To express regret for something done wrong", ejemplo: "He apologized for being late." },
+        { texto: "PHOTOGRAPHY", significado: "The art or practice of taking photographs", ejemplo: "She studies photography." },
+        { texto: "SOMNAMBULISM", significado: "The act to walk while asleep", ejemplo: "Somnambulism can be dangerous." },
+        { texto: "EMBARRASSMENT", significado: "A feeling of self-consciousness or shame", ejemplo: "He felt embarrassment after the mistake." }
+    ];
+
+    function getRandomWord() {
+        return wordBank[Math.floor(Math.random() * wordBank.length )];
+    }
+
+    function fitWordToModal() {
+        const wordEl = document.querySelector('.word-modal-word');
+        const containerEl = document.querySelector('.word-modal-inner');
+        if (!wordEl || !containerEl) return;
+
+        const maxFontSize = 57.6;
+        const minFontSize = 20;
+        const availableWidth = containerEl.clientWidth - 32;
+
+        let fontSize = maxFontSize;
+        wordEl.style.fontSize = fontSize + 'px';
+
+        while (wordEl.scrollWidth > availableWidth && fontSize > minFontSize) {
+            fontSize -= 2;
+            wordEl.style.fontSize = fontSize + 'px';
+        }
+    }
+
     function enterBeehive() {
         if (currentHive) {
             closeModal('confirmBeehiveModal');
+
+            const word = getRandomWord();
+            document.getElementById('currentWordText').textContent = word.texto;
+            document.getElementById('currentWordDef').textContent = word.significado;
+            document.getElementById('currentWordExample').textContent = word.ejemplo;
+
             document.getElementById('wordModal').classList.add('active');
+            fitWordToModal();
         }
     }
 
