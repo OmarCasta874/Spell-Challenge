@@ -271,6 +271,89 @@ CREATE TABLE lista_palabra (
     FOREIGN KEY (palabra) REFERENCES palabra(codigo)
 ) ENGINE=InnoDB;
 
+CREATE TABLE puntaje (
+    codigo VARCHAR(10) PRIMARY KEY,
+    experiencia INT NOT NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE leccion (
+    clave VARCHAR(10) PRIMARY KEY,
+    nombre VARCHAR(30) NOT NULL,
+    descripcion VARCHAR(255) NOT NULL,
+    practica_sesion VARCHAR(10) NOT NULL,
+    puntaje VARCHAR(10) NOT NULL,
+    FOREIGN KEY (practica_sesion) REFERENCES practica_sesion(clave),
+    FOREIGN KEY (puntaje) REFERENCES puntaje(codigo)
+) ENGINE=InnoDB;
+
+CREATE TABLE bitacora_profesor (
+    codigo VARCHAR(10) PRIMARY KEY,
+    fecha_generacion DATE NOT NULL,
+    hora_generacion TIME NOT NULL,
+    accion VARCHAR(255) NOT NULL,
+    profesor VARCHAR(10) NOT NULL,
+    FOREIGN KEY (profesor) REFERENCES profesor(clave)
+) ENGINE=InnoDB;
+
+CREATE TABLE bitacora_administrador (
+    codigo VARCHAR(10) PRIMARY KEY,
+    fecha_generacion DATE NOT NULL,
+    hora_generacion TIME NOT NULL,
+    accion VARCHAR(255) NOT NULL,
+    usuario VARCHAR(10) NOT NULL,
+    FOREIGN KEY (usuario) REFERENCES usuario(codigo)
+) ENGINE=InnoDB;
+
+CREATE TABLE grupo_carrera (
+    grupo VARCHAR(10) NOT NULL,
+    carrera VARCHAR(10) NOT NULL,
+    PRIMARY KEY (grupo, carrera),
+    FOREIGN KEY (grupo) REFERENCES grupo(codigo),
+    FOREIGN KEY (carrera) REFERENCES carrera(clave)
+) ENGINE=InnoDB;
+
+CREATE TABLE copia_seguridad (
+    codigo VARCHAR(10) PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    fecha DATE NOT NULL,
+    hora TIME NOT NULL,
+    datos TEXT NOT NULL,
+    administrador VARCHAR(10) NOT NULL,
+    FOREIGN KEY (administrador) REFERENCES administrador(clave)
+) ENGINE=InnoDB;
+
+CREATE TABLE competencia (
+    codigo VARCHAR(10) PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    fecha DATE NOT NULL,
+    hora TIME NOT NULL,
+    profesor VARCHAR(10) NOT NULL,
+    FOREIGN KEY (profesor) REFERENCES profesor(clave)
+) ENGINE=InnoDB;
+
+CREATE TABLE lista_competencia (
+    lista VARCHAR(10) NOT NULL,
+    competencia VARCHAR(10) NOT NULL,
+    PRIMARY KEY (lista, competencia),
+    FOREIGN KEY (lista) REFERENCES lista(codigo),
+    FOREIGN KEY (competencia) REFERENCES competencia(codigo)
+) ENGINE=InnoDB;
+
+CREATE TABLE alumno_leccion (
+    alumno VARCHAR(10) NOT NULL,
+    leccion VARCHAR(10) NOT NULL,
+    PRIMARY KEY (alumno, leccion),
+    FOREIGN KEY (alumno) REFERENCES alumno(matricula),
+    FOREIGN KEY (leccion) REFERENCES leccion(clave)
+) ENGINE=InnoDB;
+
+CREATE TABLE lista_leccion (
+    lista VARCHAR(10) NOT NULL,
+    leccion VARCHAR(10) NOT NULL,
+    PRIMARY KEY (lista, leccion),
+    FOREIGN KEY (lista) REFERENCES lista(codigo),
+    FOREIGN KEY (leccion) REFERENCES leccion(clave)
+) ENGINE=InnoDB;
 
 -- ============================================================
 -- CATALOGOS
@@ -935,6 +1018,197 @@ INSERT INTO lista_palabra VALUES
 ('LIS10', 'PAL0058'),
 ('LIS10', 'PAL0059'),
 ('LIS10', 'PAL0060');
+
+INSERT INTO puntaje (codigo, experiencia)
+VALUES ('PUN01', 20);
+
+INSERT INTO leccion 
+(clave, nombre, descripcion, practica_sesion, puntaje)
+VALUES
+
+-- PRA01
+('LEC01', 'Lesson 1 - PRA01', 'First lesson of practice PRA01.', 'PRA01', 'PUN01'),
+('LEC02', 'Lesson 2 - PRA01', 'Second lesson of practice PRA01.', 'PRA01', 'PUN01'),
+('LEC03', 'Lesson 3 - PRA01', 'Third lesson of practice PRA01.', 'PRA01', 'PUN01'),
+('LEC04', 'Lesson 4 - PRA01', 'Fourth lesson of practice PRA01.', 'PRA01', 'PUN01'),
+
+-- PRA02
+('LEC05', 'Lesson 1 - PRA02', 'First lesson of practice PRA02.', 'PRA02', 'PUN01'),
+('LEC06', 'Lesson 2 - PRA02', 'Second lesson of practice PRA02.', 'PRA02', 'PUN01'),
+('LEC07', 'Lesson 3 - PRA02', 'Third lesson of practice PRA02.', 'PRA02', 'PUN01'),
+('LEC08', 'Lesson 4 - PRA02', 'Fourth lesson of practice PRA02.', 'PRA02', 'PUN01'),
+
+-- PRA03
+('LEC09', 'Lesson 1 - PRA03', 'First lesson of practice PRA03.', 'PRA03', 'PUN01'),
+('LEC10', 'Lesson 2 - PRA03', 'Second lesson of practice PRA03.', 'PRA03', 'PUN01'),
+('LEC11', 'Lesson 3 - PRA03', 'Third lesson of practice PRA03.', 'PRA03', 'PUN01'),
+('LEC12', 'Lesson 4 - PRA03', 'Fourth lesson of practice PRA03.', 'PRA03', 'PUN01'),
+
+-- PRA04
+('LEC13', 'Lesson 1 - PRA04', 'First lesson of practice PRA04.', 'PRA04', 'PUN01'),
+('LEC14', 'Lesson 2 - PRA04', 'Second lesson of practice PRA04.', 'PRA04', 'PUN01'),
+('LEC15', 'Lesson 3 - PRA04', 'Third lesson of practice PRA04.', 'PRA04', 'PUN01'),
+('LEC16', 'Lesson 4 - PRA04', 'Fourth lesson of practice PRA04.', 'PRA04', 'PUN01'),
+
+-- PRA05
+('LEC17', 'Lesson 1 - PRA05', 'First lesson of practice PRA05.', 'PRA05', 'PUN01'),
+('LEC18', 'Lesson 2 - PRA05', 'Second lesson of practice PRA05.', 'PRA05', 'PUN01'),
+('LEC19', 'Lesson 3 - PRA05', 'Third lesson of practice PRA05.', 'PRA05', 'PUN01'),
+('LEC20', 'Lesson 4 - PRA05', 'Fourth lesson of practice PRA05.', 'PRA05', 'PUN01'),
+
+-- PRA06
+('LEC21', 'Lesson 1 - PRA06', 'First lesson of practice PRA06.', 'PRA06', 'PUN01'),
+('LEC22', 'Lesson 2 - PRA06', 'Second lesson of practice PRA06.', 'PRA06', 'PUN01'),
+('LEC23', 'Lesson 3 - PRA06', 'Third lesson of practice PRA06.', 'PRA06', 'PUN01'),
+('LEC24', 'Lesson 4 - PRA06', 'Fourth lesson of practice PRA06.', 'PRA06', 'PUN01'),
+
+-- PRA07
+('LEC25', 'Lesson 1 - PRA07', 'First lesson of practice PRA07.', 'PRA07', 'PUN01'),
+('LEC26', 'Lesson 2 - PRA07', 'Second lesson of practice PRA07.', 'PRA07', 'PUN01'),
+('LEC27', 'Lesson 3 - PRA07', 'Third lesson of practice PRA07.', 'PRA07', 'PUN01'),
+('LEC28', 'Lesson 4 - PRA07', 'Fourth lesson of practice PRA07.', 'PRA07', 'PUN01'),
+
+-- PRA08
+('LEC29', 'Lesson 1 - PRA08', 'First lesson of practice PRA08.', 'PRA08', 'PUN01'),
+('LEC30', 'Lesson 2 - PRA08', 'Second lesson of practice PRA08.', 'PRA08', 'PUN01'),
+('LEC31', 'Lesson 3 - PRA08', 'Third lesson of practice PRA08.', 'PRA08', 'PUN01'),
+('LEC32', 'Lesson 4 - PRA08', 'Fourth lesson of practice PRA08.', 'PRA08', 'PUN01'),
+
+-- PRA09
+('LEC33', 'Lesson 1 - PRA09', 'First lesson of practice PRA09.', 'PRA09', 'PUN01'),
+('LEC34', 'Lesson 2 - PRA09', 'Second lesson of practice PRA09.', 'PRA09', 'PUN01'),
+('LEC35', 'Lesson 3 - PRA09', 'Third lesson of practice PRA09.', 'PRA09', 'PUN01'),
+('LEC36', 'Lesson 4 - PRA09', 'Fourth lesson of practice PRA09.', 'PRA09', 'PUN01'),
+
+-- PRA10
+('LEC37', 'Lesson 1 - PRA10', 'First lesson of practice PRA10.', 'PRA10', 'PUN01'),
+('LEC38', 'Lesson 2 - PRA10', 'Second lesson of practice PRA10.', 'PRA10', 'PUN01'),
+('LEC39', 'Lesson 3 - PRA10', 'Third lesson of practice PRA10.', 'PRA10', 'PUN01'),
+('LEC40', 'Lesson 4 - PRA10', 'Fourth lesson of practice PRA10.', 'PRA10', 'PUN01');
+
+INSERT INTO bitacora_profesor VALUES
+('BITP01', '2026-08-01', '09:15:00', 'Created a new word list: Animals.', 'PROF01'),
+('BITP02', '2026-08-04', '10:30:00', 'Updated the Food word list.', 'PROF02'),
+('BITP03', '2026-08-07', '11:45:00', 'Created a new word list: Colors.', 'PROF03'),
+('BITP04', '2026-08-10', '13:20:00', 'Assigned the Family word list to a group.', 'PROF04'),
+('BITP05', '2026-08-13', '14:10:00', 'Created a new word list: School.', 'PROF05');
+
+INSERT INTO bitacora_administrador VALUES
+('BITA01', '2026-08-01', '08:30:00', 'Registered a new student account.', 'USR0016'),
+('BITA02', '2026-08-02', '09:45:00', 'Updated user information.', 'USR0017'),
+('BITA03', '2026-08-03', '10:15:00', 'Registered a new teacher account.', 'USR0018'),
+('BITA04', '2026-08-04', '12:00:00', 'Updated a career record.', 'USR0019'),
+('BITA05', '2026-08-05', '13:30:00', 'Created a database backup.', 'USR0020');
+
+INSERT INTO grupo_carrera VALUES
+('GRU01', 'EII'),
+('GRU02', 'EII'),
+('GRU03', 'PP'),
+('GRU04', 'PP'),
+('GRU05', 'OLCE'),
+('GRU06', 'OLCE'),
+('GRU07', 'DSM'),
+('GRU08', 'DSM'),
+('GRU09', 'IRD'),
+('GRU10', 'IRD');
+
+INSERT INTO copia_seguridad VALUES
+('COP01', 'Backup_2026_08_01', '2026-08-01', '18:00:00', 'Full database backup.', 'AD01'),
+('COP02', 'Backup_2026_08_08', '2026-08-08', '18:30:00', 'Full database backup.', 'AD02'),
+('COP03', 'Backup_2026_08_15', '2026-08-15', '19:00:00', 'Full database backup.', 'AD03'),
+('COP04', 'Backup_2026_08_22', '2026-08-22', '19:30:00', 'Full database backup.', 'AD04'),
+('COP05', 'Backup_2026_08_29', '2026-08-29', '20:00:00', 'Full database backup.', 'AD05');
+
+INSERT INTO competencia VALUES
+('COM01', 'Animals Spelling Challenge', '2026-08-15', '10:00:00', 'PROF01'),
+('COM02', 'Food Spelling Challenge', '2026-08-18', '11:00:00', 'PROF02'),
+('COM03', 'Colors Spelling Challenge', '2026-08-21', '12:00:00', 'PROF03'),
+('COM04', 'Family Spelling Challenge', '2026-08-24', '13:00:00', 'PROF04'),
+('COM05', 'School Spelling Challenge', '2026-08-27', '14:00:00', 'PROF05');
+
+INSERT INTO lista_competencia VALUES
+('LIS01', 'COM01'),
+('LIS02', 'COM02'),
+('LIS03', 'COM03'),
+('LIS04', 'COM04'),
+('LIS05', 'COM05');
+
+INSERT INTO lista_leccion VALUES
+('LIS01', 'LEC01'),
+('LIS01', 'LEC02'),
+('LIS01', 'LEC03'),
+('LIS01', 'LEC04'),
+
+('LIS02', 'LEC05'),
+('LIS02', 'LEC06'),
+('LIS02', 'LEC07'),
+('LIS02', 'LEC08'),
+
+('LIS03', 'LEC09'),
+('LIS03', 'LEC10'),
+('LIS03', 'LEC11'),
+('LIS03', 'LEC12'),
+
+('LIS04', 'LEC13'),
+('LIS04', 'LEC14'),
+('LIS04', 'LEC15'),
+('LIS04', 'LEC16'),
+
+('LIS05', 'LEC17'),
+('LIS05', 'LEC18'),
+('LIS05', 'LEC19'),
+('LIS05', 'LEC20'),
+
+('LIS06', 'LEC21'),
+('LIS06', 'LEC22'),
+('LIS06', 'LEC23'),
+('LIS06', 'LEC24'),
+
+('LIS07', 'LEC25'),
+('LIS07', 'LEC26'),
+('LIS07', 'LEC27'),
+('LIS07', 'LEC28'),
+
+('LIS08', 'LEC29'),
+('LIS08', 'LEC30'),
+('LIS08', 'LEC31'),
+('LIS08', 'LEC32'),
+
+('LIS09', 'LEC33'),
+('LIS09', 'LEC34'),
+('LIS09', 'LEC35'),
+('LIS09', 'LEC36'),
+
+('LIS10', 'LEC37'),
+('LIS10', 'LEC38'),
+('LIS10', 'LEC39'),
+('LIS10', 'LEC40');
+
+INSERT INTO alumno_leccion VALUES
+('2026100001', 'LEC01'),
+('2026100001', 'LEC02'),
+('2026100001', 'LEC03'),
+('2026100001', 'LEC04'),
+
+('2026100002', 'LEC05'),
+('2026100002', 'LEC06'),
+('2026100002', 'LEC07'),
+('2026100002', 'LEC08'),
+
+('2026100003', 'LEC09'),
+('2026100003', 'LEC10'),
+('2026100003', 'LEC11'),
+('2026100003', 'LEC12'),
+
+('2026100004', 'LEC13'),
+('2026100004', 'LEC14'),
+('2026100004', 'LEC15'),
+('2026100004', 'LEC16'),
+
+('2026100005', 'LEC17'),
+('2026100005', 'LEC18'),
+('2026100005', 'LEC19'),
+('2026100005', 'LEC20');
 
 SELECT * FROM usuario;
 

@@ -759,4 +759,266 @@ class Reporte(models.Model):
     def __str__(self):
         return f"{self.tipo_reporte} - {self.codigo}"
     
-
+#MODELO PUNTAJE
+class Puntaje(models.Model):
+    codigo = models.CharField(
+        max_length=10,
+        primary_key=True
+    )
+    
+    experiencia = models.IntegerField()
+    
+    class Meta:
+        db_table = 'puntaje'
+        
+    def __str__(self):
+        return f"{self.codigo} - {self.experiencia}"
+    
+#MODELO LECCION
+class Leccion(models.Model):
+    clave = models.CharField(
+        max_length=10,
+        primary_key=True
+    )
+    
+    nombre = models.CharField(max_length=30)
+    descripcion = models.CharField(max_length=255)
+    
+    practica_sesion = models.ForeignKey(
+        Practica_Sesion,
+        on_delete=models.PROTECT,
+        related_name='lecciones',
+        db_column='practica_sesion',
+        to_field='clave'
+    )
+    
+    puntaje = models.ForeignKey(
+        Puntaje,
+        on_delete=models.PROTECT,
+        related_name='lecciones',
+        db_column='puntaje',
+        to_field='codigo'
+    )
+    
+    class Meta:
+        db_table = 'leccion'
+        
+    def __str__(self):
+        return self.nombre
+    
+#MODELO BITACORA_PROFESOR
+class Bitacora_Profesor(models.Model):
+    codigo = models.CharField(
+        max_length=10,
+        primary_key=True
+    )
+    
+    fecha_generacion = models.DateField(
+        db_column='fecha_generacion'
+    )
+    
+    hora_generacion = models.TimeField(
+        db_column='hora_generacion'
+    )
+    
+    accion = models.CharField(max_length=255)
+    
+    profesor = models.ForeignKey(
+        Profesor,
+        on_delete=models.PROTECT,
+        related_name='bitacoras',
+        db_column='profesor',
+        to_field='clave'
+    )
+    
+    class Meta:
+        db_table = 'bitacora_profesor'
+        
+    def __str__(self):
+        return f"{self.codigo} - {self.accion}"
+    
+#MODELO BITACORA_ADMINISTRADOR
+class Bitacora_Administrador(models.Model):
+    codigo = models.CharField(
+        max_length=10,
+        primary_key=True
+    )
+    
+    fecha_generacion = models.DateField(
+        db_column='fecha_generacion'
+    )
+    
+    hora_generacion = models.TimeField(
+        db_column='hora_generacion'
+    )
+    
+    accion = models.CharField(max_length=255)
+    
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.PROTECT,
+        related_name='bitacoras_administrador',
+        db_column='usuario',
+        to_field='codigo'
+    )
+    
+    class Meta:
+        db_table = 'bitacora_administrador'
+        
+    def __str__(self):
+        return f"{self.codigo} - {self.accion}"
+    
+#MODELO GRUPO_CARRERA
+class Grupo_Carrera(models.Model):
+    grupo = models.ForeignKey(
+        Grupo,
+        on_delete=models.CASCADE,
+        related_name='grupo_carreras',
+        db_column='grupo',
+        to_field='codigo'
+    )
+    
+    carrera = models.ForeignKey(
+        Carrera,
+        on_delete=models.CASCADE,
+        related_name='grupo_carreras',
+        db_column='carrera',
+        to_field='clave'
+    )
+    
+    pk = models.CompositePrimaryKey(
+        'grupo',
+        'carrera'
+    )
+    
+    class Meta:
+        db_table = 'grupo_carrera'
+        
+#MODELO COPIA_SEGURIDAD
+class Copia_Seguridad(models.Model):
+    codigo = models.CharField(
+        max_length=10,
+        primary_key=True
+    )
+    
+    nombre = models.CharField(max_length=50)
+    fecha = models.DateField()
+    hora = models.TimeField()
+    datos = models.TextField()
+    
+    administrador = models.ForeignKey(
+        Administrador,
+        on_delete=models.PROTECT,
+        related_name='copias_seguridad',
+        db_column='administrador',
+        to_field='clave'
+    )
+    
+    class Meta:
+        db_table = 'copia_seguridad'
+        
+    def __str__(self):
+        return self.nombre
+    
+#MODELO COMPETENCIA
+class Competencia(models.Model):
+    codigo = models.CharField(
+        max_length=10,
+        primary_key=True
+    )
+    
+    nombre = models.CharField(max_length=50)
+    fecha = models.DateField()
+    hora = models.TimeField()
+    
+    profesor = models.ForeignKey(
+        Profesor,
+        on_delete=models.PROTECT,
+        related_name='competencias',
+        db_column='profesor',
+        to_field='clave'
+    )
+    
+    class Meta:
+        db_table = 'competencia'
+        
+    def __str__(self):
+        return self.nombre
+    
+#MODELO LISTA_COMPETENCIA
+class Lista_Competencia(models.Model):
+    lista = models.ForeignKey(
+        Lista,
+        on_delete=models.CASCADE,
+        related_name='lista_competencias',
+        db_column='lista',
+        to_field='codigo'
+    )
+    
+    competencia = models.ForeignKey(
+        Competencia,
+        on_delete=models.CASCADE,
+        related_name='lista_competencias',
+        db_column='comeptencia',
+        to_field='codigo'
+    )
+    
+    pk = models.CompositePrimaryKey(
+        'lista',
+        'competencia'
+    )
+    
+    class Meta:
+        db_table = 'lista_competencia'
+        
+#MODELO ALUMNO_LECCION
+class Alumno_Leccion(models.Model):
+    alumno = models.ForeignKey(
+        Alumno,
+        on_delete=models.CASCADE,
+        related_name='alumno_lecciones',
+        db_column='alumno',
+        to_field='matricula'
+    )
+    
+    leccion = models.ForeignKey(
+        Leccion,
+        on_delete=models.CASCADE,
+        related_name='alumno_lecciones',
+        db_column='leccion',
+        to_field='clave'
+    )
+    
+    pk = models.CompositePrimaryKey(
+        'alumno',
+        'leccion'
+    )
+    
+    class Meta:
+        db_table = 'alumno_leccion'
+        
+#MODELO LISTA_LECCION
+class Lista_Leccion(models.Model):
+    lista = models.ForeignKey(
+        Lista,
+        on_delete=models.CASCADE,
+        related_name='lista_lecciones',
+        db_column='lista',
+        to_field='codigo'
+    )
+    
+    leccion = models.ForeignKey(
+        Leccion,
+        on_delete=models.CASCADE,
+        related_name='lista_lecciones',
+        db_column='leccion',
+        to_field='clave'
+    )
+    
+    pk = models.CompositePrimaryKey(
+        'lista',
+        'leccion'
+    )
+    
+    class Meta:
+        db_table = 'lista_leccion'
