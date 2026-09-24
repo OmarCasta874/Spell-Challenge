@@ -1198,7 +1198,67 @@ def practice_spelling(request):
 @never_cache
 @role_required('student')
 def student_match_words(request):
-    return render(request, 'student/match_words.html')
+    alumno = request.user.alumno
+    
+    grupo_alumno = (
+        Grupo_Alumno.objects
+        .filter(alumno=alumno)
+        .select_related('grupo')
+        .first()
+    )
+    
+    if not grupo_alumno:
+        return render(
+            request,
+            'student/match_words.html',
+            {
+                'words': [],
+                'message': 'No group assigned.'
+            }
+        )
+    
+    grupo = grupo_alumno.grupo
+    
+    lista_grupo = (
+        Lista_Grupo.objects
+        .filter(grupo=grupo)
+        .select_related('lista')
+        .first()
+    )
+    
+    if not lista_grupo:
+        return render(
+            request,
+            'student/match_words.html',
+            {
+                'words': [],
+                'message': 'No word list assigned.'
+            }
+        )
+        
+    lista = lista_grupo.lista
+    
+    words = (
+        Palabra.objects
+        .filter(lista_palabras__lista=lista)
+        .select_related('categoria')
+    )
+    
+    categories = (
+        Categoria.objects
+        .filter(palabras__lista_palabras__lista=lista)
+        .distinct()
+    )
+    
+    return render(
+        request, 
+        'student/match_words.html',
+        {
+            'words': words,
+            'categories': categories,
+            'lista': lista
+        }
+    )
 
 @never_cache
 @role_required('student')

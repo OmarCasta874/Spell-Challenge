@@ -31,18 +31,22 @@
 
       <div class="mw-column">
         <p class="mw-column-title">WORDS</p>
-        <button class="mw-item" data-word="apple" onclick="mwSelectWord(this)">APPLE</button>
-        <button class="mw-item" data-word="tiger" onclick="mwSelectWord(this)">TIGER</button>
-        <button class="mw-item" data-word="saxophone" onclick="mwSelectWord(this)">SAXOPHONE</button>
-        <button class="mw-item" data-word="doctor" onclick="mwSelectWord(this)">DOCTOR</button>
+
+        {% for word in words %}
+        <button type="button" class="mw-item" data-word="{{ word.codigo }}" data-category="{{ word.categoria.codigo }}" onclick="mwSelectWord(this)">
+          {{ word.significado|upper }}
+        </button>
+        {% endfor %}
       </div>
 
       <div class="mw-column">
         <p class="mw-column-title">CATEGORIES</p>
-        <button class="mw-item" data-category="animals" onclick="mwSelectCategory(this)">ANIMALS</button>
-        <button class="mw-item" data-category="music" onclick="mwSelectCategory(this)">MUSIC</button>
-        <button class="mw-item" data-category="jobs" onclick="mwSelectCategory(this)">JOBS</button>
-        <button class="mw-item" data-category="fruits" onclick="mwSelectCategory(this)">FRUITS</button>
+
+        {% for category in categories %}
+        <button type="button" class="mw-item" data-category="{{ category.codigo }}" onclick="mwSelectCategory(this)">
+          {{ category.nombre|upper }}
+        </button>
+        {% endfor %}
       </div>
 
     </div>
@@ -80,7 +84,7 @@
 <script>
   var mwSelectedWordBtn = null;
   var mwMatchedCount = 0;
-  var mwTotalPairs = 4;
+  var mwTotalPairs = {{ words|length }};
 
   function mwSelectWord(btn) {
     if (btn.classList.contains('mw-item-matched')) return;
@@ -88,36 +92,72 @@
     if (mwSelectedWordBtn) {
       mwSelectedWordBtn.classList.remove('mw-item-selected');
     }
+
     mwSelectedWordBtn = btn;
     btn.classList.add('mw-item-selected');
   }
 
   function mwSelectCategory(btn) {
     if (btn.classList.contains('mw-item-matched')) return;
+
     if (!mwSelectedWordBtn) return;
 
-    mwSelectedWordBtn.classList.remove('mw-item-selected');
-    mwSelectedWordBtn.classList.add('mw-item-matched');
-    btn.classList.add('mw-item-matched');
-    mwSelectedWordBtn = null;
+    var selectedCategory = mwSelectedWordBtn.dataset.category;
+    var clickedCategory = btn.dataset.category;
 
-    mwMatchedCount++;
-    var pct = (mwMatchedCount / mwTotalPairs) * 100;
-    document.getElementById('mwProgressFill').style.width = pct + '%';
-    document.getElementById('mwBeeMarker').style.left = pct + '%';
+    var isCorrect =
+      selectedCategory === clickedCategory;
 
-    if (mwMatchedCount === mwTotalPairs) {
+    if (isCorrect) {
+
+      mwSelectedWordBtn.classList.remove('mw-item-selected');
+      mwSelectedWordBtn.classList.add('mw-item-matched');
+
+      btn.classList.add('mw-item-matched');
+
+      mwSelectedWordBtn = null;
+
+      mwMatchedCount++;
+
+      var pct = (mwMatchedCount / mwTotalPairs) * 100;
+
+      document.getElementById('mwProgressFill').style.width = pct + '%';
+      document.getElementById('mwBeeMarker').style.left = pct + '%';
+
+      if (mwMatchedCount === mwTotalPairs) {
+
+        setTimeout(function () {
+          document.getElementById('mwGame').classList.add('d-none');
+          document.getElementById('mwCompleted').classList.remove('d-none');
+        }, 400);
+      }
+
+    } else {
+
+      mwSelectedWordBtn.classList.remove('mw-item-selected');
+
+      mwSelectedWordBtn.classList.add('mw-item-incorrect');
+      btn.classList.add('mw-item-incorrect');
+
       setTimeout(function () {
-        document.getElementById('mwGame').classList.add('d-none');
-        document.getElementById('mwCompleted').classList.remove('d-none');
-      }, 400);
+        mwSelectedWordBtn.classList.remove('mw-item-incorrect');
+        btn.classList.remove('mw-item-incorrect');
+      }, 700);
+
+      mwSelectedWordBtn = null;
     }
   }
 
   function mwRepeatLesson() {
+
     document.querySelectorAll('.mw-item').forEach(function (item) {
-      item.classList.remove('mw-item-matched', 'mw-item-selected');
+      item.classList.remove(
+        'mw-item-matched',
+        'mw-item-selected',
+        'mw-item-incorrect'
+      );
     });
+
     mwSelectedWordBtn = null;
     mwMatchedCount = 0;
 

@@ -600,6 +600,77 @@ INSERT INTO palabra VALUES
 ('PAL0009', 'happy', '/ha.pi/', '', '', 'CAT09', 'B1'),
 ('PAL0010', 'bicycle', '/bai.si.kel/', '', '', 'CAT10', 'B2');
 
+INSERT INTO palabra VALUES
+-- ANIMALS
+('PAL0011', 'rabbit', '/ra.bit/', '', '', 'CAT01', 'A1'),
+('PAL0012', 'monkey', '/mon.ki/', '', '', 'CAT01', 'A1'),
+('PAL0013', 'dolphin', '/dol.fin/', '', '', 'CAT01', 'A2'),
+('PAL0014', 'elephant', '/e.le.fant/', '', '', 'CAT01', 'B1'),
+('PAL0015', 'penguin', '/pen.gwin/', '', '', 'CAT01', 'B1'),
+
+-- FOOD
+('PAL0016', 'banana', '/ba.na.na/', '', '', 'CAT02', 'A1'),
+('PAL0017', 'cheese', '/chiiz/', '', '', 'CAT02', 'A1'),
+('PAL0018', 'chicken', '/chi.ken/', '', '', 'CAT02', 'A2'),
+('PAL0019', 'sandwich', '/sand.wich/', '', '', 'CAT02', 'B1'),
+('PAL0020', 'vegetable', '/vej.ta.bol/', '', '', 'CAT02', 'B2'),
+
+-- COLORS
+('PAL0021', 'red', '/red/', '', '', 'CAT03', 'A1'),
+('PAL0022', 'yellow', '/ye.low/', '', '', 'CAT03', 'A1'),
+('PAL0023', 'orange', '/o.ranch/', '', '', 'CAT03', 'A2'),
+('PAL0024', 'green', '/grin/', '', '', 'CAT03', 'A2'),
+('PAL0025', 'turquoise', '/ter.kwoiz/', '', '', 'CAT03', 'B1'),
+
+-- FAMILY
+('PAL0026', 'father', '/fa.der/', '', '', 'CAT04', 'A1'),
+('PAL0027', 'sister', '/sis.ter/', '', '', 'CAT04', 'A1'),
+('PAL0028', 'brother', '/bra.der/', '', '', 'CAT04', 'A1'),
+('PAL0029', 'daughter', '/do.ter/', '', '', 'CAT04', 'A2'),
+('PAL0030', 'grandmother', '/grand.ma.der/', '', '', 'CAT04', 'B1'),
+
+-- SCHOOL
+('PAL0031', 'book', '/buk/', '', '', 'CAT05', 'A1'),
+('PAL0032', 'teacher', '/ti.cher/', '', '', 'CAT05', 'A1'),
+('PAL0033', 'classroom', '/klas.rum/', '', '', 'CAT05', 'A2'),
+('PAL0034', 'homework', '/hom.work/', '', '', 'CAT05', 'A2'),
+('PAL0035', 'assignment', '/a.sain.ment/', '', '', 'CAT05', 'B1'),
+
+-- SPORTS
+('PAL0036', 'tennis', '/te.nis/', '', '', 'CAT06', 'A1'),
+('PAL0037', 'basketball', '/bas.ket.bol/', '', '', 'CAT06', 'A1'),
+('PAL0038', 'baseball', '/beis.bol/', '', '', 'CAT06', 'A2'),
+('PAL0039', 'swimming', '/swi.ming/', '', '', 'CAT06', 'A2'),
+('PAL0040', 'competition', '/kom.pe.ti.shon/', '', '', 'CAT06', 'B1'),
+
+-- NATURE
+('PAL0041', 'tree', '/tri/', '', '', 'CAT07', 'A1'),
+('PAL0042', 'flower', '/flau.er/', '', '', 'CAT07', 'A1'),
+('PAL0043', 'river', '/ri.ver/', '', '', 'CAT07', 'A2'),
+('PAL0044', 'mountain', '/maun.ten/', '', '', 'CAT07', 'A2'),
+('PAL0045', 'waterfall', '/wo.ter.fol/', '', '', 'CAT07', 'B1'),
+
+-- TECHNOLOGY
+('PAL0046', 'phone', '/fon/', '', '', 'CAT08', 'A1'),
+('PAL0047', 'computer', '/kom.piu.ter/', '', '', 'CAT08', 'A1'),
+('PAL0048', 'keyboard', '/ki.bord/', '', '', 'CAT08', 'A2'),
+('PAL0049', 'software', '/soft.wer/', '', '', 'CAT08', 'B1'),
+('PAL0050', 'database', '/dei.ta.beis/', '', '', 'CAT08', 'B1'),
+
+-- FEELINGS
+('PAL0051', 'sad', '/sad/', '', '', 'CAT09', 'A1'),
+('PAL0052', 'angry', '/ang.gri/', '', '', 'CAT09', 'A1'),
+('PAL0053', 'excited', '/ik.sai.ted/', '', '', 'CAT09', 'A2'),
+('PAL0054', 'nervous', '/ner.vos/', '', '', 'CAT09', 'A2'),
+('PAL0055', 'confident', '/kon.fi.dent/', '', '', 'CAT09', 'B1'),
+
+-- VEHICLES
+('PAL0056', 'car', '/kar/', '', '', 'CAT10', 'A1'),
+('PAL0057', 'bus', '/bas/', '', '', 'CAT10', 'A1'),
+('PAL0058', 'train', '/trein/', '', '', 'CAT10', 'A2'),
+('PAL0059', 'airplane', '/er.plein/', '', '', 'CAT10', 'A2'),
+('PAL0060', 'motorcycle', '/mo.tor.sai.kol/', '', '', 'CAT10', 'B1');
+
 
 -- ============================================================
 -- REPORTES
@@ -785,16 +856,85 @@ INSERT INTO dificultad_juego VALUES
 ('J12', 'DI03');
 
 INSERT INTO lista_palabra VALUES
-('LIS01', 'PAL0001'),
-('LIS02', 'PAL0002'),
+-- ANIMALS
+('LIS01', 'PAL0002'),
+('LIS01', 'PAL0011'),
+('LIS01', 'PAL0012'),
+('LIS01', 'PAL0013'),
+('LIS01', 'PAL0014'),
+('LIS01', 'PAL0015'),
+
+-- FOOD
+('LIS02', 'PAL0001'),
+('LIS02', 'PAL0016'),
+('LIS02', 'PAL0017'),
+('LIS02', 'PAL0018'),
+('LIS02', 'PAL0019'),
+('LIS02', 'PAL0020'),
+
+-- COLORS
 ('LIS03', 'PAL0003'),
+('LIS03', 'PAL0021'),
+('LIS03', 'PAL0022'),
+('LIS03', 'PAL0023'),
+('LIS03', 'PAL0024'),
+('LIS03', 'PAL0025'),
+
+-- FAMILY
 ('LIS04', 'PAL0004'),
+('LIS04', 'PAL0026'),
+('LIS04', 'PAL0027'),
+('LIS04', 'PAL0028'),
+('LIS04', 'PAL0029'),
+('LIS04', 'PAL0030'),
+
+-- SCHOOL
 ('LIS05', 'PAL0005'),
+('LIS05', 'PAL0031'),
+('LIS05', 'PAL0032'),
+('LIS05', 'PAL0033'),
+('LIS05', 'PAL0034'),
+('LIS05', 'PAL0035'),
+
+-- SPORTS
 ('LIS06', 'PAL0006'),
+('LIS06', 'PAL0036'),
+('LIS06', 'PAL0037'),
+('LIS06', 'PAL0038'),
+('LIS06', 'PAL0039'),
+('LIS06', 'PAL0040'),
+
+-- NATURE
 ('LIS07', 'PAL0007'),
+('LIS07', 'PAL0041'),
+('LIS07', 'PAL0042'),
+('LIS07', 'PAL0043'),
+('LIS07', 'PAL0044'),
+('LIS07', 'PAL0045'),
+
+-- TECHNOLOGY
 ('LIS08', 'PAL0008'),
+('LIS08', 'PAL0046'),
+('LIS08', 'PAL0047'),
+('LIS08', 'PAL0048'),
+('LIS08', 'PAL0049'),
+('LIS08', 'PAL0050'),
+
+-- FEELINGS
 ('LIS09', 'PAL0009'),
-('LIS10', 'PAL0010');
+('LIS09', 'PAL0051'),
+('LIS09', 'PAL0052'),
+('LIS09', 'PAL0053'),
+('LIS09', 'PAL0054'),
+('LIS09', 'PAL0055'),
+
+-- VEHICLES
+('LIS10', 'PAL0010'),
+('LIS10', 'PAL0056'),
+('LIS10', 'PAL0057'),
+('LIS10', 'PAL0058'),
+('LIS10', 'PAL0059'),
+('LIS10', 'PAL0060');
 
 SELECT * FROM usuario;
 
