@@ -280,6 +280,27 @@
 }
 .btn-solid-pill:hover { background-color: var(--sc-salmon-hover); color: var(--sc-white); }
 
+.option-btn.active {
+  background-color: var(--sc-maroon);
+  color: var(--sc-white);
+}
+
+.option-btn.correct {
+  background-color: #198754;
+  color: var(--sc-white);
+}
+
+.option-btn.incorrect {
+  background-color: #DC3545;
+  color: var(--sc-white);
+}
+
+.exercise-feedback {
+  min-height: 24px;
+  margin-bottom: 1.25rem;
+  font-weight: 700;
+}
+
 /* =========================================================
    Responsive
    ========================================================= */

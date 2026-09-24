@@ -119,6 +119,12 @@
   transform: scale(1.04);
 }
 
+.mw-item-incorrect {
+  background-color: #dc3545;
+  color: var(--sc-white);
+  transform: scale(1.04);
+}
+
 .mw-item-matched {
   background-color: #c9c9c9;
   color: #f1f1f1;
