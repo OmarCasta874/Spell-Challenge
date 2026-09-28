@@ -11,6 +11,7 @@ from home.models import Usuario, TipoUsuario, Profesor, Alumno, Administrador, G
 from home.models import Carrera, Categoria, Alumno_Insignia, Alumno_Practica, Lista_Grupo, Grupo_Alumno
 from home.models import Nivel, Dificultad, Dificultad_Juego, Insignia, Intento_Palabra, Lista, Lista_Palabra
 from home.models import Proceso_Lista, Rango, Ranking, Reporte, TipoRanking, UsuarioManager, Juego, Practica_Sesion
+import json
 
 # Create your views here.
 
@@ -1140,11 +1141,44 @@ def mini_games_view(request):
 @never_cache
 @role_required('student')
 def student_competitions_view(request):
-    # Genera la lista de panales del 1 al 30
     beehives = list(range(1, 31))
+    
+    palabras = Palabra.objects.filter(
+        categoria__codigo__in=[
+            'CAT11',
+            'CAT12',
+            'CAT13',
+            'CAT14',
+            'CAT15',
+            'CAT16',
+            'CAT17',
+        ]
+    ).select_related('categoria', 'nivel').order_by('codigo')
+    
+    words_by_category = {
+        'CAT11': [],
+        'CAT12': [],
+        'CAT13': [],
+        'CAT14': [],
+        'CAT15': [],
+        'CAT16': [],
+        'CAT17': [],
+    }
+    
+    for palabra in palabras:
+        words_by_category[palabra.categoria.codigo].append({
+            'texto': palabra.significado,
+            'definicion': palabra.definicion,
+            'ejemplo': palabra.ejemplo,
+            'pronunciacion': palabra.pronunciacion,
+            'categoria': palabra.categoria.codigo,
+            'letras': palabra.categoria.nombre,
+            'nivel': palabra.nivel.codigo,
+        })
     
     context = {
         'beehives': beehives,
+        'words_by_category': json.dumps(words_by_category),
     }
     return render(request, 'student/competitions_selecting.html', context)
 

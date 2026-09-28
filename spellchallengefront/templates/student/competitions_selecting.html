@@ -16,6 +16,19 @@
             <img src="{% static 'img/spell-challenge_black-grey.png' %}" alt="Spell Challenge Logo" class="competition-logo">
         </div>
         <h2 class="competition-title">SELECT A BEEHIVE</h2>
+        <div class="word-length-selector">
+            <label for="wordLengthSelect">SELECT WORD LENGTH</label>
+
+            <select id="wordLengthSelect" onchange="filterBeehives()">
+                <option value="CAT11">6 Letters</option>
+                <option value="CAT12">7 Letters</option>
+                <option value="CAT13">8 Letters</option>
+                <option value="CAT14">9 Letters</option>
+                <option value="CAT15">10 Letters</option>
+                <option value="CAT16">11 Letters</option>
+                <option value="CAT17">12 Letters</option>
+            </select>
+        </div>
     </div>
 
     <div class="honeycomb-grid">
@@ -96,26 +109,21 @@
 {% block extra_js %}
 {{ block.super }}
 <script>
+    const wordsByCategory = {{ words_by_category|safe }};
+    let currentCategory = 'CAT11';
+
     let currentHive = null;
+
+    function filterBeehives() {
+        currentCategory = document.getElementById('wordLengthSelect').value;
+
+        currentHive = null;
+    }
 
     function selectBeehive(number) {
         currentHive = number;
         document.getElementById('selectedHiveNum').innerText = number;
         document.getElementById('confirmBeehiveModal').classList.add('active');
-    }
-
-    const wordBank = [
-        { texto: "CAT", significado: "A small domesticated animal", ejemplo: "The cat is sleeping." },
-        { texto: "APPLE", significado: "A round fruit with red or green skin", ejemplo: "I ate an apple." },
-        { texto: "CUSTOMS", significado: "The official department that administers duties on imports", ejemplo: "We passed through customs." },
-        { texto: "APOLOGIZE", significado: "To express regret for something done wrong", ejemplo: "He apologized for being late." },
-        { texto: "PHOTOGRAPHY", significado: "The art or practice of taking photographs", ejemplo: "She studies photography." },
-        { texto: "SOMNAMBULISM", significado: "The act to walk while asleep", ejemplo: "Somnambulism can be dangerous." },
-        { texto: "EMBARRASSMENT", significado: "A feeling of self-consciousness or shame", ejemplo: "He felt embarrassment after the mistake." }
-    ];
-
-    function getRandomWord() {
-        return wordBank[Math.floor(Math.random() * wordBank.length )];
     }
 
     function fitWordToModal() {
@@ -137,17 +145,29 @@
     }
 
     function enterBeehive() {
-        if (currentHive) {
-            closeModal('confirmBeehiveModal');
+        if (!currentHive) return;
 
-            const word = getRandomWord();
-            document.getElementById('currentWordText').textContent = word.texto;
-            document.getElementById('currentWordDef').textContent = word.significado;
-            document.getElementById('currentWordExample').textContent = word.ejemplo;
+        closeModal('confirmBeehiveModal');
 
-            document.getElementById('wordModal').classList.add('active');
-            fitWordToModal();
+        const words = wordsByCategory[currentCategory];
+
+        if (!words || words.length === 0) {
+            alert('There are no words available for this word length.');
+            return;
         }
+
+        const wordIndex = (parseInt(currentHive) - 1) % words.length;
+        const word = words[wordIndex];
+
+        document.getElementById('currentWordText').textContent = word.texto;
+
+        document.getElementById('currentWordDef').textContent = word.definicion;
+
+        document.getElementById('currentWordExample').textContent = word.ejemplo;
+
+        document.getElementById('wordModal').classList.add('active');
+
+        fitWordToModal();
     }
 
     function finishWordModal() {

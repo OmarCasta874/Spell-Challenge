@@ -297,6 +297,52 @@
     transform: scaleX(-1);
 }
 
+/* ==============================
+   WORD LENGTH SELECTOR
+   ============================== */
+
+.word-length-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 20px auto 30px;
+}
+
+.word-length-selector label {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: #5A3E1B;
+}
+
+.word-length-selector select {
+    min-width: 220px;
+    padding: 10px 42px 10px 16px;
+
+    font-size: 16px;
+    font-weight: 600;
+    color: #5A3E1B;
+
+    background-color: #F9D84A;
+    border: 2px solid #8B5E2B;
+    border-radius: 12px;
+
+    cursor: pointer;
+    outline: none;
+
+    transition: all 0.2s ease;
+}
+
+.word-length-selector select:hover {
+    background-color: #F7CF2F;
+}
+
+.word-length-selector select:focus {
+    border-color: #5A3E1B;
+    box-shadow: 0 0 0 3px rgba(139, 94, 43, 0.18);
+}
+
 /* Responsive: en pantallas pequeñas evita que el modal se desborde */
 @media (max-width: 900px) {
     .word-modal-theme {
