@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'css/teacher_base.css' %}">
 <link rel="stylesheet" href="{% static 'css/my_groups.css' %}">
 {% endblock %}
@@ -70,21 +71,23 @@
         <button type="button" class="btn-close create-group-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body create-group-body">
-        <form>
+        <form method="POST">
+          {% csrf_token %} 
           <div class="mb-3">
             <label class="form-label create-group-label">Group Name:</label>
-            <input type="text" class="form-control create-group-input" placeholder="e.g. Group 3A - English">
+            <input type="text" name="nombre" class="form-control create-group-input" placeholder="e.g. Group 3A - English">
           </div>
           <div class="mb-3">
             <label class="form-label create-group-label">English Level:</label>
-            <select class="form-select create-group-input">
-              <option selected>Select a Level</option>
-              <option>A1 - Beginner</option>
+            <select name="nivel" class="form-select create-group-input" required>
+              <option value="" selected disabled>Select a Level</option>
+              <option value="A1">A1 - Beginner</option>
+              <option value="A2">A2 - Elementary</option>
+              <option value="B1">B1 - Intermediate</option>
+              <option value="B2">B2 - Upper Intermediate</option>
+              <option value="C1">C1 - Advanced</option>
+              <option value="C2">C2 - Proficient</option>
             </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label create-group-label">Description (optional):</label>
-            <input type="text" class="form-control create-group-input">
           </div>
           <div class="text-end">
             <button type="submit" class="btn-create-group-submit">Create Group</button>

@@ -12,6 +12,9 @@ from home.models import Carrera, Categoria, Alumno_Insignia, Alumno_Practica, Li
 from home.models import Nivel, Dificultad, Dificultad_Juego, Insignia, Intento_Palabra, Lista, Lista_Palabra
 from home.models import Proceso_Lista, Rango, Ranking, Reporte, TipoRanking, UsuarioManager, Juego, Practica_Sesion
 import json
+from .mascot import say
+from datetime import date
+import random, string
 
 # Create your views here.
 
@@ -52,9 +55,19 @@ def login(request):
             tipo_usuario = usuario.tipo_usuario.nombre.strip().lower()
             
             if tipo_usuario == 'teacher':
+                say(
+                    request,
+                    "Welcome to Spell-Challenge!",
+                    "My name is Crowing, and I will be here to guide you along the way!"
+                )
                 return redirect('teacher_dashboard')
             
             elif tipo_usuario == 'student':
+                say(
+                    request,
+                    "Welcome to Spell-Challenge!",
+                    "Every mistake helps you learn. Keep buzzing!"
+                )
                 return redirect('student_home')
             
             elif tipo_usuario == 'administrator':
@@ -205,6 +218,38 @@ def dashboard(request):
 @role_required('teacher')
 def my_groups(request):
     profesor = request.user.profesor
+    
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre', '').strip()
+        nivel = request.POST.get('nivel', '').strip()
+        
+        if nombre:
+            caracteres = string.ascii_uppercase + string.digits
+            
+            while True:
+                codigo = ''.join(
+                    random.choices(caracteres, k=6)
+                )
+                
+                if not Grupo.objects.filter(codigo=codigo).exists():
+                    break
+                
+            grupo = Grupo.objects.create(
+                codigo=codigo,
+                nombre=nombre,
+                fecha_creacion=date.today(),
+                ciclo=nivel,
+                profesor=profesor,
+            )
+            
+            say(
+                request,
+                f"Your Class Code is: {codigo}",
+                "Share it with your students so they can join our class."
+            )
+            
+            return redirect('teacher_groups')
+    
     grupos = Grupo.objects.filter(profesor=profesor)
     
     return render(
@@ -315,44 +360,93 @@ def student_groups(request):
         usuario=request.user
     )
     
-    grupos = (
-        Grupo.objects
-        .filter(grupo_alumnos__alumno=alumno)
-        .select_related('profesor')
-        .prefetch_related(
-            'grupo_alumnos__alumno',
-            'lista_grupos'
+    def get_groups():
+        grupos = (
+            Grupo.objects
+            .filter(grupo_alumnos__alumno=alumno)
+            .select_related('profesor')
+            .prefetch_related(
+                'grupo_alumnos__alumno',
+                'lista_grupos'
+            )
+            .distinct()
         )
-        .distinct()
-    )
+        
+        groups = []
+        
+        for grupo in grupos:
+            teacher = grupo.profesor
+            
+            teacher_name = (
+                f"{teacher.nombre_pila} "
+                f"{teacher.apellidoPaterno} "
+                f"{teacher.apellidoMaterno}"
+            ).strip()
+            
+            student_count = grupo.grupo_alumnos.count()
+            list_count = grupo.lista_grupos.count()
+            
+            groups.append({
+                'id': grupo.codigo,
+                'nombre': grupo.nombre,
+                'teacher_name': teacher_name,
+                'student_count': student_count,
+                'list_count': list_count,
+            })
+            
+        return groups
     
-    groups = []
-    
-    for grupo in grupos:
-        teacher = grupo.profesor
+    if request.method == 'POST':
+        codigo = request.POST.get('group_code', '').strip().upper()
         
-        teacher_name = (
-            f"{teacher.nombre_pila} "
-            f"{teacher.apellidoPaterno} "
-            f"{teacher.apellidoMaterno}"
-        ).strip()
+        if not codigo:
+            return render(
+                request,
+                'student/my_groups_student.html',
+                {
+                    'groups': [],
+                    'join_error': 'Please enter a group code.',
+                }
+            )
+            
+        try:
+            grupo = Grupo.objects.get(codigo=codigo)
+            
+        except Grupo.DoesNotExist:
+            return render(
+                request,
+                'student/my_groups_student.html',
+                {
+                    'groups': [],
+                    'join_error': 'Group code not found.',
+                }
+            )
+            
+        if Grupo_Alumno.objects.filter(
+            grupo=grupo,
+            alumno=alumno
+        ).exists():
+            return render(
+                request,
+                'student/my_groups_student.html',
+                {
+                    'groups': [],
+                    'join_error': 'You are already a member of this group.',
+                }
+            )
+            
+        Grupo_Alumno.objects.create(
+            grupo=grupo,
+            alumno=alumno
+        )
         
-        student_count = grupo.grupo_alumnos.count()
-        list_count = grupo.lista_grupos.count()
-        
-        groups.append({
-            'id': grupo.codigo,
-            'nombre': grupo.nombre,
-            'teacher_name': teacher_name,
-            'student_count': student_count,
-            'list_count': list_count,
-        })
+        return redirect('student_groups')
     
     return render(
         request, 
         'student/my_groups_student.html',
         {
-            'groups': groups
+            'groups': get_groups()
         }
     )
 

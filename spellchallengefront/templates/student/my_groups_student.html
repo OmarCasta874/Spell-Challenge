@@ -58,10 +58,18 @@
       </div>
       <div class="modal-body join-group-body">
         <p class="join-group-hint">Enter the code provided by your teacher.</p>
-        <form id="formJoinGroup">
+
+        {% if join_error %}
+        <div class="alert alert-danger">
+          {{ join_error }}
+        </div>
+        {% endif %}
+        
+        <form id="formJoinGroup" method="POST">
+          {% csrf_token %}
           <div class="mb-3">
             <label for="groupCode" class="form-label join-group-label">Group Code:</label>
-            <input type="text" class="form-control join-group-input" id="groupCode" placeholder="" required>
+            <input type="text" class="form-control join-group-input" id="groupCode" name="group_code" placeholder="e.g. A7K2PX" required>
           </div>
           <button type="submit" class="btn-join-group-submit">Join</button>
         </form>

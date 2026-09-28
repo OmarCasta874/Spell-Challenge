@@ -1,0 +1,80 @@
+/* mascot.css — widget de mascota (Crowing = Teacher, Beenary = Student) */
+.mascot {
+  --mascot-bg: #141414;
+  --mascot-border: #3a3a3a;
+  --mascot-fg: #ffffff;
+  --mascot-close: #ffffff;
+  --mascot-radius: 6px;
+  position: fixed;
+  left: 16px;
+  bottom: 12px;
+  z-index: 1030;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: calc(100vw - 32px);
+  pointer-events: none; 
+  font-family: 'Lato', sans-serif;
+}
+/* Beenary (Student): caja amarilla plana, texto negro, X vino */
+.mascot--beenary {
+  --mascot-bg: #f0ff00; 
+  --mascot-border: transparent;
+  --mascot-fg: #000000;
+  --mascot-close: #8b0000;
+  --mascot-radius: 0;
+}
+
+.mascot-bubble {
+  position: relative;
+  width: 290px;
+  max-width: 100%;
+  padding: 10px 44px 12px 12px;
+  background: var(--mascot-bg);
+  color: var(--mascot-fg);
+  border: 1px solid var(--mascot-border);
+  border-radius: var(--mascot-radius);
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  pointer-events: auto;
+}
+.mascot-bubble[hidden] { display: none; }
+.mascot-bubble.is-visible { animation: mascot-pop 0.25s ease-out; }
+.mascot-title { margin: 0 0 12px; }
+.mascot-text  { margin: 0; }
+
+.mascot-close {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  padding: 2px;
+  background: none;
+  border: none;
+  color: var(--mascot-close);
+  cursor: pointer;
+  line-height: 0;
+}
+.mascot-close:focus-visible,
+.mascot-img:focus-visible { outline: 2px solid var(--mascot-close); outline-offset: 2px; }
+
+.mascot-img {
+  display: block;
+  height: auto;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+}
+
+@keyframes mascot-pop {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mascot-bubble.is-visible { animation: none; }
+}
+@media (max-width: 600px) {
+  .mascot-bubble { width: 240px; font-size: 0.85rem; }
+  .mascot-img { width: 76px; }
+}

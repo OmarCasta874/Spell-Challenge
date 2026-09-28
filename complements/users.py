@@ -8,9 +8,13 @@
 #O alternativamente:
 #email = gilda.torres@beemail.com
 #password = gilda1234
+#email = ariana.gonzales@beemail.com
+#password = ariana1234
 
 #Para entrar al sistema como Student (por ahora), se va a utilizar:
 #email = 2026100001@ut-tijuana.edu.mx
+#password = Student12345
+#email = 2026100002@ut-tijuana.edu.mx
 #password = Student12345
 
 #para entrar como admin, se va a tomar:
