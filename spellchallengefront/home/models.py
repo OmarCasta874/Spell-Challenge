@@ -290,6 +290,10 @@ class Nivel(models.Model):
 class Palabra(models.Model):
     codigo = models.CharField(max_length=10, primary_key=True)
     significado = models.CharField(max_length=50)
+    
+    definicion = models.CharField(max_length=255)
+    ejemplo = models.CharField(max_length=255)
+    
     pronunciacion = models.CharField(max_length=100)
     imagen = models.ImageField(
         upload_to='palabras/imagenes/',
@@ -959,7 +963,7 @@ class Lista_Competencia(models.Model):
         Competencia,
         on_delete=models.CASCADE,
         related_name='lista_competencias',
-        db_column='comeptencia',
+        db_column='competencia',
         to_field='codigo'
     )
     
