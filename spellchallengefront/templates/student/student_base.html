@@ -3,6 +3,7 @@
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/student_base.css' %}"> {# o student_base.css #}
   <link rel="stylesheet" href="{% static 'css/logout_modal.css' %}">
+  <link rel="stylesheet" href="{% static 'css/pet_messages.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -55,9 +56,11 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script>
   lucide.createIcons();
 </script>
 
 {% include 'base/logout_modal.html' %}
+{% include 'base/pet_messages.html' with mascot="beenary" mascot_img="beenary-left.png" %}
 {% endblock %}
