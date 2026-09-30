@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{% static 'css/mini_games.css' %}">
 <link rel="stylesheet" href="{% static 'css/hangman_modal.css' %}">
 <link rel="stylesheet" href="{% static 'css/missing_letters_modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/memory_game_modal.css' %}">
 {% endblock %}
 
 {% block title %}Mini Games - Spell-Challenge Student{% endblock %}
@@ -25,6 +26,13 @@
         <div class="game-card-pink">
             <h3>MISSING LETTERS</h3>
             <button class="btn-pill-play" onclick="openMissingModal()">
+                PLAY
+            </button>
+        </div>
+
+        <div class="game-card-pink">
+            <h3>MEMORY GAME</h3>
+            <button class="btn-pill-play" onclick="openMemoryGame()">
                 PLAY
             </button>
         </div>
@@ -74,6 +82,7 @@
 </div>
 {% include 'student/hangman_modal.html' %}
 {% include 'student/missing_letters_modal.html' %}
+{% include 'student/memory_game_modal.html' %}
 {% endblock %}
 
 {% block extra_js %}

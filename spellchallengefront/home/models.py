@@ -778,6 +778,16 @@ class Puntaje(models.Model):
     def __str__(self):
         return f"{self.codigo} - {self.experiencia}"
     
+#MODELO CONTENIDO_LECCION
+class Contenido_Leccion(models.Model):
+    codigo = models.CharField(max_length=5, primary_key=True)
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField()
+    
+    class Meta:
+        db_table = 'contenido_leccion'
+        managed = False
+    
 #MODELO LECCION
 class Leccion(models.Model):
     clave = models.CharField(
@@ -804,8 +814,15 @@ class Leccion(models.Model):
         to_field='codigo'
     )
     
+    contenido_leccion = models.ForeignKey(
+        Contenido_Leccion,
+        on_delete=models.CASCADE,
+        db_column='contenido_leccion'
+    )
+    
     class Meta:
         db_table = 'leccion'
+        managed = False
         
     def __str__(self):
         return self.nombre
@@ -1026,3 +1043,61 @@ class Lista_Leccion(models.Model):
     
     class Meta:
         db_table = 'lista_leccion'
+        
+#MODELO EJERCICIO
+class Ejercicio(models.Model):
+    clave = models.CharField(max_length=5, primary_key=True)
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField()
+    leccion = models.ForeignKey(
+        Leccion,
+        on_delete=models.CASCADE,
+        db_column='leccion'
+    )
+    
+    class Meta:
+        db_table = 'ejercicio'
+        managed = False
+        
+#MODELO ESTADO_OPCION
+class Estado_Opcion(models.Model):
+    clave = models.CharField(max_length=5, primary_key=True)
+    nombre = models.CharField(max_length=50)
+    descripcion = models.TextField()
+    
+    class Meta:
+        db_table = 'estado_opcion'
+        managed = False
+        
+#MODELO OPCION
+class Opcion(models.Model):
+    clave = models.CharField(max_length=5, primary_key=True)
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField()
+    estado_opcion = models.ForeignKey(
+        Estado_Opcion,
+        on_delete=models.CASCADE,
+        db_column='estado_opcion'
+    )
+    
+    class Meta:
+        db_table = 'opcion'
+        managed = False
+        
+#MODELO EJERCICIO_OPCION
+class Ejercicio_Opcion(models.Model):
+    ejercicio = models.ForeignKey(
+        Ejercicio,
+        on_delete=models.CASCADE,
+        db_column='ejercicio'
+    )
+    opcion = models.ForeignKey(
+        Opcion,
+        on_delete=models.CASCADE,
+        db_column='opcion'
+    )
+    
+    class Meta:
+        db_table = 'ejercicio_opcion'
+        managed = False
+        unique_together = (('ejercicio', 'opcion'),)
