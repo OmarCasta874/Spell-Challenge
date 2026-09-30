@@ -355,6 +355,50 @@ CREATE TABLE lista_leccion (
     FOREIGN KEY (leccion) REFERENCES leccion(clave)
 ) ENGINE=InnoDB;
 
+CREATE TABLE contenido_leccion (
+    codigo VARCHAR(5) PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT NOT NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE estado_opcion (
+    clave VARCHAR(5) PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    descripcion TEXT NOT NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE opcion (
+    clave VARCHAR(5) PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT NOT NULL,
+    estado_opcion VARCHAR(5) NOT NULL,
+    CONSTRAINT fk_opcion_estado
+        FOREIGN KEY (estado_opcion) REFERENCES estado_opcion(clave)
+) ENGINE=InnoDB;
+
+CREATE TABLE ejercicio (
+    clave VARCHAR(5) PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT NOT NULL,
+    leccion VARCHAR(10) NOT NULL,
+
+    CONSTRAINT fk_ejercicio_leccion
+        FOREIGN KEY (leccion) REFERENCES leccion(clave)
+) ENGINE=InnoDB;
+
+CREATE TABLE ejercicio_opcion (
+    ejercicio VARCHAR(5) NOT NULL,
+    opcion VARCHAR(5) NOT NULL,
+
+    PRIMARY KEY (ejercicio, opcion),
+
+    CONSTRAINT fk_ejercicio_opcion_ejercicio
+        FOREIGN KEY (ejercicio) REFERENCES ejercicio(clave),
+
+    CONSTRAINT fk_ejercicio_opcion_opcion
+        FOREIGN KEY (opcion) REFERENCES opcion(clave)
+) ENGINE=InnoDB;
+
 -- ============================================================
 -- CATALOGOS
 -- ============================================================
@@ -1895,68 +1939,68 @@ INSERT INTO puntaje (codigo, experiencia)
 VALUES ('PUN01', 20);
 
 INSERT INTO leccion 
-(clave, nombre, descripcion, practica_sesion, puntaje)
+(clave, nombre, descripcion, practica_sesion, puntaje, contenido_leccion)
 VALUES
 
 -- PRA01
-('LEC01', 'Lesson 1 - PRA01', 'First lesson of practice PRA01.', 'PRA01', 'PUN01'),
-('LEC02', 'Lesson 2 - PRA01', 'Second lesson of practice PRA01.', 'PRA01', 'PUN01'),
-('LEC03', 'Lesson 3 - PRA01', 'Third lesson of practice PRA01.', 'PRA01', 'PUN01'),
-('LEC04', 'Lesson 4 - PRA01', 'Fourth lesson of practice PRA01.', 'PRA01', 'PUN01'),
+('LEC01', 'Lesson 1 - PRA01', 'First lesson of practice PRA01.', 'PRA01', 'PUN01', 'CON01'),
+('LEC02', 'Lesson 2 - PRA01', 'Second lesson of practice PRA01.', 'PRA01', 'PUN01', 'CON02'),
+('LEC03', 'Lesson 3 - PRA01', 'Third lesson of practice PRA01.', 'PRA01', 'PUN01', 'CON03'),
+('LEC04', 'Lesson 4 - PRA01', 'Fourth lesson of practice PRA01.', 'PRA01', 'PUN01', 'CON06'),
 
 -- PRA02
-('LEC05', 'Lesson 1 - PRA02', 'First lesson of practice PRA02.', 'PRA02', 'PUN01'),
-('LEC06', 'Lesson 2 - PRA02', 'Second lesson of practice PRA02.', 'PRA02', 'PUN01'),
-('LEC07', 'Lesson 3 - PRA02', 'Third lesson of practice PRA02.', 'PRA02', 'PUN01'),
-('LEC08', 'Lesson 4 - PRA02', 'Fourth lesson of practice PRA02.', 'PRA02', 'PUN01'),
+('LEC05', 'Lesson 1 - PRA02', 'First lesson of practice PRA02.', 'PRA02', 'PUN01', 'CON01'),
+('LEC06', 'Lesson 2 - PRA02', 'Second lesson of practice PRA02.', 'PRA02', 'PUN01', 'CON02'),
+('LEC07', 'Lesson 3 - PRA02', 'Third lesson of practice PRA02.', 'PRA02', 'PUN01', 'CON03'),
+('LEC08', 'Lesson 4 - PRA02', 'Fourth lesson of practice PRA02.', 'PRA02', 'PUN01', 'CON06'),
 
 -- PRA03
-('LEC09', 'Lesson 1 - PRA03', 'First lesson of practice PRA03.', 'PRA03', 'PUN01'),
-('LEC10', 'Lesson 2 - PRA03', 'Second lesson of practice PRA03.', 'PRA03', 'PUN01'),
-('LEC11', 'Lesson 3 - PRA03', 'Third lesson of practice PRA03.', 'PRA03', 'PUN01'),
-('LEC12', 'Lesson 4 - PRA03', 'Fourth lesson of practice PRA03.', 'PRA03', 'PUN01'),
+('LEC09', 'Lesson 1 - PRA03', 'First lesson of practice PRA03.', 'PRA03', 'PUN01', 'CON01'),
+('LEC10', 'Lesson 2 - PRA03', 'Second lesson of practice PRA03.', 'PRA03', 'PUN01', 'CON02'),
+('LEC11', 'Lesson 3 - PRA03', 'Third lesson of practice PRA03.', 'PRA03', 'PUN01', 'CON03'),
+('LEC12', 'Lesson 4 - PRA03', 'Fourth lesson of practice PRA03.', 'PRA03', 'PUN01', 'CON06'),
 
 -- PRA04
-('LEC13', 'Lesson 1 - PRA04', 'First lesson of practice PRA04.', 'PRA04', 'PUN01'),
-('LEC14', 'Lesson 2 - PRA04', 'Second lesson of practice PRA04.', 'PRA04', 'PUN01'),
-('LEC15', 'Lesson 3 - PRA04', 'Third lesson of practice PRA04.', 'PRA04', 'PUN01'),
-('LEC16', 'Lesson 4 - PRA04', 'Fourth lesson of practice PRA04.', 'PRA04', 'PUN01'),
+('LEC13', 'Lesson 1 - PRA04', 'First lesson of practice PRA04.', 'PRA04', 'PUN01', 'CON01'),
+('LEC14', 'Lesson 2 - PRA04', 'Second lesson of practice PRA04.', 'PRA04', 'PUN01', 'CON02'),
+('LEC15', 'Lesson 3 - PRA04', 'Third lesson of practice PRA04.', 'PRA04', 'PUN01', 'CON03'),
+('LEC16', 'Lesson 4 - PRA04', 'Fourth lesson of practice PRA04.', 'PRA04', 'PUN01', 'CON06'),
 
 -- PRA05
-('LEC17', 'Lesson 1 - PRA05', 'First lesson of practice PRA05.', 'PRA05', 'PUN01'),
-('LEC18', 'Lesson 2 - PRA05', 'Second lesson of practice PRA05.', 'PRA05', 'PUN01'),
-('LEC19', 'Lesson 3 - PRA05', 'Third lesson of practice PRA05.', 'PRA05', 'PUN01'),
-('LEC20', 'Lesson 4 - PRA05', 'Fourth lesson of practice PRA05.', 'PRA05', 'PUN01'),
+('LEC17', 'Lesson 1 - PRA05', 'First lesson of practice PRA05.', 'PRA05', 'PUN01', 'CON01'),
+('LEC18', 'Lesson 2 - PRA05', 'Second lesson of practice PRA05.', 'PRA05', 'PUN01', 'CON02'),
+('LEC19', 'Lesson 3 - PRA05', 'Third lesson of practice PRA05.', 'PRA05', 'PUN01', 'CON03'),
+('LEC20', 'Lesson 4 - PRA05', 'Fourth lesson of practice PRA05.', 'PRA05', 'PUN01', 'CON06'),
 
 -- PRA06
-('LEC21', 'Lesson 1 - PRA06', 'First lesson of practice PRA06.', 'PRA06', 'PUN01'),
-('LEC22', 'Lesson 2 - PRA06', 'Second lesson of practice PRA06.', 'PRA06', 'PUN01'),
-('LEC23', 'Lesson 3 - PRA06', 'Third lesson of practice PRA06.', 'PRA06', 'PUN01'),
-('LEC24', 'Lesson 4 - PRA06', 'Fourth lesson of practice PRA06.', 'PRA06', 'PUN01'),
+('LEC21', 'Lesson 1 - PRA06', 'First lesson of practice PRA06.', 'PRA06', 'PUN01', 'CON01'),
+('LEC22', 'Lesson 2 - PRA06', 'Second lesson of practice PRA06.', 'PRA06', 'PUN01', 'CON02'),
+('LEC23', 'Lesson 3 - PRA06', 'Third lesson of practice PRA06.', 'PRA06', 'PUN01', 'CON03'),
+('LEC24', 'Lesson 4 - PRA06', 'Fourth lesson of practice PRA06.', 'PRA06', 'PUN01', 'CON06'),
 
 -- PRA07
-('LEC25', 'Lesson 1 - PRA07', 'First lesson of practice PRA07.', 'PRA07', 'PUN01'),
-('LEC26', 'Lesson 2 - PRA07', 'Second lesson of practice PRA07.', 'PRA07', 'PUN01'),
-('LEC27', 'Lesson 3 - PRA07', 'Third lesson of practice PRA07.', 'PRA07', 'PUN01'),
-('LEC28', 'Lesson 4 - PRA07', 'Fourth lesson of practice PRA07.', 'PRA07', 'PUN01'),
+('LEC25', 'Lesson 1 - PRA07', 'First lesson of practice PRA07.', 'PRA07', 'PUN01', 'CON01'),
+('LEC26', 'Lesson 2 - PRA07', 'Second lesson of practice PRA07.', 'PRA07', 'PUN01', 'CON02'),
+('LEC27', 'Lesson 3 - PRA07', 'Third lesson of practice PRA07.', 'PRA07', 'PUN01', 'CON03'),
+('LEC28', 'Lesson 4 - PRA07', 'Fourth lesson of practice PRA07.', 'PRA07', 'PUN01', 'CON06'),
 
 -- PRA08
-('LEC29', 'Lesson 1 - PRA08', 'First lesson of practice PRA08.', 'PRA08', 'PUN01'),
-('LEC30', 'Lesson 2 - PRA08', 'Second lesson of practice PRA08.', 'PRA08', 'PUN01'),
-('LEC31', 'Lesson 3 - PRA08', 'Third lesson of practice PRA08.', 'PRA08', 'PUN01'),
-('LEC32', 'Lesson 4 - PRA08', 'Fourth lesson of practice PRA08.', 'PRA08', 'PUN01'),
+('LEC29', 'Lesson 1 - PRA08', 'First lesson of practice PRA08.', 'PRA08', 'PUN01', 'CON01'),
+('LEC30', 'Lesson 2 - PRA08', 'Second lesson of practice PRA08.', 'PRA08', 'PUN01', 'CON02'),
+('LEC31', 'Lesson 3 - PRA08', 'Third lesson of practice PRA08.', 'PRA08', 'PUN01', 'CON03'),
+('LEC32', 'Lesson 4 - PRA08', 'Fourth lesson of practice PRA08.', 'PRA08', 'PUN01', 'CON06'),
 
 -- PRA09
-('LEC33', 'Lesson 1 - PRA09', 'First lesson of practice PRA09.', 'PRA09', 'PUN01'),
-('LEC34', 'Lesson 2 - PRA09', 'Second lesson of practice PRA09.', 'PRA09', 'PUN01'),
-('LEC35', 'Lesson 3 - PRA09', 'Third lesson of practice PRA09.', 'PRA09', 'PUN01'),
-('LEC36', 'Lesson 4 - PRA09', 'Fourth lesson of practice PRA09.', 'PRA09', 'PUN01'),
+('LEC33', 'Lesson 1 - PRA09', 'First lesson of practice PRA09.', 'PRA09', 'PUN01', 'CON01'),
+('LEC34', 'Lesson 2 - PRA09', 'Second lesson of practice PRA09.', 'PRA09', 'PUN01', 'CON02'),
+('LEC35', 'Lesson 3 - PRA09', 'Third lesson of practice PRA09.', 'PRA09', 'PUN01', 'CON03'),
+('LEC36', 'Lesson 4 - PRA09', 'Fourth lesson of practice PRA09.', 'PRA09', 'PUN01', 'CON06'),
 
 -- PRA10
-('LEC37', 'Lesson 1 - PRA10', 'First lesson of practice PRA10.', 'PRA10', 'PUN01'),
-('LEC38', 'Lesson 2 - PRA10', 'Second lesson of practice PRA10.', 'PRA10', 'PUN01'),
-('LEC39', 'Lesson 3 - PRA10', 'Third lesson of practice PRA10.', 'PRA10', 'PUN01'),
-('LEC40', 'Lesson 4 - PRA10', 'Fourth lesson of practice PRA10.', 'PRA10', 'PUN01');
+('LEC37', 'Lesson 1 - PRA10', 'First lesson of practice PRA10.', 'PRA10', 'PUN01', 'CON01'),
+('LEC38', 'Lesson 2 - PRA10', 'Second lesson of practice PRA10.', 'PRA10', 'PUN01', 'CON02'),
+('LEC39', 'Lesson 3 - PRA10', 'Third lesson of practice PRA10.', 'PRA10', 'PUN01', 'CON03'),
+('LEC40', 'Lesson 4 - PRA10', 'Fourth lesson of practice PRA10.', 'PRA10', 'PUN01', 'CON06');
 
 INSERT INTO bitacora_profesor VALUES
 ('BITP01', '2026-08-01', '09:15:00', 'Created a new word list: Animals.', 'PROF01'),
@@ -3587,3 +3631,91 @@ UPDATE palabra SET definicion = 'A holiday in the United States and Canada when 
 UPDATE palabra SET definicion = 'Not pleasant to look at.', ejemplo = 'The old building was gray and unattractive.' WHERE codigo = 'PAL0898';
 UPDATE palabra SET definicion = 'The state of not being firm or balanced.', ejemplo = 'The unsteadiness of the ladder worried him.' WHERE codigo = 'PAL0899';
 UPDATE palabra SET definicion = 'A person who talks too much or tells secrets.', ejemplo = 'Do not tell Sam a secret because he is a blabbermouth.' WHERE codigo = 'PAL0900';
+
+INSERT INTO contenido_leccion
+(codigo, nombre, descripcion)
+VALUES
+('CON01', 'Lesson Introduction', 'Introduction and explanation of the lesson.'),
+('CON02', 'Vocabulary', 'Vocabulary related to the lesson topic.'),
+('CON03', 'Grammar', 'Grammar concepts and examples related to the lesson.'),
+('CON04', 'Listening', 'Listening content and comprehension activities.'),
+('CON05', 'Speaking', 'Speaking content and pronunciation practice.'),
+('CON06', 'Review', 'Review of the concepts and vocabulary learned in the lesson.');
+
+INSERT INTO estado_opcion
+(clave, nombre, descripcion)
+VALUES
+('EST01', 'Correct', 'The option is the correct answer.'),
+('EST02', 'Incorrect', 'The option is an incorrect answer.');
+
+INSERT INTO opcion
+(clave, nombre, descripcion, estado_opcion)
+VALUES
+
+('OPC01', 'Correct Answer', 'The option represents the correct answer.', 'EST01'),
+('OPC02', 'Incorrect Answer 1', 'The option represents an incorrect answer.', 'EST02'),
+('OPC03', 'Incorrect Answer 2', 'The option represents an incorrect answer.', 'EST02'),
+('OPC04', 'Incorrect Answer 3', 'The option represents an incorrect answer.', 'EST02');
+
+INSERT INTO ejercicio
+(clave, nombre, descripcion, leccion)
+VALUES
+
+('EJE01', 'Vocabulary Selection', 'Select the correct vocabulary answer.', 'LEC01'),
+('EJE02', 'Vocabulary Meaning', 'Select the correct meaning of the word.', 'LEC02'),
+('EJE03', 'Grammar Selection', 'Select the correct grammar answer.', 'LEC03'),
+('EJE04', 'Lesson Review', 'Select the correct answer from the lesson review.', 'LEC04');
+
+INSERT INTO ejercicio_opcion
+(ejercicio, opcion)
+VALUES
+
+('EJE01', 'OPC01'),
+('EJE01', 'OPC02'),
+('EJE01', 'OPC03'),
+('EJE01', 'OPC04'),
+
+('EJE02', 'OPC01'),
+('EJE02', 'OPC02'),
+('EJE02', 'OPC03'),
+('EJE02', 'OPC04'),
+
+('EJE03', 'OPC01'),
+('EJE03', 'OPC02'),
+('EJE03', 'OPC03'),
+('EJE03', 'OPC04'),
+
+('EJE04', 'OPC01'),
+('EJE04', 'OPC02'),
+('EJE04', 'OPC03'),
+('EJE04', 'OPC04');
+
+ALTER TABLE leccion
+ADD COLUMN contenido_leccion VARCHAR(5) NULL;
+
+UPDATE leccion
+SET contenido_leccion = 'CON01'
+WHERE clave IN ('LEC01','LEC05','LEC09','LEC13','LEC17',
+                'LEC21','LEC25','LEC29','LEC33','LEC37');
+
+UPDATE leccion
+SET contenido_leccion = 'CON02'
+WHERE clave IN ('LEC02','LEC06','LEC10','LEC14','LEC18',
+                'LEC22','LEC26','LEC30','LEC34','LEC38');
+
+UPDATE leccion
+SET contenido_leccion = 'CON03'
+WHERE clave IN ('LEC03','LEC07','LEC11','LEC15','LEC19',
+                'LEC23','LEC27','LEC31','LEC35','LEC39');
+
+UPDATE leccion
+SET contenido_leccion = 'CON06'
+WHERE clave IN ('LEC04','LEC08','LEC12','LEC16','LEC20',
+                'LEC24','LEC28','LEC32','LEC36','LEC40');
+
+ALTER TABLE leccion
+ADD CONSTRAINT fk_leccion_contenido
+FOREIGN KEY (contenido_leccion) REFERENCES contenido_leccion(codigo);
+
+ALTER TABLE leccion
+MODIFY contenido_leccion VARCHAR(5) NOT NULL;
