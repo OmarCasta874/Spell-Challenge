@@ -2,179 +2,291 @@
 {% load static %}
 
 {% block extra_css %}
-  {{ block.super }}
+{{ block.super }}
   <link rel="stylesheet" href="{% static 'css/teacher_statistics.css' %}">
 {% endblock %}
-
 {% block teacher_content %}
 <div class="statistics-container">
-  <!-- Encabezado y Filtros -->
+  <!-- ==========================================
+       HEADER + FILTERS
+       ========================================== -->
   <header class="statistics-header">
     <div>
-      <h1 class="statistics-title">STATISTICS</h1> <!--[cite: 5] -->
-      <p class="statistics-subtitle">Analyze student performance and learning progress.</p> <!--[cite: 5] -->
+      <h1 class="statistics-title">STATISTICS</h1>
+      <p class="statistics-subtitle">
+        Analyze student performance and learning progress.
+      </p>
     </div>
-
-    <!-- Barra de Filtros -->
-    <div class="filters-bar">
+    <form method="GET" class="filters-bar">
+      <!-- GROUP -->
       <div class="filter-group">
-        <label for="filterGroup">Group</label> <!--[cite: 5] -->
-        <select id="filterGroup" class="form-select form-select-sm">
-          <option selected>All Groups</option> <!--[cite: 5] -->
-          <option value="3A">Group 3A</option> <!--[cite: 5] -->
-          <option value="4B">Group 4B</option> <!--[cite: 5] -->
+        <label for="filterGroup">Group</label>
+        <select
+          id="filterGroup"
+          name="group"
+          class="form-select form-select-sm"
+          onchange="this.form.submit()"
+        >
+          <option value="">All Groups</option>
+          {% for group in groups %}
+            <option
+              value="{{ group.codigo }}"
+              {% if selected_group and selected_group.codigo == group.codigo %}
+                selected
+              {% endif %}
+            >
+              {{ group.nombre }}
+            </option>
+          {% endfor %}
         </select>
       </div>
-
+      <!-- WORD LIST -->
       <div class="filter-group">
-        <label for="filterWordList">Word List</label> <!--[cite: 5] -->
-        <select id="filterWordList" class="form-select form-select-sm">
-          <option selected>All Word Lists</option> <!--[cite: 5] -->
-          <option value="greetings">Greetings - A1</option> <!--[cite: 5] -->
+        <label for="filterWordList">Word List</label>
+        <select
+          id="filterWordList"
+          name="list"
+          class="form-select form-select-sm"
+          onchange="this.form.submit()"
+        >
+          <option value="">All Word Lists</option>
+          {% for word_list in word_lists %}
+            <option
+              value="{{ word_list.codigo }}"
+              {% if selected_list and selected_list.codigo == word_list.codigo %}
+                selected
+              {% endif %}
+            >
+              {{ word_list.nombre }}
+            </option>
+          {% endfor %}
         </select>
       </div>
-
+      <!-- PERIOD -->
       <div class="filter-group">
-        <label for="filterPeriod">Period</label> <!--[cite: 5] -->
-        <select id="filterPeriod" class="form-select form-select-sm">
-          <option selected>Last 7 Days</option> <!--[cite: 5] -->
-          <option value="month">Last 30 Days</option>
+        <label for="filterPeriod">Period</label>
+        <select
+          id="filterPeriod"
+          name="period"
+          class="form-select form-select-sm"
+          onchange="this.form.submit()"
+        >
+          <option
+            value="7"
+            {% if selected_period == '7' %}
+              selected
+            {% endif %}
+          >
+            Last 7 Days
+          </option>
+          <option
+            value="30"
+            {% if selected_period == '30' %}
+              selected
+            {% endif %}
+            >
+            Last 30 Days
+          </option>
         </select>
       </div>
-    </div>
+    </form>
   </header>
-
-  <!-- Grilla Principal -->
-  <div class="row g-4 mb-4">
-    <!-- Columna Izquierda: Student Performance Table -->
-    <div class="col-lg-7">
-      <div class="stat-card-box h-100">
-        <h3 class="card-section-title">Student Performance</h3> <!--[cite: 5] -->
-        
-        <div class="table-responsive">
-          <table class="table table-hover align-middle">
-            <thead>
-              <tr>
-                <th>Student</th> <!--[cite: 5] -->
-                <th class="text-center">Competitions</th> <!--[cite: 5] -->
-                <th class="text-center">Best Score</th> <!--[cite: 5] -->
-                <th class="text-center">Accuracy</th> <!--[cite: 5] -->
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Castañon Castañon</strong><br><small class="text-muted">Jesús Omar</small></td> <!--[cite: 5] -->
-                <td class="text-center">4</td> <!--[cite: 5] -->
-                <td class="text-center fw-bold">19/20</td> <!--[cite: 5] -->
-                <td class="text-center"><span class="badge bg-success-light text-success">95%</span></td> <!--[cite: 5] -->
-              </tr>
-              <tr>
-                <td><strong>Sánchez Hernández</strong><br><small class="text-muted">Diego</small></td> <!--[cite: 5] -->
-                <td class="text-center">3</td> <!--[cite: 5] -->
-                <td class="text-center fw-bold">18/20</td> <!--[cite: 5] -->
-                <td class="text-center"><span class="badge bg-success-light text-success">90%</span></td> <!--[cite: 5] -->
-              </tr>
-              <tr>
-                <td><strong>Villegas Hernández</strong><br><small class="text-muted">Josué Alberto</small></td> <!--[cite: 5] -->
-                <td class="text-center">3</td> <!--[cite: 5] -->
-                <td class="text-center fw-bold">18/20</td> <!--[cite: 5] -->
-                <td class="text-center"><span class="badge bg-success-light text-success">90%</span></td> <!--[cite: 5] -->
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <!-- ==========================================
+        SUMMARY
+        ========================================== -->
+    <div class="summary-stats-grid mb-4">
+      <div class="mini-stat-card">
+        <span class="mini-stat-label">Total Students:</span>
+        <span class="mini-stat-value">{{ total_students }}</span>
+      </div>
+      <div class="mini-stat-card">
+        <span class="mini-stat-label">Groups:</span>
+        <span class="mini-stat-value">{{ total_groups }}</span>
+      </div>
+      <div class="mini-stat-card">
+        <span class="mini-stat-label">Competitions:</span>
+        <span class="mini-stat-value">{{ total_competitions }}</span>
+      </div>
+      <div class="mini-stat-card">
+        <span class="mini-stat-label">Word Lists:</span>
+        <span class="mini-stat-value">{{ total_word_lists }}</span>
       </div>
     </div>
-
-    <!-- Columna Derecha: Métricas Resumidas + Palabras -->
+    <!-- ==========================================
+        STUDENT OVERVIEW + WORD LIST OVERVIEW
+        ========================================== -->
+    <div class="row g-4 mb-4">
+      <!-- STUDENTS -->
+      <div class="col-lg-7">
+        <div class="stat-card-box h-100">
+          <h3 class="card-section-title">
+            Student Overview
+          </h3>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Group</th>
+                  <th>Level</th>
+                  <th>Career</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for student in students %}
+                  <tr>
+                    <td>
+                      <strong>
+                        {{ student.apellidoPaterno }}
+                        {% if student.apellidoMaterno %}
+                          {{ student.apellidoMaterno }}
+                        {% endif %}
+                      </strong>
+                      <br>
+                      <small class="text-muted">{{ student.nombre_pila }}</small>
+                    </td>
+                    <td>
+                      {% for relation in student.grupo_alumnos.all %}
+                        {% if relation.grupo.profesor.clave == request.user.profesor.clave %}
+                          {{ relation.grupo.nombre }}
+                          {% if not forloop.last %}
+                            ,
+                          {% endif %}
+                        {% endif %}
+                      {% empty %}
+                        <span class="text-muted">No group</span>
+                      {% endfor %}
+                    </td>
+                    <td>{{ student.nivel.codigo }}</td>
+                    <td>{{ student.carrera.nombre }}</td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-center text-muted py-4">
+                      No students found.
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    <!-- WORD LISTS -->
     <div class="col-lg-5">
-      <!-- Tarjetas Pequeñas de Estadísticas Generales -->
-      <div class="summary-stats-grid mb-4">
-        <div class="mini-stat-card">
-          <span class="mini-stat-label">Total Students:</span> <!--[cite: 5] -->
-          <span class="mini-stat-value">24</span> <!--[cite: 5] -->
-        </div>
-        <div class="mini-stat-card">
-          <span class="mini-stat-label">Average Accuracy:</span> <!--[cite: 5] -->
-          <span class="mini-stat-value">84%</span> <!--[cite: 5] -->
-        </div>
-        <div class="mini-stat-card">
-          <span class="mini-stat-label">Competitions:</span> <!--[cite: 5] -->
-          <span class="mini-stat-value">8</span> <!--[cite: 5] -->
-        </div>
-        <div class="mini-stat-card">
-          <span class="mini-stat-label">Average Score:</span> <!--[cite: 5] -->
-          <span class="mini-stat-value">16.8/20</span> <!--[cite: 5] -->
+        <div class="stat-card-box h-100">
+          <h3 class="card-section-title">
+            Word List Overview
+          </h3>
+            {% for item in word_list_data %}
+              <div class="word-list-item">
+                <div>
+                  <strong>{{ item.lista.nombre }}</strong>
+                  <br>
+                  <small class="text-muted"> {{ item.lista.numero_letras }} letters </small>
+                </div>
+                <span class="badge bg-light text-dark"> {{ item.total_words }} words </span>
+              </div>
+            {% empty %}
+              <p class="text-muted text-center py-3">
+                No word lists found.
+              </p>
+            {% endfor %}
         </div>
       </div>
-
-      <!-- Word Performance -->
-      <div class="stat-card-box">
-        <h3 class="card-section-title">Word Performance</h3> <!--[cite: 5] -->
-        
-        <div class="row g-3">
-          <!-- Most Failed Words -->
-          <div class="col-6">
-            <h4 class="word-list-title text-danger">Most Failed Words</h4> <!--[cite: 5] -->
-            <ul class="word-rank-list">
-              <li><span>1. Accommodation</span> <strong class="text-muted">74%</strong></li> <!--[cite: 5] -->
-              <li><span>2. Necessary</span> <strong class="text-muted">70%</strong></li> <!--[cite: 5] -->
-              <li><span>3. Environment</span> <strong class="text-muted">68%</strong></li> <!--[cite: 5] -->
-              <li><span>4. Beautiful</span> <strong class="text-muted">63%</strong></li> <!--[cite: 5] -->
-            </ul>
+  </div>
+    <!-- ==========================================
+        COMPETITIONS
+        ========================================== -->
+    <div class="row g-4 mb-4">
+      <div class="col-12">
+        <div class="stat-card-box">
+          <h3 class="card-section-title">
+            Recent Competitions
+          </h3>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Competition</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for competition in competitions %}
+                  <tr>
+                    <td>
+                      <strong>
+                        {{ competition.nombre }}
+                      </strong>
+                    </td>
+                    <td>
+                      {{ competition.fecha|date:"M d, Y" }}
+                    </td>
+                    <td>
+                      {{ competition.hora|time:"H:i" }}
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="3" class="text-center text-muted py-4">
+                      No competitions found for this period.
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           </div>
+        </div>
+      </div>
+    </div>
+    <!-- ==========================================
+        COMPETITIONS OVER TIME
+        ========================================== -->
+    <div class="row">
+      <div class="col-12">
+        <div class="stat-card-box">
+          <h3 class="card-section-title mb-1">
+            Competitions Over Time
+          </h3>
+          <p class="text-center fw-semibold text-muted mb-2">
+            {% if selected_period == '30' %}
+              Last 30 Days
+            {% else %}
+              Last 7 Days
+            {% endif %}
+          </p>
+          <div class="chart-wrapper">
+            <div class="chart-y-axis">
+              <span>5+</span>
+              <span>4</span>
+              <span>3</span>
+              <span>2</span>
+              <span>1</span>
+              <span>0</span>
+            </div>
+            <div class="chart-bars">
+              {% for item in competition_chart %}
+                <div class="bar-group">
+                  {% if item.count > 0 %}
+                    <div class="bar" style="height: {% widthratio item.count 5 100 %}%;" title="{{ item.date|date:'M d' }} - {{ item.count }} competition(s)">
 
-          <!-- Most Successful Words -->
-          <div class="col-6">
-            <h4 class="word-list-title text-success">Most Successful Words</h4> <!--[cite: 5] -->
-            <ul class="word-rank-list">
-              <li><span>1. Responsibility</span> <strong class="text-muted">95%</strong></li> <!--[cite: 5] -->
-              <li><span>2. Procedure</span> <strong class="text-muted">87%</strong></li> <!--[cite: 5] -->
-              <li><span>3. Performance</span> <strong class="text-muted">84%</strong></li> <!--[cite: 5] -->
-              <li><span>4. Instantly</span> <strong class="text-muted">79%</strong></li> <!--[cite: 5] -->
-            </ul>
+                    </div>
+                  {% else %}
+                    <div class="bar" style="height: 0%;" title="{{ item.date|date:'M d' }} - No competitions">
+
+                    </div>
+                  {% endif %}
+                  <span class="bar-label">
+                    {{ item.date|date:"M d" }}
+                  </span>
+                </div>
+              {% endfor %}
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- Fila Inferior: Chart Accuracy Over Time -->
-  <div class="row">
-    <div class="col-12">
-      <div class="stat-card-box">
-        <h3 class="card-section-title mb-1">Accuracy Over Time</h3> <!--[cite: 5] -->
-        <p class="text-center fw-semibold text-muted mb-2">September</p> <!--[cite: 5] -->
-
-        <div class="chart-wrapper">
-          <div class="chart-y-axis">
-            <span>100%</span> <!--[cite: 5] -->
-            <span>80%</span> <!--[cite: 5] -->
-            <span>60%</span> <!--[cite: 5] -->
-            <span>40%</span> <!--[cite: 5] -->
-            <span>20%</span> <!--[cite: 5] -->
-          </div>
-          <div class="chart-bars">
-            <div class="bar-group">
-              <div class="bar" style="height: 67%;"></div>
-              <span class="bar-label">W1</span> <!--[cite: 5] -->
-            </div>
-            <div class="bar-group">
-              <div class="bar" style="height: 15%;"></div>
-              <span class="bar-label">W2</span> <!--[cite: 5] -->
-            </div>
-            <div class="bar-group">
-              <div class="bar" style="height: 0%;"></div>
-              <span class="bar-label">W3</span> <!--[cite: 5] -->
-            </div>
-            <div class="bar-group">
-              <div class="bar" style="height: 0%;"></div>
-              <span class="bar-label">W4</span> <!--[cite: 5] -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock %}

@@ -11,10 +11,15 @@ from home.models import Usuario, TipoUsuario, Profesor, Alumno, Administrador, G
 from home.models import Carrera, Categoria, Alumno_Insignia, Alumno_Practica, Lista_Grupo, Grupo_Alumno
 from home.models import Nivel, Dificultad, Dificultad_Juego, Insignia, Intento_Palabra, Lista, Lista_Palabra
 from home.models import Proceso_Lista, Rango, Ranking, Reporte, TipoRanking, UsuarioManager, Juego, Practica_Sesion
-import json
+from home.models import Leccion, Lista_Leccion, Competencia, Lista_Competencia, Alumno_Leccion, Grupo_Carrera, Bitacora_Administrador
+from home.models import Bitacora_Profesor, Puntaje, Contenido_Leccion, Ejercicio, Ejercicio_Opcion, Estado_Opcion, Copia_Seguridad, Opcion
+import json, os, subprocess
 from .mascot import say
-from datetime import date
+from datetime import date, timedelta, datetime
 import random, string
+from django.utils import timezone
+from django.conf import settings
+from django.http import FileResponse, Http404
 
 # Create your views here.
 
@@ -453,7 +458,129 @@ def student_groups(request):
 @never_cache
 @role_required('teacher')
 def teacher_competitions(request):
-    return render(request, 'teacher/competitions.html')
+    profesor = request.user.profesor
+    
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre', '').strip()
+        lista_codigo = request.POST.get('lista', '')
+        fecha = request.POST.get('fecha', '')
+        hora = request.POST.get('hora', '')
+        
+        if not nombre or not lista_codigo or not fecha or not hora:
+            messages.error(
+                request,
+                'Please complete all required fields.'
+            )
+            return redirect('teacher_competitions')
+        
+        lista = Lista.objects.filter(
+            codigo=lista_codigo,
+            profesor=profesor
+        ).first()
+        
+        if not lista:
+            messages.error(
+                request,
+                'The selected word list is not valid.'
+            )
+            return redirect('teacher_competitions')
+        
+        try:
+            competition_datetime = timezone.make_aware(
+                datetime.combine(
+                    datetime.strptime(fecha, '%Y-%m-%d').date(),
+                    datetime.strptime(hora, '%H:%M').time()
+                )
+            )
+            if competition_datetime < timezone.localtime():
+                messages.error(
+                    request,
+                    'The competition date and time cannot be in the past.'
+                )
+                return redirect('teacher_competitions')
+            
+        except ValueError:
+            messages.error(
+                request,
+                'The selected date or time is invalid.'
+            )
+            return redirect('teacher_competitons')
+        
+        number = 1
+        
+        while Competencia.objects.filter(
+            codigo=f'COM{number:02d}'
+        ).exists():
+            number += 1
+            
+        codigo = f'COM{number:02d}'
+        
+        competencia = Competencia.objects.create(
+            codigo=codigo,
+            nombre=nombre,
+            fecha=fecha,
+            hora=hora,
+            profesor=profesor
+        )
+        
+        Lista_Competencia.objects.create(
+            lista=lista,
+            competencia=competencia
+        )
+        
+        messages.success(
+            request,
+            'Competition created successfully.'
+        )
+        
+        return redirect('teacher_competitions')
+    
+    competitions = Competencia.objects.filter(
+        profesor=profesor
+    ).order_by('-fecha', 'hora')
+    
+    groups = Grupo.objects.filter(
+        profesor=profesor
+    ).order_by('nombre')
+    
+    word_lists = Lista.objects.filter(
+        profesor=profesor
+    ).order_by('nombre')
+    
+    now = timezone.localtime()
+    today = now.date()
+    current_time = now.time()
+    
+    total_competitions = competitions.count()
+    finished_competitions = competitions.filter(
+        fecha__lt=today
+    ).count()
+    upcoming_competitions = competitions.filter(
+        fecha__gt=today
+    ).count()
+    upcoming_competitions += competitions.filter(
+        fecha=today,
+        hora__gt=current_time
+    ).count()
+    
+    active_competitions = 0
+    
+    context = {
+        'competitions': competitions,
+        'groups': groups,
+        'word_lists': word_lists,
+        'total_competitions': total_competitions,
+        'active_competitions': active_competitions,
+        'finished_competitions': finished_competitions,
+        'upcoming_competitions': upcoming_competitions,
+        'today': today,
+    }
+    
+    return render(
+        request, 
+        'teacher/competitions.html',
+        context
+    )
 
 @never_cache
 @role_required('student')
@@ -478,7 +605,135 @@ def progress(request):
 @never_cache
 @role_required('teacher')
 def statistics(request):
-    return render(request, 'teacher/statistics.html')
+    profesor = request.user.profesor
+    
+    group_code = request.GET.get('group', '')
+    list_code = request.GET.get('list', '')
+    period = request.GET.get('period', '7')
+    
+    groups = Grupo.objects.filter(
+        profesor=profesor
+    ).order_by('nombre')
+    
+    word_lists = Lista.objects.filter(
+        profesor=profesor
+    ).order_by('nombre')
+    
+    selected_group = None
+    
+    if group_code:
+        selected_group = groups.filter(
+            codigo=group_code
+        ).first()
+        
+    if selected_group:
+        students = Alumno.objects.filter(
+            grupo_alumnos__grupo=selected_group
+        ).select_related(
+            'nivel',
+            'carrera'
+        ).distinct().order_by(
+            'apellidoPaterno',
+            'nombre_pila'
+        )
+    else:
+        students = Alumno.objects.filter(
+            grupo_alumnos__grupo__profesor=profesor
+        ).select_related(
+            'nivel',
+            'carrera'
+        ).distinct().order_by(
+            'apellidoPaterno',
+            'nombre_pila'
+        )
+        
+    selected_list = None
+    
+    if list_code:
+        selected_list = word_lists.filter(
+            codigo=list_code
+        ).first()
+        
+    today = timezone.localdate()
+    
+    if period == '30':
+        start_date = today - timedelta(days=29)
+    else:
+        period = '7'
+        start_date = today - timedelta(days=6)
+        
+    competitions = Competencia.objects.filter(
+        profesor=profesor,
+        fecha__gte=start_date,
+        fecha__lte=today
+    ).order_by('-fecha', '-hora')
+    
+    if selected_list:
+        competitions = competitions.filter(
+            lista_competencias__lista=selected_list
+        ).distinct()
+        
+    total_students = students.count()
+    total_groups = groups.count()
+    total_competitions = competitions.count()
+    total_word_lists = word_lists.count()
+    
+    word_list_data = []
+    
+    for word_list in word_lists:
+        if selected_list and word_list.codigo != selected_list.codigo:
+            continue
+        
+        total_words = Lista_Palabra.objects.filter(
+            lista=word_list
+        ).count()
+        
+        word_list_data.append({
+            'lista': word_list,
+            'total_words': total_words,
+        })
+        
+    competitions_by_date = {}
+    
+    for competition in competitions:
+        date_key = competition.fecha
+        
+        competitions_by_date[date_key] = (
+            competitions_by_date.get(date_key, 0) + 1
+        )
+        
+    competition_chart = []
+    current_date = start_date
+    
+    while current_date <= today:
+        competition_chart.append({
+            'date': current_date,
+            'count': competitions_by_date.get(current_date, 0),
+        })
+        
+        current_date += timedelta(days=1)
+        
+    context = {
+        'groups': groups,
+        'word_lists': word_lists,
+        'selected_group': selected_group,
+        'selected_list': selected_list,
+        'selected_period': period,
+        'students': students,
+        'total_students': total_students,
+        'total_groups': total_groups,
+        'total_competitions': total_competitions,
+        'total_word_lists': total_word_lists,
+        'word_list_data': word_list_data,
+        'competitions': competitions,
+        'competition_chart': competition_chart,
+    }
+    
+    return render(
+        request, 
+        'teacher/statistics.html',
+        context
+    )
 
 def logout_view(request):
     logout(request)
@@ -1142,7 +1397,287 @@ def admin_academy(request):
 @never_cache
 @role_required('administrator')
 def admin_backups(request):
-    return render(request, 'administrator/backups.html')
+    administrador = request.user.administrador
+    
+    if request.method == 'POST':
+        backup_type = request.POST.get('backup_type', 'Manual')
+        description = request.POST.get('description', '').strip()
+        
+        backup_dir = os.path.join(
+            settings.BASE_DIR,
+            'backups'
+        )
+        
+        os.makedirs(
+            backup_dir,
+            exist_ok=True
+        )
+        
+        now = timezone.localtime()
+        
+        filename = (
+            f'backup_{now.strftime("%Y-%m-%d_%H-%M-%S")}.sql'
+        )
+        
+        backup_path = os.path.join(
+            backup_dir,
+            filename
+        )
+        
+        mysqldump_path = r'C:\xampp\mysql\bin\mysqldump.exe'
+        
+        command = [
+            mysqldump_path,
+            '--host=localhost',
+            '--port=3306',
+            '--user=root',
+            '--routines',
+            '--events',
+            '--triggers',
+            'spell_challenge'
+        ]
+        
+        try:
+            with open(
+                backup_path,
+                'w',
+                encoding='utf-8'
+            ) as backup_file:
+                result = subprocess.run(
+                    command,
+                    stdout=backup_file,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+            if result.returncode != 0:
+                if os.path.exists(backup_path):
+                    os.remove(backup_path)
+                    
+                messages.error(
+                    request,
+                    'The database backup could not be created.'
+                )
+                return redirect('admin_backups')
+            
+            file_size = os.path.getsize(
+                backup_path
+            )
+            
+            if file_size >= 1024 * 1024:
+                size_text = f'{file_size / (1024 * 1024):-2f} MB'
+            elif file_size >= 1024:
+                size_text = f'{file_size / 1024:.2f} KB'
+            else:
+                size_text = f'{file_size} B'
+            
+            number = 1
+            
+            while Copia_Seguridad.objects.filter(
+                codigo=f'COP{number:02d}'
+            ).exists():
+                number += 1
+                
+            codigo = f'COP{number:02d}'
+            
+            datos = (
+                f'Filename: {filename}\n'
+                f'Size: {size_text}\n'
+                f'Type: {backup_type}\n'
+                f'Description: {description or "No description"}'
+            )
+            
+            Copia_Seguridad.objects.create(
+                codigo=codigo,
+                nombre=filename,
+                fecha=now.date(),
+                hora=now.time(),
+                datos=datos,
+                administrador=administrador
+            )
+            messages.success(
+                request,
+                'Database backup created successfully.'
+            )
+        
+        except Exception as e:
+            if os.path.exists(backup_path):
+                os.remove(backup_path)
+                
+            messages.error(
+                request,
+                'An error occurred while creating the database backup.'
+            )
+            
+        return redirect('admin_backups')
+    
+    backups = Copia_Seguridad.objects.filter(
+        administrador=administrador
+    ).order_by(
+        '-fecha',
+        '-hora'
+    )
+    total_backups = backups.count()
+    last_backup = backups.first()
+    
+    if last_backup:
+        last_backup_date = (
+            f'{last_backup.fecha.strftime("%b %d, %Y")} '
+            f'{last_backup.hora.strftime("%I:%M %p")}'
+        )
+    else:
+        last_backup_date = 'No backups'
+        
+    context = {
+        'backups': backups,
+        'total_backups': total_backups,
+        'last_backup_date': last_backup_date,
+        'frequency': 'Manual',
+    }
+    
+    return render(
+        request, 
+        'administrator/backups.html',
+        context
+    )
+    
+@never_cache
+@role_required('administrator')
+def admin_backup_download(request, codigo):
+    administrador = request.user.administrador
+    
+    backup = get_object_or_404(
+        Copia_Seguridad,
+        codigo=codigo,
+        administrador=administrador
+    )
+    backup_path = os.path.join(
+        settings.BASE_DIR,
+        'backups',
+        backup.nombre
+    )
+    if not os.path.isfile(backup_path):
+        messages.error(
+            request,
+            'The backup file could not be found in system storage.'
+        )
+        return redirect('admin_backups')
+    
+    return FileResponse(
+        open(backup_path, 'rb'),
+        as_attachment=True,
+        filename=backup.nombre
+    )
+    
+@never_cache
+@role_required('administrator')
+def admin_backup_delete(request, codigo):
+    administrador = request.user.administrador
+    
+    if request.method != 'POST':
+        return redirect('admin_backups')
+    
+    backup = get_object_or_404(
+        Copia_Seguridad,
+        codigo=codigo,
+        administrador=administrador
+    )
+    backup_path = os.path.join(
+        settings.BASE_DIR,
+        'backups',
+        backup.nombre
+    )
+    if os.path.isfile(backup_path):
+        os.remove(backup_path)
+    
+    backup.delete()
+    
+    messages.success(
+        request,
+        'Backup deleted successfully.'
+    )
+    return redirect('admin_backups')
+
+@never_cache
+@role_required('administrator')
+def admin_backup_restore(request, codigo):
+    administrador = request.user.administrador
+    
+    if request.method != 'POST':
+        return redirect('admin_backups')
+    
+    backup = get_object_or_404(
+        Copia_Seguridad,
+        codigo=codigo,
+        administrador=administrador
+    )
+    backup_dir = os.path.join(
+        settings.BASE_DIR,
+        'backups'
+    )
+    backup_path = os.path.join(
+        backup_dir,
+        backup.nombre
+    )
+    
+    if not os.path.isfile(backup_path):
+        messages.error(
+            request,
+            'The selected backup file could not be found.'
+        )
+        return redirect('admin_backups')
+    
+    mysql_path = r'C:\xampp\mysql\bin\mysql.exe'
+    
+    command = [
+        mysql_path,
+        '--host=localhost',
+        '--port=3306',
+        '--user=root',
+        'spell_challenge'
+    ]
+    
+    try:
+        with open(
+            backup_path, 
+            'rb'
+        ) as backup_file:
+            result = subprocess.run(
+                command,
+                stdin=backup_file,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+        if result.returncode != 0:
+            error_message = result.stderr.decode(
+                'utf-8',
+                errors='replace'
+            )
+            messages.error(
+                request,
+                'The database could not be restored.'
+            )
+            print(
+                'RESTORE ERROR: ',
+                error_message
+            )
+            return redirect('admin_backups')
+        
+        messages.success(
+            request,
+            'Database restored successfully.'
+        )
+        
+    except Exception as e:
+        print(
+            'RESTORE EXCEPTION:',
+            str(e)
+        )
+        messages.error(
+            request,
+            'An error occurred while restoring the database.'
+        )
+        
+    return redirect('admin_backups')
 
 @never_cache
 @role_required('administrator')
@@ -1230,7 +1765,61 @@ def leave_group(request, group_id):
 @never_cache
 @role_required('student')
 def mini_games_view(request):
-    return render(request, 'student/mini_games.html')
+    alumno = request.user.alumno
+    
+    grupos = Grupo_Alumno.objects.filter(
+        alumno=alumno
+    ).values_list(
+        'grupo',
+        flat=True
+    )
+    listas = Lista_Grupo.objects.filter(
+        grupo__in=grupos
+    ).values_list(
+        'lista',
+        flat=True
+    )
+    palabras = Palabra.objects.filter(
+        lista_palabras__lista__in=listas
+    ).distinct().order_by('codigo')
+    
+    vocabulary = []
+    
+    for palabra in palabras:
+        vocabulary.append({
+            'word': palabra.significado.upper(),
+            'meaning': palabra.definicion,
+            'example': palabra.ejemplo,
+            'image': palabra.imagen.url if palabra.imagen else '',
+            'audio': palabra.audio.url if palabra.audio else '',
+            'category': palabra.categoria.nombre,
+            'level': palabra.nivel.codigo,
+        })
+        
+    memory_words = Palabra.objects.filter(
+        imagen__isnull=False
+    ).exclude(
+        imagen=''
+    ).order_by('codigo')
+    
+    memory_vocabulary = []
+    
+    for palabra in memory_words:
+        memory_vocabulary.append({
+            'word': palabra.significado.upper(),
+            'image': palabra.imagen.url,
+        })
+        
+    context = {
+        'vocabulary': vocabulary,
+        'memory_vocabulary': memory_vocabulary,
+    }
+    
+    return render(
+        request, 
+        'student/mini_games.html',
+        context
+    )
     
 @never_cache
 @role_required('student')

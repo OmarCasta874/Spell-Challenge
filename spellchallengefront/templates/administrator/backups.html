@@ -61,27 +61,34 @@
         <tbody>
             {% for b in backups %}
             <tr>
-                <td><strong class="text-primary">{{ b.filename }}</strong></td>
-                <td>{{ b.created_at|date:"M d, Y" }}</td>
-                <td>{{ b.created_at|time:"h:i A" }}</td>
-                <td>{{ b.size }}</td>
+                <td><strong class="text-primary">{{ b.nombre }}</strong></td>
+                <td>{{ b.fecha|date:"M d, Y" }}</td>
+                <td>{{ b.hora|time:"h:i A" }}</td>
                 <td>
-                    <span class="type-tag type-{{ b.type|lower }}">{{ b.type }}</span>
+                    {% if "Size:" in b.datos %}
+                        {{ b.datos|cut:"Filename:"|cut:"Type:"|cut:"Description:" }}
+                    {% else %}
+                        —
+                    {% endif %}
                 </td>
+                <td><span class="type-tag type-manual">Manual</span></td>
                 <td class="actions-cell text-right">
-                    <button class="btn-pill-outline" title="Download File">DOWNLOAD</button>
-                    <button 
-                        class="btn-pill-outline" 
-                        onclick="openRestoreModal('{{ b.filename }}', '{{ b.created_at }}')" 
+                    <a href="{% url 'admin_backup_download' b.codigo %}" class="btn-pill-outline" title="Download File">
+                        DOWNLOAD
+                    </a>
+                    <button
+                        type="button"
+                        class="btn-pill-outline"
                         title="Restore Database"
+                        onclick="openRestoreModal(
+                            '{{ b.codigo }}',
+                            '{{ b.nombre }}',
+                            '{{ b.fecha }} {{ b.hora }}'
+                        )"
                     >
                         RESTORE
                     </button>
-                    <button 
-                        class="btn-pill-solid" 
-                        onclick="openModal('deleteBackupModal')" 
-                        title="Delete Snapshot"
-                    >
+                    <button type="button" class="btn-pill-solid" title="Delete Snapshot" onclick="openDeleteModal('{{ b.codigo }}', '{{ b.nombre }}')">
                         DELETE
                     </button>
                 </td>
@@ -106,7 +113,7 @@
             <h3>Generate New System Backup</h3>
             <button class="modal-close" onclick="closeModal('createBackupModal')">&times;</button>
         </div>
-        <form method="POST" action="#">
+        <form method="POST">
             {% csrf_token %}
             <div class="modal-body">
                 <p class="modal-description">Select what components you want to include in this backup snapshot:</p>
@@ -130,7 +137,7 @@
 
                 <div class="form-field mt-1">
                     <label>Snapshot Description / Note</label>
-                    <input type="text" class="form-input" placeholder="e.g. Manual backup before system maintenance">
+                    <input type="text" name="description" class="form-input" placeholder="e.g. Manual backup before system maintenance">
                 </div>
             </div>
             <div class="modal-footer">
@@ -158,7 +165,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" onclick="closeModal('restoreModal')">Cancel</button>
-            <form method="POST" action="#" style="display:inline;">
+            <form id="restoreForm" method="POST" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger">Confirm & Restore Data</button>
             </form>
@@ -173,15 +180,25 @@
     <div class="modal-content modal-small">
         <div class="modal-header">
             <h3>Delete Snapshot</h3>
-            <button class="modal-close" onclick="closeModal('deleteBackupModal')">&times;</button>
+            <button type="button" class="modal-close" onclick="closeModal('deleteBackupModal')">
+                &times;
+            </button>
         </div>
         <div class="modal-body">
-            <p>Are you sure you want to permanently delete this backup file?</p>
+            <p>Are you sure you want to permanently delete:</p>
+            <p><strong id="deleteBackupFileName" class="text-primary"></strong></p>
             <p class="warning-text">This file will be permanently removed from server storage.</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteBackupModal')">Cancel</button>
-            <button type="button" class="btn btn-danger">Delete File</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteBackupModal')">
+                Cancel
+            </button>
+            <form id="deleteBackupForm" method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    Delete File
+                </button>
+            </form>
         </div>
     </div>
 </div>
@@ -198,14 +215,22 @@
         document.getElementById(id).classList.remove('active');
     }
 
-    function openRestoreModal(fileName, fileDate) {
+    function openRestoreModal(codigo, fileName, fileDate) {
         document.getElementById('restoreFileName').innerText = fileName;
         document.getElementById('restoreFileDate').innerText = fileDate;
+        document.getElementById('restoreForm').action = `/admin_backups/restore/${codigo}/`;
+
         openModal('restoreModal');
     }
 
+    function openDeleteModal(codigo, fileName) {
+        document.getElementById('deleteBackupFileName').innerText = fileName;
+        document.getElementById('deleteBackupForm').action = `/admin_backups/delete/${codigo}/`;
+
+        openModal('deleteBackupModal');
+    }
+
     function submitBackup() {
-        // Pendiente de definir funcionalidad
         console.log('Submit Backup: funcionalidad aún no definida');
     }
 
