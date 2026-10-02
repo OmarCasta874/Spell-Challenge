@@ -87,7 +87,13 @@
 
 {% block extra_js %}
 {{ block.super }}
+{{ vocabulary|json_script:"miniGamesVocabulary" }}
+{{ memory_vocabulary|json_script:"memoryGameVocabulary" }}
 <script>
+    const vocabulary = JSON.parse(
+        document.getElementById('miniGamesVocabulary').textContent
+    );
+
     function openModal(id) {
         document.getElementById(id).classList.add('active');
     }
@@ -114,11 +120,7 @@
         }
     }
 
-    const hangman_vocabularyList = [
-        { word: 'DOG', meaning: "It's known as man's best friend.", audio: 'Dog' },
-        { word: 'HELLO', meaning: 'A common greeting used to begin a conversation.', audio: 'Hello' },
-        { word: 'TEACHER', meaning: 'A person who helps students to acquire knowledge.', audio: 'Teacher' }
-    ];
+    const hangman_vocabularyList = vocabulary;
 
     let hangman_currentWordIndex = 0;
     let hangman_selectedWord = '';
@@ -128,8 +130,32 @@
 
     function hangman_initGame() {
         const item = hangman_vocabularyList[hangman_currentWordIndex];
+
         hangman_selectedWord = item.word.toUpperCase();
+
         document.getElementById('hangmanHint').innerText = item.meaning;
+
+        const exampleElement = document.getElementById('hangmanExample');
+
+        if (item.example) {
+            exampleElement.innerText = `"${item.example}"`;
+            exampleElement.style.display = 'block';
+        } else {
+            exampleElement.innerText = '';
+            exampleElement.style.display = 'none';
+        }
+
+        const imageElement = document.getElementById('hangmanImage');
+
+        if (item.image) {
+            imageElement.src = item.image;
+            imageElement.alt = `Image of ${item.word}`;
+            imageElement.style.display = 'block';
+        } else {
+            imageElement.src = '';
+            imageElement.style.display = 'none';
+        }
+
         hangman_guessedLetters = [];
         hangman_attemptsLeft = 5;
 
@@ -216,12 +242,14 @@
     }
 
     function hangman_playAudioHint() {
-        const word = hangman_vocabularyList[hangman_currentWordIndex].audio;
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(word);
-            utterance.lang = 'en-US';
-            window.speechSynthesis.speak(utterance);
+        const audioUrl = hangman_vocabularyList[hangman_currentWordIndex].audio;
+
+        if (!audioUrl) {
+            return;
         }
+
+        const audio = new Audio(audioUrl);
+        audio.play();
     }
 
     function openHangmanModal() {
@@ -229,12 +257,7 @@
         openModal('hangmanModal');
     }
 
-    const missing_vocabularyList = [
-        { word: 'COMPUTER', meaning: 'An electronic device for processing data.', audio: 'Computer' },
-        { word: 'GREETING', meaning: 'A polite word or sign of welcome.', audio: 'Greeting' },
-        { word: 'WELCOME', meaning: 'Used to greet someone arriving at a place.', audio: 'Welcome' },
-        { word: 'SPELLING', meaning: 'The process of writing or naming the letters of a word.', audio: 'Spelling' }
-    ];
+    const missing_vocabularyList = vocabulary;
 
     let missing_currentItem = null;
     let missing_selectedWord = '';
@@ -274,15 +297,35 @@
     }
 
     function missing_loadNewWord() {
-        missing_currentItem = missing_vocabularyList[Math.floor(Math.random() * missing_vocabularyList.length)];
+        missing_currentItem = missing_vocabularyList[
+            Math.floor(Math.random() * missing_vocabularyList.length)
+        ];
+
         missing_selectedWord = missing_currentItem.word.toUpperCase();
+
+        const imageElement = document.getElementById('missingImage');
+
+        if (missing_currentItem.image) {
+            imageElement.src = missing_currentItem.image;
+            imageElement.alt = `Image of ${missing_currentItem.word}`;
+            imageElement.style.display = 'block';
+        } else {
+            imageElement.src = '';
+            imageElement.style.display = 'none';
+        }
 
         // Selecciona ~40% de letras al azar como huecos
         missing_missingIndices = [];
+
         missing_selectedWord.split('').forEach((_, i) => {
-            if (Math.random() < 0.4) missing_missingIndices.push(i);
+            if (Math.random() < 0.4) {
+                missing_missingIndices.push(i);
+            }
         });
-        if (missing_missingIndices.length === 0) missing_missingIndices.push(0);
+
+        if (missing_missingIndices.length === 0) {
+            missing_missingIndices.push(0);
+        }
 
         missing_filledMap = {};
         missing_renderWordSlots();
@@ -379,12 +422,14 @@
     }
 
     function missing_playAudioHint() {
-        const word = missing_currentItem.audio;
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(word);
-            utterance.lang = 'en-US';
-            window.speechSynthesis.speak(utterance);
+        const audioUrl = missing_currentItem.audio;
+
+        if (!audioUrl) {
+            return;
         }
+
+        const audio = new Audio(audioUrl);
+        audio.play();
     }
 
     function openMissingModal() {

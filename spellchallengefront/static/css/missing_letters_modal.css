@@ -151,3 +151,12 @@
     background: #FFF;
     color: #7a1f2b;
 }
+
+.missing-word-image {
+    display: block;
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    margin: 0.5rem auto 1rem;
+    border-radius: 12px;
+}

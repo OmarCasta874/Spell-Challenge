@@ -31,15 +31,33 @@
 
   var MG_LOGO = "{% static 'img/spell-challenge_red.png' %}";
 
-  var MG_MEDIA = "{% get_media_prefix %}palabras/imagenes/";
-  var MG_IMAGES = [
-    { id: 'apple',   alt: 'Apple',   src: MG_MEDIA + 'apple-red.png' },
-    { id: 'mother',  alt: 'Mother',  src: MG_MEDIA + 'mother.png' },
-    { id: 'pencil',  alt: 'Pencil',  src: MG_MEDIA + 'pencil.png' },
-    { id: 'purple',  alt: 'Purple',  src: MG_MEDIA + 'purple.jpg' },
-    { id: 'tiger',   alt: 'Tiger',   src: MG_MEDIA + 'tiger.png' },
-    { id: 'beenary', alt: 'Beenary', src: "{% static 'img/beenary-left.png' %}" }
-  ];
+  var MG_IMAGES = [];
+
+  function loadMemoryImages() {
+    var vocabularyElement =
+      document.getElementById('memoryGameVocabulary');
+
+    if (!vocabularyElement) {
+      MG_IMAGES = [];
+      return;
+    }
+
+    var vocabularyData = JSON.parse(
+      vocabularyElement.textContent
+    );
+
+    MG_IMAGES = vocabularyData
+      .filter(function (item) {
+        return item.image;
+      })
+      .map(function (item) {
+        return {
+          id: item.word,
+          alt: item.word,
+          src: item.image
+        };
+      });
+  }
 
   var FLIP_BACK_MS = 900;
 
@@ -69,11 +87,15 @@
   }
 
   function buildDeck() {
+    var availableImages = shuffle(MG_IMAGES).slice(0, 6);
+
     var deck = [];
-    MG_IMAGES.forEach(function (im) {
+
+    availableImages.forEach(function (im) {
       deck.push(im);
       deck.push(im);
     });
+
     return shuffle(deck);
   }
 
@@ -108,14 +130,34 @@
   }
 
   function startGame() {
+    loadMemoryImages();
+
+    if (MG_IMAGES.length < 2) {
+      alert('There are not enough images available to start the Memory Game.');
+      return;
+    }
+
+    var selectedImages = shuffle(MG_IMAGES).slice(0, 6);
+
+    var deck = [];
+
+    selectedImages.forEach(function (im) {
+      deck.push(im);
+      deck.push(im);
+    });
+
+    deck = shuffle(deck);
+
     state = {
-      deck: buildDeck(),
+      deck: deck,
       first: null,
       lock: false,
       matched: 0,
-      pairs: MG_IMAGES.length
+      pairs: selectedImages.length
     };
+
     renderBoard(state.deck);
+
     resultEl.classList.remove('active');
     board.style.display = '';
   }
@@ -171,6 +213,7 @@
 
   /* ---------- Abrir / cerrar ---------- */
   function openMemoryGame() {
+    loadMemoryImages();
     preload();
     startGame();
     overlay.classList.add('active');

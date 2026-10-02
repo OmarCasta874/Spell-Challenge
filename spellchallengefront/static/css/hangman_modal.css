@@ -155,3 +155,23 @@
     text-align: center;
     margin-top: 1.2rem;
 }
+
+/* Word image */
+.hangman-word-image {
+    display: block;
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    margin: 0.8rem auto;
+    border-radius: 12px;
+}
+
+/* Example sentence */
+.hangman-clue-example {
+    margin: 0.7rem auto 1rem;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: #666;
+    max-width: 90%;
+    text-align: center;
+}
