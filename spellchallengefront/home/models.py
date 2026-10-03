@@ -966,6 +966,48 @@ class Competencia(models.Model):
     def __str__(self):
         return self.nombre
     
+#MODELO COMPETENCIA_ALUMNO
+class Competencia_Alumno(models.Model):
+    competencia = models.ForeignKey(
+        Competencia,
+        on_delete=models.CASCADE,
+        db_column='competencia',
+        to_field='codigo'
+    )
+    
+    alumno = models.ForeignKey(
+        Alumno,
+        on_delete=models.CASCADE,
+        db_column='alumno',
+        to_field='matricula'
+    )
+    
+    class Meta:
+        managed = False
+        db_table = 'competencia_alumno'
+        unique_together = ('competencia', 'alumno')
+        
+#MODELO COMPETENCIA_PROFESOR
+class Competencia_Profesor(models.Model):
+    competencia = models.ForeignKey(
+        Competencia,
+        on_delete=models.CASCADE,
+        db_column='competencia',
+        to_field='codigo'
+    )
+    
+    profesor = models.ForeignKey(
+        Profesor,
+        on_delete=models.CASCADE,
+        db_column='profesor',
+        to_field='clave'
+    )
+    
+    class Meta:
+        managed = False
+        db_table = 'competencia_profesor'
+        unique_together = ('competencia', 'profesor')
+    
 #MODELO LISTA_COMPETENCIA
 class Lista_Competencia(models.Model):
     lista = models.ForeignKey(

@@ -90,8 +90,96 @@ def login(request):
 def choose_role(request):
     return render(request, 'base/choose_role.html')
 
+@transaction.atomic
 def signup_student(request):
-    return render(request, 'users/singup_student.html')
+    niveles = Nivel.objects.all().order_by('codigo')
+    carreras = Carrera.objects.all().order_by('nombre')
+    
+    if request.method == 'POST':
+        nombre = request.POST.get('first_name', '').strip()
+        apellido_paterno = request.POST.get('paternal_last_name', '').strip()
+        apellido_materno = request.POST.get('maternal_last_name', '').strip()
+        matricula = request.POST.get('student_id', '').strip()
+        correo = request.POST.get('email', '').strip()
+        telefono = request.POST.get('phone', '').strip()
+        nivel_codigo = request.POST.get('level', '').strip()
+        carrera_clave = request.POST.get('career', '').strip()
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+        
+        if password != confirm_password:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'users/singup_student.html', {
+                'niveles': niveles,
+                'carreras': carreras,
+            })
+            
+        if Usuario.objects.filter(correo=correo).exists():
+            messages.error(request, 'This email is already registered.')
+            return render(request, 'users/singup_student.html', {
+                'niveles': niveles,
+                'carreras': carreras,
+            })
+            
+        if Alumno.objects.filter(matricula=matricula).exists():
+            messages.error(request, 'This Student ID is already registered.')
+            return render(request, 'users/singup_student.html', {
+                'niveles': niveles,
+                'carreras': carreras,
+            })
+            
+        tipo_usuario = TipoUsuario.objects.get(clave='TUSR01')
+        
+        nivel = Nivel.objects.get(codigo=nivel_codigo)
+        carrera = Carrera.objects.get(clave=carrera_clave)
+        
+        numeros = []
+        
+        for codigo in Usuario.objects.filter(
+            tipo_usuario=tipo_usuario,
+            codigo__startswith='USR'
+        ).values_list('codigo', flat=True):
+            
+            try:
+                numeros.append(int(codigo[3:]))
+            except ValueError:
+                pass
+            
+        siguiente = max(numeros, default=0) + 1
+        codigo_usuario = f'USR{siguiente:04d}'
+        
+        usuario = Usuario.objects.create_user(
+            correo=correo,
+            password=password,
+            codigo=codigo_usuario,
+            nombre_pila=nombre,
+            apellidoPaterno=apellido_paterno,
+            apellidoMaterno=apellido_materno,
+            numero_telefono=telefono,
+            tipo_usuario=tipo_usuario,
+        )
+        
+        Alumno.objects.create(
+            matricula=matricula,
+            nombre_pila=nombre,
+            apellidoPaterno=apellido_materno,
+            apellidoMaterno=apellido_materno,
+            usuario=usuario,
+            nivel=nivel,
+            carrera=carrera,
+        )
+        
+        messages.success(
+            request,
+            'Student account created successfully. You can now log in.'
+        )
+        
+        return redirect('login')
+    
+    return render(request, 'users/singup_student.html', {
+        'niveles': niveles,
+        'carreras': carreras,
+    })
 
 def signup_teacher(request):
     return render(request, 'users/singup_teacher.html')
@@ -1981,3 +2069,45 @@ def student_match_words(request):
 @role_required('student')
 def practice_speaking(request):
     return render(request, 'student/practice_speaking.html')
+
+@never_cache
+@role_required('teacher')
+def teacher_competition_results(request, pk):
+    competition = get_object_or_404(
+        Competencia,
+        pk=pk,                       
+    )
+
+    if competition.fecha >= timezone.localdate():
+        messages.info(request, "Results will be available when the competition finishes.")
+        return redirect("teacher_competitions")
+ 
+    participaciones = (
+        Participacion.objects
+        .filter(competencia=competition)
+        .select_related("estudiante", "estudiante__grupo")  
+        .order_by("-aciertos", "estudiante__apellidos")      
+    )
+
+    results = []
+    for p in participantes:
+        est = p.estudiante
+        results.append({
+            "enrollment": est.matricula,
+            "first_name": est.mombres,
+            "last_name": est.apellidos,
+            "email": est.correo,
+            "group": grupo.nombre if est.grupo else "—",
+            "correct": p.aciertos,
+            "incorrect": p.errores,
+            "best_word": p.mejor_palabra,
+            "avatar": est.foto.url if getattr(est, "foto", None) else "",
+        })
+
+        total_words = (results[0]["correct"] + results[0]["incorrect"]) if results else 0
+
+        return render(requests, "teacher/competition_results.html", {
+            "competition": competition,
+            "results": results,
+            "total_words": total_words,
+        })

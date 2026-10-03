@@ -399,6 +399,34 @@ CREATE TABLE ejercicio_opcion (
         FOREIGN KEY (opcion) REFERENCES opcion(clave)
 ) ENGINE=InnoDB;
 
+CREATE TABLE competencia_alumno (
+    competencia VARCHAR(10) NOT NULL,
+    alumno VARCHAR(10) NOT NULL,
+    PRIMARY KEY (competencia, alumno),
+    CONSTRAINT fk_competencia_alumno_competencia
+        FOREIGN KEY (competencia)
+        REFERENCES competencia(codigo)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_competencia_alumno_alumno
+        FOREIGN KEY (alumno)
+        REFERENCES alumno(matricula)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE competencia_profesor (
+    competencia VARCHAR(10) NOT NULL,
+    profesor VARCHAR(10) NOT NULL,
+    PRIMARY KEY (competencia, profesor),
+    CONSTRAINT fk_competencia_profesor_competencia
+        FOREIGN KEY (competencia)
+        REFERENCES competencia(codigo)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_competencia_profesor_profesor
+        FOREIGN KEY (profesor)
+        REFERENCES profesor(clave)
+        ON DELETE CASCADE
+);
+
 -- ============================================================
 -- CATALOGOS
 -- ============================================================
@@ -3719,3 +3747,13 @@ FOREIGN KEY (contenido_leccion) REFERENCES contenido_leccion(codigo);
 
 ALTER TABLE leccion
 MODIFY contenido_leccion VARCHAR(5) NOT NULL;
+
+INSERT INTO competencia_profesor (competencia, profesor) VALUES
+('COM01', 'PROF01'),
+('COM02', 'PROF02'),
+('COM03', 'PROF03'),
+('COM04', 'PROF04'),
+('COM05', 'PROF05'),
+('COM06', 'PROF01'),
+('COM07', 'PROF04'),
+('COM08', 'PROF04');

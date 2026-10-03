@@ -14,19 +14,19 @@
 }
 
 .btn-join-group {
-  background: #e0574f;
-  border: none;
-  border-radius: 50px;
-  color: #fff;
+  border: 2px solid #7A1220;
+  background: #7A1220;
+  color: #FFFFFF;
+  border-radius: 999px;
   font-weight: 700;
-  font-size: 0.9rem;
-  padding: 0.6rem 1.4rem;
+  padding: 8px 24px;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(224, 87, 79, 0.35);
 }
 
 .btn-join-group:hover {
-  background: #c8443c;
+  background: #F2908A;
+  border-color: #F2908A;
+  color: #FFFFFF;
 }
 
 .groups-row {

@@ -23,6 +23,8 @@
                 text: text || ''
             };
 
+            root.classList.add('is-active');
+
             bubble.hidden = false;
 
             bubble.classList.remove('is-visible');
@@ -32,6 +34,7 @@
 
         function hide() {
             bubble.hidden = true;
+            root.classList.remove('is-active');
         }
 
         closeBtn.addEventListener('click', hide);

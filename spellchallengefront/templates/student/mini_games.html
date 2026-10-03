@@ -129,21 +129,15 @@
     let hangman_score = 0;
 
     function hangman_initGame() {
+        hangman_currentWordIndex = Math.floor(
+            Math.random() * hangman_vocabularyList.length
+        );
+
         const item = hangman_vocabularyList[hangman_currentWordIndex];
 
         hangman_selectedWord = item.word.toUpperCase();
 
         document.getElementById('hangmanHint').innerText = item.meaning;
-
-        const exampleElement = document.getElementById('hangmanExample');
-
-        if (item.example) {
-            exampleElement.innerText = `"${item.example}"`;
-            exampleElement.style.display = 'block';
-        } else {
-            exampleElement.innerText = '';
-            exampleElement.style.display = 'none';
-        }
 
         const imageElement = document.getElementById('hangmanImage');
 
@@ -154,6 +148,16 @@
         } else {
             imageElement.src = '';
             imageElement.style.display = 'none';
+        }
+
+        const audioButton = document.getElementById('hangmanAudioButton');
+
+        if (item.audio) {
+            audioButton.disabled = false;
+            audioButton.innerText = '🔊 Listen Word';
+        } else {
+            audioButton.disabled = true;
+            audioButton.innerText = '🔊 Audio Unavailable';
         }
 
         hangman_guessedLetters = [];

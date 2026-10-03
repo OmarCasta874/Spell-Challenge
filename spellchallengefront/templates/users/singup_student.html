@@ -23,9 +23,16 @@
     </div>
 
     <div class="field">
-      <label for="id_last_name">Last Name:</label>
+      <label for="id_paternal_last_name">Paternal Last Name:</label>
       <div class="field-input">
-        <input type="text" id="id_last_name" name="last_name" required>
+        <input type="text" id="id_paternal_last_name" name="paternal_last_name" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="id_maternal_last_name">Maternal Last Name:</label>
+      <div class="field-input">
+        <input type="text" id="id_maternal_last_name" name="maternal_last_name" required>
       </div>
     </div>
 
@@ -40,6 +47,37 @@
       <label for="id_email">Email Address:</label>
       <div class="field-input">
         <input type="email" id="id_email" name="email" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="id_phone">Phone:</label>
+      <div class="field-input">
+        <input type="tel" id="id_phone" name="phone" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="id_level">Level:</label>
+      <div class="field-input">
+        <select id="id_level" name="level" required>
+          <option value="">Select your level</option>
+          {% for nivel in niveles %}
+            <option value="{{ nivel.codigo }}">{{ nivel.codigo }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="id_career">Career:</label>
+      <div class="field-input">
+        <select id="id_career" name="career" required>
+          <option value="">Select your career</option>
+          {% for carrera in carreras %}
+            <option value="{{ carrera.clave }}">{{ carrera.nombre }}</option>
+          {% endfor %}
+        </select>
       </div>
     </div>
 

@@ -3,7 +3,7 @@
 
 {% block extra_css %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'css/teacher_modals.css' %}">
+<link rel="stylesheet" href="{% static 'css/teacher_base.css' %}">
 <link rel="stylesheet" href="{% static 'css/teacher_competitions.css' %}">
 {% endblock %}
 
@@ -73,6 +73,75 @@
             {{ competition.fecha|date:"M d, Y" }}
           </span>
           <span>{{ competition.hora|time:"g:i A" }}</span>
+        </div>
+
+        <div class="competition-card-actions">
+          <button type="button" class="btn-comp-outline" data-bs-toggle="modal" data-bs-target="#detailsModal{{ forloop.counter }}">
+            View Details
+          </button>
+          {% if competition.fecha < today %}
+            <a href="{% url 'teacher_competition_results' competition.pk %}" class="btn-comp-solid">View Results</a>
+          {% else %}
+            {# TODO: reemplaza "#" por la URL real para entrar a la competencia, ej:
+               {% url 'teacher_enter_competition' competition.pk %} #}
+            <a href="#" class="btn-comp-solid">Enter Competition</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="detailsModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="detailsModalLabel{{ forloop.counter }}" aria-hidden="true">
+      <div class="modal-dialog panel-center modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title" id="detailsModalLabel{{ forloop.counter }}">
+                Competition Details
+              </h5>
+              <small class="modal-subtitle">{{ competition.nombre }}</small>
+            </div>
+            <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="competition-modal-row">
+              <div>
+                <div class="competition-modal-label">Competition Name:</div>
+                <div class="competition-modal-value">{{ competition.nombre }}</div>
+              </div>
+              <div>
+                <div class="competition-modal-label">Description:</div>
+                {# Se muestra solo si tu modelo tiene el campo "descripcion"; si no existe, queda vacío. #}
+                <div class="competition-modal-value">{{ competition.descripcion|default:"—" }}</div>
+              </div>
+            </div>
+            <div class="competition-modal-row">
+              <div>
+                <div class="competition-modal-label">Group:</div>
+                {% with competition.lista_competencias.first as relation %}
+                  <div class="competition-modal-value">{{ relation.lista.nombre|default:"—" }}</div>
+                {% endwith %}
+              </div>
+              <div>
+                <div class="competition-modal-label">Date / Time:</div>
+                <div class="competition-modal-value">
+                  {{ competition.fecha|date:"M d, Y" }} &middot; {{ competition.hora|time:"g:i A" }}
+                </div>
+              </div>
+            </div>
+            <div class="competition-modal-row">
+              <div>
+                <div class="competition-modal-label">State:</div>
+                {% if competition.fecha < today %}
+                  <span class="badge-status badge-finished">Finished</span>
+                {% else %}
+                  <span class="badge-status badge-upcoming">Upcoming</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-pill-light" data-bs-dismiss="modal">Close</button>
+          </div>
         </div>
       </div>
     </div>
