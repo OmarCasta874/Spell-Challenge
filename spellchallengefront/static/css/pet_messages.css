@@ -6,8 +6,8 @@
   --mascot-close: #ffffff;
   --mascot-radius: 6px;
   position: fixed;
-  left: 16px;
-  bottom: 12px;
+  left: 12px;
+  bottom: 8px;
   z-index: 1030;
   display: flex;
   flex-direction: column;
@@ -61,10 +61,32 @@
 
 .mascot-img {
   display: block;
+  width: 72px;
   height: auto;
   cursor: pointer;
   pointer-events: auto;
   user-select: none;
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+
+  transition: 
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    visibility 0s linear 0.25s;
+}
+
+.mascot.is-active .mascot-img {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+
+  transition: 
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    visibility 0s linear 0s;
 }
 
 @keyframes mascot-pop {

@@ -114,10 +114,42 @@
 
     let currentHive = null;
 
+    const usedBeehives = {
+        CAT11: new Set(),
+        CAT12: new Set(),
+        CAT13: new Set(),
+        CAT14: new Set(),
+        CAT15: new Set(),
+        CAT16: new Set(),
+        CAT17: new Set()
+    };
+
+    const usedWords = {
+        CAT11: new Set(),
+        CAT12: new Set(),
+        CAT13: new Set(),
+        CAT14: new Set(),
+        CAT15: new Set(),
+        CAT16: new Set(),
+        CAT17: new Set()
+    };
+
     function filterBeehives() {
         currentCategory = document.getElementById('wordLengthSelect').value;
 
         currentHive = null;
+
+        document.querySelectorAll('.beehive-cell').forEach(cell => {
+            const hiveNumber = cell.dataset.hive;
+
+            if (usedBeehives[currentCategory].has(hiveNumber)) {
+                cell.classList.add('beehive-disabled');
+                cell.disabled = true;
+            } else {
+                cell.classList.remove('beehive-disabled');
+                cell.disabled = false;
+            }
+        });
     }
 
     function selectBeehive(number) {
@@ -156,8 +188,19 @@
             return;
         }
 
-        const wordIndex = (parseInt(currentHive) - 1) % words.length;
-        const word = words[wordIndex];
+        const availableWords = words.filter(
+            word => !usedWords[currentCategory].has(word.texto)
+        );
+
+        if (availableWords.length === 0) {
+            alert('There are no more unused words available for this word length.');
+            return;
+        }
+
+        const randomIndex = Math.floor(Math.random() * availableWords.length);
+        const word = availableWords[randomIndex];
+
+        usedWords[currentCategory].add(word.texto);
 
         document.getElementById('currentWordText').textContent = word.texto;
 
@@ -175,6 +218,8 @@
         if (currentHive) {
             const cell = document.querySelector(`.beehive-cell[data-hive="${currentHive}"]`);
             if (cell) {
+                usedBeehives[currentCategory].add(currentHive);
+
                 cell.classList.add('beehive-disabled');
                 cell.disabled = true;
             }
