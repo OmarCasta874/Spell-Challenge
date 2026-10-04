@@ -18,15 +18,15 @@
   <section class="stats-grid mb-4">
     <div class="stat-card">
       <span class="stat-label">Overall Accuracy:</span> <!-- -->
-      <span class="stat-value">87%</span> <!-- -->
+      <span class="stat-value">{{ overall_accuracy }}%</span> <!-- -->
     </div>
     <div class="stat-card">
       <span class="stat-label">Words Practiced:</span> <!-- -->
-      <span class="stat-value">146</span> <!-- -->
+      <span class="stat-value">{{ words_practiced }}</span> <!-- -->
     </div>
     <div class="stat-card">
       <span class="stat-label">Competitions:</span> <!-- -->
-      <span class="stat-value">8</span> <!-- -->
+      <span class="stat-value">{{ competitions_count }}</span> <!-- -->
     </div>
     <div class="stat-card">
       <span class="stat-label">Best Score:</span> <!-- -->
@@ -52,20 +52,20 @@
           </div>
           <div class="chart-bars">
             <div class="bar-group">
-              <div class="bar" style="height: 67%;"></div>
-              <span class="bar-label">W1</span> <!-- -->
+              <div class="bar" style="height: {{ week_accuracy.0}}%;"></div>
+              <span class="bar-label">{{ week_labels.0 }}</span> <!-- -->
             </div>
             <div class="bar-group">
-              <div class="bar" style="height: 15%;"></div>
-              <span class="bar-label">W2</span> <!-- -->
+              <div class="bar" style="height: {{ week_accuracy.1 }}%;"></div>
+              <span class="bar-label">{{ week_labels.1 }}</span> <!-- -->
             </div>
             <div class="bar-group">
-              <div class="bar" style="height: 0%;"></div>
-              <span class="bar-label">W3</span> <!-- -->
+              <div class="bar" style="height: {{ week_accuracy.2 }}%;"></div>
+              <span class="bar-label">{{ week_labels.2 }}</span> <!-- -->
             </div>
             <div class="bar-group">
-              <div class="bar" style="height: 0%;"></div>
-              <span class="bar-label">W4</span> <!-- -->
+              <div class="bar" style="height: {{ week_accuracy.3 }}%;"></div>
+              <span class="bar-label">{{ week_labels.3 }}</span> <!-- -->
             </div>
           </div>
         </div>
@@ -78,53 +78,28 @@
         <h3 class="card-section-title">Achievements</h3> <!-- -->
 
         <div class="achievements-grid">
-          <!-- Achievement 1 -->
-          <div class="achievement-item">
-            <div class="achievement-icon">
-              <i data-lucide="check-circle"></i>
-            </div>
-            <div class="achievement-info">
-              <h4 class="achievement-title">50 Correct Answers</h4> <!-- -->
-              <p class="achievement-desc">50 correct words</p> <!-- -->
-            </div>
-            <span class="achievement-counter">50/50</span> <!-- -->
-          </div>
-
-          <!-- Achievement 2 -->
-          <div class="achievement-item">
-            <div class="achievement-icon">
-              <i data-lucide="award"></i>
-            </div>
-            <div class="achievement-info">
-              <h4 class="achievement-title">No Mistakes</h4> <!-- -->
-              <p class="achievement-desc">No mistakes in a list</p> <!-- -->
-            </div>
-            <span class="achievement-counter">0/0 mistakes</span> <!-- -->
-          </div>
-
-          <!-- Achievement 3 -->
-          <div class="achievement-item">
-            <div class="achievement-icon">
-              <i data-lucide="zap"></i>
-            </div>
-            <div class="achievement-info">
-              <h4 class="achievement-title">Maximum Speed</h4> <!-- -->
-              <p class="achievement-desc">5 lessons completed in less than 1 minute</p> <!-- -->
-            </div>
-            <span class="achievement-counter">0/5</span> <!-- -->
-          </div>
-
-          <!-- Achievement 4 -->
-          <div class="achievement-item">
-            <div class="achievement-icon">
-              <i data-lucide="sun"></i>
-            </div>
-            <div class="achievement-info">
-              <h4 class="achievement-title">Early Bird</h4> <!-- -->
-              <p class="achievement-desc">Doing a lesson before 7 am</p> <!-- -->
-            </div>
-            <span class="achievement-counter">0/1</span>
-          </div>
+          {% for achievement in achievements_preview %} 
+            <div class="achievement-item {% if achievement.obtenida %}achievement-earned{% endif %}"> 
+              <div class="achievement-icon"> 
+                {% if achievement.obtenida %} 
+                  <i data-lucide="check-circle"></i> 
+                {% else %} 
+                  <i data-lucide="award"></i> 
+                {% endif %} 
+              </div> 
+              <div class="achievement-info"> 
+                <h4 class="achievement-title"> {{ achievement.insignia.nombre }} </h4> 
+                <p class="achievement-desc"> {{ achievement.insignia.descripcion }} </p> 
+              </div> 
+              {% if achievement.obtenida %} 
+                <span class="achievement-counter"> Earned </span> 
+              {% else %} 
+                <span class="achievement-counter"> Locked </span> 
+              {% endif %} 
+            </div> 
+            {% empty %} 
+            <p class="text-center text-muted"> No achievements available yet. </p> 
+          {% endfor %}
         </div>
         <button class="view-achievements-btn" data-bs-toggle="modal" data-bs-target="#achievementsModal">
           <i data-lucide="arrow-right"></i>
@@ -180,65 +155,28 @@
       <div class="modal-header achievements-modal-header">
         <div class="achievements-modal-header-text">
           <h5 class="modal-title">ACHIEVEMENTS</h5>
-          <span class="achievements-modal-count">{{ achievements_earned|default:2 }} / {{ achievements_total|default:20 }} ACHIEVEMENTS</span>
+          <span class="achievements-modal-count">{{ achievements_earned }} / {{ achievements_total }} ACHIEVEMENTS</span>
         </div>
         <button type="button" class="btn-close achievements-modal-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body achievements-modal-body">
         <div class="achievements-modal-grid">
-
-          <div class="achievement-tile achievement-tile-done">
-            <h4 class="achievement-tile-title">50 Correct Answers</h4>
-            <p class="achievement-tile-desc">50 correct words</p>
-            <span class="achievement-tile-counter">50/50</span>
-          </div>
-
-          <div class="achievement-tile achievement-tile-done">
-            <h4 class="achievement-tile-title">No Mistakes</h4>
-            <p class="achievement-tile-desc">No mistakes in a list completed</p>
-            <i data-lucide="check" class="achievement-tile-check"></i>
-          </div>
-
-          <div class="achievement-tile">
-            <h4 class="achievement-tile-title">Maximum Speed</h4>
-            <p class="achievement-tile-desc">5 lessons completed in less than 1 minute</p>
-            <span class="achievement-tile-counter">0/5</span>
-          </div>
-
-          <div class="achievement-tile">
-            <h4 class="achievement-tile-title">Early Bird</h4>
-            <p class="achievement-tile-desc">Doing a lesson before 7 am</p>
-            <span class="achievement-tile-counter">0/1</span>
-          </div>
-
-          <div class="achievement-tile">
-            <h4 class="achievement-tile-title">Listening Master</h4>
-            <p class="achievement-tile-desc">No mistakes in 3 audio games</p>
-            <span class="achievement-tile-counter">0/3</span>
-          </div>
-
-          <div class="achievement-tile">
-            <h4 class="achievement-tile-title">100 Correct Answers</h4>
-            <p class="achievement-tile-desc">100 correct words</p>
-            <span class="achievement-tile-counter">50/100</span>
-          </div>
-
-          <div class="achievement-tile">
-            <h4 class="achievement-tile-title">Silver Student</h4>
-            <p class="achievement-tile-desc">Reach weekly ranking second place</p>
-            <span class="achievement-tile-counter">0/1</span>
-          </div>
-
-          <div class="achievement-tile">
-            <h4 class="achievement-tile-title">Weekly Champion</h4>
-            <p class="achievement-tile-desc">Ranking weekly first place</p>
-            <span class="achievement-tile-counter">0/1</span>
-          </div>
-
+          {% for achievement in achievements %}
+            <div class="achievement-tile {% if achievement.obtenida %}achievement-tile-done{% endif %}">
+              <h4 class="achievement-tile-title">{{ achievement.insignia.nombre }}</h4>
+              <p class="achievement-tile-desc">{{ achievement.insignia.descripcion }}</p>
+              {% if achievement.obtenida %}
+                <i data-lucide="check" class="achievement-tile-check"></i>
+              {% else %}
+                <span class="achievement-tile-counter">Locked</span>
+              {% endif %}
+            </div>
+          {% empty %}
+            <p class="text-center text-muted">No achievements available yet.</p>
+          {% endfor %}
         </div>
       </div>
-
     </div>
   </div>
 </div>
