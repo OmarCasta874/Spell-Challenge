@@ -3757,3 +3757,32 @@ INSERT INTO competencia_profesor (competencia, profesor) VALUES
 ('COM06', 'PROF01'),
 ('COM07', 'PROF04'),
 ('COM08', 'PROF04');
+
+ALTER TABLE competencia_alumno
+ADD COLUMN puntos_obtenidos INT NULL,
+ADD COLUMN palabras_correctas INT NULL,
+ADD COLUMN palabras_incorrectas INT NULL;
+
+UPDATE competencia_alumno
+SET
+    puntos_obtenidos = 95,
+    palabras_correctas = 19,
+    palabras_incorrectas = 1
+WHERE competencia = 'COM01'
+  AND alumno = '2026100002';
+
+UPDATE competencia_alumno
+SET
+    puntos_obtenidos = 88,
+    palabras_correctas = 18,
+    palabras_incorrectas = 2
+WHERE competencia = 'COM02'
+  AND alumno = '2026100003';
+
+UPDATE competencia_alumno
+SET
+    puntos_obtenidos = 100,
+    palabras_correctas = 20,
+    palabras_incorrectas = 0
+WHERE competencia = 'COM03'
+  AND alumno = '2026100004';

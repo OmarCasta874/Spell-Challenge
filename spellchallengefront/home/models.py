@@ -982,6 +982,24 @@ class Competencia_Alumno(models.Model):
         to_field='matricula'
     )
     
+    puntos_obtenidos = models.IntegerField(
+        null=True,
+        blank=True,
+        db_column='puntos_obtenidos'
+    )
+    
+    palabras_correctas = models.IntegerField(
+        null=True,
+        blank=True,
+        db_column='puntos_obtenidos'
+    )
+    
+    palabras_incorrectas = models.IntegerField(
+        null=True,
+        blank=True,
+        db_column='palabras_incorrectas'
+    )
+    
     class Meta:
         managed = False
         db_table = 'competencia_alumno'
