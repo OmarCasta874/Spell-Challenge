@@ -105,27 +105,22 @@
   </div>
 
   <div class="activity-card">
-    <h5 class="overview-title">Recent Learning Activity</h5>
-    <p class="overview-subtitle">Latest updates across your groups</p>
-
+    <h5 class="overview-title">Teacher Activity Log</h5>
+    <p class="overview-subtitle">Your latest system actions</p>
     <div class="activity-list">
-      <div class="activity-item">
-        <p class="activity-title">Group 3A improved its average score</p>
-        <p class="activity-desc">Average increased from 78% to 85%</p>
-        <p class="activity-date">Sep 3rd, 2026</p>
-      </div>
-      <div class="activity-item">
-        <p class="activity-title">Group 2A completed a practice session</p>
-        <p class="activity-desc">Average score: 91%</p>
-        <p class="activity-date">Sep 3rd, 2026</p>
-      </div>
-      <div class="activity-item">
-        <p class="activity-title">Group 4B competition results are available</p>
-        <p class="activity-desc">Group 4B - Basic Challenge</p>
-        <p class="activity-date">Sep 3rd, 2026</p>
-      </div>
+      {% for bitacora in bitacoras %}
+        <div class="activity-item">
+          <p class="activity-title">{{ bitacora.accion }}</p>
+          <p class="activity-date">
+            {{ bitacora.fecha_generacion|date:"M j, Y" }}
+            ·
+            {{ bitacora.hora_generacion|time:"h:i A" }}
+          </p>
+        </div>
+      {% empty %}
+        <p>No activity recorded yet.</p>
+      {% endfor %}
     </div>
   </div>
-
 </div>
 {% endblock %}

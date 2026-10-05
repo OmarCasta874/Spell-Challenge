@@ -5,6 +5,7 @@
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'css/teacher_base.css' %}">
 <link rel="stylesheet" href="{% static 'css/teacher_competitions.css' %}">
+<link rel="stylesheet" href="{% static 'css/teacher_modals.css' %}">
 {% endblock %}
 
 {% block teacher_content %}
@@ -80,10 +81,8 @@
             View Details
           </button>
           {% if competition.fecha < today %}
-            <a href="{% url 'teacher_competition_results' competition.pk %}" class="btn-comp-solid">View Results</a>
+            <a href="{% url 'teacher_competition_results' %}" class="btn-comp-solid">View Results</a>
           {% else %}
-            {# TODO: reemplaza "#" por la URL real para entrar a la competencia, ej:
-               {% url 'teacher_enter_competition' competition.pk %} #}
             <a href="#" class="btn-comp-solid">Enter Competition</a>
           {% endif %}
         </div>

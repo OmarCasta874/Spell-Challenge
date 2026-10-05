@@ -104,17 +104,19 @@
         </div>
     </div>
 
-    <!-- Recent Activity -->
-    <div class="panel-card activity-panel-salmon">
-        <h3>Recent Activity</h3>
-        <div class="activity-list">
-            {% for act in recent_activities %}
-                <div class="activity-row">
-                    <strong class="activity-title">Teacher created: Ana Lopez</strong>
-                    <span class="activity-date">3 days ago</span>
-                </div>
-            {% endfor %}
-        </div>
+    <div class="activity-list">
+        {% for act in recent_activities %}
+            <div class="activity-row">
+                <strong class="activity-title">{{ act.accion }}</strong>
+                <span class="activity-date">
+                    {{ act.fecha_generacion|date:"M j, Y" }}
+                    ·
+                    {{ act.hora_generacion|time:"h:i A" }}
+                </span>
+            </div>
+        {% empty %}
+            <p class="text-muted">No activity recorded yet.</p>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

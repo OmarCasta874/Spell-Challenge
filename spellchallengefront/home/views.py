@@ -136,7 +136,6 @@ def signup_student(request):
         numeros = []
         
         for codigo in Usuario.objects.filter(
-            tipo_usuario=tipo_usuario,
             codigo__startswith='USR'
         ).values_list('codigo', flat=True):
             
@@ -162,7 +161,7 @@ def signup_student(request):
         Alumno.objects.create(
             matricula=matricula,
             nombre_pila=nombre,
-            apellidoPaterno=apellido_materno,
+            apellidoPaterno=apellido_paterno,
             apellidoMaterno=apellido_materno,
             usuario=usuario,
             nivel=nivel,
@@ -188,6 +187,13 @@ def signup_teacher(request):
 @role_required('teacher')
 def dashboard(request):
     profesor = request.user.profesor
+    
+    bitacoras = Bitacora_Profesor.objects.filter(
+        profesor=profesor
+    ).order_by(
+        '-fecha_generacion',
+        '-hora_generacion'
+    )[:5]
     
     grupos = Grupo.objects.filter(profesor=profesor)
     
@@ -304,6 +310,7 @@ def dashboard(request):
             'group_performance': group_performance,
             'average_score': average_score,
             'challenging_words': challenging_words_data,
+            'bitacoras': bitacoras,
         }
     )
 
@@ -592,7 +599,7 @@ def teacher_competitions(request):
                 request,
                 'The selected date or time is invalid.'
             )
-            return redirect('teacher_competitons')
+            return redirect('teacher_competitions')
         
         number = 1
         
@@ -614,6 +621,25 @@ def teacher_competitions(request):
         Lista_Competencia.objects.create(
             lista=lista,
             competencia=competencia
+        )
+        
+        number_bitacora = 1
+        
+        while Bitacora_Profesor.objects.filter(
+            codigo=f'BITP{number_bitacora:02d}'
+        ).exists():
+            number_bitacora += 1
+            
+        codigo_bitacora = f'BITP{number_bitacora:02d}'
+        
+        now = timezone.localtime()
+        
+        Bitacora_Profesor.objects.create(
+            codigo=codigo_bitacora,
+            fecha_generacion=now.date(),
+            hora_generacion=now.time(),
+            accion=f'Created a new competition: {nombre}.',
+            profesor=profesor
         )
         
         messages.success(
@@ -1025,7 +1051,7 @@ def gen_panel(request):
                 'grupo_alumnos__alumno__practicas__practica_sesion__porcentaje_aciertos'
             )
         )
-        .order_by('nombre')
+        .order_by('-average_score')[:5]
     )
     
     group_scores_data = []
@@ -1045,6 +1071,13 @@ def gen_panel(request):
         )
     else: 
         average_score_total = 0
+        
+    recent_activities = Bitacora_Administrador.objects.select_related(
+        'usuario'
+    ).order_by(
+        '-fecha_generacion',
+        '-hora_generacion'
+    )[:5]
     
     context = {
         'active_teachers': active_teachers,
@@ -1057,6 +1090,7 @@ def gen_panel(request):
         'challenging_words': challenging_words_data,
         'group_scores': group_scores_data,
         'average_score_total': average_score_total,
+        'recent_activities': recent_activities,
     }
     
     return render(
@@ -1362,6 +1396,27 @@ def admin_users(request):
                             request,
                             'This role is not available yet.'
                         )
+                    
+                    if role in ['STUDENT', 'TEACHER', 'ADMIN']:
+                        number_bitacora = 1
+                        
+                        while Bitacora_Administrador.objects.filter(
+                            codigo=f'BITA{number_bitacora:02d}'
+                        ).exists():
+                            number_bitacora += 1
+                            
+                        codigo_bitacora = f'BITA{number_bitacora:02d}'
+                        
+                        now = timezone.localtime()
+                        
+                        Bitacora_Administrador.objects.create(
+                            codigo=codigo_bitacora,
+                            fecha_generacion=now.date(),
+                            hora_generacion=now.time(),
+                            accion=f'Created a new user: {first_name} {last_name}.',
+                            usuario=request.user
+                        )
+                    
             except Exception as e:
                 messages.error(
                     request,
@@ -1510,29 +1565,48 @@ def admin_academy(request):
     careers = []
     
     for carrera in carreras:
+        grupos = Grupo.objects.filter(
+            grupo_carreras__carrera=carrera
+        ).distinct()
+        
+        students_count = Grupo_Alumno.objects.filter(
+            grupo__in=grupos
+        ).count()
+        
         careers.append({
             'code': carrera.clave,
             'name': carrera.nombre,
             'status': 'ACTIVE',
-            'groups_count': 0,
-            'students_count': 0,
+            'groups_count': grupos.count(),
+            'students_count': students_count,
         })
-        
+                
     niveles = Nivel.objects.all().order_by('codigo')
     
     levels = []
     
     for nivel in niveles:
+        grupos = (
+            Grupo.objects
+            .filter(
+                grupo_alumnos__alumno__nivel=nivel
+            )
+            .distinct()
+        )
+        
         levels.append({
             'code': nivel.codigo,
             'name': nivel.descripcion,
-            'groups_count': 0,
+            'groups_count': grupos.count(),
         })
         
     grupos = (
         Grupo.objects
         .select_related('profesor')
-        .prefetch_related('grupo_alumnos')
+        .prefetch_related(
+            'grupo_alumnos__alumno__nivel',
+            'grupo_carreras__carrera'
+        )
         .order_by('nombre')
     )
     
@@ -1547,11 +1621,38 @@ def admin_academy(request):
             f"{teacher.apellidoMaterno or ''}"
         ).strip()
         
+        grupo_carrera = (
+            Grupo_Carrera.objects
+            .filter(grupo=grupo)
+            .select_related('carrera')
+            .first()
+        )
+        
+        career_name = (
+            grupo_carrera.carrera.nombre
+            if grupo_carrera
+            else 'Not assigned'
+        )
+        
+        nivel = (
+            Nivel.objects
+            .filter(
+                alumnos__grupo_alumnos__grupo=grupo
+            )
+            .first()
+        )
+        
+        level_code = (
+            nivel.codigo
+            if nivel
+            else 'Not assigned'
+        )
+        
         groups.append({
             'name': grupo.nombre,
-            'career': 'Not assigned',
+            'career': career_name,
             'teacher': teacher_name,
-            'level': 'Not assigned',
+            'level': level_code,
             'students_count': grupo.grupo_alumnos.count(),
             'status': 'ACTIVE',
         })
@@ -2208,7 +2309,7 @@ def teacher_competition_results(request, pk):
 
         total_words = (results[0]["correct"] + results[0]["incorrect"]) if results else 0
 
-        return render(requests, "teacher/competition_results.html", {
+        return render(request, "teacher/competition_results.html", {
             "competition": competition,
             "results": results,
             "total_words": total_words,
