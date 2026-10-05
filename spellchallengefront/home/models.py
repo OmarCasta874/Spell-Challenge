@@ -991,7 +991,7 @@ class Competencia_Alumno(models.Model):
     palabras_correctas = models.IntegerField(
         null=True,
         blank=True,
-        db_column='puntos_obtenidos'
+        db_column='palabras_correctas'
     )
     
     palabras_incorrectas = models.IntegerField(
