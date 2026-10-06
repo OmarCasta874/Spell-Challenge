@@ -1000,6 +1000,8 @@ class Competencia_Alumno(models.Model):
         db_column='palabras_incorrectas'
     )
     
+    pk = models.CompositePrimaryKey('competencia', 'alumno')
+    
     class Meta:
         managed = False
         db_table = 'competencia_alumno'

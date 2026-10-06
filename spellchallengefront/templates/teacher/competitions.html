@@ -56,6 +56,7 @@
       <div class="competition-card">
         <div class="d-flex justify-content-between align-items-start">
           <h5>{{ competition.nombre }}</h5>
+          <small>CODE: {{ competition.codigo }}</small>
           {% if competition.fecha < today %}
             <span class="badge-status badge-finished">Finished</span>
           {% else %}
@@ -81,7 +82,7 @@
             View Details
           </button>
           {% if competition.fecha < today %}
-            <a href="{% url 'teacher_competition_results' %}" class="btn-comp-solid">View Results</a>
+            <a href="{% url 'teacher_competition_results' competition.codigo %}" class="btn-comp-solid">View Results</a>
           {% else %}
             <a href="#" class="btn-comp-solid">Enter Competition</a>
           {% endif %}
