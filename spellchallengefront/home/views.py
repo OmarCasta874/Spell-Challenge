@@ -2280,37 +2280,82 @@ def teacher_competition_results(request, pk):
         Competencia,
         pk=pk,                       
     )
-
-    if competition.fecha >= timezone.localdate():
-        messages.info(request, "Results will be available when the competition finishes.")
-        return redirect("teacher_competitions")
- 
-    participaciones = (
-        Participacion.objects
-        .filter(competencia=competition)
-        .select_related("estudiante", "estudiante__grupo")  
-        .order_by("-aciertos", "estudiante__apellidos")      
+    
+    now = timezone.localtime()
+    
+    competition_datetime = timezone.make_aware(
+        datetime.combine(
+            competition.fecha,
+            competition.hora
+        )
     )
-
+    
+    if competition_datetime >= now:
+        messages.info(
+            request,
+            "Results will be available when the competition finishes."
+        )
+        return redirect("teacher_competitions")
+    
+    participaciones = (
+        Competencia_Alumno.objects
+        .filter(competencia=competition)
+        .select_related(
+            'alumno',
+            'alumno__usuario',
+        )
+        .order_by(
+            '-palabras_correctas',
+            'alumno__apellidoPaterno'
+        )
+    )
+    
     results = []
-    for p in participantes:
-        est = p.estudiante
+    
+    for participacion in participaciones:
+        alumno = participacion.alumno
+        
+        grupo_alumno = (
+            Grupo_Alumno.objects
+            .filter(alumno=alumno)
+            .select_related('grupo')
+            .first()
+        )
+        
+        group_name = (
+            grupo_alumno.grupo.nombre
+            if grupo_alumno
+            else '-'
+        )
+        
         results.append({
-            "enrollment": est.matricula,
-            "first_name": est.mombres,
-            "last_name": est.apellidos,
-            "email": est.correo,
-            "group": grupo.nombre if est.grupo else "—",
-            "correct": p.aciertos,
-            "incorrect": p.errores,
-            "best_word": p.mejor_palabra,
-            "avatar": est.foto.url if getattr(est, "foto", None) else "",
+            'enrollment': alumno.matricula,
+            'first_name': alumno.nombre_pila,
+            'last_name': (
+                f"{alumno.apellidoPaterno} "
+                f"{alumno.apellidoMaterno or ''}"
+            ).strip(),
+            'email': alumno.usuario.correo,
+            'group': group_name,
+            'correct': participacion.palabras_correctas or 0,
+            'incorrect': participacion.palabras_incorrectas or 0,
+            'points': participacion.puntos_obtenidos or 0,
         })
+        
+    total_words = 0
+    
+    if results:
+        total_words = (
+            results[0]['correct'] +
+            results[0]['incorrect']
+        )
 
-        total_words = (results[0]["correct"] + results[0]["incorrect"]) if results else 0
-
-        return render(request, "teacher/competition_results.html", {
-            "competition": competition,
-            "results": results,
-            "total_words": total_words,
-        })
+    return render(
+        request, 
+        "teacher/competitions_results.html",
+        {
+            'competition': competition,
+            'results': results,
+            'total_words': total_words,
+        }
+    )

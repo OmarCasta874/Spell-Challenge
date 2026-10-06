@@ -41,27 +41,29 @@
         <th>Student's name</th>
         <th>Email Account</th>
         <th class="col-center">Group</th>
-        <th class="col-center">Successes</th>
+        <th class="col-center">Result</th>
+        <th class="col-center">Points</th>
         <th class="col-center">Actions</th>
       </tr>
     </thead>
     <tbody id="resBody">
       {% for r in results %}
         <tr data-name="{{ r.first_name|lower }} {{ r.last_name|lower }}"
-            data-email="{{ r.email|lower }}"
-            data-group="{{ r.group|lower }}"
-            data-score="{{ r.correct }}">
+          data-email="{{ r.email|lower }}"
+          data-group="{{ r.group|lower }}"
+          data-score="{{ r.correct }}">
           <td>{{ r.first_name }} {{ r.last_name }}</td>
           <td>{{ r.email }}</td>
           <td class="col-center">{{ r.group }}</td>
           <td class="col-center">{{ r.correct }}/{{ total_words }}</td>
+          <td class="col-center">{{ r.points }}</td>
           <td class="col-center">
-            <button type="button" class="res-btn-view" data-bs-toggle="modal" data-bs-target="#viewStudentModal{{ forloop.counter }}">VIEW</button>
+              <button type="button" class="res-btn-view" data-bs-toggle="modal" data-bs-target="#viewStudentModal{{ forloop.counter }}">VIEW</button>
           </td>
-        </tr>
+      </tr>
       {% endfor %}
       <tr id="resEmpty" class="res-empty-row"{% if results %} hidden{% endif %}>
-        <td colspan="5" class="res-empty">
+        <td colspan="6" class="res-empty">
           {% if results %}No students match your search.{% else %}No student has completed this competition yet.{% endif %}
         </td>
       </tr>
@@ -80,21 +82,23 @@
 
       <div class="modal-body res-modal-body">
         <div class="res-profile">
-          <div class="res-avatar">
-            {# TODO: cambia la ruta del avatar por defecto por la tuya #}
-            <img src="{% if r.avatar %}{{ r.avatar }}{% else %}{% static 'img/student_avatar.png' %}{% endif %}" alt="Avatar of {{ r.first_name }}">
-          </div>
           <div class="res-profile-info">
             <div class="res-enrollment">{{ r.enrollment }}</div>
-            <p class="res-fullname">{{ r.first_name }}<br>{{ r.last_name }}</p>
+            <p class="res-fullname">
+              {{ r.first_name }}<br>
+              {{ r.last_name }}
+            </p>
             <div class="res-email">{{ r.email }}</div>
+            <div class="res-email">Group: {{ r.group }}</div>
           </div>
         </div>
-
         <div class="res-stats">
           <div class="res-stat res-stat-result">
-            <div class="res-stat-label">Your Result:</div>
-            <div class="res-stat-value">{{ r.correct }} / {{ total_words }}<br>Correct Words</div>
+            <div class="res-stat-label">Result:</div>
+            <div class="res-stat-value">
+              {{ r.correct }} / {{ total_words }}<br>
+              Correct Words
+            </div>
           </div>
           <div class="res-stat">
             <div class="res-stat-label">&#10003; Correct:</div>
@@ -105,12 +109,11 @@
             <div class="res-stat-value">{{ r.incorrect }}</div>
           </div>
           <div class="res-stat">
-            <div class="res-stat-label">Best Word:</div>
-            <div class="res-stat-value is-text">{{ r.best_word|default:"—" }}</div>
+            <div class="res-stat-label">Points:</div>
+            <div class="res-stat-value">{{ r.points }}</div>
           </div>
         </div>
       </div>
-
       <div class="modal-footer res-modal-footer">
         <button type="button" class="res-btn-accept" data-bs-dismiss="modal">ACCEPT</button>
       </div>

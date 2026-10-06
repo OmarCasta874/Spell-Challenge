@@ -42,5 +42,5 @@ urlpatterns = [
     path('student/practice_spelling/', views.practice_spelling, name='practice_spelling'),
     path('student/match_words/', views.student_match_words, name='match_words'),
     path('student/practice_speaking/', views.practice_speaking, name='practice_speaking'),
-    path("teacher/competitions_results/", views.teacher_competition_results, name="teacher_competition_results"),
+    path("teacher/competitions_results/<str:pk>/", views.teacher_competition_results, name="teacher_competition_results"),
 ]
