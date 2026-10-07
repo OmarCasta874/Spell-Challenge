@@ -53,6 +53,63 @@
     </div>
   </div>
 
+  <div class="modal fade" id="editGroupModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="editGroupModalLabel{{ forloop.counter }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content create-group-modal">
+        <div class="modal-header create-group-header">
+          <h5 class="modal-title" id="editGroupModalLabel{{ forloop.counter }}">Edit Group</h5>
+          <button type="button" class="btn-close create-group-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body create-group-body">
+          <form method="POST" action="{% url 'edit_group' grupo.codigo %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label create-group-label">Group Name:</label>
+              <input type="text" name="nombre" class="form-control create-group-input" value="{{ grupo.nombre }}" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label create-group-label">English Level / Cycle:</label>
+              <select name="nivel" class="form-select create-group-input" required>
+                <option value="A1" {% if grupo.ciclo == 'A1' %}selected{% endif %}>A1 - Beginner</option>
+                <option value="A2" {% if grupo.ciclo == 'A2' %}selected{% endif %}>A2 - Elementary</option>
+                <option value="B1" {% if grupo.ciclo == 'B1' %}selected{% endif %}>B1 - Intermediate</option>
+                <option value="B2" {% if grupo.ciclo == 'B2' %}selected{% endif %}>B2 - Upper Intermediate</option>
+                <option value="C1" {% if grupo.ciclo == 'C1' %}selected{% endif %}>C1 - Advanced</option>
+                <option value="C2" {% if grupo.ciclo == 'C2' %}selected{% endif %}>C2 - Proficient</option>
+              </select>
+            </div>
+            <div class="text-end d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn-create-group-submit">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="deleteGroupModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="deleteGroupModalLabel{{ forloop.counter }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content create-group-modal">
+        <div class="modal-header create-group-header">
+          <h5 class="modal-title" id="deleteGroupModalLabel{{ forloop.counter }}">Delete Group</h5>
+          <button type="button" class="btn-close create-group-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body create-group-body text-center py-4">
+          <p class="fs-5 text-dark mb-2">Are you sure you want to delete <strong>"{{ grupo.nombre }}"</strong>?</p>
+          <p class="text-muted small mb-0">This action cannot be undone and will remove all student assignments to this group.</p>
+        </div>
+        <div class="modal-footer justify-content-center border-0 pb-4">
+          <form method="POST" action="{% url 'delete_group' grupo.codigo %}">
+            {% csrf_token %}
+            <button type="button" class="btn btn-secondary rounded-pill px-4 me-2" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger rounded-pill px-4">Yes, Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   {% empty %}
 
   <div class="empty-groups">

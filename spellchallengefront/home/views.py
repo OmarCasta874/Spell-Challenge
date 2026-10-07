@@ -2091,7 +2091,7 @@ def mini_games_view(request):
         imagen__isnull=False
     ).exclude(
         imagen=''
-    ).order_by('codigo')
+    )
     
     memory_vocabulary = []
     
@@ -2101,9 +2101,22 @@ def mini_games_view(request):
             'image': palabra.imagen.url,
         })
         
+    memory_difficulties = list(
+        Dificultad_Juego.objects.filter(
+            juego='J04'
+        ).select_related(
+            'dificultad'
+        ).values(
+            'dificultad__clave',
+            'dificultad__nombre',
+            'dificultad__descripcion'
+        )
+    )
+        
     context = {
         'vocabulary': vocabulary,
         'memory_vocabulary': memory_vocabulary,
+        'memory_difficulties': memory_difficulties,
     }
     
     return render(
@@ -2375,13 +2388,69 @@ def teacher_start_competition(request, codigo):
 @never_cache
 @role_required('teacher')
 def teacher_edit_competition(request, codigo):
-    competition = get_object_or_404(Competencia, codigo=codigo)
+    competition = get_object_or_404(
+        Competencia, 
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
     if request.method == 'POST':
         competition.nombre = request.POST.get('nombre')
-        if hasattr(competition, 'descripcion'):
-            competition.descripcion = request.POST.get('descripcion')
         competition.fecha = request.POST.get('fecha')
         competition.hora = request.POST.get('hora')
         competition.save()
         messages.success(request, "Competition updated successfully.")
     return redirect('teacher_competitions')
+
+@never_cache
+@role_required('teacher')
+def edit_group(request, group_id):
+    profesor = request.user.profesor
+    grupo = get_object_or_404(Grupo, codigo=group_id, profesor=profesor)
+
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre', '').strip()
+        nivel = request.POST.get('nivel', '').strip()
+
+        if nombre:
+            grupo.nombre = nombre
+            if nivel:
+                grupo.ciclo = nivel
+            grupo.save()
+
+            now = timezone.localtime()
+            numbre_bitacora = Bitacora_Profesor.objects.count() + 1
+            Bitacora_Profesor.objects.create(
+                codigo=f'BITP{numbre_bitacora:02d}',
+                fecha_generacion=now.date(),
+                hora_generacion=now.time(),
+                accion=f'Updated group details: {nombre}.',
+                profesor=profesor
+            )
+
+            messages.success(request, f'Group "{nombre}" updated successfully.')
+    return redirect('teacher_groups')
+
+@never_cache
+@role_required('teacher')
+def delete_group(request, group_id):
+    profesor = request.user.profesor
+    grupo = get_object_or_404(Grupo, codigo=group_id, profesor=profesor)
+
+    if request.method == 'POST':
+        nombre_grupo = grupo.nombre
+
+        grupo.delete()
+
+        now = timezone.localtime()
+        number_bitacora = Bitacora_Profesor.objects.count() + 1
+        Bitacora_Profesor.objects.create(
+            codigo=f'BITP{number_bitacora:02d}',
+            fecha_generacion=now.date(),
+            hora_generacion=now.time(),
+            accion=f'Delete group: {nombre_grupo}',
+            profesor=profesor
+        )
+
+        messages.success(request, f'Group "{nombre_grupo}" was deletedsuccessfully.')
+
+    return redirect('teacher_groups')
