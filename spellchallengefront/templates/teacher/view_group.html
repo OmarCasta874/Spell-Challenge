@@ -78,8 +78,8 @@
         {% for word in word_list %}
         <tr>
           <td>{{ forloop.counter }}</td>
-          <td>{{ word.word }}</td>
           <td>{{ word.significado }}</td>
+          <td>{{ word.definicion|default:word.significado }}</td>
           <td>{{ word.pronunciacion }}</td>
           <td class="wordlist-actions">
             <button
@@ -87,15 +87,16 @@
               class="wordlist-btn"
               onclick="openWordModal(
                   '{{ word.word|escapejs }}',
-                  '{{ word.significado|escapejs }}',
-                  '{{ word.pronunciacion|escapejs }}'
+                  '{{ word.definicion|default:word.significado|escapejs }}',
+                  '{{ word.pronunciacion|escapejs }}',
+                  '{% if word.imagen %}{{ word.imagen.url }}{% endif %}'
               )">
               VIEW
             </button>
             <button
               type="button"
               class="wordlist-btn"
-              onclick="playAudio('{{ word.word|escapejs }}')">
+              onclick="playAudio('{{ word.significado|escapejs }}')">
               LISTEN
             </button>
           </td>
@@ -136,6 +137,9 @@
       <button class="modal-close" onclick="closeModal('wordModal')">&times;</button>
     </div>
     <div class="modal-body text-center">
+      <div id="wImgContainer" class="mb-3" style="display: none;">
+        <img id="wImage" src="" alt="Word Image" style="max-width: 140px; height: auto; border-radius: 8px; object-fit: contain;">
+      </div>
       <h2 id="wWord" style="color: #7a1f2b; font-size: 2rem;"></h2>
       <p id="wPhonetic" style="font-style: italic; color: #8a8a8a;"></p>
       <p class="mt-1"><strong>Meaning:</strong> <span id="wMeaning"></span></p>
@@ -172,6 +176,19 @@
         document.getElementById('wWord').innerText = word;
         document.getElementById('wMeaning').innerText = meaning;
         document.getElementById('wPhonetic').innerText = phonetic;
+        openModal('wordModal');
+
+        const imgContainer = document.getElementById('wImgContainer');
+        const imgElement = document.getElementById('wImage');
+
+        if (imageUrl && imageUrl.trim() !== '') {
+            imgElement.src = imageUrl;
+            imgContainer.style.display = 'block';
+        } else {
+            imgElement.src = '';
+            imgContainer.style.display = 'none';
+        }
+
         openModal('wordModal');
     }
 

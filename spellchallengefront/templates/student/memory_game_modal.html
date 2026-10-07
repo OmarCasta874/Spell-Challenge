@@ -1,13 +1,20 @@
 {% load static %}
 <div class="mg-overlay" id="memoryGameModal" role="dialog" aria-modal="true" aria-labelledby="mgTitle">
   <div class="mg-content">
-
     <button type="button" class="mg-back" id="mgBackBtn">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       <span>Mini Games</span>
     </button>
 
     <h2 class="mg-title" id="mgTitle">MEMORY GAME</h2>
+    <div class="mg-difficulty" id="mgDifficulty">
+        <h3>CHOOSE YOUR DIFFICULTY</h3>
+        <div class="mg-difficulty-options" id="mgDifficultyOptions"></div>
+    </div>
+
+    <div class="mg-timer" id="mgTimer">
+      Time: <span id="mgTimerValue">120</span>
+    </div>
 
     <!-- Tablero (las 12 cartas se generan en JS) -->
     <div class="mg-board" id="mgBoard"></div>
@@ -65,8 +72,74 @@
   var board    = document.getElementById('mgBoard');
   var resultEl = document.getElementById('mgResult');
 
+  var timerEl = document.getElementById('mgTimer');
+  var timerValueEl = document.getElementById('mgTimerValue');
+
   var state = null;
   var preloaded = false;
+
+  var MG_DIFFICULTIES = {};
+
+  var MG_GAME_RULES = {
+    DI01: {
+      pairs: 6,
+      time: null
+    },
+    DI02: {
+      pairs: 8,
+      time: null
+    },
+    DI03: {
+      pairs: 10,
+      time: 120
+    }
+  };
+
+  function loadMemoryDifficulties() {
+    var difficultiesElement = document.getElementById('memoryGameDifficulties');
+
+    if (!difficultiesElement) {
+      MG_DIFFICULTIES = {};
+      return;
+    }
+
+    var difficultiesData = JSON.parse(
+      difficultiesElement.textContent
+    );
+
+    MG_DIFFICULTIES = {};
+
+    difficultiesData.forEach(function (item) {
+      MG_DIFFICULTIES[item.dificultad__clave] = {
+        name: item.dificultad__nombre,
+        description: item.dificultad__descripcion
+      };
+    });
+  }
+
+  function renderDifficultyOptions() {
+      var container = document.getElementById('mgDifficultyOptions');
+
+      container.innerHTML = '';
+
+      Object.keys(MG_DIFFICULTIES).forEach(function (key) {
+          var difficulty = MG_DIFFICULTIES[key];
+
+          var button = document.createElement('button');
+
+          button.type = 'button';
+          button.className = 'mg-difficulty-btn';
+          button.dataset.difficulty = key;
+
+          button.innerText = difficulty.name;
+
+          button.addEventListener('click', function () {
+              startGame(key);
+          });
+
+          container.appendChild(button);
+      });
+  }
 
   function shuffle(arr) {
     var a = arr.slice();
@@ -86,80 +159,180 @@
     });
   }
 
-  function buildDeck() {
-    var availableImages = shuffle(MG_IMAGES).slice(0, 6);
+  function buildDeck(pairCount) {
+    var availableImages = shuffle(MG_IMAGES).slice(0, pairCount);
 
     var deck = [];
 
-    availableImages.forEach(function (im) {
-      deck.push(im);
-      deck.push(im);
+    availableImages.forEach(function (item) {
+      
+      deck.push({
+        pairId: item.id,
+        type: 'image',
+        word: item.alt,
+        src: item.src,
+        alt: item.alt
+      });
+
+      deck.push({
+        pairId: item.id,
+        type: 'word',
+        word: item.alt,
+        src: '',
+        alt: item.alt
+      });
     });
 
     return shuffle(deck);
   }
 
-  function makeFace(className, src, alt) {
-    var face = document.createElement('span');
-    face.className = 'mg-face ' + className;
-    var img = document.createElement('img');
-    img.src = src;
-    img.alt = alt;
-    img.draggable = false;
-    face.appendChild(img);
-    return face;
+  function makeFace(className, card) {
+      var face = document.createElement('span');
+      face.className = 'mg-face ' + className;
+
+      if (card.type === 'image') {
+          var img = document.createElement('img');
+
+          img.src = card.src;
+          img.alt = 'Image of ' + card.word;
+          img.draggable = false;
+
+          face.appendChild(img);
+
+      } else if (card.type === 'word') {
+          var word = document.createElement('span');
+
+          word.className = 'mg-word';
+          word.innerText = card.word;
+
+          face.appendChild(word);
+
+      } else if (card.type === 'logo') {
+          var logo = document.createElement('img');
+
+          logo.src = card.src;
+          logo.alt = '';
+          logo.draggable = false;
+
+          face.appendChild(logo);
+      }
+
+      return face;
   }
 
   function renderBoard(deck) {
-    board.innerHTML = '';
-    deck.forEach(function (c, idx) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'mg-card';
-      btn.dataset.index = idx;
-      btn.setAttribute('aria-label', 'Card ' + (idx + 1));
+      board.innerHTML = '';
 
-      var inner = document.createElement('span');
-      inner.className = 'mg-card-inner';
-      inner.appendChild(makeFace('mg-face-front', MG_LOGO, ''));
-      inner.appendChild(makeFace('mg-face-back', c.src, c.alt));
+      deck.forEach(function (c, idx) {
+          var btn = document.createElement('button');
 
-      btn.appendChild(inner);
-      board.appendChild(btn);
-    });
+          btn.type = 'button';
+          btn.className = 'mg-card';
+          btn.dataset.index = idx;
+          btn.setAttribute(
+              'aria-label',
+              'Card ' + (idx + 1)
+          );
+
+          var inner = document.createElement('span');
+          inner.className = 'mg-card-inner';
+
+          inner.appendChild(
+              makeFace('mg-face-front', {
+                  type: 'logo',
+                  src: MG_LOGO,
+                  word: ''
+              })
+          );
+
+          inner.appendChild(
+              makeFace('mg-face-back', c)
+          );
+
+          btn.appendChild(inner);
+          board.appendChild(btn);
+      });
   }
 
-  function startGame() {
-    loadMemoryImages();
-
-    if (MG_IMAGES.length < 2) {
-      alert('There are not enough images available to start the Memory Game.');
+  function startTimer() {
+    if (!state || state.timeLeft === null) {
       return;
     }
 
-    var selectedImages = shuffle(MG_IMAGES).slice(0, 6);
+    timerEl.style.display = 'block';
+    timerValueEl.innerText = state.timeLeft;
 
-    var deck = [];
+    state.timer = setInterval(function () {
+      state.timeLeft--;
 
-    selectedImages.forEach(function (im) {
-      deck.push(im);
-      deck.push(im);
-    });
+      timerValueEl.innerText = state.timeLeft;
 
-    deck = shuffle(deck);
+      if (state.timeLeft <= 0) {
+        clearInterval(state.timer);
+        state.timer = null;
+        timeOutGame();
+      }
+    }, 1000);
+  }
 
-    state = {
-      deck: deck,
-      first: null,
-      lock: false,
-      matched: 0,
-      pairs: selectedImages.length
-    };
+  function timeOutGame() {
+    if (!state) {
+      return;
+    }
 
-    renderBoard(state.deck);
+    state.lock = true;
 
-    resultEl.classList.remove('active');
-    board.style.display = '';
+    setTimeout(function () {
+      board.style.display = 'none';
+      resultEl.classList.add('active');
+
+      document.querySelector('.mg-result-title').innerText = 'Time is up!';
+      document.querySelector('.mg-result-text').innerText = 'You ran out of time. Try again!';
+    }, 300);
+  }
+
+  function startGame(difficultyKey) {
+      var rules = MG_GAME_RULES[difficultyKey];
+
+      if (!rules) {
+          return;
+      }
+
+      document.getElementById('mgDifficulty').style.display = 'none';
+
+      loadMemoryImages();
+
+      if (MG_IMAGES.length < rules.pairs) {
+          alert(
+              'There are not enough words with images available for this difficulty.'
+          );
+
+          document.getElementById('mgDifficulty').style.display = 'block';
+          return;
+      }
+
+      var deck = buildDeck(rules.pairs);
+
+      state = {
+          deck: deck,
+          first: null,
+          lock: false,
+          matched: 0,
+          pairs: rules.pairs,
+          difficulty: difficultyKey,
+          timeLeft: rules.time
+      };
+
+      renderBoard(state.deck);
+
+      resultEl.classList.remove('active');
+      board.style.display = '';
+
+      timerEl.style.display = 'none';
+
+      if (state.timeLeft !== null) {
+        startTimer();
+      }
   }
 
   function onCardClick(e) {
@@ -182,7 +355,7 @@
     var cardB = state.deck[b.dataset.index];
     state.first = null;
 
-    if (cardA.id === cardB.id) {
+    if (cardA.pairId === cardB.pairId && cardA.type !== cardB.type) {
       // Par: verde + animación, ya no se pueden seleccionar
       [a, b].forEach(function (c) {
         c.classList.remove('flipped');
@@ -214,8 +387,16 @@
   /* ---------- Abrir / cerrar ---------- */
   function openMemoryGame() {
     loadMemoryImages();
+    loadMemoryDifficulties();
     preload();
-    startGame();
+
+    board.style.display = 'none';
+    resultEl.classList.remove('active');
+
+    renderDifficultyOptions();
+
+    document.getElementById('mgDifficulty').style.display = 'block';
+
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
@@ -232,7 +413,9 @@
   board.addEventListener('click', onCardClick);
   document.getElementById('mgBackBtn').addEventListener('click', closeMemoryGame);
   document.getElementById('mgExitBtn').addEventListener('click', closeMemoryGame);
-  document.getElementById('mgPlayAgainBtn').addEventListener('click', startGame);
+  document.getElementById('mgPlayAgainBtn').addEventListener('click', function () {
+    startGame(state.difficulty);
+  });
 
   overlay.addEventListener('click', function (e) {
     if (e.target === overlay) closeMemoryGame();

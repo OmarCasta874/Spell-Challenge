@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'css/student_base.css' %}"> 
 <link rel="stylesheet" href="{% static 'css/mini_games.css' %}">
 <link rel="stylesheet" href="{% static 'css/hangman_modal.css' %}">
@@ -89,9 +90,14 @@
 {{ block.super }}
 {{ vocabulary|json_script:"miniGamesVocabulary" }}
 {{ memory_vocabulary|json_script:"memoryGameVocabulary" }}
+{{ memory_difficulties|json_script:"memoryGameDifficulties" }}
 <script>
     const vocabulary = JSON.parse(
         document.getElementById('miniGamesVocabulary').textContent
+    );
+
+    const memoryDifficulties = JSON.parse(
+        document.getElementById('memoryGameDifficulties').textContent
     );
 
     function openModal(id) {

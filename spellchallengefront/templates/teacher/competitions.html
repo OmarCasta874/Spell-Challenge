@@ -115,9 +115,8 @@
                 <div class="competition-modal-value">{{ competition.nombre }}</div>
               </div>
               <div>
-                <div class="competition-modal-label">Description:</div>
-                {# Se muestra solo si tu modelo tiene el campo "descripcion"; si no existe, queda vacío. #}
-                <div class="competition-modal-value">{{ competition.descripcion|default:"—" }}</div>
+                <div class="competition-modal-label">Competition Code:</div>
+                <div class="competition-modal-value">{{ competition.codigo }}</div>
               </div>
             </div>
             <div class="competition-modal-row">
@@ -168,10 +167,6 @@
               <div class="mb-3">
                 <label class="form-label">Competition Name:</label>
                 <input type="text" class="form-control" name="nombre" value="{{ competition.nombre }}" required>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Description:</label>
-                <textarea class="form-control" name="descripcion" rows="2">{{ competition.descripcion }}</textarea>
               </div>
               <div class="row g-3 mb-3">
                 <div class="col-6">
