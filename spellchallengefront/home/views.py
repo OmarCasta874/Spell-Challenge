@@ -666,18 +666,18 @@ def teacher_competitions(request):
     current_time = now.time()
     
     total_competitions = competitions.count()
-    finished_competitions = competitions.filter(
-        fecha__lt=today
-    ).count()
-    upcoming_competitions = competitions.filter(
-        fecha__gt=today
-    ).count()
-    upcoming_competitions += competitions.filter(
-        fecha=today,
-        hora__gt=current_time
+    
+    active_competitions = competitions.filter(
+        estado='Active'
     ).count()
     
-    active_competitions = 0
+    finished_competitions = competitions.filter(
+        estado='Finished'
+    ).count()
+    
+    upcoming_competitions = competitions.filter(
+        estado='Upcoming'
+    ).count()
     
     context = {
         'competitions': competitions,
@@ -699,7 +699,25 @@ def teacher_competitions(request):
 @never_cache
 @role_required('student')
 def student_competitions(request):
-    return render(request, 'student/competitions.html')
+    alumno = request.user.alumno
+    
+    participaciones = (
+        Competencia_Alumno.objects
+        .filter(alumno=alumno)
+        .select_related('competencia')
+        .order_by(
+            '-competencia__fecha',
+            '-competencia__hora'
+        )
+    )
+    
+    return render(
+        request, 
+        'student/competitions.html',
+        {
+            'participaciones': participaciones,
+        }
+    )
 
 @never_cache
 @role_required('student')
@@ -2376,11 +2394,14 @@ def teacher_competition_results(request, pk):
 @never_cache
 @role_required('teacher')
 def teacher_start_competition(request, codigo):
-    competition = get_object_or_404(Competencia, codigo=codigo)
+    competition = get_object_or_404(
+        Competencia, 
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
     
-    if hasattr(competition, 'estado'):
-        competition.estado = 'Active' 
-        competition.save()
+    competition.estado = 'Active'
+    competition.save()
     
     messages.success(request, f"Competition {competition.nombre} is now Active!")
     return redirect('teacher_competitions')

@@ -59,11 +59,11 @@
           <small>CODE: {{ competition.codigo }}</small>
           
           {% if competition.estado == 'Active' %}
-            <span class="badge-status badge-active">Active</span>
-          {% elif competition.fecha < today %}
-            <span class="badge-status badge-finished">Finished</span>
+              <span class="badge-status badge-active">Active</span>
+          {% elif competition.estado == 'Finished' %}
+              <span class="badge-status badge-finished">Finished</span>
           {% else %}
-            <span class="badge-status badge-upcoming">Upcoming</span>
+              <span class="badge-status badge-upcoming">Upcoming</span>
           {% endif %}
         </div>
         {% with competition.lista_competencias.first as relation %}

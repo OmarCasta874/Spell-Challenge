@@ -952,6 +952,11 @@ class Competencia(models.Model):
     fecha = models.DateField()
     hora = models.TimeField()
     
+    estado = models.CharField(
+        max_length=10,
+        default="Upcoming"
+    )
+    
     profesor = models.ForeignKey(
         Profesor,
         on_delete=models.PROTECT,
