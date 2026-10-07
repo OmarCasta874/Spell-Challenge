@@ -17,89 +17,77 @@
     <h2 class="section-title">My Competitions</h2>
 
     <div class="competitions-grid">
-
-      <!-- 1. Finished -->
-      <article class="competition-card">
-        <header class="competition-card-header">
-          <h3 class="competition-card-title">Competition #1</h3>
-          <span class="status-badge status-badge-finished">Finished</span>
-        </header>
-
-        <div class="competition-card-body">
-          <p class="competition-card-group">Group 3-A</p>
-
-          <div class="competition-card-row competition-card-row-split">
-            <div class="competition-card-stat">
-              <span class="competition-card-label">Score:</span>
-              <span class="competition-card-value">18/20</span>
+      {% for participacion in participaciones %}
+        {% with competition=participacion.competencia %}
+          <article class="competition-card {% if competition.estado == 'Active' %}competition-card-active{% endif %}">
+            <header class="competition-card-header">
+              <h3 class="competition-card-title">{{ competition.nombre }}</h3>
+              {% if competition.estado == 'Finished' %}
+                <span class="status-badge status-badge-finished">Finished</span>
+              {% elif competition.estado == 'Active' %}
+                <span class="status-badge status-badge-active">Active</span>
+              {% else %}
+                <span class="status-badge status-badge-upcoming">Upcoming</span>
+              {% endif %}
+            </header>
+            <div class="competition-card-body">
+              <p class="competition-card-group">Competition Code: {{ competition.codigo }}</p>
+              {% if competition.estado == 'Finished' %}
+                <div class="competition-card-row competition-card-row-split">
+                  <div class="competition-card-stat">
+                    <span class="competition-card-label">Score:</span>
+                    <span class="competition-card-value">
+                      {{ participacion.palabras_correctas|default:0 }}/{{ participacion.palabras_correctas|default:0|add:participacion.palabras_incorrectas|default:0 }}
+                    </span>
+                  </div>
+                  <div class="competition-card-stat competition-card-stat-right">
+                    <span class="competition-card-label">Accuracy:</span>
+                    <span class="competition-card-value">
+                      {% if participacion.palabras_correctas or participacion.palabras_incorrectas %}
+                        {% widthratio participacion.palabras_correctas participacion.palabras_correctas|add:participacion.palabras_incorrectas 100 %}%
+                      {% else %}
+                        0%
+                      {% endif %}
+                    </span>
+                  </div>
+                </div>
+              {% elif competition.estado == 'Active' %}
+                <div class="competition-card-row">
+                  <span class="competition-card-value">Competition in progress</span>
+                </div>
+              {% else %}
+                <div class="competition-card-row">
+                  <span class="competition-card-value">Upcoming competition</span>
+                </div>
+              {% endif %}
+              <div class="competition-card-row competition-card-row-date">
+                <span class="competition-card-date">
+                  {{ competition.fecha|date:"M j, Y" }}
+                </span>
+                <span class="competition-card-date competition-card-date-right">
+                  {{ competition.hora|time:"g:i a" }}
+                </span>
+              </div>
             </div>
-            <div class="competition-card-stat competition-card-stat-right">
-              <span class="competition-card-label">Accuracy:</span>
-              <span class="competition-card-value">90%</span>
-            </div>
-          </div>
-
-          <div class="competition-card-row competition-card-row-date">
-            <span class="competition-card-date">Sep 4, 2026</span>
-            <span class="competition-card-date competition-card-date-right">10:00 am</span>
-          </div>
+            <footer class="competition-card-footer">
+              {% if competition.estado == 'Finished' %}
+                <a href="#" class="competition-card-link">View Results</a>
+              {% elif competition.estado == 'Active' %}
+                <a href="{% url 'student_competitions_select' %}"
+                  class="competition-card-link">
+                  Enter Competition
+                </a>
+              {% else %}
+                <a href="#" class="competition-card-link">View Details</a>
+              {% endif %}
+            </footer>
+          </article>
+        {% endwith %}
+      {% empty %}
+        <div class="competition-empty-state">
+          <p>You are not enrolled in any competitions yet.</p>
         </div>
-
-        <footer class="competition-card-footer">
-          <a href="#" class="competition-card-link">View Results</a>
-        </footer>
-      </article>
-
-      <!-- 2. Active -->
-      <article class="competition-card competition-card-active">
-        <header class="competition-card-header">
-          <h3 class="competition-card-title">Competition #2</h3>
-          <span class="status-badge status-badge-active">Active</span>
-        </header>
-
-        <div class="competition-card-body">
-          <p class="competition-card-group">Group 4-C</p>
-
-          <div class="competition-card-row">
-            <span class="competition-card-value">20 words</span>
-          </div>
-
-          <div class="competition-card-row competition-card-row-date">
-            <span class="competition-card-date">Sep 7, 2026</span>
-            <span class="competition-card-date competition-card-date-right">9:30 am</span>
-          </div>
-        </div>
-
-        <footer class="competition-card-footer">
-          <a href="{% url 'student_competitions_select' %}" class="competition-card-link">Enter Competition</a>
-        </footer>
-      </article>
-
-      <!-- 3. Upcoming -->
-      <article class="competition-card">
-        <header class="competition-card-header">
-          <h3 class="competition-card-title">Competition #3</h3>
-          <span class="status-badge status-badge-upcoming">Upcoming</span>
-        </header>
-
-        <div class="competition-card-body">
-          <p class="competition-card-group">Group 4-C</p>
-
-          <div class="competition-card-row">
-            <span class="competition-card-value">Starts in 4 days</span>
-          </div>
-
-          <div class="competition-card-row competition-card-row-date">
-            <span class="competition-card-date">Sep 11, 2026</span>
-            <span class="competition-card-date competition-card-date-right">10:50 am</span>
-          </div>
-        </div>
-
-        <footer class="competition-card-footer">
-          <a href="#" class="competition-card-link">View Details</a>
-        </footer>
-      </article>
-
+      {% endfor %}
     </div>
   </section>
 </div>
