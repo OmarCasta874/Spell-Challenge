@@ -2359,3 +2359,29 @@ def teacher_competition_results(request, pk):
             'total_words': total_words,
         }
     )
+
+@never_cache
+@role_required('teacher')
+def teacher_start_competition(request, codigo):
+    competition = get_object_or_404(Competencia, codigo=codigo)
+    
+    if hasattr(competition, 'estado'):
+        competition.estado = 'Active' 
+        competition.save()
+    
+    messages.success(request, f"Competition {competition.nombre} is now Active!")
+    return redirect('teacher_competitions')
+
+@never_cache
+@role_required('teacher')
+def teacher_edit_competition(request, codigo):
+    competition = get_object_or_404(Competencia, codigo=codigo)
+    if request.method == 'POST':
+        competition.nombre = request.POST.get('nombre')
+        if hasattr(competition, 'descripcion'):
+            competition.descripcion = request.POST.get('descripcion')
+        competition.fecha = request.POST.get('fecha')
+        competition.hora = request.POST.get('hora')
+        competition.save()
+        messages.success(request, "Competition updated successfully.")
+    return redirect('teacher_competitions')
