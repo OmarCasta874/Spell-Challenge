@@ -701,13 +701,16 @@ def teacher_competitions(request):
 def student_competitions(request):
     alumno = request.user.alumno
     
-    participaciones = (
-        Competencia_Alumno.objects
-        .filter(alumno=alumno)
-        .select_related('competencia')
+    competencias = (
+        Competencia.objects
+        .filter(
+            profesor__grupos__grupo_alumnos__alumno=alumno
+        )
+        .select_related('profesor')
+        .distinct()
         .order_by(
-            '-competencia__fecha',
-            '-competencia__hora'
+            'fecha',
+            'hora'
         )
     )
     
@@ -715,7 +718,7 @@ def student_competitions(request):
         request, 
         'student/competitions.html',
         {
-            'participaciones': participaciones,
+            'competencias': competencias,
         }
     )
 
@@ -2168,20 +2171,38 @@ def mini_games_view(request):
     
 @never_cache
 @role_required('student')
-def student_competitions_view(request):
+def student_competitions_view(request, competition_code):
+    
+    competencia = get_object_or_404(
+        Competencia,
+        codigo=competition_code
+    )
+    
+    alumno = get_object_or_404(
+        Alumno,
+        usuario=request.user
+    )
+    
+    participacion, created = Competencia_Alumno.objects.get_or_create(
+        competencia=competencia,
+        alumno=alumno,
+        defaults={
+            'puntos_obtenidos': 0,
+            'palabras_correctas': 0,
+            'palabras_incorrectas': 0,
+        }
+    )
+    
     beehives = list(range(1, 31))
     
-    palabras = Palabra.objects.filter(
-        categoria__codigo__in=[
-            'CAT11',
-            'CAT12',
-            'CAT13',
-            'CAT14',
-            'CAT15',
-            'CAT16',
-            'CAT17',
-        ]
-    ).select_related('categoria', 'nivel').order_by('codigo')
+    palabras = (
+        Palabra.objects.filter(
+            categoria__codigo__in=[
+                'CAT11', 'CAT12', 'CAT13', 'CAT14', 'CAT15', 'CAT16', 'CAT17',
+            ]
+        ).select_related('categoria', 'nivel')
+        .order_by('codigo')
+    )
     
     words_by_category = {
         'CAT11': [],
@@ -2497,29 +2518,38 @@ def student_competition_results(request, codigo):
     alumno = request.user.alumno
     competition = get_object_or_404(Competencia, codigo=codigo)
 
-    intentos = Intento_Palabra.objects.filter(
-        alumno=alumno,
-        competencia=competition
-    ).select_related('palabra')
-
-    total_palabras = intentos.count()
-    palabras_correctas = intentos.filter(es_correcto=True).count()
-
     participacion = Competencia_Alumno.objects.filter(
         alumno=alumno,
         competencia=competition
     ).first()
-
-    total_puntos = participacion.puntos.obtenidos if (participacion and participacion.puntos_obtenidos) else 0
-    posicion = participacion.posicion if (participacion and participacion.posicion) else None
-
+    
+    total_puntos = (
+        participacion.puntos_obtenidos
+        if participacion and participacion.puntos_obtenidos is not None
+        else 0
+    )
+    
+    palabras_correctas = (
+        participacion.palabras_correctas
+        if participacion and participacion.palabras_correctas is not None
+        else 0
+    )
+    
+    palabras_incorrectas = (
+        participacion.palabras_incorrectas
+        if participacion and participacion.palabras_incorrectas is not None
+        else 0
+    )
+    
+    total_palabras = palabras_correctas + palabras_incorrectas
+    
     context = {
         'competition': competition,
-        'intentos': intentos,
         'total_palabras': total_palabras,
         'palabras_correctas': palabras_correctas,
+        'palabras_incorrectas': palabras_incorrectas,
         'total_puntos': total_puntos,
-        'posicion': posicion
+        'posicion': None,
     }
-
+    
     return render(request, 'student/student_competition_results.html', context)
