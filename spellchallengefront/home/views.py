@@ -2046,8 +2046,8 @@ def group_view(request, group_id):
         palabra = item.palabra
         
         words.append({
-            'word': palabra.codigo,
-            'meaning': palabra.significado,
+            'word': palabra.significado,
+            'meaning': palabra.definicion,
             'pronunciation': palabra.pronunciacion,
             'audio': palabra.audio,
         })
@@ -2067,9 +2067,32 @@ def group_view(request, group_id):
 @never_cache
 @role_required('student')
 def leave_group(request, group_id):
+    alumno = request.user.alumno
+    
+    grupo = get_object_or_404(
+        Grupo,
+        codigo=group_id
+    )
+    
     if request.method == 'POST':
-        messages.success(request, 'You have left the group successfully.')
-        return redirect('mygroups_student')
+        membership = Grupo_Alumno.objects.filter(
+            grupo=grupo,
+            alumno=alumno
+        ).first()
+        
+        if membership:
+            membership.delete()
+            messages.success(
+                request,
+                f'You have left "{grupo.nombre}" successfully.'
+            )
+        else:
+            messages.error(
+                request,
+                'You are not a member of this group.'
+            )
+            
+        return redirect('student_groups')
     
 @never_cache
 @role_required('student')
@@ -2237,65 +2260,49 @@ def practice_spelling(request):
 @never_cache
 @role_required('student')
 def student_match_words(request):
-    alumno = request.user.alumno
-    
-    grupo_alumno = (
-        Grupo_Alumno.objects
-        .filter(alumno=alumno)
-        .select_related('grupo')
-        .first()
-    )
-    
-    if not grupo_alumno:
-        return render(
-            request,
-            'student/match_words.html',
-            {
-                'words': [],
-                'message': 'No group assigned.'
-            }
+
+    categories = list(
+        Categoria.objects
+        .filter(
+            codigo__in=[
+                'CAT01',
+                'CAT02',
+                'CAT03',
+                'CAT04',
+                'CAT05',
+                'CAT06',
+                'CAT07',
+                'CAT08',
+                'CAT09',
+                'CAT10',
+            ]
         )
-    
-    grupo = grupo_alumno.grupo
-    
-    lista_grupo = (
-        Lista_Grupo.objects
-        .filter(grupo=grupo)
-        .select_related('lista')
-        .first()
     )
     
-    if not lista_grupo:
-        return render(
-            request,
-            'student/match_words.html',
-            {
-                'words': [],
-                'message': 'No word list assigned.'
-            }
+    random.shuffle(categories)
+    selected_categories = categories[:5]
+    
+    words = []
+    
+    for category in selected_categories:
+        category_words = list(
+            Palabra.objects
+            .filter(categoria=category)
         )
         
-    lista = lista_grupo.lista
-    
-    words = (
-        Palabra.objects
-        .filter(lista_palabras__lista=lista)
-        .select_related('categoria')
-    )
-    
-    categories = (
-        Categoria.objects
-        .filter(palabras__lista_palabras__lista=lista)
-        .distinct()
-    )
+        if category_words:
+            words.append(
+                random.choice(category_words)
+            )
+            
+    random.shuffle(words)
     
     return render(
-        request, 
+        request,
         'student/match_words.html',
         {
             'words': words,
-            'categories': categories,
-            'lista': lista
+            'categories': selected_categories,
         }
     )
 
@@ -2436,12 +2443,14 @@ def edit_group(request, group_id):
             grupo.nombre = nombre
             if nivel:
                 grupo.ciclo = nivel
+                
             grupo.save()
 
             now = timezone.localtime()
-            numbre_bitacora = Bitacora_Profesor.objects.count() + 1
+            number_bitacora = Bitacora_Profesor.objects.count() + 1
+            
             Bitacora_Profesor.objects.create(
-                codigo=f'BITP{numbre_bitacora:02d}',
+                codigo=f'BITP{number_bitacora:02d}',
                 fecha_generacion=now.date(),
                 hora_generacion=now.time(),
                 accion=f'Updated group details: {nombre}.',
@@ -2449,6 +2458,12 @@ def edit_group(request, group_id):
             )
 
             messages.success(request, f'Group "{nombre}" updated successfully.')
+            
+        else:
+            messages.error(
+                request,
+                'Group name cannot be empty.'
+            )
     return redirect('teacher_groups')
 
 @never_cache
@@ -2472,6 +2487,39 @@ def delete_group(request, group_id):
             profesor=profesor
         )
 
-        messages.success(request, f'Group "{nombre_grupo}" was deletedsuccessfully.')
+        messages.success(request, f'Group "{nombre_grupo}" was deleted successfully.')
 
     return redirect('teacher_groups')
+
+@never_cache
+@role_required('student')
+def student_competition_results(request, codigo):
+    alumno = request.user.alumno
+    competition = get_object_or_404(Competencia, codigo=codigo)
+
+    intentos = Intento_Palabra.objects.filter(
+        alumno=alumno,
+        competencia=competition
+    ).select_related('palabra')
+
+    total_palabras = intentos.count()
+    palabras_correctas = intentos.filter(es_correcto=True).count()
+
+    participacion = Competencia_Alumno.objects.filter(
+        alumno=alumno,
+        competencia=competition
+    ).first()
+
+    total_puntos = participacion.puntos.obtenidos if (participacion and participacion.puntos_obtenidos) else 0
+    posicion = participacion.posicion if (participacion and participacion.posicion) else None
+
+    context = {
+        'competition': competition,
+        'intentos': intentos,
+        'total_palabras': total_palabras,
+        'palabras_correctas': palabras_correctas,
+        'total_puntos': total_puntos,
+        'posicion': posicion
+    }
+
+    return render(request, 'student/student_competition_results.html', context)

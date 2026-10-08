@@ -43,10 +43,10 @@
            class="group-btn group-btn-view">
           VIEW
         </a>
-        <button class="group-btn group-btn-edit">
+        <button type="button" class="group-btn group-btn-edit" data-bs-toggle="modal" data-bs-target="#editGroupModal{{ forloop.counter }}">
           EDIT
         </button>
-        <button class="group-btn group-btn-delete">
+        <button type="button" class="group-btn group-btn-delete" data-bs-toggle="modal" data-bs-target="#deleteGroupModal{{ forloop.counter }}">
           DELETE
         </button>
       </div>

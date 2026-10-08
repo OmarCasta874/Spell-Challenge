@@ -1,0 +1,109 @@
+{% extends 'student/student_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/student_competitions.css' %}">
+{% endblock %}
+
+{% block student_content %}
+<div class="competitions-container py-4">
+
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{% url 'student_competitions' %}" class="btn text-white rounded-circle d-flex align-items-center justify-content-center text-decoration-none" style="width: 40px; height: 40px; background-color: #7a1f2b; font-size: 1.2rem;">
+      &#8592;
+    </a>
+    <div>
+      <h2 class="mb-0 fw-bold" style="color: #7a1f2b;">Competition Results</h2>
+      <p class="text-muted mb-0">{{ competition.nombre }}</p>
+    </div>
+  </div>
+
+  <div class="card border-0 rounded-4 shadow-sm p-4 mb-4" style="background-color: #faf8f6; border: 2px solid #f2908a !important;">
+    
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="fw-bold mb-0" style="color: #7a1f2b;">{{ competition.nombre }}</h4>
+      <span class="status-badge status-badge-finished">Finished</span>
+    </div>
+
+    <div class="row g-4 align-items-center my-2">
+      <div class="col-12 col-md-4 text-center text-md-start">
+        <span class="text-muted small fw-bold text-uppercase">Total Score</span>
+        <div class="display-5 fw-bold" style="color: #7a1f2b;">
+          {{ total_puntos|default:0 }} <span class="fs-5 text-muted">pts</span>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4 text-center">
+        <span class="text-muted small fw-bold text-uppercase">Your Ranking</span>
+        <div class="fs-2 fw-bold" style="color: #d9585c;">
+          {% if posicion == 1 %}
+            1st Place 🏆
+          {% elif posicion == 2 %}
+            2nd Place 🥈
+          {% elif posicion == 3 %}
+            3rd Place 🥉
+          {% elif posicion %}
+            #{{ posicion }} Place
+          {% else %}
+            Participated
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4 text-center text-md-end">
+        <span class="text-muted small fw-bold text-uppercase">Accuracy</span>
+        <div class="fs-3 fw-bold text-success">
+          {{ palabras_correctas }} / {{ total_palabras }}
+        </div>
+        <small class="text-muted">correct words</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-4 shadow-sm p-4 mb-4 border">
+    <h5 class="fw-bold mb-3" style="color: #7a1f2b;">Performance breakdown</h5>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Word</th>
+            <th>Your Attempt</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for intento in intentos %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td class="fw-bold">{{ intento.palabra.significado }}</td>
+            <td><code>{{ intento.intento_texto }}</code></td>
+            <td>
+              {% if intento.es_correcto %}
+                <span class="badge bg-success px-3 py-2 rounded-pill">Correct</span>
+              {% else %}
+                <span class="badge bg-danger px-3 py-2 rounded-pill">Incorrect</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-center text-muted py-4">
+              No detailed word logs found for this competition.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="{% url 'student_competitions' %}" class="btn text-white px-5 py-2 rounded-pill fw-bold" style="background-color: #7a1f2b;">
+      Back to Competitions
+    </a>
+  </div>
+
+</div>
+{% endblock %}
