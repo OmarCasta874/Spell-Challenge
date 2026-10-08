@@ -22,7 +22,7 @@
           <article class="competition-card {% if competition.estado == 'Active' %}competition-card-active{% endif %}">
             <header class="competition-card-header">
               <h3 class="competition-card-title">{{ competition.nombre }}</h3>
-              {% if competition.estado == 'Finished' %}
+              {% if competition.estado == 'Finished' or competition.fecha < today %}
                 <span class="status-badge status-badge-finished">Finished</span>
               {% elif competition.estado == 'Active' %}
                 <span class="status-badge status-badge-active">Active</span>
@@ -30,36 +30,22 @@
                 <span class="status-badge status-badge-upcoming">Upcoming</span>
               {% endif %}
             </header>
+
             <div class="competition-card-body">
-              <p class="competition-card-group">Competition Code: {{ competition.codigo }}</p>
-              {% if competition.estado == 'Finished' %}
-                <div class="competition-card-row competition-card-row-split">
-                  <div class="competition-card-stat">
-                    <span class="competition-card-label">Score:</span>
-                    <span class="competition-card-value">
-                      {{ participacion.palabras_correctas|default:0 }}/{{ participacion.palabras_correctas|default:0|add:participacion.palabras_incorrectas|default:0 }}
-                    </span>
-                  </div>
-                  <div class="competition-card-stat competition-card-stat-right">
-                    <span class="competition-card-label">Accuracy:</span>
-                    <span class="competition-card-value">
-                      {% if participacion.palabras_correctas or participacion.palabras_incorrectas %}
-                        {% widthratio participacion.palabras_correctas participacion.palabras_correctas|add:participacion.palabras_incorrectas 100 %}%
-                      {% else %}
-                        0%
-                      {% endif %}
-                    </span>
-                  </div>
+              {% if competition.estado == 'Finished' or competition.fecha < today %}
+                <div class="competition-card-row">
+                  <span class="competition-card-value">Competition Ended</span>
                 </div>
               {% elif competition.estado == 'Active' %}
                 <div class="competition-card-row">
-                  <span class="competition-card-value">Competition in progress</span>
+                  <span class="competition-card-value">In progress</span>
                 </div>
               {% else %}
                 <div class="competition-card-row">
                   <span class="competition-card-value">Upcoming competition</span>
                 </div>
               {% endif %}
+              
               <div class="competition-card-row competition-card-row-date">
                 <span class="competition-card-date">
                   {{ competition.fecha|date:"M j, Y" }}
@@ -69,19 +55,65 @@
                 </span>
               </div>
             </div>
+
             <footer class="competition-card-footer">
-              {% if competition.estado == 'Finished' %}
-                <a href="#" class="competition-card-link">View Results</a>
+              <button type="button" class="competition-card-link bg-transparent border-0" data-bs-toggle="modal" data-bs-target="#detailsModalStudent{{ forloop.counter }}">
+                View Details
+              </button>
+
+              {% if competition.estado == 'Finished' or competition.fecha < today %}
+                <a href="{% url 'student_competition_results' competition.codigo %}" class="competition-card-link">View Results</a>
               {% elif competition.estado == 'Active' %}
-                <a href="{% url 'student_competitions_select' %}"
-                  class="competition-card-link">
-                  Enter Competition
-                </a>
-              {% else %}
-                <a href="#" class="competition-card-link">View Details</a>
+                <a href="{% url 'student_competitions_select' %}" class="competition-card-link">Enter Competition</a>
               {% endif %}
             </footer>
           </article>
+
+          <div class="modal fade" id="detailsModalStudent{{ forloop.counter }}" tabindex="-1" aria-labelledby="detailsModalLabelStudent{{ forloop.counter }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content text-dark" style="border-radius: 16px; border: 2px solid #7a1f2b;">
+                <div class="modal-header" style="background-color: #fdf8f5; border-bottom: 1px solid #eee;">
+                  <div>
+                    <h5 class="modal-title fw-bold" id="detailsModalLabelStudent{{ forloop.counter }}" style="color: #7a1f2b;">Competition Details</h5>
+                    <small class="text-muted">{{ competition.nombre }}</small>
+                  </div>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-start p-4">
+                  <div class="mb-3">
+                    <strong style="color: #7a1f2b;">Description:</strong>
+                    <p class="text-muted mb-0 mt-1">{{ competition.descripcion|default:"No description provided for this competition." }}</p>
+                  </div>
+                  <div class="row g-3 mb-3">
+                    <div class="col-6">
+                      <strong style="color: #7a1f2b;">Date:</strong>
+                      <p class="text-muted mb-0 mt-1">{{ competition.fecha|date:"M d, Y" }}</p>
+                    </div>
+                    <div class="col-6">
+                      <strong style="color: #7a1f2b;">Time:</strong>
+                      <p class="text-muted mb-0 mt-1">{{ competition.hora|time:"h:i a" }}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <strong style="color: #7a1f2b;">Status:</strong>
+                    <div class="mt-1">
+                      {% if competition.estado == 'Active' %}
+                        <span class="status-badge status-badge-active">Active</span>
+                      {% elif competition.fecha < today or competition.estado == 'Finished' %}
+                        <span class="status-badge status-badge-finished">Finished</span>
+                      {% else %}
+                        <span class="status-badge status-badge-upcoming">Upcoming</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer border-0">
+                  <button type="button" class="btn text-white rounded-pill px-4" style="background-color: #7a1f2b;" data-bs-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
         {% endwith %}
       {% empty %}
         <div class="competition-empty-state">

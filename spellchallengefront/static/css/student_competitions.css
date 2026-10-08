@@ -132,3 +132,28 @@
 .competition-card-link:hover {
   color: #5c1620;
 }
+
+.btn-back-circle {
+  width: 40px;
+  height: 40px;
+  background-color: #7a1f2b;
+  color: #ffffff;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  transition: opacity 0.2s ease;
+}
+
+.btn-back-circle:hover {
+  color: #ffffff;
+  opacity: 0.85;
+}
+
+@media (min-width: 768px) {
+  .border-end-md {
+    border-right: 1px solid #e0e0e0;
+  }
+}

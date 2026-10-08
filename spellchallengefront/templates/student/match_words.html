@@ -63,7 +63,7 @@
 
       <div class="mw-results-text">
         <p class="mw-results-lead">Excellent! You got...</p>
-        <p class="mw-results-score">4/4 MATCHES</p>
+        <p class="mw-results-score">5/5 MATCHES</p>
       </div>
 
       <img src="{% static 'img/beenary-right.png' %}" class="mw-bee-decoration mw-bee-right">
@@ -149,23 +149,7 @@
   }
 
   function mwRepeatLesson() {
-
-    document.querySelectorAll('.mw-item').forEach(function (item) {
-      item.classList.remove(
-        'mw-item-matched',
-        'mw-item-selected',
-        'mw-item-incorrect'
-      );
-    });
-
-    mwSelectedWordBtn = null;
-    mwMatchedCount = 0;
-
-    document.getElementById('mwProgressFill').style.width = '0%';
-    document.getElementById('mwBeeMarker').style.left = '0%';
-
-    document.getElementById('mwCompleted').classList.add('d-none');
-    document.getElementById('mwGame').classList.remove('d-none');
+    window.location.reload();
   }
 </script>
 {% endblock %}
