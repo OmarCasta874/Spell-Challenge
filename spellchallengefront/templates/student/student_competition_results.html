@@ -50,52 +50,13 @@
           {% endif %}
         </div>
       </div>
-
       <div class="col-12 col-md-4 text-center text-md-end">
         <span class="text-muted small fw-bold text-uppercase">Accuracy</span>
         <div class="fs-3 fw-bold text-success">
           {{ palabras_correctas }} / {{ total_palabras }}
         </div>
-        <small class="text-muted">correct words</small>
+        <small class="text-muted">correct words · {{ palabras_incorrectas }} incorrect </small>
       </div>
-    </div>
-  </div>
-
-  <div class="bg-white rounded-4 shadow-sm p-4 mb-4 border">
-    <h5 class="fw-bold mb-3" style="color: #7a1f2b;">Performance breakdown</h5>
-    <div class="table-responsive">
-      <table class="table align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>#</th>
-            <th>Word</th>
-            <th>Your Attempt</th>
-            <th>Result</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for intento in intentos %}
-          <tr>
-            <td>{{ forloop.counter }}</td>
-            <td class="fw-bold">{{ intento.palabra.significado }}</td>
-            <td><code>{{ intento.intento_texto }}</code></td>
-            <td>
-              {% if intento.es_correcto %}
-                <span class="badge bg-success px-3 py-2 rounded-pill">Correct</span>
-              {% else %}
-                <span class="badge bg-danger px-3 py-2 rounded-pill">Incorrect</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="4" class="text-center text-muted py-4">
-              No detailed word logs found for this competition.
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
     </div>
   </div>
 

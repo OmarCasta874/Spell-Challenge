@@ -17,8 +17,7 @@
     <h2 class="section-title">My Competitions</h2>
 
     <div class="competitions-grid">
-      {% for participacion in participaciones %}
-        {% with competition=participacion.competencia %}
+      {% for competition in competencias %}
           <article class="competition-card {% if competition.estado == 'Active' %}competition-card-active{% endif %}">
             <header class="competition-card-header">
               <h3 class="competition-card-title">{{ competition.nombre }}</h3>
@@ -64,7 +63,7 @@
               {% if competition.estado == 'Finished' or competition.fecha < today %}
                 <a href="{% url 'student_competition_results' competition.codigo %}" class="competition-card-link">View Results</a>
               {% elif competition.estado == 'Active' %}
-                <a href="{% url 'student_competitions_select' %}" class="competition-card-link">Enter Competition</a>
+                <a href="{% url 'student_competitions_select' competition.codigo %}" class="competition-card-link">Enter Competition</a>
               {% endif %}
             </footer>
           </article>
@@ -113,11 +112,9 @@
               </div>
             </div>
           </div>
-
-        {% endwith %}
       {% empty %}
         <div class="competition-empty-state">
-          <p>You are not enrolled in any competitions yet.</p>
+          <p>No competitions are available at the moment.</p>
         </div>
       {% endfor %}
     </div>
