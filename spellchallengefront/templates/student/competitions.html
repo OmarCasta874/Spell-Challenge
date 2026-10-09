@@ -21,7 +21,7 @@
           <article class="competition-card {% if competition.estado == 'Active' %}competition-card-active{% endif %}">
             <header class="competition-card-header">
               <h3 class="competition-card-title">{{ competition.nombre }}</h3>
-              {% if competition.estado == 'Finished' or competition.fecha < today %}
+              {% if competition.estado == 'Finished' %}
                 <span class="status-badge status-badge-finished">Finished</span>
               {% elif competition.estado == 'Active' %}
                 <span class="status-badge status-badge-active">Active</span>
@@ -98,7 +98,7 @@
                     <div class="mt-1">
                       {% if competition.estado == 'Active' %}
                         <span class="status-badge status-badge-active">Active</span>
-                      {% elif competition.fecha < today or competition.estado == 'Finished' %}
+                      {% elif competition.estado == 'Finished' %}
                         <span class="status-badge status-badge-finished">Finished</span>
                       {% else %}
                         <span class="status-badge status-badge-upcoming">Upcoming</span>

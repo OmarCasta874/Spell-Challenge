@@ -3885,3 +3885,21 @@ WHERE ai.alumno = '2026100002'
         AND n.tipo = 'ACHIEVEMENT'
         AND n.insignia = ai.insignia
   );
+
+
+UPDATE palabra SET
+    significado = 'Pleasure',
+    pronunciacion = '/plé-shur/',
+    definicion = 'feeling that produces that good feeling.',
+    ejemplo = 'Itˈs a pleasure to meet you.'
+WHERE codigo = 'PAL0594';
+
+UPDATE palabra SET
+    significado = 'Woodland',
+    pronunciacion = '/WUUD-lənd/',
+    definicion = 'Area of land covered with trees and shrubs.',
+    ejemplo = 'Woodland birds.'
+WHERE codigo = 'PAL0579';
+
+INSERT INTO palabra VALUES
+('PAL0901', 'Candor', '/ˈkæn.dɚ/', '', '', 'CAT11', 'B1', 'Speaking with frankness and telling the truth.', 'I appreciate your candor about the projectˈs delay.');

@@ -2410,6 +2410,7 @@ def teacher_competition_results(request, pk):
 
 @never_cache
 @role_required('teacher')
+@require_POST
 def teacher_start_competition(request, codigo):
     competition = get_object_or_404(
         Competencia, 
@@ -2417,10 +2418,51 @@ def teacher_start_competition(request, codigo):
         profesor=request.user.profesor
     )
     
+    if competition.estado == 'Finished':
+        messages.error(
+            request,
+            'A finished competition cannot be started again.'
+        )
+        return redirect('teacher_competitions')
+    
+    if competition.estado == 'Active':
+        messages.info(
+            request,
+            f'{competition.nombre} is already Active.'
+        )
+        return redirect('teacher_competitions')
+    
     competition.estado = 'Active'
-    competition.save()
+    competition.save(update_fields=['estado'])
     
     messages.success(request, f"Competition {competition.nombre} is now Active!")
+    return redirect('teacher_competitions')
+
+@never_cache
+@role_required('teacher')
+@require_POST
+def teacher_finish_competition(request, codigo):
+    competition = get_object_or_404(
+        Competencia,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+    
+    if competition.estado != 'Active':
+        messages.error(
+            request,
+            'Only active competitions can be finished.'
+        )
+        return redirect('teacher_competitions')
+    
+    competition.estado = 'Finished'
+    competition.save(update_fields=['estado'])
+    
+    messages.success(
+        request,
+        f'Competition {competition.nombre} has been finished.'
+    )
+    
     return redirect('teacher_competitions')
 
 @never_cache
