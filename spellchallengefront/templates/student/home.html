@@ -58,7 +58,15 @@
   <div class="home-col-right">
     <div class="mini-games-header">
       <h5 class="section-heading">Mini-Games</h5>
-      <i data-lucide="bell" class="notification-bell"></i>
+      <button type="button" class="notification-bell" data-bs-toggle="modal"
+       data-bs-target="#notificationsModal" aria-label="Open notifications" title="Notifications">
+        <i data-lucide="bell"></i>
+        {% if notificaciones_no_leidas > 0 %}
+          <span class="notification-badge">
+            {{ notificaciones_no_leidas }}
+          </span>
+        {% endif %}
+      </button>
     </div>
 
     <div class="mini-games-row">
@@ -146,7 +154,6 @@
       </div>
 
       <div class="modal-body leaderboard-modal-body">
-
         <!-- TOP 3 -->
         <div class="lb-top3-row">
           <div class="lb-top3-item">
@@ -213,11 +220,111 @@
             </div>
           </div>
         </div>
-
       </div>
+    </div>
+  </div>
+</div>
 
+<!-- MODAL: STUDENT NOTIFICATIONS -->
+<div class="modal fade" id="notificationsModal" tabindex="-1"
+     aria-labelledby="notificationsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content notifications-modal-content">
+      <div class="modal-header notifications-modal-header">
+        <div class="notifications-title-group">
+          <i data-lucide="bell-ring"></i>
+          <h5 class="modal-title" id="notificationsModalLabel">
+            Notifications
+          </h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body notifications-modal-body">
+        {% if notificaciones %}
+          <div class="notifications-list">
+            {% for notificacion in notificaciones %}
+              <div class="notification-item {% if notificacion.leida %}is-read{% else %}is-unread{% endif %}">
+                <div class="notification-item-icon">
+                  {% if notificacion.tipo == 'COMPETITION_RESULT' %}
+                    <i data-lucide="trophy"></i>
+                  {% elif notificacion.tipo == 'ACHIEVEMENT' %}
+                    <i data-lucide="award"></i>
+                  {% else %}
+                    <i data-lucide="bell"></i>
+                  {% endif %}
+                </div>
+                <div class="notification-item-content">
+                  <div class="notification-item-heading">
+                    <h6>{{ notificacion.titulo }}</h6>
+                    {% if notificacion.leida %}
+                      <span class="notification-status">Read</span>
+                    {% else %}
+                      <span class="notification-status unread-status">New</span>
+                    {% endif %}
+                  </div>
+                  <p>{{ notificacion.mensaje }}</p>
+                  <span class="notification-date">
+                    {{ notificacion.fecha_creacion|date:"M d, Y · H:i" }}
+                  </span>
+                  {% if notificacion.leida %}
+                    <span class="notification-status">Read</span>
+                  {% else %}
+                    <form method="post"
+                          action="{% url 'mark_notification_read' notificacion.id %}"
+                          class="notification-read-form">
+                      {% csrf_token %}
+                      <button type="submit" class="notification-mark-read">
+                        Mark as read
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="notifications-empty">
+            <div class="notifications-empty-icon">
+              <i data-lucide="bell"></i>
+            </div>
+            <h6>You're all caught up!</h6>
+            <p>
+              Updates about your competitions, results,
+              and learning progress will appear here.
+            </p>
+          </div>
+        {% endif %}
+      </div>
+      <div class="modal-footer notifications-modal-footer">
+        <button type="button" class="notifications-close-btn" data-bs-dismiss="modal">
+          CLOSE
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
 {% endblock student_content %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('notifications') === '1') {
+      const modalElement = document.getElementById('notificationsModal');
+
+      if (modalElement && window.bootstrap) {
+        boostrap.Modal.getOrCreateInstance(modalElement).show();
+      }
+
+      params.delete('notifications');
+
+      const query = params.toString();
+      const newUrl = window.location.pathname +
+          (query ? '?' + query : '') +
+          window.location.hash;
+
+      window.history.replaceState({}, '', newUrl);
+    }
+  });
+</script>
