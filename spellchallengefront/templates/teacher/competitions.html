@@ -79,18 +79,42 @@
           </span>
           <span>{{ competition.hora|time:"g:i A" }}</span>
         </div>
-
         <div class="competition-card-actions">
-          <button type="button" class="btn-comp-outline" data-bs-toggle="modal" data-bs-target="#detailsModal{{ forloop.counter }}">
+          <button type="button" class="btn-comp-outline"
+                  data-bs-toggle="modal"
+                  data-bs-target="#detailsModal{{ forloop.counter }}">
             View Details
           </button>
-          {% if competition.fecha < today %}
-            <a href="{% url 'teacher_competition_results' competition.codigo %}" class="btn-comp-solid">View Results</a>
+
+          {% if competition.estado == 'Active' %}
+            <form method="POST"
+                  action="{% url 'teacher_finish_competition' competition.codigo %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-comp-solid">
+                Finish Competition
+              </button>
+            </form>
+
+          {% elif competition.estado == 'Finished' %}
+            <a href="{% url 'teacher_competition_results' competition.codigo %}"
+              class="btn-comp-solid">
+              View Results
+            </a>
+
           {% else %}
-            <button type="button" class="btn-comp-outline" data-bs-toggle="modal" data-bs-target="#editModal{{ forloop.counter }}">
+            <button type="button" class="btn-comp-outline"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editModal{{ forloop.counter }}">
               Edit
             </button>
-            <a href="{% url 'teacher_start_competition' competition.codigo %}" class="btn-comp-solid">Enter Competition</a>
+
+            <form method="POST"
+                  action="{% url 'teacher_start_competition' competition.codigo %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-comp-solid">
+                Enter Competition
+              </button>
+            </form>
           {% endif %}
         </div>
       </div>
@@ -136,7 +160,9 @@
             <div class="competition-modal-row">
               <div>
                 <div class="competition-modal-label">State:</div>
-                {% if competition.fecha < today %}
+                {% if competition.estado == 'Active' %}
+                  <span class="badge-status badge-active">Active</span>
+                {% elif competition.estado == 'Finished' %}
                   <span class="badge-status badge-finished">Finished</span>
                 {% else %}
                   <span class="badge-status badge-upcoming">Upcoming</span>
