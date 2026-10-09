@@ -1168,3 +1168,58 @@ class Ejercicio_Opcion(models.Model):
         db_table = 'ejercicio_opcion'
         managed = False
         unique_together = (('ejercicio', 'opcion'),)
+        
+#MODELO NOTIFICACION
+class Notificacion(models.Model):
+    TIPO_CHOICES = [
+        ('COMPETITION_RESULT', 'Competition Result'),
+        ('ACHIEVEMENT', 'Achievement'),
+    ]
+    
+    id = models.AutoField(primary_key=True)
+    
+    alumno = models.ForeignKey(
+        Alumno,
+        on_delete=models.CASCADE,
+        related_name='notificaciones',
+        db_column='alumno',
+        to_field='matricula'
+    )
+    
+    tipo = models.CharField(max_length=30)
+    titulo = models.CharField(max_length=100)
+    mensaje = models.CharField(max_length=255)
+    
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True,
+        db_column='fecha_creacion'
+    )
+    
+    leida = models.BooleanField(default=False)
+    
+    competencia = models.ForeignKey(
+        Competencia,
+        on_delete=models.SET_NULL,
+        related_name='notificaciones',
+        db_column='competencia',
+        to_field='codigo',
+        null=True,
+        blank=True
+    )
+    
+    insignia = models.ForeignKey(
+        Insignia,
+        on_delete=models.SET_NULL,
+        related_name='notificaciones',
+        db_column='insignia',
+        to_field='clave',
+        null=True,
+        blank=True
+    )
+    
+    class Meta:
+        managed = False
+        db_table = 'notificacion'
+        
+    def __str__(self):
+        return f"{self.titulo} - {self.alumno}"

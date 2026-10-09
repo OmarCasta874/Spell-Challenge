@@ -48,4 +48,5 @@ urlpatterns = [
     path('mygroups/edit/<str:group_id>/', views.edit_group, name='edit_group'),
     path('mygroups/delete/<str:group_id>/', views.delete_group, name='delete_group'),
     path('student/competitions/results/<str:codigo>/', views.student_competition_results, name='student_competition_results'),
+    path('student/notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
 ]

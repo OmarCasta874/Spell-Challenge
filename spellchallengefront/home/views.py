@@ -7,7 +7,7 @@ from django.views.decorators.cache import never_cache
 from functools import wraps
 from django.db import transaction
 from django.db.models import Count, Avg, Q
-from home.models import Usuario, TipoUsuario, Profesor, Alumno, Administrador, Grupo, Palabra
+from home.models import Usuario, TipoUsuario, Profesor, Alumno, Administrador, Grupo, Palabra, Notificacion
 from home.models import Carrera, Categoria, Alumno_Insignia, Alumno_Practica, Lista_Grupo, Grupo_Alumno
 from home.models import Nivel, Dificultad, Dificultad_Juego, Insignia, Intento_Palabra, Lista, Lista_Palabra, Competencia_Profesor
 from home.models import Proceso_Lista, Rango, Ranking, Reporte, TipoRanking, UsuarioManager, Juego, Practica_Sesion, Competencia_Alumno
@@ -20,6 +20,7 @@ import random, string
 from django.utils import timezone
 from django.conf import settings
 from django.http import FileResponse, Http404
+from django.urls import reverse
 
 # Create your views here.
 
@@ -393,6 +394,15 @@ def word_lists(request):
 def student_home(request):
     alumno = request.user.alumno
     
+    notificaciones = (
+        Notificacion.objects
+        .filter(alumno=alumno)
+        .select_related('competencia', 'insignia')
+        .order_by('-fecha_creacion')
+    )
+    
+    notificaciones_no_leidas = notificaciones.filter(leida=False).count()
+    
     grupo_actual = (
         Grupo.objects
         .filter(grupo_alumnos__alumno=alumno)
@@ -449,8 +459,28 @@ def student_home(request):
             'mini_games': mini_games,
             'grupo_actual': grupo_actual,
             'leaderboard': leaderboard,
+            'notificaciones': notificaciones,
+            'notificaciones_no_leidas': notificaciones_no_leidas,
         }
     )
+    
+@never_cache
+@role_required('student')
+@require_POST
+def mark_notification_read(request, notification_id):
+    alumno = request.user.alumno
+    
+    notificacion = get_object_or_404(
+        Notificacion,
+        id=notification_id,
+        alumno=alumno
+    )
+    
+    if not notificacion.leida:
+        notificacion.leida = True
+        notificacion.save(update_fields=['leida'])
+        
+    return redirect(f"{reverse('student_home')}?notifications=1")
 
 @never_cache
 @role_required('student')
@@ -737,10 +767,14 @@ def practices(request):
 def progress(request):
     alumno = request.user.alumno
     
-    practicas_alumno = Alumno_Practica.objects.filter(
+    all_competitions = Competencia_Alumno.objects.filter(
         alumno=alumno
-    )
+    ).select_related('competencia').order_by('-competencia__fecha', '-competencia__hora')
     
+    recent_competitions = all_competitions[:3]
+    competitions_count = all_competitions.count()
+    
+    practicas_alumno = Alumno_Practica.objects.filter(alumno=alumno)
     practicas = Practica_Sesion.objects.filter(
         clave__in=practicas_alumno.values('practica_sesion')
     ).order_by('-fecha')
@@ -748,93 +782,48 @@ def progress(request):
     week_accuracy = [0, 0, 0, 0]
     week_labels = ['W1', 'W2', 'W3', 'W4']
     
-    print("PRÁCTICAS DEL ALUMNO: ", list(
-        practicas.values(
-            'clave',
-            'fecha',
-            'porcentaje_aciertos'
-        )
-    ))
-    
     if practicas.exists():
         fecha_mas_reciente = practicas.first().fecha
-        
         for i in range(4):
             fecha_inicio = fecha_mas_reciente - timedelta(days=(i + 1) * 7)
             fecha_fin = fecha_mas_reciente - timedelta(days=i * 7)
-            
-            practicas_semana = practicas.filter(
-                fecha__gt=fecha_inicio,
-                fecha__lte=fecha_fin
-            )
-            
+            practicas_semana = practicas.filter(fecha__gt=fecha_inicio, fecha__lte=fecha_fin)
             if practicas_semana.exists():
-                promedio = practicas_semana.aggregate(
-                    promedio=Avg('porcentaje_aciertos')
-                )['promedio']
-                
+                promedio = practicas_semana.aggregate(promedio=Avg('porcentaje_aciertos'))['promedio']
                 week_accuracy[i] = round(promedio)
-                
-    print("WEEK ACCURACY: ", week_accuracy)
-    
-    fechas_practicas = list(
-        practicas.values_list('fecha', flat=True).distinct()
-    )
     
     intentos = Intento_Palabra.objects.filter(
         practica_sesion__in=practicas_alumno.values('practica_sesion')
     )
-    
     total_intentos = intentos.count()
     total_aciertos = intentos.filter(acertado=1).count()
-    
-    if total_intentos > 0:
-        overall_accuracy = round(
-            (total_aciertos / total_intentos) * 100
-        )
-    else:
-        overall_accuracy = 0
-        
-    words_practiced = intentos.values(
-        'palabra'
-    ).distinct().count()
-    
-    competitions_count = Competencia_Alumno.objects.filter(
-        alumno=alumno
-    ).count()
+    overall_accuracy = round((total_aciertos / total_intentos) * 100) if total_intentos > 0 else 0
+    words_practiced = intentos.values('palabra').distinct().count()
     
     insignias = Insignia.objects.all().order_by('clave')
-    insignias_obtenidas = Alumno_Insignia.objects.filter(
-        alumno=alumno
-    ).values_list('insignia_id', flat=True)
-    
-    insignias_obtenidas = set(insignias_obtenidas)
+    insignias_obtenidas = set(Alumno_Insignia.objects.filter(alumno=alumno).values_list('insignia_id', flat=True))
     
     achievements = []
-    
     for insignia in insignias:
         achievements.append({
             'insignia': insignia,
             'obtenida': insignia.clave in insignias_obtenidas,
         })
         
-    achievements_preview = sorted(
-        achievements,
-        key=lambda x: not x['obtenida']
-    )[:4]
+    achievements_preview = sorted(achievements, key=lambda x: not x['obtenida'])[:4]
         
     context = {
         'achievements': achievements,
         'achievements_preview': achievements_preview,
         'achievements_earned': len(insignias_obtenidas),
         'achievements_total': insignias.count(),
-        
         'overall_accuracy': overall_accuracy,
         'words_practiced': words_practiced,
         'competitions_count': competitions_count,
-        
         'week_labels': week_labels,
         'week_accuracy': week_accuracy,
+        'recent_competitions': recent_competitions,
+        'all_competitions': all_competitions,
     }
     
     return render(request, 'student/progress.html', context)

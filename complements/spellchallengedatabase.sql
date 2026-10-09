@@ -427,6 +427,27 @@ CREATE TABLE competencia_profesor (
         ON DELETE CASCADE
 );
 
+CREATE TABLE notificacion (
+    id INT NOT NULL AUTO_INCREMENT,
+    alumno VARCHAR(10) COLLATE utf8mb4_general_ci NOT NULL,
+    tipo VARCHAR(30) NOT NULL,
+    titulo VARCHAR(100) NOT NULL,
+    mensaje VARCHAR(255) NOT NULL,
+    fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    leida TINYINT(1) NOT NULL DEFAULT 0,
+    competencia VARCHAR(10) COLLATE utf8mb4_general_ci NULL,
+    insignia VARCHAR(10) COLLATE utf8mb4_general_ci NULL,
+
+    PRIMARY KEY (id),
+    INDEX idx_notificacion_alumno (alumno),
+    INDEX idx_notificacion_competencia (competencia),
+    INDEX idx_notificacion_insignia (insignia),
+    INDEX idx_notificacion_alumno_leida (alumno, leida)
+
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_general_ci;
+
 -- ============================================================
 -- CATALOGOS
 -- ============================================================
@@ -3786,3 +3807,81 @@ SET
     palabras_incorrectas = 0
 WHERE competencia = 'COM03'
   AND alumno = '2026100004';
+
+ALTER TABLE notificacion
+ADD CONSTRAINT fk_notificacion_alumno
+FOREIGN KEY (alumno)
+REFERENCES alumno (matricula)
+ON DELETE CASCADE;
+
+ALTER TABLE notificacion
+ADD CONSTRAINT fk_notificacion_competencia
+FOREIGN KEY (competencia)
+REFERENCES competencia (codigo)
+ON DELETE SET NULL;
+
+ALTER TABLE notificacion
+ADD CONSTRAINT fk_notificacion_insignia
+FOREIGN KEY (insignia)
+REFERENCES insignia (clave)
+ON DELETE SET NULL;
+
+
+INSERT INTO notificacion (
+    alumno,
+    tipo,
+    titulo,
+    mensaje,
+    leida,
+    competencia,
+    insignia
+)
+SELECT
+    ca.alumno,
+    'COMPETITION_RESULT',
+    'Competition Results Available!',
+    'Your results are ready. Open Competitions to review your performance.',
+    0,
+    ca.competencia,
+    NULL
+FROM competencia_alumno ca
+WHERE ca.alumno = '2026100002'
+  AND ca.competencia = 'COM01'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM notificacion n
+      WHERE n.alumno = ca.alumno
+        AND n.tipo = 'COMPETITION_RESULT'
+        AND n.competencia = ca.competencia
+  );
+
+
+INSERT INTO notificacion (
+    alumno,
+    tipo,
+    titulo,
+    mensaje,
+    leida,
+    competencia,
+    insignia
+)
+SELECT
+    ai.alumno,
+    'ACHIEVEMENT',
+    'New Achievement Unlocked!',
+    CONCAT('Congratulations! You earned the ', i.nombre, ' badge.'),
+    0,
+    NULL,
+    ai.insignia
+FROM alumno_insignia ai
+INNER JOIN insignia i
+    ON i.clave = ai.insignia
+WHERE ai.alumno = '2026100002'
+  AND ai.insignia = 'INS02'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM notificacion n
+      WHERE n.alumno = ai.alumno
+        AND n.tipo = 'ACHIEVEMENT'
+        AND n.insignia = ai.insignia
+  );
