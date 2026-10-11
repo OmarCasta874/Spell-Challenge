@@ -19,6 +19,43 @@
   <h2>Students Results</h2>
 </div>
 
+<div class="res-table-wrap" style="margin-bottom: 24px; padding: 20px;">
+  <h3>Add Competition Participants</h3>
+  <p>Select only the students who participated in person.</p>
+
+  {% if alumnos_candidatos %}
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="add_participants">
+    
+    <div style="max-height: 300px; overflow-y: auto; margin-bottom: 16px;">
+      {% for alumno in alumnos_candidatos %}
+      <label style="display: flex; align-items: center; gap: 10px; padding: 8px 0;">
+        {% if alumno.enrollment in participantes_ids %}
+          <input type="checkbox" disabled checked>
+          <span>
+            {{ alumno.first_name }} {{ alumno.last_name }}
+            — {{ alumno.enrollment }}
+            <small>(Already added)</small>
+          </span>
+        {% else %}
+          <input type="checkbox" name="participantes" value="{{ alumno.enrollment }}">
+          <span>
+            {{ alumno.first_name }} {{ alumno.last_name }}
+            — {{ alumno.enrollment }}
+            <small>({{ alumno.group }})</small>
+          </span>
+        {% endif %}
+      </label>
+      {% endfor %}
+    </div>
+    <button type="submit" class="res-btn-search">Add Selected Students</button>
+  </form>
+  {% else %}
+    <p>No students were found in your groups.</p>
+  {% endif %}
+</div>
+
 <div class="res-search-bar">
   <div class="res-search-field">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -41,30 +78,58 @@
         <th>Student's name</th>
         <th>Email Account</th>
         <th class="col-center">Group</th>
-        <th class="col-center">Result</th>
+        <th class="col-center">Correct Words</th>
+        <th class="col-center">Incorrect Words</th>
         <th class="col-center">Points</th>
         <th class="col-center">Actions</th>
       </tr>
     </thead>
     <tbody id="resBody">
       {% for r in results %}
-        <tr data-name="{{ r.first_name|lower }} {{ r.last_name|lower }}"
-          data-email="{{ r.email|lower }}"
-          data-group="{{ r.group|lower }}"
-          data-score="{{ r.correct }}">
-          <td>{{ r.first_name }} {{ r.last_name }}</td>
-          <td>{{ r.email }}</td>
-          <td class="col-center">{{ r.group }}</td>
-          <td class="col-center">{{ r.correct }}/{{ total_words }}</td>
-          <td class="col-center">{{ r.points }}</td>
-          <td class="col-center">
-              <button type="button" class="res-btn-view" data-bs-toggle="modal" data-bs-target="#viewStudentModal{{ forloop.counter }}">VIEW</button>
-          </td>
+      <tr
+        data-name="{{ r.first_name|lower }} {{ r.last_name|lower }}"
+        data-email="{{ r.email|lower }}"
+        data-group="{{ r.group|lower }}"
+        data-score="{{ r.correct|default_if_none:0 }}"
+      >
+        <td>{{ r.first_name }} {{ r.last_name }}</td>
+        <td>{{ r.email }}</td>
+        <td class="col-center">{{ r.group }}</td>
+        <td class="col-center">
+          {% if r.correct is not None %}
+            {{ r.correct }}
+          {% else %}
+            <span>Pending</span>
+          {% endif %}
+        </td>
+        <td class="col-center">
+          {% if r.incorrect is not None %}
+            {{ r.incorrect }}
+          {% else %}
+            <span>Pending</span>
+          {% endif %}
+        </td>
+        <td class="col-center">
+          {% if r.points is not None %}
+            {{ r.points }}
+          {% else %}
+            <span>Pending</span>
+          {% endif %}
+        </td>
+        <td class="col-center">
+          <button type="button" class="res-btn-view" data-bs-toggle="modal" data-bs-target="#editStudentModal{{ forloop.counter }}">
+            EDIT RESULTS
+          </button>
+        </td>
       </tr>
       {% endfor %}
       <tr id="resEmpty" class="res-empty-row"{% if results %} hidden{% endif %}>
-        <td colspan="6" class="res-empty">
-          {% if results %}No students match your search.{% else %}No student has completed this competition yet.{% endif %}
+        <td colspan="7" class="res-empty">
+          {% if results %}
+            No students match your search.
+          {% else %}
+            No student has participated in this competition yet.
+          {% endif %}
         </td>
       </tr>
     </tbody>
@@ -117,6 +182,79 @@
       <div class="modal-footer res-modal-footer">
         <button type="button" class="res-btn-accept" data-bs-dismiss="modal">ACCEPT</button>
       </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% for r in results %}
+<div class="modal fade res-modal" id="editStudentModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_results">
+        <input type="hidden" name="matricula" value="{{ r.enrollment }}">
+        <div class="modal-header res-modal-header">
+          <h5 class="res-modal-title">
+            Record Student Results
+          </h5>
+          <button type="button" class="res-modal-close" data-bs-dismiss="modal" aria-label="Close">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body res-modal-body">
+          <p><strong>{{ r.first_name }} {{ r.last_name }}</strong></p>
+          <p>Enrollment: {{ r.enrollment }}</p>
+          <div class="mb-3">
+            <label for="correct_{{ r.enrollment }}">Correct Words</label>
+            <input
+              type="number"
+              class="form-control"
+              id="correct_{{ r.enrollment }}"
+              name="correct_{{ r.enrollment }}"
+              min="0"
+              step="1"
+              value="{{ r.correct|default_if_none:'' }}"
+              required
+            >
+          </div>
+          <div class="mb-3">
+            <label for="incorrect_{{ r.enrollment }}">Incorrect Words</label>
+            <input
+              type="number"
+              class="form-control"
+              id="incorrect_{{ r.enrollment }}"
+              name="incorrect_{{ r.enrollment }}"
+              min="0"
+              step="1"
+              value="{{ r.incorrect|default_if_none:'' }}"
+              required
+            >
+          </div>
+          <div class="mb-3">
+            <label for="points_{{ r.enrollment }}">Points</label>
+            <input
+              type="number"
+              class="form-control"
+              id="points_{{ r.enrollment }}"
+              name="points_{{ r.enrollment }}"
+              min="0"
+              step="1"
+              value="{{ r.points|default_if_none:'' }}"
+              required
+            >
+          </div>
+        </div>
+        <div class="modal-footer res-modal-footer">
+          <button type="button" class="res-btn-accept" data-bs-dismiss="modal">
+            CANCEL
+          </button>
+          <button type="submit" class="res-btn-search">
+            SAVE RESULTS
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
