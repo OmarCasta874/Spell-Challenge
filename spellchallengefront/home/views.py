@@ -2326,19 +2326,11 @@ def practice_speaking(request):
 def teacher_competition_results(request, pk):
     competition = get_object_or_404(
         Competencia,
-        pk=pk,                       
+        pk=pk,
+        profesor=request.user.profesor,
     )
     
-    now = timezone.localtime()
-    
-    competition_datetime = timezone.make_aware(
-        datetime.combine(
-            competition.fecha,
-            competition.hora
-        )
-    )
-    
-    if competition_datetime >= now:
+    if competition.estado != 'Finished':
         messages.info(
             request,
             "Results will be available when the competition finishes."
@@ -2357,6 +2349,156 @@ def teacher_competition_results(request, pk):
             'alumno__apellidoPaterno'
         )
     )
+    
+    alumnos_grupos = (
+        Grupo_Alumno.objects
+        .filter(grupo__profesor=competition.profesor)
+        .select_related(
+            'alumno',
+            'alumno__usuario',
+            'grupo',
+        )
+        .order_by(
+            'alumno__apellidoPaterno',
+            'alumno__nombre_pila',
+        )
+    )
+    
+    alumnos_candidatos = {}
+    
+    for relacion in alumnos_grupos:
+        alumno = relacion.alumno
+        
+        if alumno.matricula not in alumnos_candidatos:
+            alumnos_candidatos[alumno.matricula] = {
+                'enrollment': alumno.matricula,
+                'first_name': alumno.nombre_pila,
+                'last_name': (
+                    f"{alumno.apellidoPaterno} "
+                    f"{alumno.apellidoMaterno or ''}"
+                ).strip(),
+                'email': alumno.usuario.correo,
+                'group': relacion.grupo.nombre,
+            }
+            
+    participantes_ids = set(
+        Competencia_Alumno.objects
+        .filter(competencia=competition)
+        .values_list('alumno_id', flat=True)
+    )
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'add_participants':
+            matriculas_seleccionadas = set(
+                request.POST.getlist('participantes')
+            )
+            
+            matriculas_validas = set(alumnos_candidatos.keys())
+            matriculas_seleccionadas &= matriculas_validas
+            
+            agregados = 0
+            
+            for matricula in matriculas_seleccionadas:
+                _, creado = Competencia_Alumno.objects.get_or_create(
+                    competencia=competition,
+                    alumno_id=matricula,
+                )
+                
+                if creado:
+                    agregados += 1
+                    
+            if agregados:
+                messages.success(
+                    request,
+                    f'{agregados} participant(s) added successfully.'
+                )
+            else:
+                messages.info(
+                    request,
+                    'No new participants were added.'
+                )
+                
+            return redirect(
+                'teacher_competition_results',
+                pk=competition.pk,
+            )
+        
+        elif action == 'save_results':
+            matricula = request.POST.get('matricula', '').strip()
+
+            participacion = get_object_or_404(
+                Competencia_Alumno,
+                competencia=competition,
+                alumno_id=matricula,
+            )
+
+            correctas_raw = request.POST.get(
+                f'correct_{matricula}', ''
+            ).strip()
+
+            incorrectas_raw = request.POST.get(
+                f'incorrect_{matricula}', ''
+            ).strip()
+
+            puntos_raw = request.POST.get(
+                f'points_{matricula}', ''
+            ).strip()
+
+            if not correctas_raw or not incorrectas_raw or not puntos_raw:
+                messages.error(
+                    request,
+                    'Please complete all result fields.'
+                )
+                return redirect(
+                    'teacher_competition_results',
+                    pk=competition.pk,
+                )
+
+            try:
+                correctas = int(correctas_raw)
+                incorrectas = int(incorrectas_raw)
+                puntos = int(puntos_raw)
+            except ValueError:
+                messages.error(
+                    request,
+                    'Results must be whole numbers.'
+                )
+                return redirect(
+                    'teacher_competition_results',
+                    pk=competition.pk,
+                )
+
+            if correctas < 0 or incorrectas < 0 or puntos < 0:
+                messages.error(
+                    request,
+                    'Results cannot be negative.'
+                )
+                return redirect(
+                    'teacher_competition_results',
+                    pk=competition.pk,
+                )
+
+            participacion.palabras_correctas = correctas
+            participacion.palabras_incorrectas = incorrectas
+            participacion.puntos_obtenidos = puntos
+
+            participacion.save(update_fields=[
+                'palabras_correctas',
+                'palabras_incorrectas',
+                'puntos_obtenidos',
+            ])
+
+            messages.success(
+                request,
+                'Student results saved successfully.'
+            )
+
+            return redirect(
+                'teacher_competition_results',
+                pk=competition.pk,
+            )
     
     results = []
     
@@ -2385,18 +2527,19 @@ def teacher_competition_results(request, pk):
             ).strip(),
             'email': alumno.usuario.correo,
             'group': group_name,
-            'correct': participacion.palabras_correctas or 0,
-            'incorrect': participacion.palabras_incorrectas or 0,
-            'points': participacion.puntos_obtenidos or 0,
+            'correct': participacion.palabras_correctas,
+            'incorrect': participacion.palabras_incorrectas,
+            'points': participacion.puntos_obtenidos,
         })
         
     total_words = 0
     
-    if results:
-        total_words = (
-            results[0]['correct'] +
-            results[0]['incorrect']
-        )
+    if results and results[0]['correct'] is not None:
+        if results[0]['incorrect'] is not None:
+            total_words = (
+                results[0]['correct'] +
+                results[0]['incorrect']
+            )
 
     return render(
         request, 
@@ -2405,6 +2548,8 @@ def teacher_competition_results(request, pk):
             'competition': competition,
             'results': results,
             'total_words': total_words,
+            'alumnos_candidatos': list(alumnos_candidatos.values()),
+            'participantes_ids': participantes_ids,
         }
     )
 
