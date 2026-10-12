@@ -2489,6 +2489,44 @@ def teacher_competition_results(request, pk):
                 'palabras_incorrectas',
                 'puntos_obtenidos',
             ])
+            
+            notificacion = (
+                Notificacion.objects
+                .filter(
+                    alumno=participacion.alumno,
+                    tipo='COMPETITION_RESULT',
+                    competencia=competition,
+                )
+                .order_by('id')
+                .first()
+            )
+            
+            titulo = f"Results Available: {competition.nombre}"
+            
+            mensaje = (
+                f"Your results for {competition.nombre} are available. "
+                f"Correct: {correctas}, Incorrect: {incorrectas}, "
+                f"Points: {puntos}."
+            )
+            
+            if notificacion:
+                notificacion.titulo = titulo
+                notificacion.mensaje = mensaje
+                notificacion.leida = False
+                notificacion.save(update_fields=[
+                    'titulo',
+                    'mensaje',
+                    'leida',
+                ])
+            else:
+                Notificacion.objects.create(
+                    alumno=participacion.alumno,
+                    tipo='COMPETITION_RESULT',
+                    titulo=titulo,
+                    mensaje=mensaje,
+                    competencia=competition,
+                    leida=False,
+                )
 
             messages.success(
                 request,

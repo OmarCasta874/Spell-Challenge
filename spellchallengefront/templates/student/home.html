@@ -266,6 +266,12 @@
                   <span class="notification-date">
                     {{ notificacion.fecha_creacion|date:"M d, Y · H:i" }}
                   </span>
+                  {% if notificacion.tipo == 'COMPETITION_RESULT' and notificacion.competencia %}
+                    <a href="{% url 'student_competition_results' notificacion.competencia.codigo %}" class="notification-mark-read">
+                      View Results &amp; Diploma
+                      <i data-lucide="arrow-right"></i>
+                    </a>
+                  {% endif %}
                   {% if notificacion.leida %}
                     <span class="notification-status">Read</span>
                   {% else %}
@@ -303,9 +309,6 @@
     </div>
   </div>
 </div>
-
-{% endblock student_content %}
-
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const params = new URLSearchParams(window.location.search);
@@ -314,7 +317,7 @@
       const modalElement = document.getElementById('notificationsModal');
 
       if (modalElement && window.bootstrap) {
-        boostrap.Modal.getOrCreateInstance(modalElement).show();
+        bootstrap.Modal.getOrCreateInstance(modalElement).show();
       }
 
       params.delete('notifications');
@@ -328,3 +331,4 @@
     }
   });
 </script>
+{% endblock student_content %}
