@@ -10,6 +10,12 @@
 #password = gilda1234
 #email = ariana.gonzales@beemail.com
 #password = ariana1234
+#email = blanca.roman@beemail.com
+#password = blanca1234
+#email = isaac.salvatierra@beemail.com
+#password = isaac1234
+#email = juan.quinones@beemail.com
+#password = juan1234
 
 #Para entrar al sistema como Student (por ahora), se va a utilizar:
 #email = 2026100001@ut-tijuana.edu.mx

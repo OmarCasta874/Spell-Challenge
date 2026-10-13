@@ -14,11 +14,8 @@
     + Create New Group
   </button>
 </div>
-
 <div class="groups-row">
-
   {% for grupo in grupos %}
-
   <div class="group-card">
     <div class="group-card-header">
       <div class="group-card-header-text">
@@ -27,16 +24,12 @@
           Prof. {{ grupo.profesor.nombre_pila }} {{ grupo.profesor.apellidoPaterno }}
         </p>
       </div>
-      <div class="group-avatar"></div>
+      <div class="group-avatar">{{ grupo.profesor.nombre_pila|slice:":2"|upper }}</div>
     </div>
     <div class="group-card-body">
       <div class="group-stats">
-        <span class="group-stat">
-          {{ grupo.grupo_alumnos.count }} students
-        </span>
-        <span class="group-stat">
-          {{ grupo.lista_grupos.count }} Lists
-        </span>
+        <span class="group-stat">{{ grupo.grupo_alumnos.count }} students</span>
+        <span class="group-stat">{{ grupo.lista_grupos.count }} Lists</span>
       </div>
       <div class="group-actions">
         <a href="{% url 'view_group' grupo.codigo %}"
@@ -52,7 +45,6 @@
       </div>
     </div>
   </div>
-
   <div class="modal fade" id="editGroupModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="editGroupModalLabel{{ forloop.counter }}" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content create-group-modal">
@@ -87,7 +79,6 @@
       </div>
     </div>
   </div>
-
   <div class="modal fade" id="deleteGroupModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="deleteGroupModalLabel{{ forloop.counter }}" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content create-group-modal">
@@ -109,17 +100,12 @@
       </div>
     </div>
   </div>
-
   {% empty %}
-
   <div class="empty-groups">
     <p>You do not have any groups yet.</p>
   </div>
-
   {% endfor %}
-
 </div>
-
 <div class="modal fade" id="createGroupModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content create-group-modal">
@@ -154,5 +140,4 @@
     </div>
   </div>
 </div>
-
 {% endblock %}

@@ -23,7 +23,7 @@
         <h5>{{ group.nombre }}</h5>
         <p class="group-teacher">Teacher {{ group.teacher_name }}</p>
       </div>
-      <div class="group-avatar"></div>
+      <div class="group-avatar">{{ group.teacher_name|slice:":2"|upper }}</div>
     </div>
     <div class="group-card-body">
       <div class="group-stats">
@@ -45,10 +45,6 @@
   <p class="text-muted">You haven't joined any groups yet.</p>
   {% endfor %}
 </div>
-
-<!-- ========================================== -->
-<!-- MODAL: JOIN GROUP                          -->
-<!-- ========================================== -->
 <div class="modal fade" id="joinGroupModal" tabindex="-1" aria-labelledby="joinGroupModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content join-group-modal">
@@ -77,14 +73,10 @@
     </div>
   </div>
 </div>
-
-<!-- ========================================== -->
-<!-- MODAL: LEAVE GROUP (único, reutilizable)   -->
-<!-- ========================================== -->
 <div id="leaveGroupModal" class="modal-overlay">
     <div class="modal-content modal-small">
         <div class="modal-header">
-            <h3 style="color: var(--primary-red, #D9534F);">Leave Group</h3>
+            <h3 class="leave-group-title">Leave Group</h3>
             <button class="modal-close" onclick="closeModal('leaveGroupModal')">&times;</button>
         </div>
         <div class="modal-body text-center">
@@ -95,14 +87,15 @@
                 You will lose access to the group's word lists and progress.
             </p>
         </div>
-        <div class="modal-footer" style="display: flex; justify-content: center; gap: 1rem;">
+        <div class="modal-footer leave-group-footer">
             <form id="leaveGroupForm" method="POST" action="">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger" style="background-color: #D9534F; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 5px; cursor: pointer;">
+                <button type="submit" class="btn-leave-confirm">
                     Yes, Leave
                 </button>
             </form>
-            <button type="button" class="btn btn-secondary" onclick="closeModal('leaveGroupModal')" style="padding: 0.5rem 1.2rem; border-radius: 5px; cursor: pointer;">
+            <button type="button" class="btn-leave-cancel"
+                    onclick="closeModal('leaveGroupModal')">
                 Cancel
             </button>
         </div>

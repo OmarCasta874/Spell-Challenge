@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'css/student_base.css' %}"> 
 <link rel="stylesheet" href="{% static 'css/student_group_view.css' %}">
 {% endblock %}
@@ -9,19 +10,13 @@
 {% block title %} {{ group.nombre }} - Spell-Challenge Student{% endblock %}
 
 {% block student_content %}
-<!-- ENCABEZADO CON BOTÓN DE REGRESO -->
 <div class="page-header flex-align-center mb-15">
     <a href="{% url 'student_groups' %}" class="btn-back-link">
         ← {{ group.nombre }}
     </a>
 </div>
-
-<!-- CONTENEDOR EN 2 COLUMNAS -->
 <div class="group-view-grid">
-    
-    <!-- COLUMNA IZQUIERDA: PROFESOR Y TABLA DE COMPAÑEROS -->
     <div class="left-column">
-        <!-- TARJETA INFORMACIÓN DEL PROFESOR -->
         <div class="panel-card panel-border-red mb-1">
             <table class="data-table compact-table">
                 <thead>
@@ -38,8 +33,6 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- TABLA DE COMPAÑEROS (CLASSMATES) -->
         <div class="panel-card table-card panel-border-red">
             <div class="table-responsive">
                 <table class="data-table">
@@ -84,8 +77,6 @@
             </div>
         </div>
     </div>
-
-    <!-- COLUMNA DERECHA: PALABRAS DEL GRUPO -->
     <div class="right-column">
         <div class="panel-card table-card header-red-table">
             <div class="table-responsive">
@@ -136,8 +127,6 @@
         </div>
     </div>
 </div>
-
-<!-- MODAL: VIEW CLASSMATE -->
 <div id="classmateModal" class="modal-overlay">
   <div class="modal-content classmate-theme">
     <button class="modal-close" onclick="closeModal('classmateModal')">&times;</button>
@@ -153,8 +142,6 @@
     <button type="button" class="btn-accept" onclick="closeModal('classmateModal')">ACCEPT</button>
   </div>
 </div>
-
-<!-- MODAL: WORD DETAILS -->
 <div id="wordModal" class="modal-overlay">
     <div class="modal-content modal-small">
         <div class="modal-header">
@@ -172,9 +159,7 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
-
 {% block extra_js %}
 {{ block.super }}
 <script>

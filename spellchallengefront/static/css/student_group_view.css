@@ -1,9 +1,14 @@
 /* DISPOSICIÓN DE LA VISTA DE GRUPO EN 2 COLUMNAS */
 .group-view-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 1.5rem;
     align-items: start;
+}
+
+.left-column,
+.right-column {
+    min-width: 0;
 }
 
 @media (max-width: 992px) {
@@ -13,58 +18,71 @@
 }
 
 .btn-back-link {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #700000;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #7a1f2b;
+    font-size: 1.35rem;
+    font-weight: 800;
     text-decoration: none;
+    transition: color 0.2s ease;
 }
 
 .btn-back-link:hover {
-    color: var(--primary-red);
+    color: #F28F89;
 }
 
 /* TABLA DE COLOR ROJO / GUINDA (MOCKUP) */
 .header-red-table thead th,
 .data-table.red-theme-table thead th {
-    background-color: #D9534F !important;
+    background-color: #7a1f2b !important;
     color: #FFFFFF !important;
 }
 
 /* BOTONES OVALADOS (PILL BUTTONS) DEL MOCKUP */
 .btn-pill-action {
-    border: 2px solid #D9534F;
-    background: transparent;
-    color: #D9534F;
+    display: inline-block;
+    border: 2px solid #7a1f2b;
+    background: #FFFFFF;
+    color: #7a1f2b;
     border-radius: 20px;
-    padding: 0.15rem 0.8rem;
-    font-size: 0.75rem;
-    font-weight: 700;
+    padding: 0.25rem 0.8rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    line-height: 1.3;
+    white-space: nowrap;
     cursor: pointer;
-    transition: all 0.2s ease;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
 .btn-pill-action:hover {
-    background-color: #D9534F;
-    color: #FFF;
+    background-color: #7a1f2b;
+    color: #FFFFFF;
 }
 
 .btn-pill-solid {
-    background-color: #D9534F;
+    background-color: #7a1f2b;
     color: #FFF;
 }
 
 .btn-pill-solid:hover {
-    background-color: #B92C28;
+    background-color: #5e1721;
+    border-color: #5e1721;
 }
 
 .actions-group {
-    display: flex;
-    gap: 0.4rem;
-    justify-content: center;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.actions-group .btn-pill-action + .btn-pill-action {
+    margin-left: 0.25rem;
 }
 
 .compact-table th, .compact-table td {
-    padding: 0.5rem 0.8rem;
+    padding: 0.65rem 0.8rem;
+    vertical-align: middle;
 }
 
 /* ===== MODAL BASE ===== */
@@ -163,12 +181,15 @@
 }
 
 .classmate-avatar {
+    display: block;
     width: 90px;
     height: 90px;
+    margin: 0 auto 0.8rem;
     border-radius: 50%;
-    background: #FFF;
+    background: #FFFFFF;
     padding: 0.5rem;
-    margin-bottom: 0.8rem;
+    object-fit: cover;
+    box-sizing: border-box;
 }
 
 .classmate-name {
@@ -206,6 +227,37 @@
 
 /* ===== BORDE ROJO EN TABLA DE CLASSMATES ===== */
 .panel-border-red {
-    border: 3px solid #D9534F;
+    border: 1px solid #f2c9ce;
     border-radius: 10px;
+    overflow: hidden;
+    background: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.group-view-grid .data-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.group-view-grid .data-table th,
+.group-view-grid .data-table td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+}
+
+.group-view-grid .data-table tbody td {
+    border-bottom: 1px solid #f2c9ce;
+}
+
+.group-view-grid .data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.group-view-grid .actions-group .btn-pill-action {
+    margin: 0.15rem;
+}
+
+.group-view-grid .text-center {
+    text-align: center;
 }

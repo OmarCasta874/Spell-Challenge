@@ -189,6 +189,10 @@ def signup_teacher(request):
 def dashboard(request):
     profesor = request.user.profesor
     
+    total_competitions = Competencia.objects.filter(
+        profesor=profesor
+    ).count()
+    
     bitacoras = Bitacora_Profesor.objects.filter(
         profesor=profesor
     ).order_by(
@@ -306,6 +310,7 @@ def dashboard(request):
             'total_groups': total_groups,
             'total_lists': total_lists,
             'total_students': total_students,
+            'total_competitions': total_competitions,
             'level_counts': level_counts,
             'level_percentages': level_percentages,
             'group_performance': group_performance,
