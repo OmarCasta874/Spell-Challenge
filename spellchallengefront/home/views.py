@@ -1108,13 +1108,12 @@ def gen_panel(request):
         'administrator/gen_panel.html',
         context
     )
-
 @never_cache
 @role_required('administrator')
 def admin_teachers(request):
     if request.method == 'POST':
         action = request.POST.get('action')
-        
+
         if action == 'add_teacher':
             teacher_code = request.POST.get('teacher_code', '').strip()
             first_name = request.POST.get('first_name', '').strip()
@@ -1123,39 +1122,32 @@ def admin_teachers(request):
             email = request.POST.get('email', '').strip()
             phone = request.POST.get('phone', '').strip()
             password = request.POST.get('password', '')
-            
+
             if Usuario.objects.filter(codigo=teacher_code).exists():
-                messages.error(
-                    request,
-                    'A user with this teacher code already exists. '
-                )
+                messages.error(request, 'A user with this teacher code already exists.')
                 return redirect('admin_teachers')
-            
+
             if Usuario.objects.filter(correo=email).exists():
-                messages.error(
-                    request,
-                    'A user with this email already exists. '
-                )
+                messages.error(request, 'A user with this email already exists.')
                 return redirect('admin_teachers')
-            
+
             try:
                 with transaction.atomic():
-                    tipo_teacher = TipoUsuario.objects.get(
-                        clave='TUSR02'
-                    )
-                    
+                    tipo_teacher = TipoUsuario.objects.get(clave='TUSR02')
+
                     usuario = Usuario.objects.create_user(
                         correo=email,
                         password=password,
                         codigo=teacher_code,
                         nombre_pila=first_name,
                         apellidoPaterno=last_name,
+                        apellidoMaterno=second_last_name,
                         numero_telefono=phone,
                         tipo_usuario=tipo_teacher,
                         is_active=True,
                         is_staff=False,
                     )
-                    
+
                     Profesor.objects.create(
                         clave=teacher_code,
                         nombre_pila=first_name,
@@ -1163,27 +1155,76 @@ def admin_teachers(request):
                         apellidoMaterno=second_last_name,
                         usuario=usuario,
                     )
-                    
-                messages.success(
-                    request,
-                    'Teacher created successfully.'
-                )
+
+                messages.success(request, 'Teacher created successfully.')
+
             except Exception as e:
-                messages.error(
-                    request,
-                    f'Error creating teacher: {str(e)}'
-                )
-                
+                messages.error(request, f'Error creating teacher: {str(e)}')
+
             return redirect('admin_teachers')
-    
+
+        elif action == 'edit_teacher':
+            teacher_code = request.POST.get('teacher_id', '').strip()
+            email = request.POST.get('email', '').strip()
+            phone = request.POST.get('phone', '').strip()
+            password = request.POST.get('password', '').strip()
+
+            try:
+                usuario = Usuario.objects.get(codigo=teacher_code)
+            except Usuario.DoesNotExist:
+                messages.error(request, 'Teacher not found.')
+                return redirect('admin_teachers')
+
+            if Usuario.objects.filter(correo=email).exclude(codigo=teacher_code).exists():
+                messages.error(request, 'Another user already has this email.')
+                return redirect('admin_teachers')
+
+            try:
+                with transaction.atomic():
+                    usuario.correo = email
+                    usuario.numero_telefono = phone
+
+                    if password:
+                        usuario.set_password(password)
+
+                    usuario.save()
+
+                messages.success(request, 'Teacher updated successfully.')
+
+            except Exception as e:
+                messages.error(request, f'Error updating teacher: {str(e)}')
+
+            return redirect('admin_teachers')
+
+        elif action == 'delete_teacher':
+            teacher_code = request.POST.get('teacher_id', '').strip()
+
+            try:
+                usuario = Usuario.objects.get(codigo=teacher_code)
+            except Usuario.DoesNotExist:
+                messages.error(request, 'Teacher not found.')
+                return redirect('admin_teachers')
+
+            try:
+                with transaction.atomic():
+                    usuario.is_active = False
+                    usuario.save()
+
+                messages.success(request, 'Teacher deactivated successfully.')
+
+            except Exception as e:
+                messages.error(request, f'Error deactivating teacher: {str(e)}')
+
+            return redirect('admin_teachers')
+
     search_query = request.GET.get('search', '').strip()
     group_filter = request.GET.get('group', 'ALL')
     status_filter = request.GET.get('status', 'ALL')
-    
+
     teachers = Profesor.objects.select_related('usuario').prefetch_related(
         'grupos__grupo_alumnos__alumno'
     )
-    
+
     if search_query:
         teachers = teachers.filter(
             Q(nombre_pila__icontains=search_query) |
@@ -1191,69 +1232,62 @@ def admin_teachers(request):
             Q(apellidoMaterno__icontains=search_query) |
             Q(usuario__correo__icontains=search_query)
         )
-        
+
     if group_filter != 'ALL':
-        teachers = teachers.filter(
-            grupos__nombre=group_filter
-        ).distinct()
-        
+        teachers = teachers.filter(grupos__nombre=group_filter).distinct()
+
     if status_filter == 'ACTIVE':
-        teachers = teachers.filter(
-            usuario__is_active=True
-        )
-        
+        teachers = teachers.filter(usuario__is_active=True)
     elif status_filter == 'INACTIVE':
-        teachers = teachers.filter(
-            usuario__is_active=False
-        )
-    
+        teachers = teachers.filter(usuario__is_active=False)
+
     teachers_data = []
-    
+
     for teacher in teachers:
         assigned_groups = []
         students = set()
-        
+
         for group in teacher.grupos.all():
             assigned_groups.append(group.nombre)
-            
             for group_student in group.grupo_alumnos.all():
                 students.add(group_student.alumno.matricula)
-                
+
         full_name = (
             f"{teacher.nombre_pila} "
             f"{teacher.apellidoPaterno} "
             f"{teacher.apellidoMaterno or ''}"
         ).strip()
-        
+
         teachers_data.append({
             'id': teacher.clave,
             'full_name': full_name,
+            'first_name': teacher.nombre_pila,
+            'last_name': teacher.apellidoPaterno,
+            'second_last_name': teacher.apellidoMaterno or '',
             'email': teacher.usuario.correo,
+            'phone': teacher.usuario.numero_telefono,
             'assigned_groups': assigned_groups,
+            'groups_display': ', '.join(assigned_groups) if assigned_groups else 'No groups',
             'students_count': len(students),
             'status': 'ACTIVE' if teacher.usuario.is_active else 'INACTIVE',
         })
-        
+
     available_groups = (
         Grupo.objects
         .values_list('nombre', flat=True)
         .distinct()
         .order_by('nombre')
     )
-        
+
     context = {
         'teachers': teachers_data,
         'search_query': search_query,
         'group_filter': group_filter,
         'status_filter': status_filter,
-        'avaliable_groups': available_groups,
+        'available_groups': available_groups,
     }
-    
-    return render(
-        request, 
-        'administrator/teachers.html',
-        context
-    )
+
+    return render(request, 'administrator/teachers.html', context)
 
 @never_cache
 @role_required('administrator')
@@ -1262,12 +1296,11 @@ def admin_users(request):
     role_filter = request.GET.get('role', 'ALL')
     group_filter = request.GET.get('group', 'ALL')
     status_filter = request.GET.get('status', 'ALL')
-    
+
     if request.method == 'POST':
         action = request.POST.get('action')
-        
+
         if action == 'add_user':
-            
             user_code = request.POST.get('user_code', '').strip()
             first_name = request.POST.get('first_name', '').strip()
             last_name = request.POST.get('last_name', '').strip()
@@ -1277,39 +1310,25 @@ def admin_users(request):
             password = request.POST.get('password', '').strip()
             role = request.POST.get('role', 'STUDENT')
             status = request.POST.get('status', 'ACTIVE')
-            
+
             if Usuario.objects.filter(codigo=user_code).exists():
-                messages.error(
-                    request,
-                    'A user with this code already exists.'
-                )
+                messages.error(request, 'A user with this code already exists.')
                 return redirect('admin_users')
-            
+
             if Usuario.objects.filter(correo=email).exists():
-                messages.error(
-                    request,
-                    'A user with this email already exists.'
-                )
+                messages.error(request, 'A user with this email already exists.')
                 return redirect('admin_users')
-            
+
             try:
                 with transaction.atomic():
                     if role == 'STUDENT':
                         level_code = request.POST.get('level')
                         career_code = request.POST.get('career')
-                        
-                        tipo_student = TipoUsuario.objects.get(
-                            clave='TUSR01'
-                        )
-                        
-                        level = Nivel.objects.get(
-                            codigo=level_code
-                        )
-                        
-                        career = Carrera.objects.get(
-                            clave=career_code
-                        )
-                        
+
+                        tipo_student = TipoUsuario.objects.get(clave='TUSR01')
+                        level = Nivel.objects.get(codigo=level_code)
+                        career = Carrera.objects.get(clave=career_code)
+
                         usuario = Usuario.objects.create_user(
                             correo=email,
                             password=password,
@@ -1322,7 +1341,7 @@ def admin_users(request):
                             is_active=(status == 'ACTIVE'),
                             is_staff=False,
                         )
-                        
+
                         Alumno.objects.create(
                             matricula=user_code,
                             nombre_pila=first_name,
@@ -1332,18 +1351,12 @@ def admin_users(request):
                             nivel=level,
                             carrera=career,
                         )
-                        
-                        messages.success(
-                            request,
-                            'Student registered successfully.'
-                        )
-                        
+
+                        messages.success(request, 'Student registered successfully.')
+
                     elif role == 'TEACHER':
-                        
-                        tipo_teacher = TipoUsuario.objects.get(
-                            clave='TUSR02'
-                        )
-                        
+                        tipo_teacher = TipoUsuario.objects.get(clave='TUSR02')
+
                         usuario = Usuario.objects.create_user(
                             correo=email,
                             password=password,
@@ -1356,7 +1369,7 @@ def admin_users(request):
                             is_active=(status == 'ACTIVE'),
                             is_staff=False,
                         )
-                        
+
                         Profesor.objects.create(
                             clave=user_code,
                             nombre_pila=first_name,
@@ -1364,17 +1377,12 @@ def admin_users(request):
                             apellidoMaterno=second_last_name,
                             usuario=usuario,
                         )
-                        
-                        messages.success(
-                            request,
-                            'Teacher registered successfully. '
-                        )
-                        
+
+                        messages.success(request, 'Teacher registered successfully.')
+
                     elif role == 'ADMIN':
-                        tipo_admin = TipoUsuario.objects.get(
-                            clave='TUSR03'
-                        )
-                        
+                        tipo_admin = TipoUsuario.objects.get(clave='TUSR03')
+
                         usuario = Usuario.objects.create_user(
                             correo=email,
                             password=password,
@@ -1387,7 +1395,7 @@ def admin_users(request):
                             is_active=(status == 'ACTIVE'),
                             is_staff=False,
                         )
-                        
+
                         Administrador.objects.create(
                             clave=user_code,
                             nombre_pila=first_name,
@@ -1395,30 +1403,22 @@ def admin_users(request):
                             apellidoMaterno=second_last_name,
                             usuario=usuario,
                         )
-                        
-                        messages.success(
-                            request,
-                            'Administrator registered successfully.'
-                        )
-                        
+
+                        messages.success(request, 'Administrator registered successfully.')
+
                     else:
-                        messages.error(
-                            request,
-                            'This role is not available yet.'
-                        )
-                    
+                        messages.error(request, 'This role is not available yet.')
+
                     if role in ['STUDENT', 'TEACHER', 'ADMIN']:
                         number_bitacora = 1
-                        
                         while Bitacora_Administrador.objects.filter(
                             codigo=f'BITA{number_bitacora:02d}'
                         ).exists():
                             number_bitacora += 1
-                            
+
                         codigo_bitacora = f'BITA{number_bitacora:02d}'
-                        
                         now = timezone.localtime()
-                        
+
                         Bitacora_Administrador.objects.create(
                             codigo=codigo_bitacora,
                             fecha_generacion=now.date(),
@@ -1426,22 +1426,133 @@ def admin_users(request):
                             accion=f'Created a new user: {first_name} {last_name}.',
                             usuario=request.user
                         )
-                    
+
             except Exception as e:
-                messages.error(
-                    request,
-                    f'Error registering user: {str(e)}'
-                )
-                
+                messages.error(request, f'Error registering user: {str(e)}')
+
             return redirect('admin_users')
-    
+
+        elif action == 'edit_user':
+            user_code = request.POST.get('user_id', '').strip()
+            email = request.POST.get('email', '').strip()
+            phone = request.POST.get('phone', '').strip()
+            password = request.POST.get('password', '').strip()
+            role = request.POST.get('role', 'STUDENT')
+            status = request.POST.get('status', 'ACTIVE')
+
+            try:
+                usuario = Usuario.objects.get(codigo=user_code)
+            except Usuario.DoesNotExist:
+                messages.error(request, 'User not found.')
+                return redirect('admin_users')
+
+            if Usuario.objects.filter(correo=email).exclude(codigo=user_code).exists():
+                messages.error(request, 'Another user already has this email.')
+                return redirect('admin_users')
+
+            try:
+                with transaction.atomic():
+                    usuario.correo = email
+                    usuario.numero_telefono = phone
+                    usuario.is_active = (status == 'ACTIVE')
+
+                    if password:
+                        usuario.set_password(password)
+
+                    role_map = {
+                        'STUDENT': 'TUSR01',
+                        'TEACHER': 'TUSR02',
+                        'ADMIN': 'TUSR03',
+                    }
+
+                    if role in role_map:
+                        usuario.tipo_usuario = TipoUsuario.objects.get(clave=role_map[role])
+
+                    usuario.save()
+
+                    if role == 'STUDENT':
+                        level_code = request.POST.get('level', '').strip()
+                        career_code = request.POST.get('career', '').strip()
+
+                        try:
+                            alumno = Alumno.objects.get(usuario=usuario)
+                            if level_code:
+                                alumno.nivel = Nivel.objects.get(codigo=level_code)
+                            if career_code:
+                                alumno.carrera = Carrera.objects.get(clave=career_code)
+                            alumno.save()
+                        except Alumno.DoesNotExist:
+                            pass
+
+                    number_bitacora = 1
+                    while Bitacora_Administrador.objects.filter(
+                        codigo=f'BITA{number_bitacora:02d}'
+                    ).exists():
+                        number_bitacora += 1
+
+                    codigo_bitacora = f'BITA{number_bitacora:02d}'
+                    now = timezone.localtime()
+
+                    Bitacora_Administrador.objects.create(
+                        codigo=codigo_bitacora,
+                        fecha_generacion=now.date(),
+                        hora_generacion=now.time(),
+                        accion=f'Updated user: {usuario.nombre_pila} {usuario.apellidoPaterno}.',
+                        usuario=request.user
+                    )
+
+                messages.success(request, 'User updated successfully.')
+
+            except Exception as e:
+                messages.error(request, f'Error updating user: {str(e)}')
+
+            return redirect('admin_users')
+
+        elif action == 'delete_user':
+            user_code = request.POST.get('user_id', '').strip()
+
+            try:
+                usuario = Usuario.objects.get(codigo=user_code)
+            except Usuario.DoesNotExist:
+                messages.error(request, 'User not found.')
+                return redirect('admin_users')
+
+            try:
+                with transaction.atomic():
+                    usuario.is_active = False
+                    usuario.save()
+
+                    number_bitacora = 1
+                    while Bitacora_Administrador.objects.filter(
+                        codigo=f'BITA{number_bitacora:02d}'
+                    ).exists():
+                        number_bitacora += 1
+
+                    codigo_bitacora = f'BITA{number_bitacora:02d}'
+                    now = timezone.localtime()
+
+                    Bitacora_Administrador.objects.create(
+                        codigo=codigo_bitacora,
+                        fecha_generacion=now.date(),
+                        hora_generacion=now.time(),
+                        accion=f'Deactivated user: {usuario.nombre_pila} {usuario.apellidoPaterno}.',
+                        usuario=request.user
+                    )
+
+                messages.success(request, 'User deactivated successfully.')
+
+            except Exception as e:
+                messages.error(request, f'Error deactivating user: {str(e)}')
+
+            return redirect('admin_users')
+
     users = Usuario.objects.select_related(
         'tipo_usuario'
     ).prefetch_related(
         'alumno__grupo_alumnos__grupo',
         'profesor__grupos'
     )
-    
+
     if search_query:
         users = users.filter(
             Q(nombre_pila__icontains=search_query) |
@@ -1449,106 +1560,94 @@ def admin_users(request):
             Q(apellidoMaterno__icontains=search_query) |
             Q(correo__icontains=search_query)
         )
-        
+
     if role_filter == 'STUDENT':
-        users = users.filter(
-            tipo_usuario__clave='TUSR01'
-        )
-        
+        users = users.filter(tipo_usuario__clave='TUSR01')
     elif role_filter == 'TEACHER':
-        users = users.filter(
-            tipo_usuario__clave='TUSR02'
-        )
-        
+        users = users.filter(tipo_usuario__clave='TUSR02')
     elif role_filter == 'ADMIN':
-        users = users.filter(
-            tipo_usuario__clave='TUSR03'
-        )
-        
+        users = users.filter(tipo_usuario__clave='TUSR03')
+
     if status_filter == 'ACTIVE':
-        users = users.filter(
-            is_active=True
-        )
-        
+        users = users.filter(is_active=True)
     elif status_filter == 'INACTIVE':
-        users = users.filter(
-            is_active=False
-        )
-        
+        users = users.filter(is_active=False)
+
     if group_filter != 'ALL':
         users = users.filter(
             Q(alumno__grupo_alumnos__grupo__nombre=group_filter) |
             Q(profesor__grupos__nombre=group_filter)
         ).distinct()
-        
+
     users_data = []
-    
+
     for user in users:
         full_name = (
             f"{user.nombre_pila} "
             f"{user.apellidoPaterno} "
             f"{user.apellidoMaterno or ''}"
         ).strip()
-        
+
         if user.tipo_usuario.clave == 'TUSR01':
             role = 'STUDENT'
-            
         elif user.tipo_usuario.clave == 'TUSR02':
             role = 'TEACHER'
-            
         elif user.tipo_usuario.clave == 'TUSR03':
             role = 'ADMIN'
-            
         else:
             role = user.tipo_usuario.nombre.upper()
-            
+
         groups = []
-        
         if role == 'STUDENT':
             try:
                 for membership in user.alumno.grupo_alumnos.all():
                     groups.append(membership.grupo.nombre)
             except Alumno.DoesNotExist:
                 pass
-            
         elif role == 'TEACHER':
             try:
                 for group in user.profesor.grupos.all():
                     groups.append(group.nombre)
             except Profesor.DoesNotExist:
                 pass
-            
+
         group_display = ', '.join(groups) if groups else 'N/A'
-        
+
         level = 'N/A'
-        
+        career_code = ''
         if role == 'STUDENT':
             try:
                 level = user.alumno.nivel.codigo
+                career_code = user.alumno.carrera.clave
             except Alumno.DoesNotExist:
                 pass
-            
+
         users_data.append({
             'id': user.codigo,
             'full_name': full_name,
+            'first_name': user.nombre_pila,
+            'last_name': user.apellidoPaterno,
+            'second_last_name': user.apellidoMaterno or '',
             'email': user.correo,
+            'phone': user.numero_telefono,
             'role': role,
             'group': group_display,
             'level': level,
+            'career': career_code,
             'status': 'ACTIVE' if user.is_active else 'INACTIVE',
             'date_joined': 'N/A',
         })
-        
+
     available_groups = (
         Grupo.objects
         .values_list('nombre', flat=True)
         .distinct()
         .order_by('nombre')
     )
-    
+
     available_levels = Nivel.objects.order_by('codigo')
     available_careers = Carrera.objects.order_by('nombre')
-    
+
     context = {
         'users': users_data,
         'total_count': len(users_data),
@@ -1560,12 +1659,8 @@ def admin_users(request):
         'available_levels': available_levels,
         'available_careers': available_careers,
     }
-    
-    return render(
-        request, 
-        'administrator/users.html',
-        context
-    )
+
+    return render(request, 'administrator/users.html', context)
 
 @never_cache
 @role_required('administrator')

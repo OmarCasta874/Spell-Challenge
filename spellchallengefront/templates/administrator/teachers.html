@@ -18,7 +18,6 @@
     </button>
 </div>
 
-<!-- FILTERS AND SEARCH BAR -->
 <div class="panel-card filter-card">
     <form method="GET" action="{% url 'admin_teachers' %}" class="filter-form">
         <div class="search-box">
@@ -50,7 +49,6 @@
     </form>
 </div>
 
-<!-- TEACHERS DATA TABLE -->
 <div class="panel-card table-card">
     <table class="data-table">
         <thead>
@@ -86,26 +84,43 @@
                 </td>
                 <td class="actions-cell text-right">
                     <button 
-                        class="btn-icon btn-edit"
-                        onclick="openEditModal(
+                        class="btn-pill-outline"
+                        onclick="openViewModal(
                             '{{ t.id|escapejs }}',
-                            '{{ t.full_name|escapejs }}',
+                            '{{ t.first_name|escapejs }}',
+                            '{{ t.last_name|escapejs }}',
+                            '{{ t.second_last_name|escapejs }}',
                             '{{ t.email|escapejs }}',
-                            '{{ t.status|escapejs }}'
+                            '{{ t.phone|escapejs }}',
+                            '{{ t.status|escapejs }}',
+                            '{{ t.groups_display|escapejs }}'
                         )"
-                        title="Edit Teacher"
+                        type="button"
                     >
-                        ✏️
+                        VIEW
                     </button>
                     <button 
-                        class="btn-icon btn-delete"
-                        onclick="openDeleteModal(
+                        class="btn-pill-outline"
+                        onclick="openEditModal(
                             '{{ t.id|escapejs }}',
-                            '{{ t.full_name|escapejs }}'
+                            '{{ t.first_name|escapejs }}',
+                            '{{ t.last_name|escapejs }}',
+                            '{{ t.second_last_name|escapejs }}',
+                            '{{ t.email|escapejs }}',
+                            '{{ t.phone|escapejs }}',
+                            '{{ t.status|escapejs }}',
+                            '{{ t.groups_display|escapejs }}'
                         )"
-                        title="Deactivate Teacher"
+                        type="button"
                     >
-                        🗑️
+                        EDIT
+                    </button>
+                    <button 
+                        class="btn-pill-solid"
+                        onclick="openDeleteModal('{{ t.id|escapejs }}', '{{ t.full_name|escapejs }}')"
+                        type="button"
+                    >
+                        DELETE
                     </button>
                 </td>
             </tr>
@@ -120,9 +135,6 @@
     </table>
 </div>
 
-<!-- ========================================== -->
-<!-- MODAL: ADD / EDIT TEACHER                  -->
-<!-- ========================================== -->
 <div id="teacherModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -136,93 +148,71 @@
             <input type="hidden" id="formAction" name="action" value="add_teacher">
 
             <div class="modal-body">
+
                 <div class="form-field">
-                    <label for="teacherCode">Teacher Code</label>
-                    <input
-                        type="text"
-                        id="teacherCode"
-                        name="teacher_code"
-                        class="form-input"
-                        required
-                        maxlength="10"
-                        placeholder="e.g. PROF001"
-                    >
+                    <label>Teacher Code</label>
+                    <input type="text" id="teacherCode" name="teacher_code" class="form-input" required maxlength="10" placeholder="e.g. PROF001">
+                    <span class="form-readonly" id="teacherCodeRO"></span>
                 </div>
+
+                <div class="form-field" id="fullNameField" style="display: none;">
+                    <label>Full Name</label>
+                    <span class="form-readonly" id="fullNameRO"></span>
+                </div>
+
+                <div class="form-field" id="firstNameField">
+                    <label>First Name</label>
+                    <input type="text" id="firstName" name="first_name" class="form-input" required maxlength="30" placeholder="e.g. Alex">
+                    <span class="form-readonly" id="firstNameRO"></span>
+                </div>
+
+                <div class="form-field" id="lastNameField">
+                    <label>Last Name</label>
+                    <input type="text" id="lastName" name="last_name" class="form-input" required maxlength="30" placeholder="e.g. Smith">
+                    <span class="form-readonly" id="lastNameRO"></span>
+                </div>
+
+                <div class="form-field" id="secondLastNameField">
+                    <label>Second Last Name</label>
+                    <input type="text" id="secondLastName" name="second_last_name" class="form-input" maxlength="30" placeholder="e.g. Johnson">
+                    <span class="form-readonly" id="secondLastNameRO"></span>
+                </div>
+
                 <div class="form-field">
-                    <label for="firstName">First Name</label>
-                    <input
-                        type="text"
-                        id="firstName"
-                        name="first_name"
-                        class="form-input"
-                        required
-                        maxlength="30"
-                        placeholder="e.g. Alex"
-                    >
+                    <label>Email Address</label>
+                    <input type="email" id="email" name="email" class="form-input" required placeholder="teacher@spellchallenge.com">
+                    <span class="form-readonly" id="emailRO"></span>
                 </div>
+
                 <div class="form-field">
-                    <label for="lastName">Last Name</label>
-                    <input
-                        type="text"
-                        id="lastName"
-                        name="last_name"
-                        class="form-input"
-                        required
-                        maxlength="30"
-                        placeholder="e.g. Smith"
-                    >
+                    <label>Phone Number</label>
+                    <input type="tel" id="phone" name="phone" class="form-input" required maxlength="20" placeholder="e.g. 6641234567">
+                    <span class="form-readonly" id="phoneRO"></span>
                 </div>
+
+                <div class="form-field" id="passwordField">
+                    <label>Password</label>
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Enter a temporary password">
+                    <small class="form-hint" id="passwordHint">Required for new teachers.</small>
+                </div>
+
                 <div class="form-field">
-                    <label for="secondLastName">Second Last Name</label>
-                    <input
-                        type="text"
-                        id="secondLastName"
-                        name="second_last_name"
-                        class="form-input"
-                        maxlength="30"
-                        placeholder="e.g. Johnson"
-                    >
+                    <label>Assigned Groups</label>
+                    <input type="text" id="groupsDisplay" class="form-input" readonly placeholder="Managed from the Groups panel">
+                    <span class="form-readonly" id="groupsDisplayRO"></span>
                 </div>
-                <div class="form-field">
-                    <label for="email">Email Address</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        class="form-input"
-                        required
-                        placeholder="teacher@spellchallenge.com"
-                    >
+
+                <div class="form-field" id="statusField">
+                    <label>Status</label>
+                    <span class="form-readonly" id="statusRO"></span>
                 </div>
-                <div class="form-field">
-                    <label for="phone">Phone Number</label>
-                    <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        class="form-input"
-                        required
-                        maxlength="20"
-                        placeholder="e.g. 6641234567"
-                    >
-                </div>
-                <div class="form-field">
-                    <label for="password">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        class="form-input"
-                        required
-                        placeholder="Enter a temporary password"
-                    >
-                </div>
+
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('teacherModal')">
+                <button type="button" class="btn-pill-outline" id="cancelBtn" onclick="closeModal('teacherModal')">
                     Cancel
                 </button>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn-pill-solid" id="saveBtn">
                     Save Teacher
                 </button>
             </div>
@@ -230,9 +220,6 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- MODAL: DELETE CONFIRMATION                 -->
-<!-- ========================================== -->
 <div id="deleteModal" class="modal-overlay">
     <div class="modal-content modal-small">
         <div class="modal-header">
@@ -247,10 +234,12 @@
             </p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancel</button>
-            <form method="POST" action="#" id="deleteForm" style="display:inline;">
+            <button type="button" class="btn-pill-outline" onclick="closeModal('deleteModal')">Cancel</button>
+            <form method="POST" action="{% url 'admin_teachers' %}" id="deleteForm" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Confirm Deactivate</button>
+                <input type="hidden" name="action" value="delete_teacher">
+                <input type="hidden" name="teacher_id" id="deleteTeacherId">
+                <button type="submit" class="btn-pill-solid">Confirm Deactivate</button>
             </form>
         </div>
     </div>
@@ -268,31 +257,82 @@
         document.getElementById(modalId).classList.remove('active');
     }
 
+    function setFormReadOnly(readOnly) {
+        const form = document.getElementById('teacherForm');
+
+        form.querySelectorAll('input, select').forEach(el => {
+            if (el.type === 'hidden') return;
+            el.style.display = readOnly ? 'none' : '';
+        });
+
+        form.querySelectorAll('.form-readonly').forEach(el => {
+            el.style.display = readOnly ? 'block' : 'none';
+        });
+
+        document.getElementById('passwordField').style.display = readOnly ? 'none' : 'block';
+        document.getElementById('fullNameField').style.display = readOnly ? 'block' : 'none';
+        document.getElementById('firstNameField').style.display = readOnly ? 'none' : 'block';
+        document.getElementById('lastNameField').style.display = readOnly ? 'none' : 'block';
+        document.getElementById('secondLastNameField').style.display = readOnly ? 'none' : 'block';
+
+        document.getElementById('saveBtn').style.display = readOnly ? 'none' : 'inline-block';
+        document.getElementById('cancelBtn').textContent = readOnly ? 'Close' : 'Cancel';
+    }
+
+    function fillForm(id, firstName, lastName, secondLastName, email, phone, status, groups) {
+        document.getElementById('teacherId').value = id;
+        document.getElementById('teacherCode').value = id;
+        document.getElementById('firstName').value = firstName;
+        document.getElementById('lastName').value = lastName;
+        document.getElementById('secondLastName').value = secondLastName;
+        document.getElementById('email').value = email;
+        document.getElementById('phone').value = phone;
+        document.getElementById('groupsDisplay').value = groups;
+
+        document.getElementById('teacherCodeRO').innerText = id;
+        const fullName = `${firstName} ${lastName} ${secondLastName}`.trim();
+        document.getElementById('fullNameRO').innerText = fullName;
+        document.getElementById('firstNameRO').innerText = firstName;
+        document.getElementById('lastNameRO').innerText = lastName;
+        document.getElementById('secondLastNameRO').innerText = secondLastName;
+        document.getElementById('emailRO').innerText = email;
+        document.getElementById('phoneRO').innerText = phone;
+        document.getElementById('groupsDisplayRO').innerText = groups;
+        document.getElementById('statusRO').innerText = status;
+    }
+
     function openAddModal() {
         document.getElementById('modalTitle').innerText = 'Add New Teacher';
         document.getElementById('teacherForm').reset();
-
         document.getElementById('teacherId').value = '';
         document.getElementById('formAction').value = 'add_teacher';
-
-        document.getElementById('teacherCode').disabled = false;
         document.getElementById('password').required = true;
-        
+        document.getElementById('passwordHint').innerText = 'Required for new teachers.';
+        setFormReadOnly(false);
         openModal('teacherModal');
     }
 
-    function openEditModal(id, name, email, status) {
+    function openEditModal(id, firstName, lastName, secondLastName, email, phone, status, groups) {
         document.getElementById('modalTitle').innerText = 'Edit Teacher';
-        document.getElementById('teacherId').value = id;
-        document.getElementById('fullName').value = name;
-        document.getElementById('email').value = email;
-        document.getElementById('teacherStatus').value = status;
-        
+        document.getElementById('formAction').value = 'edit_teacher';
+        document.getElementById('password').required = false;
+        document.getElementById('passwordHint').innerText = 'Leave blank to keep current password.';
+        fillForm(id, firstName, lastName, secondLastName, email, phone, status, groups);
+        setFormReadOnly(false);
+        openModal('teacherModal');
+    }
+
+    function openViewModal(id, firstName, lastName, secondLastName, email, phone, status, groups) {
+        document.getElementById('modalTitle').innerText = 'View Teacher';
+        document.getElementById('formAction').value = 'view_teacher';
+        fillForm(id, firstName, lastName, secondLastName, email, phone, status, groups);
+        setFormReadOnly(true);
         openModal('teacherModal');
     }
 
     function openDeleteModal(id, name) {
         document.getElementById('deleteTeacherName').innerText = name;
+        document.getElementById('deleteTeacherId').value = id;
         openModal('deleteModal');
     }
 
@@ -303,4 +343,3 @@
     }
 </script>
 {% endblock %}
-

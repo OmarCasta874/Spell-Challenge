@@ -37,38 +37,51 @@ body {
 /* METRICS CARDS */
 .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.2rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
     margin-bottom: 1.5rem;
 }
 
 .metric-card {
-    background-color: var(--accent-salmon);
-    border-radius: 12px;
-    padding: 1.2rem;
+    background-color: #fbe4e3;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
     display: flex;
     flex-direction: column;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .metric-icon {
-    width: 22px;
-    height: 22px;
-    color: var(--primary-red);
-    margin-bottom: 0.6rem;
+    width: 34px;
+    height: 34px;
+    background: #ffffff;
+    border: 2px solid #7a1f2b;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7a1f2b;
+    margin-bottom: 0.5rem;
+    padding: 0;
+}
+
+.metric-icon i {
+    width: 18px;
+    height: 18px;
 }
 
 .metric-label {
     font-size: 0.85rem;
-    color: var(--text-dark);
+    color: #111111;
     font-weight: 700;
+    margin: 0;
 }
 
 .metric-value {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-top: 0.2rem;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #111111;
+    margin: 0.25rem 0 0;
 }
 
 /* LAYOUT GRIDS */
@@ -128,7 +141,6 @@ body {
     transform: translate(-50%, -50%);
 }
 
-/* Aproximado para el split 60/40 de ejemplo; si el corte real cambia mucho, hay que recalcular */
 .pie-label-students { left: 76%; top: 59%; }
 .pie-label-teachers { left: 24%; top: 41%; }
 

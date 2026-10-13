@@ -19,7 +19,6 @@
     </button>
 </div>
 
-<!-- BARRA DE BÚSQUEDA Y FILTROS AVANZADOS -->
 <div class="panel-card filter-card">
     <form method="GET" action="{% url 'admin_users' %}" class="filter-form">
         <div class="search-box">
@@ -58,7 +57,6 @@
     </form>
 </div>
 
-<!-- TABLA PRINCIPAL DE USUARIOS -->
 <div class="panel-card table-card">
     <table class="data-table">
         <thead>
@@ -108,21 +106,45 @@
                 <td class="actions-cell text-right">
                     <button 
                         class="btn-pill-outline" 
-                        onclick="openViewUserModal({{ u.id }}, '{{ u.full_name }}', '{{ u.email }}', '{{ u.role }}', '{{ u.status }}')"
+                        onclick="openViewUserModal(
+                            '{{ u.id|escapejs }}',
+                            '{{ u.first_name|escapejs }}',
+                            '{{ u.last_name|escapejs }}',
+                            '{{ u.second_last_name|escapejs }}',
+                            '{{ u.email|escapejs }}',
+                            '{{ u.phone|escapejs }}',
+                            '{{ u.role|escapejs }}',
+                            '{{ u.status|escapejs }}',
+                            '{{ u.level|escapejs }}',
+                            '{{ u.career|escapejs }}',
+                            '{{ u.group|escapejs }}'
+                        )"
                         type="button"
                     >
                         VIEW
                     </button>
                     <button 
                         class="btn-pill-outline" 
-                        onclick="openEditUserModal({{ u.id }}, '{{ u.full_name }}', '{{ u.email }}', '{{ u.role }}', '{{ u.status }}')"
+                        onclick="openEditUserModal(
+                            '{{ u.id|escapejs }}',
+                            '{{ u.first_name|escapejs }}',
+                            '{{ u.last_name|escapejs }}',
+                            '{{ u.second_last_name|escapejs }}',
+                            '{{ u.email|escapejs }}',
+                            '{{ u.phone|escapejs }}',
+                            '{{ u.role|escapejs }}',
+                            '{{ u.status|escapejs }}',
+                            '{{ u.level|escapejs }}',
+                            '{{ u.career|escapejs }}',
+                            '{{ u.group|escapejs }}'
+                        )"
                         type="button"
                     >
                         EDIT
                     </button>
                     <button 
                         class="btn-pill-solid" 
-                        onclick="openDeleteUserModal({{ u.id }}, '{{ u.full_name }}')"
+                        onclick="openDeleteUserModal('{{ u.id|escapejs }}', '{{ u.full_name|escapejs }}')"
                         type="button"
                     >
                         DELETE
@@ -140,228 +162,155 @@
     </table>
 </div>
 
-<!-- ========================================== -->
-<!-- MODAL: CREAR / EDITAR USUARIO              -->
-<!-- ========================================== -->
 <div id="userModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
             <h3 id="userModalTitle">Register New User</h3>
-            <button
-                class="modal-close"
-                onclick="closeModal('userModal')"
-                type="button"
-            >
-                &times;
-            </button>
+            <button class="modal-close" onclick="closeModal('userModal')" type="button">&times;</button>
         </div>
+
         <form method="POST" action="{% url 'admin_users' %}" id="userForm">
             {% csrf_token %}
             <input type="hidden" id="userId" name="user_id">
             <input type="hidden" id="formAction" name="action" value="add_user">
+
             <div class="modal-body">
+
                 <!-- USER CODE -->
                 <div class="form-field">
-                    <label for="userCode">Student Code</label>
-                    <input
-                        type="text"
-                        id="userCode"
-                        name="user_code"
-                        class="form-input"
-                        required
-                        maxlength="10"
-                        placeholder="e.g. ALUM001"
-                    >
+                    <label>User Code</label>
+                    <input type="text" id="userCode" name="user_code" class="form-input" required maxlength="10" placeholder="e.g. ALUM001">
+                    <span class="form-readonly" id="userCodeRO"></span>
                 </div>
+
+                <!-- FULL NAME (solo VIEW) -->
+                <div class="form-field" id="fullNameField" style="display: none;">
+                    <label>Full Name</label>
+                    <span class="form-readonly" id="fullNameRO"></span>
+                </div>
+
                 <!-- FIRST NAME -->
-                <div class="form-field">
-                    <label for="firstName">First Name</label>
-                    <input
-                        type="text"
-                        id="firstName"
-                        name="first_name"
-                        class="form-input"
-                        required
-                        maxlength="30"
-                        placeholder="e.g. Maria"
-                    >
+                <div class="form-field" id="firstNameField">
+                    <label>First Name</label>
+                    <input type="text" id="firstName" name="first_name" class="form-input" required maxlength="30" placeholder="e.g. Maria">
+                    <span class="form-readonly" id="firstNameRO"></span>
                 </div>
+
                 <!-- LAST NAME -->
-                <div class="form-field">
-                    <label for="lastName">Last Name</label>
-                    <input
-                        type="text"
-                        id="lastName"
-                        name="last_name"
-                        class="form-input"
-                        required
-                        maxlength="30"
-                        placeholder="e.g. Perez"
-                    >
+                <div class="form-field" id="lastNameField">
+                    <label>Last Name</label>
+                    <input type="text" id="lastName" name="last_name" class="form-input" required maxlength="30" placeholder="e.g. Perez">
+                    <span class="form-readonly" id="lastNameRO"></span>
                 </div>
+
                 <!-- SECOND LAST NAME -->
-                <div class="form-field">
-                    <label for="secondLastName">Second Last Name</label>
-                    <input
-                        type="text"
-                        id="secondLastName"
-                        name="second_last_name"
-                        class="form-input"
-                        maxlength="30"
-                        placeholder="e.g. Lopez"
-                    >
+                <div class="form-field" id="secondLastNameField">
+                    <label>Second Last Name</label>
+                    <input type="text" id="secondLastName" name="second_last_name" class="form-input" maxlength="30" placeholder="e.g. Lopez">
+                    <span class="form-readonly" id="secondLastNameRO"></span>
                 </div>
+
                 <!-- EMAIL -->
                 <div class="form-field">
-                    <label for="userEmail">Email Address</label>
-                    <input
-                        type="email"
-                        id="userEmail"
-                        name="email"
-                        class="form-input"
-                        required
-                        placeholder="student@spellchallenge.com"
-                    >
+                    <label>Email Address</label>
+                    <input type="email" id="userEmail" name="email" class="form-input" required placeholder="student@spellchallenge.com">
+                    <span class="form-readonly" id="userEmailRO"></span>
                 </div>
+
                 <!-- PHONE -->
                 <div class="form-field">
-                    <label for="userPhone">Phone Number</label>
-                    <input
-                        type="tel"
-                        id="userPhone"
-                        name="phone"
-                        class="form-input"
-                        required
-                        maxlength="20"
-                        placeholder="e.g. 6641234567"
-                    >
+                    <label>Phone Number</label>
+                    <input type="tel" id="userPhone" name="phone" class="form-input" required maxlength="20" placeholder="e.g. 6641234567">
+                    <span class="form-readonly" id="userPhoneRO"></span>
                 </div>
-                <!-- PASSWORD -->
-                <div class="form-field">
-                    <label for="userPassword">Password</label>
-                    <input
-                        type="password"
-                        id="userPassword"
-                        name="password"
-                        class="form-input"
-                        required
-                        placeholder="Enter a temporary password"
-                    >
+
+                <!-- PASSWORD (solo CREATE/EDIT) -->
+                <div class="form-field" id="passwordField">
+                    <label>Password</label>
+                    <input type="password" id="userPassword" name="password" class="form-input" placeholder="Enter a temporary password">
+                    <small class="form-hint" id="passwordHint">Required for new users.</small>
                 </div>
+
                 <!-- ROLE + STATUS -->
                 <div class="form-row">
                     <div class="form-field flex-1">
-                        <label for="userRole">System Role</label>
-                        <select
-                            id="userRole"
-                            name="role"
-                            class="form-select"
-                            onchange="toggleRoleFields()"
-                        >
+                        <label>System Role</label>
+                        <select id="userRole" name="role" class="form-select" onchange="toggleRoleFields()">
                             <option value="STUDENT">Student</option>
                             <option value="TEACHER">Teacher</option>
                             <option value="ADMIN">Administrator</option>
                         </select>
+                        <span class="form-readonly" id="userRoleRO"></span>
                     </div>
                     <div class="form-field flex-1">
-                        <label for="userStatus">Account Status</label>
-                        <select
-                            id="userStatus"
-                            name="status"
-                            class="form-select"
-                        >
+                        <label>Account Status</label>
+                        <select id="userStatus" name="status" class="form-select">
                             <option value="ACTIVE">Active</option>
                             <option value="INACTIVE">Inactive</option>
                         </select>
+                        <span class="form-readonly" id="userStatusRO"></span>
                     </div>
                 </div>
+
                 <!-- STUDENT FIELDS -->
                 <div id="studentFields">
-                    <!-- LEVEL -->
                     <div class="form-field">
-                        <label for="userLevel">English Level</label>
-
-                        <select
-                            id="userLevel"
-                            name="level"
-                            class="form-select"
-                        >
+                        <label>English Level</label>
+                        <select id="userLevel" name="level" class="form-select">
                             <option value="">-- Select Level --</option>
                             {% for level in available_levels %}
-                                <option value="{{ level.codigo }}">
-                                    {{ level.codigo }} - {{ level.descripcion }}
-                                </option>
+                                <option value="{{ level.codigo }}">{{ level.codigo }} - {{ level.descripcion }}</option>
                             {% endfor %}
                         </select>
+                        <span class="form-readonly" id="userLevelRO"></span>
                     </div>
-                    <!-- CAREER -->
+
                     <div class="form-field">
-                        <label for="userCareer">Career</label>
-                        <select
-                            id="userCareer"
-                            name="career"
-                            class="form-select"
-                        >
+                        <label>Career</label>
+                        <select id="userCareer" name="career" class="form-select">
                             <option value="">-- Select Career --</option>
                             {% for career in available_careers %}
-                                <option value="{{ career.clave }}">
-                                    {{ career.nombre }}
-                                </option>
+                                <option value="{{ career.clave }}">{{ career.nombre }}</option>
                             {% endfor %}
                         </select>
+                        <span class="form-readonly" id="userCareerRO"></span>
                     </div>
-                    <!-- GROUP -->
-                    <div class="form-field">
-                        <label for="userGroup">Assigned Group</label>
-                        <select
-                            id="userGroup"
-                            name="group"
-                            class="form-select"
-                        >
-                            <option value="">-- No Group --</option>
-                            {% for g in available_groups %}
-                                <option value="{{ g }}">
-                                    {{ g }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <!-- TEACHER FIELDS -->
-                <div id="teacherFields" style="display: none;">
 
+                    <div class="form-field">
+                        <label>Assigned Group(s)</label>
+                        <input type="text" id="userGroupDisplay" class="form-input" readonly placeholder="Managed from the Groups panel">
+                        <span class="form-readonly" id="userGroupRO"></span>
+                    </div>
                 </div>
+
+                <div id="teacherFields" style="display: none;"></div>
             </div>
+
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('userModal')">
-                    Cancel
-                </button>
-                <button type="submit" class="btn btn-primary">
-                    Save User
-                </button>
+                <button type="button" class="btn-pill-outline" id="cancelBtn" onclick="closeModal('userModal')">Cancel</button>
+                <button type="submit" class="btn-pill-solid" id="saveBtn">Save User</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- MODAL: ELIMINAR USUARIO                    -->
-<!-- ========================================== -->
 <div id="deleteUserModal" class="modal-overlay">
     <div class="modal-content modal-small">
         <div class="modal-header">
-            <h3>Delete User Account</h3>
+            <h3>Deactivate User Account</h3>
             <button class="modal-close" onclick="closeModal('deleteUserModal')">&times;</button>
         </div>
         <div class="modal-body">
-            <p>Are you sure you want to permanently delete <strong id="deleteUserName"></strong>?</p>
-            <p class="warning-text">This action will remove their historical scores, competition records, and login access.</p>
+            <p>Are you sure you want to deactivate <strong id="deleteUserName"></strong>?</p>
+            <p class="warning-text">The user will no longer be able to log in, but their information will be preserved.</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteUserModal')">Cancel</button>
-            <form method="POST" action="#" id="deleteUserForm" style="display:inline;">
+            <button type="button" class="btn-pill-outline" onclick="closeModal('deleteUserModal')">Cancel</button>
+            <form method="POST" action="{% url 'admin_users' %}" id="deleteUserForm" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                <input type="hidden" name="action" value="delete_user">
+                <input type="hidden" name="user_id" id="deleteUserId">
+                <button type="submit" class="btn-pill-solid">Confirm Deactivate</button>
             </form>
         </div>
     </div>
@@ -381,24 +330,64 @@
 
     function setUserFormReadOnly(readOnly) {
         const form = document.getElementById('userForm');
+
+        // Ocultar todos los inputs/selects y mostrar spans en modo VIEW
         form.querySelectorAll('input, select').forEach(el => {
             if (el.type === 'hidden') return;
-            el.disabled = readOnly;
+            el.style.display = readOnly ? 'none' : '';
         });
-        document.querySelector('#userModal .modal-footer button[type="submit"]').style.display = readOnly ? 'none' : 'inline-block';
+
+        form.querySelectorAll('.form-readonly').forEach(el => {
+            el.style.display = readOnly ? 'block' : 'none';
+        });
+
+        // El campo "Password" se oculta en VIEW
+        document.getElementById('passwordField').style.display = readOnly ? 'none' : 'block';
+
+        // El nombre completo solo se muestra en VIEW
+        document.getElementById('fullNameField').style.display = readOnly ? 'block' : 'none';
+
+        // Los 3 campos de nombre se ocultan en VIEW
+        document.getElementById('firstNameField').style.display = readOnly ? 'none' : 'block';
+        document.getElementById('lastNameField').style.display = readOnly ? 'none' : 'block';
+        document.getElementById('secondLastNameField').style.display = readOnly ? 'none' : 'block';
+
+        // Botones
+        document.getElementById('saveBtn').style.display = readOnly ? 'none' : 'inline-block';
+        document.getElementById('cancelBtn').textContent = readOnly ? 'Close' : 'Cancel';
     }
 
-    function fillUserForm(id, name, email, role, status) {
+    function fillUserForm(id, firstName, lastName, secondLastName, email, phone, role, status, level, career, group) {
         document.getElementById('userId').value = id;
 
-        const nameParts = name.trim().split(' ');
-        document.getElementById('firstName').value = nameParts[0] || '';
-        document.getElementById('lastName').value = nameParts[1] || '';
-        document.getElementById('secondLastName').value = nameParts[2] || '';
-
+        // Inputs
+        document.getElementById('userCode').value = id;
+        document.getElementById('firstName').value = firstName;
+        document.getElementById('lastName').value = lastName;
+        document.getElementById('secondLastName').value = secondLastName;
         document.getElementById('userEmail').value = email;
+        document.getElementById('userPhone').value = phone;
         document.getElementById('userRole').value = role;
         document.getElementById('userStatus').value = status;
+        document.getElementById('userLevel').value = level !== 'N/A' ? level : '';
+        document.getElementById('userCareer').value = career;
+        document.getElementById('userGroupDisplay').value = group;
+
+        // Spans readonly (para VIEW)
+        document.getElementById('userCodeRO').innerText = id;
+
+        const fullName = `${firstName} ${lastName} ${secondLastName}`.trim();
+        document.getElementById('fullNameRO').innerText = fullName;
+        document.getElementById('firstNameRO').innerText = firstName;
+        document.getElementById('lastNameRO').innerText = lastName;
+        document.getElementById('secondLastNameRO').innerText = secondLastName;
+        document.getElementById('userEmailRO').innerText = email;
+        document.getElementById('userPhoneRO').innerText = phone;
+        document.getElementById('userRoleRO').innerText = role;
+        document.getElementById('userStatusRO').innerText = status;
+        document.getElementById('userLevelRO').innerText = level !== 'N/A' ? level : '—';
+        document.getElementById('userCareerRO').innerText = career || '—';
+        document.getElementById('userGroupRO').innerText = group;
 
         toggleRoleFields();
     }
@@ -408,28 +397,33 @@
         document.getElementById('userForm').reset();
         document.getElementById('userId').value = '';
         document.getElementById('formAction').value = 'add_user';
-        toggleRoleFields();
+        document.getElementById('userPassword').required = true;
+        document.getElementById('passwordHint').innerText = 'Required for new users.';
         setUserFormReadOnly(false);
         openModal('userModal');
     }
 
-    function openEditUserModal(id, name, email, role, status) {
+    function openEditUserModal(id, firstName, lastName, secondLastName, email, phone, role, status, level, career, group) {
         document.getElementById('userModalTitle').innerText = 'Edit User Profile';
         document.getElementById('formAction').value = 'edit_user';
-        fillUserForm(id, name, email, role, status);
+        document.getElementById('userPassword').required = false;
+        document.getElementById('passwordHint').innerText = 'Leave blank to keep the current password.';
+        fillUserForm(id, firstName, lastName, secondLastName, email, phone, role, status, level, career, group);
         setUserFormReadOnly(false);
         openModal('userModal');
     }
 
-    function openViewUserModal(id, name, email, role, status) {
+    function openViewUserModal(id, firstName, lastName, secondLastName, email, phone, role, status, level, career, group) {
         document.getElementById('userModalTitle').innerText = 'View User Profile';
-        fillUserForm(id, name, email, role, status);
+        document.getElementById('formAction').value = 'view_user';
+        fillUserForm(id, firstName, lastName, secondLastName, email, phone, role, status, level, career, group);
         setUserFormReadOnly(true);
         openModal('userModal');
     }
 
     function openDeleteUserModal(id, name) {
         document.getElementById('deleteUserName').innerText = name;
+        document.getElementById('deleteUserId').value = id;
         openModal('deleteUserModal');
     }
 
