@@ -241,6 +241,7 @@ class Carrera(models.Model):
 class Grupo(models.Model):
     codigo = models.CharField(max_length=10, primary_key=True)
     
+    codigo_union = models.CharField(max_length=6, unique=True)
     nombre = models.CharField(max_length=50)
     fecha_creacion = models.DateField(
         db_column='fechaCreacion'

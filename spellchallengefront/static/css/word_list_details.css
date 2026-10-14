@@ -1,0 +1,229 @@
+/* WORD LIST DETAILS */
+.words-details-page {
+    color: #3D3030;
+    padding: 12px 4px 32px;
+}
+
+.word-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.word-details-heading {
+    margin: 0 0 8px;
+    color: #7A1C1C;
+    font-size: 1.9rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.word-details-subtitle {
+    margin: 0;
+    color: #817474;
+    font-size: 0.95rem;
+}
+
+.word-details-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.word-details-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 13px;
+    border-radius: 30px;
+    background: #F8EEEE;
+    color: #7A1C1C;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.word-details-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 9px 15px;
+    border: 1px solid #EAD6D8;
+    border-radius: 9px;
+    background: #FFF;
+    color: #7A1C1C;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.word-details-back:hover {
+    background: #F8EEEE;
+    color: #5C1414;
+    transform: translateX(-2px);
+}
+
+.words-details-section {
+    margin: 30px 0 18px;
+}
+
+.words-details-section h4 {
+    margin: 0 0 6px;
+    color: #382626;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.word-details-grid {
+    display: grid;
+    grid-template-columns:  repeat(auto-fit, minmax(270px, 1fr));
+    gap: 20px;
+}
+
+.word-details-card {
+    min-width: 0;
+    padding: 22px;
+    overflow: hidden;
+    border: 1px solid #F0E5E5;
+    border-radius: 16px;
+    background: #FFF;
+    box-shadow:  0 5px 18px rgba(92, 20, 20, 0.055);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.word-details-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(92, 20, 20, 0.10);
+}
+
+.word-details-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #F1E8E8;
+}
+
+.word-details-number {
+    display: flex;
+    flex: 0 0 38px;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: #7A1C1C;
+    color: #FFF;
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+.word-details-word {
+    margin: 2px 0 0;
+    color: #7A1C1C;
+    font-size: 1.35rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.word-details-level {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 4px 9px;
+    border-radius: 20px;
+    background: #FFF3D0;
+    color: #795B10;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.word-details-field {
+    margin-bottom: 17px;
+}
+
+.word-details-field:last-child {
+    margin-bottom: 0;
+}
+
+.word-details-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #7A1C1C;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.word-details-value {
+    margin: 0;
+    color: #625757;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+
+.word-details-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+    margin-top: 10px;
+    padding: 12px;
+    border: 1px solid #F0E7E7;
+    border-radius: 12px;
+    background: #FDFAFA;
+}
+
+.word-details-image img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 8px;
+}
+
+.word-details-empty {
+    grid-column: 1 / -1;
+    padding: 42px 20px;
+    border: 1px dashed #DFC5C7;
+    border-radius: 16px;
+    background: #FFFAFA;
+    text-align: center;
+}
+
+.word-details-empty h5 {
+    margin-bottom: 8px;
+    color: #7A1C1C;
+    font-weight: 800;
+}
+
+.word-details-empty p {
+    margin: 0;
+    color: #897C7C;
+}
+
+@media (max-width: 576px) {
+    .word-details-page {
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    .word-details-heading {
+        font-size: 1.55rem;
+    }
+
+    .word-details-card {
+        padding: 17px;
+    }
+
+    .word-details-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+}

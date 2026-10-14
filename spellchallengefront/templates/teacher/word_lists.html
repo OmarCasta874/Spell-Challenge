@@ -18,55 +18,38 @@
 </div>
 
 <div class="row g-3">
-
-  <div class="col-md-4">
-    <div class="card wordlist-card p-3">
-      <h5>Greetings - A1</h5>
-      <div class="d-flex gap-2 mb-2">
-        <span class="badge-pill">20 words</span>
-        <span class="badge-pill">Beginner</span>
-      </div>
-      <small class="d-block mb-3 wordlist-date">Created: Sep 3, 2026</small>
-      <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-pill-outline">VIEW</button>
-        <button class="btn btn-sm btn-pill-outline">EDIT</button>
-        <button class="btn btn-sm btn-pill-delete">DELETE</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-4">
-    <div class="card wordlist-card p-3">
-      <h5>Family & People - A1</h5>
-      <div class="d-flex gap-2 mb-2">
-        <span class="badge-pill">20 words</span>
-        <span class="badge-pill">Beginner</span>
-      </div>
-      <small class="d-block mb-3 wordlist-date">Created: Sep 2, 2026</small>
-      <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-pill-outline">VIEW</button>
-        <button class="btn btn-sm btn-pill-outline">EDIT</button>
-        <button class="btn btn-sm btn-pill-delete">DELETE</button>
+  {% for lista in listas %}
+    <div class="col-md-4">
+      <div class="card wordlist-card p-3">
+        <h5>{{ lista.nombre }}</h5>
+        <div class="d-flex gap-2 mb-2">
+          <span class="badge-pill">{{ lista.total_palabras }} words</span>
+          <span class="badge-pill">{{ lista.numero_letras }} letters</span>
+        </div>
+        <small class="d-block mb-3 wordlist-date">
+          Created: {{ lista.fecha_asignacion|date:"M j, Y" }}
+        </small>
+        <div class="d-flex gap-2">
+          <a href="{% url 'view_word_list' lista.codigo %}" class="btn btn-sm btn-pill-outline">
+            VIEW
+          </a>
+          <button type="button" class="btn btn-sm btn-pill-outline">
+            EDIT
+          </button>
+          <button type="button" class="btn btn-sm btn-pill-delete">
+            DELETE
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-
-  <div class="col-md-4">
-    <div class="card wordlist-card p-3">
-      <h5>Capitals and Countries - A1</h5>
-      <div class="d-flex gap-2 mb-2">
-        <span class="badge-pill">20 words</span>
-        <span class="badge-pill">Beginner</span>
-      </div>
-      <small class="d-block mb-3 wordlist-date">Created: Sep 5, 2026</small>
-      <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-pill-outline">VIEW</button>
-        <button class="btn btn-sm btn-pill-outline">EDIT</button>
-        <button class="btn btn-sm btn-pill-delete">DELETE</button>
+  {% empty %}
+    <div class="col-12">
+      <div class="card wordlist-card p-4 text-center">
+        <h5>No Word Lists Yet</h5>
+        <p class="mb-0">Your created vocabulary lists will appear here.</p>
       </div>
     </div>
-  </div>
-
+  {% endfor %}
 </div>
 
 <!-- Modal 1: Create a Word List (List Information) -->

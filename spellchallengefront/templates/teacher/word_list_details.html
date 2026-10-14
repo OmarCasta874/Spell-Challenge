@@ -1,0 +1,100 @@
+{% extends 'teacher/teacher_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/teacher_base.css' %}">
+<link rel="stylesheet" href="{% static 'css/word_list_details.css' %}">
+{% endblock %}
+
+{% block teacher_content %}
+
+<div class="container-fluid word-details-page">
+  <a href="{% url 'teacher_word_lists' %}" class="word-details-back">
+    <i data-lucide="arrow-left"></i>
+    BACK TO WORD LISTS
+  </a>
+  <header class="word-details-header">
+    <div>
+      <h2 class="word-details-heading">{{ lista.nombre }}</h2>
+      <p class="word-details-subtitle">Review the vocabulary and learning resources in this list.</p>
+      <div class="word-details-meta">
+        <span class="word-details-badge">
+          <i data-lucide="book-open"></i>
+          {{ lista.total_palabras|default:lista.lista_palabras.count }} words
+        </span>
+        <span class="word-details-badge">
+          <i data-lucide="type"></i>
+          {{ lista.numero_letras }} letters
+        </span>
+        <span class="word-details-badge">
+          <i data-lucide="calendar"></i>
+          {{ lista.fecha_asignacion|date:"M j, Y" }}
+        </span>
+      </div>
+    </div>
+  </header>
+  <section class="word-details-section">
+    <h4>Vocabulary Collection</h4>
+    <p>Explore each word's definition, example and available resources.</p>
+  </section>
+  <div class="word-details-grid">
+    {% for relacion in lista_palabras %}
+      {% with palabra=relacion.palabra %}
+        <article class="word-details-card">
+          <div class="word-details-card-header">
+            <div class="word-details-number">{{ forloop.counter }}</div>
+            <div>
+              <h5 class="word-details-word">{{ palabra.significado }}</h5>
+              <span class="word-details-level">
+                {{ palabra.nivel }}
+              </span>
+            </div>
+          </div>
+          <div class="word-details-field">
+            <span class="word-details-label">Definition</span>
+            <p class="word-details-value">
+              {{ palabra.definicion|default:"Not available" }}
+            </p>
+          </div>
+          <div class="word-details-field">
+            <span class="word-details-label">Example Sentence</span>
+            <p class="word-details-value">
+              {{ palabra.ejemplo|default:"Not available" }}
+            </p>
+          </div>
+          <div class="word-details-field">
+            <span class="word-details-label">Pronunciation</span>
+            <p class="word-details-value">
+              {{ palabra.pronunciacion|default:"Not available" }}
+            </p>
+          </div>
+          {% if palabra.imagen %}
+            <div class="word-details-field">
+              <span class="word-details-label">Image</span>
+              <div class="word-details-image">
+                <img
+                  src="{{ palabra.imagen.url }}"
+                  alt="{{ palabra.significado }}">
+              </div>
+            </div>
+          {% endif %}
+          {% if palabra.audio %}
+            <div class="word-details-field">
+              <span class="word-details-label">Audio</span>
+              <audio class="word-details-audio" controls>
+                <source src="{{ palabra.audio.url }}">
+              </audio>
+            </div>
+          {% endif %}
+        </article>
+      {% endwith %}
+    {% empty %}
+      <div class="word-details-empty">
+        <h5>No Words in This List Yet</h5>
+        <p>Words associated with this list will appear here.</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

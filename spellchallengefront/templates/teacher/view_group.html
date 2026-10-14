@@ -21,6 +21,18 @@
   </div>
 </div>
 
+<div class="group-join-card">
+  <div class="group-join-info">
+    <span class="group-join-label">GROUP JOIN CODE</span>
+    <p class="group-join-description">Share this code with your students so they can join your group.</p>
+    <span id="groupJoinCode" class="group-join-code">{{ grupo.codigo_union }}</span>
+  </div>
+
+  <button type="button" class="group-copy-btn" onclick="copyGroupCode()">
+    <i data-lucide="copy"></i><span id="copyCode Text">COPY CODE</span>
+  </button>
+</div>
+
 <div class="view-group-row">
 
   <div class="students-table-wrap panel-border-red">
@@ -157,6 +169,23 @@
 {% block extra_js %}
 {{ block.super }}
 <script>
+    function copyGroupCode() {
+      const code = document.getElementById('groupJoinCode').innerText.trim();
+      const buttonText = document.getElementById('copyCodeText');
+
+      navigator.clipboard.writeText(code)
+          .then(() => {
+              buttonText.innerText = 'COPIED!';
+
+              setTimeout(() => {
+                buttonText.innerText = 'COPY CODE';
+              }, 2000);
+          })
+          .catch(() => {
+              window.prompt('Copy your group join code: ',code);
+          });
+    }
+
     function openModal(id) {
         document.getElementById(id).classList.add('active');
     }

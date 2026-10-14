@@ -333,15 +333,24 @@ def my_groups(request):
             caracteres = string.ascii_uppercase + string.digits
             
             while True:
-                codigo = ''.join(
-                    random.choices(caracteres, k=6)
-                )
+                codigo = f"GRP{random.randint(10000, 99999)}"
                 
                 if not Grupo.objects.filter(codigo=codigo).exists():
                     break
                 
+            while True:
+                codigo_union = ''.join(
+                    random.choices(caracteres, k=6)
+                )
+                
+                if not Grupo.objects.filter(
+                    codigo_union=codigo_union
+                ).exists():
+                    break
+                
             grupo = Grupo.objects.create(
                 codigo=codigo,
+                codigo_union=codigo_union,
                 nombre=nombre,
                 fecha_creacion=date.today(),
                 ciclo=nivel,
@@ -350,8 +359,8 @@ def my_groups(request):
             
             say(
                 request,
-                f"Your Class Code is: {codigo}",
-                "Share it with your students so they can join our class."
+                f"Your Class Code is: {codigo_union}",
+                "Share it with your student so they can join our class."
             )
             
             return redirect('teacher_groups')
@@ -392,7 +401,36 @@ def view_groups(request, group_id):
 @never_cache
 @role_required('teacher')
 def word_lists(request):
-    return render(request, 'teacher/word_lists.html')
+    listas = (
+        Lista.objects
+        .filter(profesor=request.user.profesor)
+        .annotate(total_palabras=Count('lista_palabras'))
+        .order_by('-fecha_asignacion')
+    )
+    
+    return render(request, 'teacher/word_lists.html', {
+        'listas': listas,
+    })
+    
+@never_cache
+@role_required('teacher')
+def view_word_list(request, codigo):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+    
+    lista_palabras = (
+        lista.lista_palabras
+        .select_related('palabra', 'palabra__categoria', 'palabra__nivel')
+        .all()
+    )
+    
+    return render(request, 'teacher/word_list_details.html', {
+        'lista': lista,
+        'lista_palabras': lista_palabras,
+    })
 
 @never_cache
 @role_required('student')
@@ -545,7 +583,7 @@ def student_groups(request):
             )
             
         try:
-            grupo = Grupo.objects.get(codigo=codigo)
+            grupo = Grupo.objects.get(codigo_union=codigo)
             
         except Grupo.DoesNotExist:
             return render(
