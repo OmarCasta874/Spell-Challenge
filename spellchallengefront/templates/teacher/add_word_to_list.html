@@ -1,0 +1,179 @@
+{% extends 'teacher/teacher_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/add_word_to_list.css' %}">
+{% endblock %}
+{% block teacher_content %}
+<div class="container-fluid add-word-page">
+    <a href="{% url 'view_word_list' lista.codigo %}" class="add-word-back">
+        <i data-lucide="arrow-left"></i>
+        Back to {{ lista.nombre }}
+    </a>
+    <header class="add-word-header">
+        <h2 class="add-word-title">ADD WORD</h2>
+        <p class="add-word-subtitle">
+            Add new vocabulary to <strong>{{ lista.nombre }}</strong>
+            and provide the information your students need to learn it.
+        </p>
+    </header>
+    {% if messages %}
+    <div class="add-word-messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}"
+             role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <section class="add-word-card">
+        <form method="POST"
+              action="{% url 'add_word_to_list' lista.codigo %}"
+              enctype="multipart/form-data"
+              class="add-word-form">
+            {% csrf_token %}
+            <!-- Vocabulary information -->
+            <section class="add-word-section">
+                <div class="add-word-section-heading">
+                    <div class="add-word-section-icon">
+                        <i data-lucide="book-open"></i>
+                    </div>
+                    <div>
+                        <h3 class="add-word-section-title">Vocabulary Information</h3>
+                        <p class="add-word-section-description">
+                            Enter the word and its learning details.
+                        </p>
+                    </div>
+                </div>
+                <div class="add-word-fields">
+                    <div class="add-word-field">
+                        <label for="significado" class="form-label">
+                            Word <span class="add-word-required">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="significado"
+                            id="significado"
+                            class="form-control"
+                            maxlength="50"
+                            placeholder="e.g. Breakfast"
+                            autocomplete="off"
+                            required
+                        >
+                        <p class="add-word-help">Enter the English vocabulary word.</p>
+                    </div>
+                    <div class="add-word-field">
+                        <label for="pronunciacion" class="form-label">
+                            Pronunciation
+                            <span class="add-word-required">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="pronunciacion"
+                            id="pronunciacion"
+                            class="form-control"
+                            maxlength="100"
+                            placeholder="e.g. ˈbrekfəst"
+                            required
+                        >
+                        <p class="add-word-help">You can use phonetic notation.</p>
+                    </div>
+                    <div class="add-word-field add-word-field-full">
+                        <label for="definicion" class="form-label">Definition</label>
+                        <textarea
+                            name="definicion"
+                            id="definicion"
+                            class="form-control"
+                            maxlength="255"
+                            rows="3"
+                            placeholder="Explain what the word means."
+                        ></textarea>
+                    </div>
+                    <div class="add-word-field add-word-field-full">
+                        <label for="ejemplo" class="form-label">Example Sentence</label>
+                        <textarea
+                            name="ejemplo"
+                            id="ejemplo"
+                            class="form-control"
+                            maxlength="255"
+                            rows="3"
+                            placeholder="Use the word in a sentence."
+                        ></textarea>
+                    </div>
+                    <div class="add-word-field">
+                        <label for="nivel" class="form-label">
+                            English Level
+                            <span class="add-word-required">*</span>
+                        </label>
+                        <select
+                            name="nivel"
+                            id="nivel"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">Select a level</option>
+                            {% for nivel in niveles %}
+                            <option value="{{ nivel.codigo }}">
+                                {{ nivel }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <p class="add-word-help">Choose the appropriate learner level.</p>
+                    </div>
+                </div>
+            </section>
+            <!-- Optional learning resources -->
+            <section class="add-word-section">
+                <div class="add-word-section-heading">
+                    <div class="add-word-section-icon">
+                        <i data-lucide="paperclip"></i>
+                    </div>
+                    <div>
+                        <h3 class="add-word-section-title">Learning Resources</h3>
+                        <p class="add-word-section-description">
+                            Add an image or audio file to support learning.
+                            These resources are optional.
+                        </p>
+                    </div>
+                </div>
+                <div class="add-word-fields">
+                    <div class="add-word-field">
+                        <label for="imagen" class="form-label">Image</label>
+                        <input
+                            type="file"
+                            name="imagen"
+                            id="imagen"
+                            class="form-control"
+                            accept="image/*"
+                        >
+                        <p class="add-word-help">Select an image file.</p>
+                    </div>
+                    <div class="add-word-field">
+                        <label for="audio" class="form-label">Audio</label>
+                        <input
+                            type="file"
+                            name="audio"
+                            id="audio"
+                            class="form-control"
+                            accept="audio/*"
+                        >
+                        <p class="add-word-help">Select an audio file for pronunciation.</p>
+                    </div>
+                </div>
+            </section>
+            <!-- Actions -->
+            <div class="add-word-actions">
+                <a href="{% url 'view_word_list' lista.codigo %}" class="add-word-cancel">
+                    Cancel
+                </a>
+                <button type="submit" class="add-word-submit">
+                    <i data-lucide="save"></i>
+                    Save Word
+                </button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

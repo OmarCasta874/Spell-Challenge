@@ -1,0 +1,77 @@
+{% extends 'teacher/teacher_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/create_word_list.css' %}">
+{% endblock %}
+{% block teacher_content %}
+<div class="container-fluid create-word-list-page">
+    <a href="{% url 'teacher_word_lists' %}" class="create-word-list-back">
+        <i data-lucide="arrow-left"></i>
+        Back to Word Lists
+    </a>
+    <header class="create-word-list-header">
+        <h2 class="create-word-list-title">CREATE WORD LIST</h2>
+        <p class="create-word-list-subtitle">
+            Build a vocabulary collection to help your students
+            practice and expand their English skills.
+        </p>
+    </header>
+    {% if messages %}
+    <div class="create-word-list-messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}"
+             role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <section class="create-word-list-card">
+        <div class="create-word-list-card-header">
+            <div class="create-word-list-icon">
+                <i data-lucide="book-plus"></i>
+            </div>
+            <div>
+                <h3 class="create-word-list-card-heading">List Information</h3>
+                <p class="create-word-list-card-description">
+                    Start by giving your vocabulary list a clear name.
+                </p>
+            </div>
+        </div>
+        <form method="POST" action="{% url 'create_word_list' %}" class="create-word-list-form">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="name" class="form-label">
+                    List Name <span aria-hidden="true">*</span>
+                </label>
+                <input
+                    type="text"
+                    name="name"
+                    id="name"
+                    class="form-control"
+                    maxlength="30"
+                    placeholder="e.g. Greetings"
+                    autocomplete="off"
+                    required
+                >
+                <div class="create-word-list-help">
+                    <span>Choose a descriptive name for your vocabulary list.</span>
+                    <span>Maximum 30 characters</span>
+                </div>
+            </div>
+            <div class="create-word-list-actions">
+                <a href="{% url 'teacher_word_lists' %}" class="create-word-list-cancel">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="create-word-list-submit">
+                    <i data-lucide="plus"></i>
+                    Create List
+                </button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

@@ -1,149 +1,409 @@
-// Spell-Challenge — Teacher / Word Lists modals behavior
-// Requiere Bootstrap 5 JS bundle ya cargado en teacher_base.html
-
+console.log('WORD_LISTS.JS LOADED');
 document.addEventListener('DOMContentLoaded', function () {
+  // =====================================================
+  // 1. REFERENCIAS A LOS MODALES
+  // =====================================================
+  const createListModalEl = document.getElementById('createListModal');
+  const chooseMethodModalEl = document.getElementById('chooseMethodModal');
+  const manualListModalEl = document.getElementById('manualListModal');
+  const excelListModalEl = document.getElementById('excelListModal');
+  const addWordModalEl = document.getElementById('addWordModal');
 
-  var createListModalEl = document.getElementById('createListModal');
-  var manualListModalEl = document.getElementById('manualListModal');
-  var excelListModalEl = document.getElementById('excelListModal');
-  var addWordModalEl = document.getElementById('addWordModal');
-
-  if (!createListModalEl || typeof bootstrap === 'undefined') return;
-
-  var createListModal = bootstrap.Modal.getOrCreateInstance(createListModalEl);
-  var manualListModal = bootstrap.Modal.getOrCreateInstance(manualListModalEl);
-  var excelListModal = bootstrap.Modal.getOrCreateInstance(excelListModalEl);
-  var addWordModal = bootstrap.Modal.getOrCreateInstance(addWordModalEl);
-
-  /* 1) "How would you like to create your list?" -> abre el panel correcto */
-  var choiceCards = createListModalEl.querySelectorAll('.choice-card');
-  if (choiceCards[0]) {
-    choiceCards[0].addEventListener('click', function () {
-      createListModal.hide();
-      manualListModal.show();
-    });
-  }
-  if (choiceCards[1]) {
-    choiceCards[1].addEventListener('click', function () {
-      createListModal.hide();
-      excelListModal.show();
-    });
+  if (typeof bootstrap === 'undefined' ||
+      !createListModalEl ||
+      !chooseMethodModalEl ||
+      !manualListModalEl ||
+      !excelListModalEl ||
+      !addWordModalEl) {
+    console.error('Word Lists: one or more modals are missing.');
+    return;
   }
 
-  /* 2) Add Word -> agrega una fila a la tabla de palabras */
-  var wordsBody = document.getElementById('wordsTableBody');
-  var emptyRow = document.getElementById('emptyRow');
-  var wordCountEl = document.getElementById('wordCount');
-  var btnSaveWord = document.getElementById('btnSaveWord');
-  var count = 0;
+  const createListModal = bootstrap.Modal.getOrCreateInstance(createListModalEl);
+  const chooseMethodModal = bootstrap.Modal.getOrCreateInstance(chooseMethodModalEl);
+  const manualListModal = bootstrap.Modal.getOrCreateInstance(manualListModalEl);
+  const excelListModal = bootstrap.Modal.getOrCreateInstance(excelListModalEl);
+  const addWordModal = bootstrap.Modal.getOrCreateInstance(addWordModalEl);
 
-  if (btnSaveWord) {
+  function switchModal(currentModal, currentModalElement, nextModal) {
+    const activeElement = document.activeElement;
+
+    if (activeElement && currentModalElement.contains(activeElement)) {
+      activeElement.blur();
+    }
+
+    currentModalElement.addEventListener('hidden.bs.modal', function () {
+      nextModal.show();
+    }, { once: true });
+
+    currentModal.hide();
+  }
+
+  // =====================================================
+  // 2. FLUJO DE CREACIÓN DE LISTAS
+  // =====================================================
+  const newListName = document.getElementById('newListName');
+  const listName = document.getElementById('listName');
+  const continueButton = document.getElementById('btnContinueCreateList');
+
+  if (continueButton) {
+    continueButton.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const name = newListName.value.trim();
+
+      if (!name) {
+        newListName.reportValidity();
+        newListName.focus();
+        return;
+      }
+
+      if (name.length > 30) {
+        alert('The word list name cannot exceed 30 characters.');
+        return;
+      }
+
+      listName.value = name;
+      switchModal(createListModal, createListModalEl, chooseMethodModal);
+    });
+  }
+
+  const choiceCards = chooseMethodModalEl.querySelectorAll('.choice-card');
+
+  choiceCards.forEach(function (card) {
+    function selectMethod() {
+      const method = card.dataset.method;
+
+      if (method === 'manual') {
+        switchModal(
+          chooseMethodModal,
+          chooseMethodModalEl,
+          manualListModal
+        );
+      } else if (method === 'excel') {
+        switchModal(
+          chooseMethodModal,
+          chooseMethodModalEl,
+          excelListModal
+        );
+      }
+    }
+
+    card.addEventListener('click', selectMethod);
+
+    card.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        selectMethod();
+      }
+    });
+  });
+
+  // =====================================================
+  // 3. AGREGAR Y ELIMINAR PALABRAS
+  // =====================================================
+  const formAddWord = document.getElementById('formAddWord');
+  const btnSaveWord = document.getElementById('btnSaveWord');
+  const wordsBody = document.getElementById('wordsTableBody');
+  const wordCountEl = document.getElementById('wordCount');
+
+  const btnOpenAddWord = document.getElementById('btnOpenAddWord');
+
+  if (btnOpenAddWord) {
+    btnOpenAddWord.addEventListener('click', function () {
+      switchModal(
+        manualListModal,
+        manualListModalEl,
+        addWordModal
+      );
+    });
+  }
+
+  // Conserva los datos y archivos de cada palabra.
+  let words = [];
+
+  window.__wordListDebug = {
+    getWords: () => words,
+    getCount: () => words.length
+  };
+
+  function getWordFields() {
+    return {
+      significado: document.getElementById('wordText').value.trim(),
+      definicion: document.getElementById('wordMeaning').value.trim(),
+      ejemplo: document.getElementById('wordExample').value.trim(),
+      pronunciacion: document.getElementById('wordPronunciation').value.trim(),
+      categoria: document.getElementById('wordCategory').value,
+      nivel: document.getElementById('wordLevel').value,
+      imagen: document.getElementById('wordImage').files[0] || null,
+      audio: document.getElementById('wordAudio').files[0] || null
+    };
+  }
+
+  function renderWords() {
+    wordsBody.innerHTML = '';
+
+    if (words.length === 0) {
+      const row = document.createElement('tr');
+      row.id = 'emptyRow';
+
+      const cell = document.createElement('td');
+      cell.colSpan = 5;
+      cell.className = 'text-center text-muted py-4';
+      cell.textContent = 'No words added yet. Click "+ Add Word" to begin.';
+
+      row.appendChild(cell);
+      wordsBody.appendChild(row);
+    } else {
+      words.forEach(function (word, index) {
+        const row = document.createElement('tr');
+
+        [
+          String(index + 1),
+          word.significado,
+          word.definicion,
+          word.pronunciacion
+        ].forEach(function (value) {
+          const cell = document.createElement('td');
+          cell.textContent = value;
+          row.appendChild(cell);
+        });
+
+        const actionsCell = document.createElement('td');
+        actionsCell.className = 'text-center';
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'btn btn-sm btn-pill-solid btn-remove-word';
+        deleteButton.dataset.index = String(index);
+        deleteButton.textContent = 'DELETE';
+
+        actionsCell.appendChild(deleteButton);
+        row.appendChild(actionsCell);
+        wordsBody.appendChild(row);
+      });
+    }
+
+    wordCountEl.textContent = words.length;
+
+    // No permitir agregar más de 20 palabras.
+    const addWordButton = document.getElementById('btnOpenAddWord');
+
+    if (addWordButton) {
+      addWordButton.disabled = words.length >= 20;
+      addWordButton.title = words.length >= 20
+        ? 'A list can contain a maximum of 20 words.'
+        : '';
+    }
+  }
+
+  if (btnSaveWord && formAddWord) {
     btnSaveWord.addEventListener('click', function () {
-      var word = document.getElementById('wordText').value.trim();
-      var meaning = document.getElementById('wordMeaning').value.trim();
-      var pronunciation = document.getElementById('wordPronunciation').value.trim();
 
-      if (!word || !meaning || !pronunciation) return;
-      if (emptyRow) { emptyRow.remove(); emptyRow = null; }
+      if (!formAddWord.reportValidity()) {
+        console.log('[TEST] Form validation failed');
 
-      count += 1;
-      wordCountEl.textContent = count;
+        const invalidFields = formAddWord.querySelectorAll(':invalid');
 
-      var tr = document.createElement('tr');
-      tr.innerHTML =
-        '<td>' + count + '</td>' +
-        '<td>' + escapeHtml(word) + '</td>' +
-        '<td>' + escapeHtml(meaning) + '</td>' +
-        '<td>' + escapeHtml(pronunciation) + '</td>' +
-        '<td class="d-flex gap-1">' +
-          '<button type="button" class="btn btn-sm btn-pill-outline">VIEW</button>' +
-          '<button type="button" class="btn btn-sm btn-pill-outline">EDIT</button>' +
-          '<button type="button" class="btn btn-sm btn-pill-solid btn-remove-word">DELETE</button>' +
-        '</td>';
-      wordsBody.appendChild(tr);
+        invalidFields.forEach(function (field) {
+          console.log(
+            '[INVALID FIELD',
+            field.id,
+            'Value:',
+            field.value,
+            'Required:',
+            field.required
+          );
+        });
 
-      document.getElementById('formAddWord').reset();
-      addWordModal.hide();
+        return;
+      }
+
+      if (words.length >= 20) {
+        alert('A word list can contain a maximum of 20 words.');
+        return;
+      }
+
+      const word = getWordFields();
+
+      if (word.significado.length > 50 ||
+          word.definicion.length > 255 ||
+          word.ejemplo.length > 255 ||
+          word.pronunciacion.length > 100) {
+        alert('One or more fields exceed their maximum length.');
+        return;
+      }
+
+      words.push(word);
+
+      renderWords();
+
+      formAddWord.reset();
+      switchModal(
+        addWordModal,
+        addWordModalEl,
+        manualListModal
+      );
     });
   }
 
-  /* Delegar el DELETE de cada fila agregada */
   if (wordsBody) {
-    wordsBody.addEventListener('click', function (e) {
-      if (e.target.classList.contains('btn-remove-word')) {
-        e.target.closest('tr').remove();
-        renumberRows();
+    wordsBody.addEventListener('click', function (event) {
+      const deleteButton = event.target.closest('.btn-remove-word');
+
+      if (!deleteButton) {
+        return;
+      }
+
+      const index = Number(deleteButton.dataset.index);
+
+      if (Number.isInteger(index) && index >= 0 && index < words.length) {
+        words.splice(index, 1);
+        renderWords();
       }
     });
   }
 
-  function renumberRows() {
-    var rows = wordsBody.querySelectorAll('tr');
-    count = rows.length;
-    rows.forEach(function (row, i) {
-      row.children[0].textContent = i + 1;
+  // =====================================================
+  // 4. GUARDAR LA LISTA EN DJANGO
+  // =====================================================
+  const formManualList = document.getElementById('formManualList');
+
+  if (formManualList) {
+    formManualList.addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const name = listName.value.trim();
+
+      if (!name) {
+        alert('Please enter a name for the word list.');
+        return;
+      }
+
+      console.log('Words before saving:',words);
+      console.log('Word count:', words.length);
+
+      console.log('[SAVE LIST] Total:',words.length, words);
+
+      if (words.length < 1 || words.length > 20) {
+        alert('Please add between 1 and 20 words before saving.');
+        return;
+      }
+
+      const formData = new FormData(formManualList);
+      formData.set('name', name);
+
+      const wordData = words.map(function (word) {
+        return {
+          significado: word.significado,
+          definicion: word.definicion,
+          ejemplo: word.ejemplo,
+          pronunciacion: word.pronunciacion,
+          categoria: word.categoria,
+          nivel: word.nivel
+        };
+      });
+
+      formData.set('words', JSON.stringify(wordData));
+
+      words.forEach(function (word, index) {
+        if (word.imagen) {
+          formData.append('word_image_' + index, word.imagen);
+        }
+
+        if (word.audio) {
+          formData.append('word_audio_' + index, word.audio);
+        }
+      });
+
+      const submitButton = formManualList.querySelector(
+        '[type="submit"]'
+      );
+
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Saving...';
+      }
+
+      try {
+        const response = await fetch(formManualList.action, {
+          method: 'POST',
+          body: formData,
+          credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+          throw new Error('The server returned status ' + response.status);
+        }
+
+        // Django redirige a los detalles de la lista si se guardó,
+        // o a Word Lists si ocurrió un error de validación.
+        window.location.assign(response.url);
+      } catch (error) {
+        console.error('Error saving word list:', error);
+        alert('The word list could not be saved. Please try again.');
+
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = 'Save Word List';
+        }
+      }
     });
-    wordCountEl.textContent = count;
-    if (count === 0 && !document.getElementById('emptyRow')) {
-      var tr = document.createElement('tr');
-      tr.id = 'emptyRow';
-      tr.innerHTML = '<td colspan="5" class="text-center text-muted py-4">No words added yet. Click "+ Add Word" to begin.</td>';
-      wordsBody.appendChild(tr);
-      emptyRow = tr;
-    }
   }
 
-  function escapeHtml(str) {
-    var div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
+  // =====================================================
+  // 5. IMPORTACIÓN DE EXCEL (SOLO INTERFAZ POR AHORA)
+  // =====================================================
+  const dropZone = document.getElementById('dropZone');
+  const excelInput = document.getElementById('excelFileInput');
+  const fileInfo = document.getElementById('fileInfo');
+  const btnUploadExcel = document.getElementById('btnUploadExcel');
 
-  /* 3) Import from Excel: drag & drop + selección manual */
-  var dropZone = document.getElementById('dropZone');
-  var excelInput = document.getElementById('excelFileInput');
-  var fileInfo = document.getElementById('fileInfo');
-  var btnUploadExcel = document.getElementById('btnUploadExcel');
+  function handleExcelFile(file) {
+    if (!file || !fileInfo || !btnUploadExcel) return;
 
-  function handleFile(file) {
-    if (!file) return;
     fileInfo.textContent = 'Selected: ' + file.name;
     fileInfo.classList.remove('d-none');
+
+    // La importación todavía no está implementada.
     btnUploadExcel.disabled = false;
   }
 
   if (excelInput) {
-    excelInput.addEventListener('change', function (e) {
-      handleFile(e.target.files[0]);
+    excelInput.addEventListener('change', function () {
+      handleExcelFile(excelInput.files[0]);
     });
   }
 
-  if (dropZone) {
-    ['dragover', 'dragenter'].forEach(function (evt) {
-      dropZone.addEventListener(evt, function (e) {
-        e.preventDefault();
+  if (dropZone && excelInput) {
+    ['dragover', 'dragenter'].forEach(function (eventName) {
+      dropZone.addEventListener(eventName, function (event) {
+        event.preventDefault();
         dropZone.classList.add('dz-active');
       });
     });
-    ['dragleave', 'drop'].forEach(function (evt) {
-      dropZone.addEventListener(evt, function (e) {
-        e.preventDefault();
+
+    ['dragleave', 'drop'].forEach(function (eventName) {
+      dropZone.addEventListener(eventName, function (event) {
+        event.preventDefault();
         dropZone.classList.remove('dz-active');
       });
     });
-    dropZone.addEventListener('drop', function (e) {
-      var file = e.dataTransfer.files[0];
-      excelInput.files = e.dataTransfer.files;
-      handleFile(file);
+
+    dropZone.addEventListener('drop', function (event) {
+      const file = event.dataTransfer.files[0];
+
+      if (!file) return;
+
+      const transfer = new DataTransfer();
+      Array.from(event.dataTransfer.files).forEach(function (item) {
+        transfer.items.add(item);
+      });
+
+      excelInput.files = transfer.files;
+      handleExcelFile(file);
     });
   }
-
-  /* Al cerrar el panel manual o el de Excel, reabre el flujo desde "Create Word List" si el usuario quiere volver */
-  [manualListModalEl, excelListModalEl, addWordModalEl].forEach(function (el) {
-    el.addEventListener('hidden.bs.modal', function () {
-      document.body.classList.remove('modal-open');
-      var openModal = document.querySelector('.modal.show');
-      if (openModal) document.body.classList.add('modal-open');
-    });
-  });
+  renderWords();
 });

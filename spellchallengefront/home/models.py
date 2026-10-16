@@ -298,11 +298,15 @@ class Palabra(models.Model):
     pronunciacion = models.CharField(max_length=100)
     imagen = models.ImageField(
         upload_to='palabras/imagenes/',
-        max_length=100
+        max_length=100,
+        blank=True,
+        null=True
     )
     audio = models.FileField(
         upload_to='palabras/audios/',
-        max_length=100
+        max_length=100,
+        blank=True,
+        null=True
     )
     categoria = models.ForeignKey(
         Categoria,

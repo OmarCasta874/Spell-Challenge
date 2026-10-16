@@ -1,0 +1,233 @@
+/* CREATE WORD LIST */
+.create-word-list-page {
+    padding: 32px 24px 48px;
+    color: #302626;
+}
+
+.create-word-list-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 28px;
+    color: #7A1C1C;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.create-word-list-back:hover {
+    color: #A12B2B;
+    transform: translateX(-3px);
+}
+
+.create-word-list-header {
+    margin-bottom: 28px;
+}
+
+.create-word-list-title {
+    margin: 0 0 10px;
+    color: #5C1414;
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 800;
+    letter-spacing: 0.045em;
+}
+
+.create-word-list-subtitle {
+    max-width: 560px;
+    margin: 0;
+    color: #777070;
+    font-size: 0.98rem;
+    line-height: 1.65;
+}
+
+.create-word-list-card {
+    width: 100%;
+    max-width: 680px;
+    padding: 32px;
+    background: #FFF;
+    border: 1px solid #EEE5E5;
+    border-radius: 20px;
+    box-shadow: 0 9px 28px rgba(74, 20, 20, 0.07);
+}
+
+.create-word-list-card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.create-word-list-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    color: #7A1C1C;
+    background: #FBEEEE;
+    border-radius: 15px;
+}
+
+.create-word-list-icon svg {
+    width: 25px;
+    height: 25px;
+}
+
+.create-word-list-card-heading {
+    margin: 0 0 5px;
+    color: #402323;
+    font-size: 1.08rem;
+    font-weight: 750;
+}
+
+.create-word-list-card-description {
+    margin: 0;
+    color: #817777;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.create-word-list-form .form-label {
+    display: block;
+    margin-bottom: 10px;
+    color: #493333;
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.create-word-list-form .form-control {
+    min-height: 50px;
+    padding: 12px 15px;
+    color: #352A2A;
+    background-color: #FFFDFD;
+    border: 1px solid #E4D8D8;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    box-shadow: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.create-word-list-form .form-control::placeholder {
+    color: #AAA0A0;
+}
+
+.create-word-list-form .form-control:focus {
+    border-color: #A84B4B;
+    box-shadow: 0 0 0 4px rgba(122, 28, 28, 0.10);
+    outline: none;
+}
+
+.create-word-list-help {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 10px;
+    color: #898080;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.create-word-list-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px solid #F0E8E8;
+}
+
+.create-word-list-cancel,
+.create-word-list-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 11px 20px;
+    border-radius: 11px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease,
+                color 0.2s ease, transform 0.2s ease;
+}
+
+.create-word-list-cancel {
+    color: #655858;
+    background: #FFF;
+    border: 1px solid #DED4D4;
+}
+
+.create-word-list-cancel:hover {
+    color: #392C2C;
+    background: #F8F4F4;
+    border-color: #CFC1C1;
+}
+
+.create-word-list-submit {
+    color: #FFF;
+    background: #7A1C1C;
+    border: 1px solid #7A1C1C;
+}
+
+.create-word-list-submit:hover {
+    color: #FFF;
+    background: #5C1414;
+    border-color: #5C1414;
+    transform: translateY(-1px);
+}
+
+.create-word-list-submit:focus-visible,
+.create-word-list-cancel:focus-visible,
+.create-word-list-back:focus-visible {
+    outline: 3px solid rgba(242, 144, 138, 0.65);
+    outline-offset: 3px;
+}
+
+.create-word-list-messages {
+    max-width: 680px;
+    margin-bottom: 20px;
+}
+
+.create-word-list-messages .alert {
+    margin-bottom: 10px;
+    border-radius: 12px;
+}
+
+@media (max-width: 576px) {
+    .create-word-list-page {
+        padding: 24px 14px 36px;
+    }
+
+    .create-word-list-card {
+        padding: 23px 19px;
+        border-radius: 16px;
+    }
+
+    .create-word-list-card-header {
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .create-word-list-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+    }
+
+    .create-word-list-actions {
+        flex-direction: column-reverse;
+    }
+
+    .create-word-list-cancel,
+    .create-word-list-submit {
+        width: 100%;
+    }
+
+    .create-word-list-help {
+        flex-direction: column;
+        gap: 4px;
+    }
+}

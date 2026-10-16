@@ -378,6 +378,15 @@
   }
 
   function finishGame() {
+    if (state && state.timer) {
+      clearInterval(state.timer);
+      state.timer = null;
+    }
+
+    if (state) {
+      state.lock = true;
+    }
+
     setTimeout(function () {
       board.style.display = 'none';
       resultEl.classList.add('active');

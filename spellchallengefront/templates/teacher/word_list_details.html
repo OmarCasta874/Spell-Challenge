@@ -35,8 +35,15 @@
     </div>
   </header>
   <section class="word-details-section">
-    <h4>Vocabulary Collection</h4>
-    <p>Explore each word's definition, example and available resources.</p>
+    <div>
+      <h4>Vocabulary Collection</h4>
+      <p>Explore each word's definition, example and available resources.</p>
+    </div>
+
+    <a href="{% url 'add_word_to_list' lista.codigo %}" class="btn btn-create-list">
+      <i data-lucide="plus"></i>
+      Add Word
+    </a>
   </section>
   <div class="word-details-grid">
     {% for relacion in lista_palabras %}

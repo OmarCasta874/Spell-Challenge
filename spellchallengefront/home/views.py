@@ -208,6 +208,10 @@ def dashboard(request):
         grupo__in=grupos
     ).values('lista').distinct().count()
     
+    total_word_lists = Lista.objects.filter(
+        profesor=profesor
+    ).count()
+    
     total_students = Grupo_Alumno.objects.filter(
         grupo__in=grupos
     ).values('alumno').distinct().count()
@@ -309,6 +313,7 @@ def dashboard(request):
         {
             'total_groups': total_groups,
             'total_lists': total_lists,
+            'total_word_lists': total_word_lists,
             'total_students': total_students,
             'total_competitions': total_competitions,
             'level_counts': level_counts,
@@ -408,8 +413,13 @@ def word_lists(request):
         .order_by('-fecha_asignacion')
     )
     
+    categorias = Categoria.objects.all().order_by('nombre')
+    niveles = Nivel.objects.all().order_by('codigo')
+    
     return render(request, 'teacher/word_lists.html', {
         'listas': listas,
+        'categorias': categorias,
+        'niveles': niveles,
     })
     
 @never_cache
@@ -431,6 +441,229 @@ def view_word_list(request, codigo):
         'lista': lista,
         'lista_palabras': lista_palabras,
     })
+    
+@never_cache
+@role_required('teacher')
+def add_word_to_list(request, codigo):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+    
+    if request.method == 'POST':
+        significado = request.POST.get('significado', '').strip()
+        definicion = request.POST.get('definicion', '').strip()
+        ejemplo = request.POST.get('ejemplo', '').strip()
+        pronunciacion = request.POST.get('pronunciacion', '').strip()
+        nivel_codigo = request.POST.get('nivel', '').strip()
+        
+        if not significado or len(significado) > 50:
+            messages.error(
+                request,
+                'The word must contain between 1 and 50 characters.'
+            )
+            return redirect('add_word_to_list', codigo=lista.codigo)
+        
+        if not pronunciacion or len(pronunciacion) > 100:
+            messages.error(
+                request,
+                'Please enter a valid pronunciation.'
+            )
+            return redirect('add_word_to_list', codigo=lista.codigo)
+        
+        if len(definicion) > 255 or len(ejemplo) > 255:
+            messages.error(
+                request,
+                'The definition and example cannot exceed 255 characters.'
+            )
+            return redirect('add_word_to_list', codigo=lista.codigo)
+        
+        categoria = Categoria.objects.filter(
+            nombre=lista.nombre
+        ).first()
+        
+        nivel = Nivel.objects.filter(
+            codigo=nivel_codigo
+        ).first()
+        
+        if categoria is None:
+            messages.error(
+                request,
+                'The category associated with this word list could not be found.'
+            )
+            return redirect('add_word_to_list', codigo=lista.codigo)
+        
+        if nivel is None:
+            messages.error(request, 'Please select a valid level.')
+            return redirect('add_word_to_list', codigo=lista.codigo)
+        
+        try:
+            with transaction.atomic():
+                existing_codes = Palabra.objects.values_list(
+                    'codigo', flat=True
+                )
+                
+                numbers = [
+                    int(code[3:])
+                    for code in existing_codes
+                    if code.startswith('PAL')
+                    and code[3:].isdigit()
+                ]
+                
+                next_number = max(numbers, default=0) + 1
+                palabra_codigo = f'PAL{next_number:04d}'
+                
+                palabra = Palabra.objects.create(
+                    codigo=palabra_codigo,
+                    significado=significado,
+                    definicion=definicion,
+                    ejemplo=ejemplo,
+                    pronunciacion=pronunciacion,
+                    categoria=categoria,
+                    nivel=nivel,
+                    imagen=request.FILES.get('imagen'),
+                    audio=request.FILES.get('audio'),
+                )
+                
+                Lista_Palabra.objects.create(
+                    lista=lista,
+                    palabra=palabra
+                )
+                
+                palabras_lista = Palabra.objects.filter(
+                    lista_palabras__lista=lista
+                )
+                
+                max_letras = max(
+                    (
+                        sum(1 for char in palabra.significado
+                            if char.isalpha())
+                        for palabra in palabras_lista
+                    ),
+                    default=0
+                )
+                
+                lista.numero_letras = max_letras
+                lista.save(update_fields=['numero_letras'])
+                
+            messages.success(
+                request,
+                f'"{significado}" was added to "{lista.nombre}"'
+            )
+            return redirect('view_word_list', codigo=lista.codigo)
+        
+        except Exception:
+            messages.error(
+                request,
+                'The word could not be saved. Please check the information and try again.'
+            )
+            return redirect('add_word_to_list', codigo=lista.codigo)
+        
+    niveles = Nivel.objects.all().order_by('codigo')
+    
+    return render(
+        request,
+        'teacher/add_word_to_list.html',
+        {
+            'lista': lista,
+            'niveles': niveles,
+        }
+    )
+    
+@never_cache
+@role_required('teacher')
+def create_word_list(request):
+    if request.method == 'POST':
+        list_name = request.POST.get('name', '').strip()
+        
+        if not list_name:
+            messages.error(
+                request,
+                'Please enter a name for the word list.'
+            )
+            return redirect('create_word_list')
+        
+        if len(list_name) > 30:
+            messages.error(
+                request,
+                'The word list name cannot exceed 30 characters.'
+            )
+            return redirect('create_word_list')
+        
+        profesor = getattr(request.user, 'profesor', None)
+        
+        if profesor is None:
+            messages.error(
+                request,
+                'Your account is not associated with a teacher profile.'
+            )
+            return redirect('teacher_word_lists')
+        
+        try:
+            with transaction.atomic():
+                existing_codes = Lista.objects.values_list(
+                    'codigo', flat=True
+                )
+                
+                numbers = [
+                    int(code[3:])
+                    for code in existing_codes
+                    if code.startswith('LIS') and code[3:].isdigit()
+                ]
+                
+                next_number = max(numbers, default=0) + 1
+                list_code = f'LIS{next_number:02d}'
+                
+                categoria = Categoria.objects.filter(nombre=list_name).first()
+                
+                if categoria is None:
+                    category_codes = Categoria.objects.values_list('codigo', flat=True)
+                    
+                    category_numbers = [
+                        int(code[3:])
+                        for code in category_codes
+                        if code.startswith('CAT') and code[3:].isdigit()
+                    ]
+                    
+                    next_category_number = max(category_numbers, default=0) + 1
+                    category_code = f'CAT{next_category_number:02d}'
+                    
+                    categoria = Categoria.objects.create(
+                        codigo=category_code,
+                        nombre=list_name,
+                    )
+                
+                lista = Lista.objects.create(
+                    codigo=list_code,
+                    nombre=list_name,
+                    fecha_asignacion=timezone.localdate(),
+                    fecha_limite=None,
+                    numero_letras=0,
+                    profesor=profesor,
+                )
+            
+            messages.success(
+                request,
+                f'Word list "{lista.nombre}" was created successfully.'
+            )
+            
+            return redirect(
+                'view_word_list',
+                codigo=lista.codigo
+            )
+            
+        except Exception:
+            messages.error(
+                request,
+                'The word list could not be created. Please try again.'
+            )
+            return redirect('create_word_list')
+        
+    return render(
+        request,
+        'teacher/create_word_list.html'
+    )
 
 @never_cache
 @role_required('student')
