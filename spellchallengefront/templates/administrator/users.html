@@ -176,38 +176,38 @@
 
             <div class="modal-body">
 
-                <!-- USER CODE -->
-                <div class="form-field">
+                <!-- USER CODE (solo CREATE) -->
+                <div class="form-field" id="userCodeField">
                     <label>User Code</label>
                     <input type="text" id="userCode" name="user_code" class="form-input" required maxlength="10" placeholder="e.g. ALUM001">
+                </div>
+
+                <!-- USER CODE (EDIT/VIEW - readonly) -->
+                <div class="form-field" id="userCodeReadonlyField" style="display: none;">
+                    <label>User Code</label>
                     <span class="form-readonly" id="userCodeRO"></span>
                 </div>
 
-                <!-- FULL NAME (solo VIEW) -->
+                <!-- FULL NAME (EDIT/VIEW - readonly) -->
                 <div class="form-field" id="fullNameField" style="display: none;">
                     <label>Full Name</label>
                     <span class="form-readonly" id="fullNameRO"></span>
                 </div>
 
-                <!-- FIRST NAME -->
+                <!-- NAME FIELDS (solo CREATE) -->
                 <div class="form-field" id="firstNameField">
                     <label>First Name</label>
                     <input type="text" id="firstName" name="first_name" class="form-input" required maxlength="30" placeholder="e.g. Maria">
-                    <span class="form-readonly" id="firstNameRO"></span>
                 </div>
 
-                <!-- LAST NAME -->
                 <div class="form-field" id="lastNameField">
                     <label>Last Name</label>
                     <input type="text" id="lastName" name="last_name" class="form-input" required maxlength="30" placeholder="e.g. Perez">
-                    <span class="form-readonly" id="lastNameRO"></span>
                 </div>
 
-                <!-- SECOND LAST NAME -->
                 <div class="form-field" id="secondLastNameField">
                     <label>Second Last Name</label>
                     <input type="text" id="secondLastName" name="second_last_name" class="form-input" maxlength="30" placeholder="e.g. Lopez">
-                    <span class="form-readonly" id="secondLastNameRO"></span>
                 </div>
 
                 <!-- EMAIL -->
@@ -328,39 +328,46 @@
         document.getElementById(modalId).classList.remove('active');
     }
 
-    function setUserFormReadOnly(readOnly) {
-        const form = document.getElementById('userForm');
+    function setUserFormMode(mode) {
+        const isCreate = mode === 'create';
+        const isEdit = mode === 'edit';
+        const isView = mode === 'view';
 
-        // Ocultar todos los inputs/selects y mostrar spans en modo VIEW
-        form.querySelectorAll('input, select').forEach(el => {
-            if (el.type === 'hidden') return;
-            el.style.display = readOnly ? 'none' : '';
+        // User Code
+        document.getElementById('userCodeField').style.display = isCreate ? 'block' : 'none';
+        document.getElementById('userCodeReadonlyField').style.display = isCreate ? 'none' : 'block';
+        document.getElementById('userCodeRO').style.display = isCreate ? 'none' : 'block';
+
+        // Full Name
+        document.getElementById('fullNameField').style.display = isCreate ? 'none' : 'block';
+        document.getElementById('fullNameRO').style.display = isCreate ? 'none' : 'block';
+
+        // Name fields (solo en CREATE)
+        document.getElementById('firstNameField').style.display = isCreate ? 'block' : 'none';
+        document.getElementById('lastNameField').style.display = isCreate ? 'block' : 'none';
+        document.getElementById('secondLastNameField').style.display = isCreate ? 'block' : 'none';
+
+        // Inputs editables (email, phone, role, status, level, career)
+        document.querySelectorAll('#userForm input:not([type="hidden"]), #userForm select').forEach(el => {
+            const field = el.closest('.form-field');
+            const isReadonlySpan = field ? field.querySelector('.form-readonly') : null;
+            if (isReadonlySpan) {
+                el.style.display = isView ? 'none' : '';
+                isReadonlySpan.style.display = isView ? 'block' : 'none';
+            }
         });
 
-        form.querySelectorAll('.form-readonly').forEach(el => {
-            el.style.display = readOnly ? 'block' : 'none';
-        });
-
-        // El campo "Password" se oculta en VIEW
-        document.getElementById('passwordField').style.display = readOnly ? 'none' : 'block';
-
-        // El nombre completo solo se muestra en VIEW
-        document.getElementById('fullNameField').style.display = readOnly ? 'block' : 'none';
-
-        // Los 3 campos de nombre se ocultan en VIEW
-        document.getElementById('firstNameField').style.display = readOnly ? 'none' : 'block';
-        document.getElementById('lastNameField').style.display = readOnly ? 'none' : 'block';
-        document.getElementById('secondLastNameField').style.display = readOnly ? 'none' : 'block';
+        // Password
+        document.getElementById('passwordField').style.display = isView ? 'none' : 'block';
 
         // Botones
-        document.getElementById('saveBtn').style.display = readOnly ? 'none' : 'inline-block';
-        document.getElementById('cancelBtn').textContent = readOnly ? 'Close' : 'Cancel';
+        document.getElementById('saveBtn').style.display = isView ? 'none' : 'inline-block';
+        document.getElementById('cancelBtn').textContent = isView ? 'Close' : 'Cancel';
     }
 
     function fillUserForm(id, firstName, lastName, secondLastName, email, phone, role, status, level, career, group) {
         document.getElementById('userId').value = id;
 
-        // Inputs
         document.getElementById('userCode').value = id;
         document.getElementById('firstName').value = firstName;
         document.getElementById('lastName').value = lastName;
@@ -373,14 +380,9 @@
         document.getElementById('userCareer').value = career;
         document.getElementById('userGroupDisplay').value = group;
 
-        // Spans readonly (para VIEW)
         document.getElementById('userCodeRO').innerText = id;
-
         const fullName = `${firstName} ${lastName} ${secondLastName}`.trim();
         document.getElementById('fullNameRO').innerText = fullName;
-        document.getElementById('firstNameRO').innerText = firstName;
-        document.getElementById('lastNameRO').innerText = lastName;
-        document.getElementById('secondLastNameRO').innerText = secondLastName;
         document.getElementById('userEmailRO').innerText = email;
         document.getElementById('userPhoneRO').innerText = phone;
         document.getElementById('userRoleRO').innerText = role;
@@ -399,7 +401,7 @@
         document.getElementById('formAction').value = 'add_user';
         document.getElementById('userPassword').required = true;
         document.getElementById('passwordHint').innerText = 'Required for new users.';
-        setUserFormReadOnly(false);
+        setUserFormMode('create');
         openModal('userModal');
     }
 
@@ -409,7 +411,7 @@
         document.getElementById('userPassword').required = false;
         document.getElementById('passwordHint').innerText = 'Leave blank to keep the current password.';
         fillUserForm(id, firstName, lastName, secondLastName, email, phone, role, status, level, career, group);
-        setUserFormReadOnly(false);
+        setUserFormMode('edit');
         openModal('userModal');
     }
 
@@ -417,7 +419,7 @@
         document.getElementById('userModalTitle').innerText = 'View User Profile';
         document.getElementById('formAction').value = 'view_user';
         fillUserForm(id, firstName, lastName, secondLastName, email, phone, role, status, level, career, group);
-        setUserFormReadOnly(true);
+        setUserFormMode('view');
         openModal('userModal');
     }
 

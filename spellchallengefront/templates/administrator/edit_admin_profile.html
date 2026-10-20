@@ -21,17 +21,23 @@
         <input type="file" id="avatarUpload" name="avatar" accept="image/*" hidden>
     </div>
 
+    <!-- Nombre y apellidos (texto plano con caja) -->
     <div class="form-row-2">
         <div class="form-field">
             <label>First Name:</label>
-            <input type="text" name="first_name" class="form-input" value="{{ admin.nombre_pila }}" required>
+            <span class="form-readonly">{{ admin.nombre_pila }}</span>
         </div>
         <div class="form-field">
             <label>Last Name:</label>
-            <input type="text" name="last_name" class="form-input" value="{{ admin.apellidoPaterno }}" required>
+            <span class="form-readonly">{{ admin.apellidoPaterno }} {{ admin.apellidoMaterno|default:"" }}</span>
         </div>
     </div>
 
+    <!-- Hidden para que el backend siga recibiendo first_name y last_name -->
+    <input type="hidden" name="first_name" value="{{ admin.nombre_pila }}">
+    <input type="hidden" name="last_name" value="{{ admin.apellidoPaterno }}">
+
+    <!-- Email, Password, Role -->
     <div class="form-row-3">
         <div class="form-field">
             <label>Email Address:</label>

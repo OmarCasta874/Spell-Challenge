@@ -134,3 +134,17 @@
 .btn-logout:hover {
     background-color: #e97b74;
 }
+
+.form-readonly {
+    display: block;
+    padding: 0.6rem 0.9rem;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #333;
+    min-height: 38px;
+    box-sizing: border-box;
+    width: 100%;
+    font-weight: 700;
+}

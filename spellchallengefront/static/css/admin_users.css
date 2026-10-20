@@ -305,4 +305,6 @@
     font-size: 0.85rem;
     color: #333;
     min-height: 38px;
+    box-sizing: border-box;
+    width: 100%;
 }

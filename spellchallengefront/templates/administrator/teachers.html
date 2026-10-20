@@ -149,59 +149,69 @@
 
             <div class="modal-body">
 
-                <div class="form-field">
+                <!-- TEACHER CODE (solo CREATE) -->
+                <div class="form-field" id="teacherCodeField">
                     <label>Teacher Code</label>
                     <input type="text" id="teacherCode" name="teacher_code" class="form-input" required maxlength="10" placeholder="e.g. PROF001">
+                </div>
+
+                <!-- TEACHER CODE (EDIT/VIEW - readonly) -->
+                <div class="form-field" id="teacherCodeReadonlyField" style="display: none;">
+                    <label>Teacher Code</label>
                     <span class="form-readonly" id="teacherCodeRO"></span>
                 </div>
 
+                <!-- FULL NAME (EDIT/VIEW - readonly) -->
                 <div class="form-field" id="fullNameField" style="display: none;">
                     <label>Full Name</label>
                     <span class="form-readonly" id="fullNameRO"></span>
                 </div>
 
+                <!-- NAME FIELDS (solo CREATE) -->
                 <div class="form-field" id="firstNameField">
                     <label>First Name</label>
                     <input type="text" id="firstName" name="first_name" class="form-input" required maxlength="30" placeholder="e.g. Alex">
-                    <span class="form-readonly" id="firstNameRO"></span>
                 </div>
 
                 <div class="form-field" id="lastNameField">
                     <label>Last Name</label>
                     <input type="text" id="lastName" name="last_name" class="form-input" required maxlength="30" placeholder="e.g. Smith">
-                    <span class="form-readonly" id="lastNameRO"></span>
                 </div>
 
                 <div class="form-field" id="secondLastNameField">
                     <label>Second Last Name</label>
                     <input type="text" id="secondLastName" name="second_last_name" class="form-input" maxlength="30" placeholder="e.g. Johnson">
-                    <span class="form-readonly" id="secondLastNameRO"></span>
                 </div>
 
+                <!-- EMAIL -->
                 <div class="form-field">
                     <label>Email Address</label>
                     <input type="email" id="email" name="email" class="form-input" required placeholder="teacher@spellchallenge.com">
                     <span class="form-readonly" id="emailRO"></span>
                 </div>
 
+                <!-- PHONE -->
                 <div class="form-field">
                     <label>Phone Number</label>
                     <input type="tel" id="phone" name="phone" class="form-input" required maxlength="20" placeholder="e.g. 6641234567">
                     <span class="form-readonly" id="phoneRO"></span>
                 </div>
 
+                <!-- PASSWORD (solo CREATE/EDIT) -->
                 <div class="form-field" id="passwordField">
                     <label>Password</label>
                     <input type="password" id="password" name="password" class="form-input" placeholder="Enter a temporary password">
                     <small class="form-hint" id="passwordHint">Required for new teachers.</small>
                 </div>
 
+                <!-- GROUPS (readonly) -->
                 <div class="form-field">
                     <label>Assigned Groups</label>
                     <input type="text" id="groupsDisplay" class="form-input" readonly placeholder="Managed from the Groups panel">
                     <span class="form-readonly" id="groupsDisplayRO"></span>
                 </div>
 
+                <!-- STATUS (readonly) -->
                 <div class="form-field" id="statusField">
                     <label>Status</label>
                     <span class="form-readonly" id="statusRO"></span>
@@ -257,28 +267,43 @@
         document.getElementById(modalId).classList.remove('active');
     }
 
-    function setFormReadOnly(readOnly) {
-        const form = document.getElementById('teacherForm');
+    function setFormMode(mode) {
+        const isCreate = mode === 'create';
+        const isEdit = mode === 'edit';
+        const isView = mode === 'view';
 
-        form.querySelectorAll('input, select').forEach(el => {
-            if (el.type === 'hidden') return;
-            el.style.display = readOnly ? 'none' : '';
+        // Teacher Code
+        document.getElementById('teacherCodeField').style.display = isCreate ? 'block' : 'none';
+        document.getElementById('teacherCodeReadonlyField').style.display = isCreate ? 'none' : 'block';
+        document.getElementById('teacherCodeRO').style.display = isCreate ? 'none' : 'block';
+
+        // Full Name
+        document.getElementById('fullNameField').style.display = isCreate ? 'none' : 'block';
+        document.getElementById('fullNameRO').style.display = isCreate ? 'none' : 'block';
+
+        // Name fields (solo en CREATE)
+        document.getElementById('firstNameField').style.display = isCreate ? 'block' : 'none';
+        document.getElementById('lastNameField').style.display = isCreate ? 'block' : 'none';
+        document.getElementById('secondLastNameField').style.display = isCreate ? 'block' : 'none';
+
+        // Inputs editables (email, phone)
+        document.querySelectorAll('#teacherForm input:not([type="hidden"]), #teacherForm select').forEach(el => {
+            const field = el.closest('.form-field');
+            const isReadonlySpan = field ? field.querySelector('.form-readonly') : null;
+            if (isReadonlySpan) {
+                el.style.display = isView ? 'none' : '';
+                isReadonlySpan.style.display = isView ? 'block' : 'none';
+            }
         });
 
-        form.querySelectorAll('.form-readonly').forEach(el => {
-            el.style.display = readOnly ? 'block' : 'none';
-        });
+        // Password
+        document.getElementById('passwordField').style.display = isView ? 'none' : 'block';
 
-        document.getElementById('passwordField').style.display = readOnly ? 'none' : 'block';
-        document.getElementById('fullNameField').style.display = readOnly ? 'block' : 'none';
-        document.getElementById('firstNameField').style.display = readOnly ? 'none' : 'block';
-        document.getElementById('lastNameField').style.display = readOnly ? 'none' : 'block';
-        document.getElementById('secondLastNameField').style.display = readOnly ? 'none' : 'block';
-
-        document.getElementById('saveBtn').style.display = readOnly ? 'none' : 'inline-block';
-        document.getElementById('cancelBtn').textContent = readOnly ? 'Close' : 'Cancel';
+        // Botones
+        document.getElementById('saveBtn').style.display = isView ? 'none' : 'inline-block';
+        document.getElementById('cancelBtn').textContent = isView ? 'Close' : 'Cancel';
     }
-
+        
     function fillForm(id, firstName, lastName, secondLastName, email, phone, status, groups) {
         document.getElementById('teacherId').value = id;
         document.getElementById('teacherCode').value = id;
@@ -292,9 +317,6 @@
         document.getElementById('teacherCodeRO').innerText = id;
         const fullName = `${firstName} ${lastName} ${secondLastName}`.trim();
         document.getElementById('fullNameRO').innerText = fullName;
-        document.getElementById('firstNameRO').innerText = firstName;
-        document.getElementById('lastNameRO').innerText = lastName;
-        document.getElementById('secondLastNameRO').innerText = secondLastName;
         document.getElementById('emailRO').innerText = email;
         document.getElementById('phoneRO').innerText = phone;
         document.getElementById('groupsDisplayRO').innerText = groups;
@@ -308,7 +330,7 @@
         document.getElementById('formAction').value = 'add_teacher';
         document.getElementById('password').required = true;
         document.getElementById('passwordHint').innerText = 'Required for new teachers.';
-        setFormReadOnly(false);
+        setFormMode('create');
         openModal('teacherModal');
     }
 
@@ -318,7 +340,7 @@
         document.getElementById('password').required = false;
         document.getElementById('passwordHint').innerText = 'Leave blank to keep current password.';
         fillForm(id, firstName, lastName, secondLastName, email, phone, status, groups);
-        setFormReadOnly(false);
+        setFormMode('edit');
         openModal('teacherModal');
     }
 
@@ -326,7 +348,7 @@
         document.getElementById('modalTitle').innerText = 'View Teacher';
         document.getElementById('formAction').value = 'view_teacher';
         fillForm(id, firstName, lastName, secondLastName, email, phone, status, groups);
-        setFormReadOnly(true);
+        setFormMode('view');
         openModal('teacherModal');
     }
 
