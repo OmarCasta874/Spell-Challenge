@@ -419,3 +419,355 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* GROUP WORD LISTS */
+.group-wordlists-panel {
+  min-width: 0;
+  padding: 1.25rem;
+  background: #FFF;
+  border: 1px solid #EAD6D8;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(92, 20, 20, 0.05);
+  overflow: hidden;
+}
+
+.group-wordlists-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.group-wordlists-title {
+  margin: 0;
+  color: #7a1f2b;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.group-wordlists-subtitle {
+  margin: 0.3rem 0 0;
+  color: #888;
+  font-size: 0.82rem;
+}
+
+.add-wordlist-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 0.9rem;
+  border: none;
+  border-radius: 9px;
+  background: #7a1f2b;
+  color: #FFF;
+  font-size: 0.8rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.add-wordlist-btn:hover {
+  background: #5C1414;
+  transform: translateY(-1px);
+}
+
+.add-wordlist-btn i {
+  width: 17px;
+  height: 17px;
+}
+
+.group-wordlists-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.group-wordlist-card {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.9rem;
+  border: 1px solid #f2c9ce;
+  border-radius: 10px;
+  background: #fffafa;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.group-wordlist-card:hover {
+  border-color: #E7A4AA;
+  transform: translateY(-1px);
+}
+
+.group-wordlist-icon,
+.available-wordlist-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #fbe6e7;
+  color: #7a1f2b;
+}
+
+.group-wordlist-icon i,
+.available-wordlist-icon i {
+  width: 21px;
+  height: 21px;
+}
+
+.group-wordlist-info {
+  min-width: 0;
+}
+
+.group-wordlist-info h4 {
+  margin: 0;
+  color: #7a1f2b;
+  font-size: 0.95rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.group-wordlist-info p {
+  margin: 0.3rem 0 0;
+  color: #777;
+  font-size: 0.8rem;
+}
+
+.wordlist-dot {
+  margin: 0 0.25rem;
+  color: #D9534F;
+}
+
+.group-wordlists-empty {
+  padding: 1.75rem 1rem;
+  text-align: center;
+  border: 1px solid #e7b9be;
+  border-radius: 10px;
+  background: #fffafa;
+}
+
+.group-wordlists-empty > i {
+  width: 12px;
+  height: 12px;
+  color: #D9534F;
+}
+
+.group-wordlists-empty p {
+  margin: 0.6rem 0 0.25rem;
+  color: #7a1f2b;
+  font-weight: 800;
+}
+
+.group-wordlists-empty span {
+  color: #888;
+  font-size: 0.82rem;
+}
+
+.wordlist-limit-message {
+  margin: 1rem 0 0;
+  padding: 0.7rem;
+  border-radius: 8px;
+  background: #fff3e0;
+  color: #875c18;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+/* ADD WORD LIST MODAL */
+.add-wordlist-modal {
+  max-width: 520px;
+}
+
+.add-wordlist-modal .modal-header {
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.add-wordlist-modal .modal-header h3 {
+  margin: 0;
+  color: #7a1f2b;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.add-wordlist-description {
+  margin: 0.35rem 0 0;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.add-wordlist-modal .modal-body {
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.wordlist-selection-count {
+  margin: 0 0 0.9rem;
+  color: #777;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.available-wordlists {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.available-wordlist-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem;
+  border: 1px solid #EAD6D8;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.available-wordlist-option:hover {
+  background: #fff7f7;
+  border-color: #D9534F;
+}
+
+.available-wordlist-option:has(input:checked) {
+  background: #fff1f2;
+  border-color: #7a1f2b;
+  box-shadow: 0 0 0 1px #7a1f2b;
+}
+
+.available-wordlist-option input[type="radio"] {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  accent-color: #7a1f2b;
+  cursor: pointer;
+}
+
+.available-wordlist-option .available-wordlist-icon {
+  width: 38px;
+  height: 38px;
+}
+
+.available-wordlist-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.available-wordlist-info strong {
+  color: #7a1f2b;
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+
+.available-wordlist-info small {
+  color: #888;
+  font-size: 0.78rem;
+}
+
+.available-wordlist-check {
+  display: flex;
+  color: #7a1f2b;
+  opacity: 0;
+}
+
+.available-wordlist-check i {
+  width: 20px;
+  height: 20px;
+}
+
+.available-wordlist-option:has(input:checked) .available-wordlist-check {
+  opacity: 1;
+}
+
+.no-available-wordlists {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: #888;
+}
+
+.no-available-wordlists i {
+  width: 30px;
+  height: 30px;
+  color: #D9534F;
+}
+
+.no-available-wordlists p {
+  margin: 0.6rem 0 0;
+  font-size: 0.88rem;
+}
+
+.add-wordlist-modal .modal-footer {
+  padding-top: 0.5rem;
+  border-top: 1px solid #eee;
+}
+
+.view-wordlist-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border: 1px solid #7A1C1C;
+  border-radius: 10px;
+  color: #7A1C1C;
+  background: #FFF;
+  text-decoration: none;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.view-wordlist-btn:hover {
+  background: #7A1C1C;
+  color: #FFF;
+  transform: translateY(-1px);
+}
+
+.view-wordlist-btn i {
+  width: 15px;
+  height: 15px;
+}
+
+@media (max-width: 520px) {
+  .group-wordlist-card {
+    flex-wrap: wrap;
+  }
+
+  .view-wordlist-btn {
+    margin-left: auto;
+  }
+}
+
+/* WORD LISTS RESPONSIVE */
+@media (max-width: 600px) {
+  .group-wordlist-panel {
+    padding: 1rem;
+  }
+
+  .group-wordlists-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .add-wordlist-btn {
+    width: 100%;
+  }
+
+  .add-wordlist-modal {
+    width: 94%;
+  }
+
+  .available-wordlist-option {
+    gap: 0.5rem;
+    padding: 0.65rem;
+  }
+}

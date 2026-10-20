@@ -16,4 +16,30 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
   }
+
+  var generalSpellingBee = document.getElementById('compGeneralSpellingBee');
+  var wordList = document.getElementById('compWordList');
+  var wordListContainer = document.getElementById('wordListContainer');
+
+  if (generalSpellingBee && wordList && wordListContainer) {
+    function updateCompetitionMode() {
+      var isGeneral = generalSpellingBee.checked;
+
+      if (isGeneral) {
+        wordList.removeAttribute('required');
+        wordList.required = false;
+        wordList.disabled = true;
+        wordList.value = '';
+        wordListContainer.style.display = 'none';
+      } else {
+        wordList.disabled = false;
+        wordList.setAttribute('required', '');
+        wordList.required = true;
+        wordListContainer.style.display = '';
+      }
+    }
+
+    generalSpellingBee.addEventListener('change', updateCompetitionMode);
+    updateCompetitionMode();
+  }
 });

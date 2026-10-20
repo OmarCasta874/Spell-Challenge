@@ -84,6 +84,16 @@
                     <p class="text-muted mb-0 mt-1">{{ competition.descripcion|default:"No description provided for this competition." }}</p>
                   </div>
                   <div class="mb-3">
+                    <strong style="color: #7a1f2b;">Competition Type:</strong>
+                    <p class="text-muted mb-0 mt-1">
+                      {% if competition.tipo == 'GENERAL' %}
+                        General Spelling Bee (6 - 12 Letters)
+                      {% else %}
+                        Word List Competition
+                      {% endif %}
+                    </p>
+                  </div>
+                  <div class="mb-3">
                     <strong style="color: #7A1F2B;">Organized by:</strong>
                     <p class="text-muted mb-0 mt-1">{{ competition.profesor }}</p>
                   </div>

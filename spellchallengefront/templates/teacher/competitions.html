@@ -66,13 +66,19 @@
               <span class="badge-status badge-upcoming">Upcoming</span>
           {% endif %}
         </div>
-        {% with competition.lista_competencias.first as relation %}
-          {% if relation %}
-            <div class="comp-meta">
-              {{ relation.lista.nombre }}
-            </div>
-          {% endif %}
-        {% endwith %}
+        {% if competition.tipo == 'GENERAL' %}
+          <div class="comp-meta">
+            General Spelling Bee (6–12 letters)
+          </div>
+        {% else %}
+          {% with competition.lista_competencias.first as relation %}
+            {% if relation %}
+              <div class="comp-meta">
+                {{ relation.lista.nombre }}
+              </div>
+            {% endif %}
+          {% endwith %}
+        {% endif %}
         <div class="comp-datetime">
           <span>
             {{ competition.fecha|date:"M d, Y" }}
@@ -145,10 +151,14 @@
             </div>
             <div class="competition-modal-row">
               <div>
-                <div class="competition-modal-label">Group:</div>
-                {% with competition.lista_competencias.first as relation %}
-                  <div class="competition-modal-value">{{ relation.lista.nombre|default:"—" }}</div>
-                {% endwith %}
+                <div class="competition-modal-label">Competition Type:</div>
+                <div class="competition-modal-value">
+                  {% if competition.tipo == 'GENERAL' %}
+                    General Spelling Bee
+                  {% else %}
+                    Word List Competition
+                  {% endif %}
+                </div>
               </div>
               <div>
                 <div class="competition-modal-label">Date / Time:</div>
@@ -242,7 +252,7 @@
               <label for="compName" class="form-label">Competition Name:</label>
               <input type="text" class="form-control" id="compName" name="nombre" maxlength="50" required>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6" id="wordListContainer">
               <label for="compWordList" class="form-label">Word List:</label>
               <select class="form-select" id="compWordList" name="lista" required>
                 <option value="" selected disabled>Select a Word List</option>
@@ -252,6 +262,23 @@
                   <option value="" disabled>No word lists available</option>
                 {% endfor %}
               </select>
+            </div>
+            <div class="col-12">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="compGeneralSpellingBee"
+                  name="general_spelling_bee"
+                  value="yes"
+                >
+                <label class="form-check-label" for="compGeneralSpellingBee">
+                  General Spelling Bee (all word-length categories, 6–12 letters)
+                </label>
+              </div>
+              <small class="text-muted">
+                Enable this option if the competition does not use a specific Word List.
+              </small>
             </div>
           </div>
           <div class="datetime-grid">

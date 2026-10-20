@@ -343,6 +343,65 @@
     box-shadow: 0 0 0 3px rgba(139, 94, 43, 0.18);
 }
 
+/* PAGINACIÓN DE BEEHIVES */
+.honeycomb-page {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+
+.honeycomb-page.active {
+    display: flex;
+}
+
+.beehive-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    margin: 1.75rem auto 0;
+}
+
+.beehive-pagination button {
+    background-color: #700000;
+    color: #FFF;
+    border: none;
+    border-radius: 22px;
+    padding: 0.65rem 1.4rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.beehive-pagination button:hover:not(:disabled) {
+    background-color: #8A2525;
+}
+
+.beehive-pagination button:disabled {
+    background-color: #b3b3b3;
+    color: #EEE;
+    cursor: not-allowed;
+}
+
+#pageIndicator {
+    color: #5A3E1B;
+    font-size: 1rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+@media (max-width: 576px) {
+    .beehive-pagination {
+        gap: 0.5rem;
+    }
+
+    .beehive-pagination button {
+        padding: 0.55rem 0.8rem;
+        font-size: 0.85rem;
+    }
+}
+
 /* Responsive: en pantallas pequeñas evita que el modal se desborde */
 @media (max-width: 900px) {
     .word-modal-theme {

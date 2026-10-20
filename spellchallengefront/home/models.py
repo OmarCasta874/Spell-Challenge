@@ -970,6 +970,11 @@ class Competencia(models.Model):
         to_field='clave'
     )
     
+    tipo = models.CharField(
+        max_length=10,
+        default='LIST'
+    )
+    
     class Meta:
         db_table = 'competencia'
         

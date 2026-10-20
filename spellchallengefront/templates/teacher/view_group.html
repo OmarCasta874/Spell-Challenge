@@ -75,54 +75,127 @@
       </tbody>
     </table>
   </div>
+  <div class="wordlist-table-wrap group-wordlists-panel">
+    <div class="group-wordlists-header">
+      <div>
+        <h3 class="group-wordlists-title">Word Lists</h3>
+        <p class="group-wordlists-subtitle">
+          {{ word_lists.count }} of {{ max_word_lists }} lists assigned
+        </p>
+      </div>
 
-  <div class="wordlist-table-wrap">
-    <table class="wordlist-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Word</th>
-          <th>Meaning</th>
-          <th>Pronunciation</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for word in word_list %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ word.significado }}</td>
-          <td>{{ word.definicion|default:word.significado }}</td>
-          <td>{{ word.pronunciacion }}</td>
-          <td class="wordlist-actions">
-            <button
-              type="button"
-              class="wordlist-btn"
-              onclick="openWordModal(
-                  '{{ word.word|escapejs }}',
-                  '{{ word.definicion|default:word.significado|escapejs }}',
-                  '{{ word.pronunciacion|escapejs }}',
-                  '{% if word.imagen %}{{ word.imagen.url }}{% endif %}'
-              )">
-              VIEW
-            </button>
-            <button
-              type="button"
-              class="wordlist-btn"
-              onclick="playAudio('{{ word.significado|escapejs }}')">
-              LISTEN
-            </button>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="5"> No words assigned to this group. </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      {% if can_add_word_list and available_word_lists %}
+        <button
+          type="button"
+          class="add-wordlist-btn"
+          onclick="openModal('addWordListModal')">
+          <i data-lucide="plus"></i>
+          <span>Add a Word List</span>
+        </button>
+      {% endif %}
+    </div>
+
+    <div class="group-wordlists-list">
+      {% for word_list in word_lists %}
+        <div class="group-wordlist-card">
+          <div class="group-wordlist-icon">
+            <i data-lucide="book-open"></i>
+          </div>
+
+          <div class="group-wordlist-info">
+            <h4>{{ word_list.nombre }}</h4>
+            <p>
+              {{ word_list.total_words }} words
+              {% if word_list.numero_letras %}
+                <span class="wordlist-dot">·</span>
+                {{ word_list.numero_letras }} letters
+              {% endif %}
+            </p>
+          </div>
+
+          <a href="{% url 'view_word_list' word_list.codigo %}"
+            class="view-wordlist-btn">
+            <span>View List</span>
+            <i data-lucide="arrow-up-right"></i>
+          </a>
+        </div>
+      {% empty %}
+        <div class="group-wordlists-empty">
+          <i data-lucide="book-open"></i>
+          <p>No Word Lists assigned to this group yet.</p>
+          {% if available_word_lists and can_add_word_list %}
+            <span>Add a list to give your students words to practice.</span>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if not can_add_word_list %}
+      <p class="wordlist-limit-message">
+        This group has reached the maximum of {{ max_word_lists }} Word Lists.
+      </p>
+    {% endif %}
   </div>
+</div>
 
+<!-- MODAL: ADD WORD LIST -->
+<div id="addWordListModal" class="modal-overlay">
+  <div class="modal-content add-wordlist-modal">
+    <div class="modal-header">
+      <div>
+        <h3>Add a Word List</h3>
+        <p class="add-wordlist-description">Choose a list to assign to this group.</p>
+      </div>
+      <button type="button" class="modal-close" onclick="closeModal('addWordListModal')">
+        &times;
+      </button>
+    </div>
+    <form method="POST">
+      {% csrf_token %}
+      <div class="modal-body">
+        <p class="wordlist-selection-count">
+          {{ word_lists.count }} of {{ max_word_lists }} lists assigned
+        </p>
+        <div class="available-wordlists">
+          {% for word_list in available_word_lists %}
+            <label class="available-wordlist-option">
+              <input type="radio" name="lista_codigo" value="{{ word_list.codigo }}" required>
+              <span class="available-wordlist-icon">
+                <i data-lucide="book-open"></i>
+              </span>
+              <span class="available-wordlist-info">
+                <strong>{{ word_list.nombre }}</strong>
+                <small>
+                  {{ word_list.total_words }} words
+                  {% if word_list.numero_letras %}
+                    · {{ word_list.numero_letras }} letters
+                  {% endif %}
+                </small>
+              </span>
+              <span class="available-wordlist-check">
+                <i data-lucide="circle-check"></i>
+              </span>
+            </label>
+          {% empty %}
+            <div class="no-available-wordlists">
+              <i data-lucide="book-open"></i>
+              <p>No additional Word Lists available.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-pill-close" onclick="closeModal('addWordListModal')">
+          Cancel
+        </button>
+        {% if available_word_lists and can_add_word_list %}
+          <button type="submit" class="btn-pill-action btn-pill-solid">
+            Add Word List
+          </button>
+        {% endif %}
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- MODAL: VIEW CLASSMATE -->

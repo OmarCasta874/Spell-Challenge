@@ -30,38 +30,26 @@
             </select>
         </div>
     </div>
-
+    
     <div class="honeycomb-grid">
-        <div class="honeycomb-row">
-            {% for number in beehives|slice:":10" %}
-                <button class="beehive-cell" data-hive="{{ number }}" onclick="selectBeehive(this.dataset.hive)">
-                    <span class="beehive-number">{{ number }}</span>
-                </button>
-            {% endfor %}
-        </div>
-        <div class="honeycomb-row">
-            {% for number in beehives|slice:"10:19" %}
-                <button class="beehive-cell" data-hive="{{ number }}" onclick="selectBeehive(this.dataset.hive)">
-                    <span class="beehive-number">{{ number }}</span>
-                </button>
-            {% endfor %}
-        </div>
-        <div class="honeycomb-row">
-            {% for number in beehives|slice:"19:29" %}
-                <button class="beehive-cell" data-hive="{{ number }}" onclick="selectBeehive(this.dataset.hive)">
-                    <span class="beehive-number">{{ number }}</span>
-                </button>
-            {% endfor %}
-        </div>
-        <div class="honeycomb-row">
-            {% for number in beehives|slice:"29:30" %}
-                <button class="beehive-cell" data-hive="{{ number }}" onclick="selectBeehive(this.dataset.hive)">
-                    <span class="beehive-number">{{ number }}</span>
-                </button>
-            {% endfor %}
+        <div class="honeycomb-page active" data-page="1">
+            <div class="honeycomb-row"></div>
+            <div class="honeycomb-row"></div>
+            <div class="honeycomb-row"></div>
+            <div class="honeycomb-row"></div>
         </div>
     </div>
 
+    <!-- PAGINATION CONTROLS -->
+    <div class="beehive-pagination">
+        <button type="button" id="previousPageBtn" onclick="changeBeehivePage(-1)" disabled>
+            Previous
+        </button>
+        <span id="pageIndicator">Page 1 of 2</span>
+        <button type="button" id="nextPageBtn" onclick="changeBeehivePage(1)">
+            Next
+        </button>
+    </div>
 </div>
 
 <!-- MODAL DE CONFIRMACIÓN -->
@@ -113,6 +101,99 @@
     let currentCategory = 'CAT11';
 
     let currentHive = null;
+    let currentBeehivePage = 1;
+
+    function changeBeehivePage(direction) {
+        const pages = document.querySelectorAll('.honeycomb-page');
+        const newPage = currentBeehivePage + direction;
+
+        if (newPage < 1 || newPage > pages.length) {
+            return;
+        }
+
+        pages.forEach(page => {
+            page.classList.toggle(
+                'active',
+                Number(page.dataset.page) === newPage
+            );
+        });
+
+        currentBeehivePage = newPage;
+
+        document.getElementById('previousPageBtn').disabled = currentBeehivePage === 1;
+        document.getElementById('nextPageBtn').disabled = currentBeehivePage === pages.length;
+        document.getElementById('pageIndicator').textContent = 
+            `Page ${currentBeehivePage} of ${pages.length}`;
+    }
+
+    function renderBeehives() {
+        const grid = document.querySelector('.honeycomb-grid');
+        const previousButton = document.getElementById('previousPageBtn');
+        const nextButton = document.getElementById('nextPageBtn');
+        const pageIndicator = document.getElementById('pageIndicator');
+
+        const availableWords = wordsByCategory[currentCategory] || [];
+        const totalBeehives = Math.min(60, availableWords.length);
+        const totalPages = Math.max(1, Math.ceil(totalBeehives / 30));
+
+        grid.innerHTML = '';
+
+        for (let pageNumber = 1; pageNumber <= totalPages; pageNumber++) {
+            const page = document.createElement('div');
+            page.className = 'honeycomb-page';
+            page.dataset.page = pageNumber;
+
+            if (pageNumber === 1) {
+                page.classList.add('active');
+            }
+
+            const start = (pageNumber - 1) * 30;
+            const end = Math.min(start + 30, totalBeehives);
+            const rowSizes = [10, 9, 10, 1];
+            let hiveIndex = start;
+
+            for (const rowSize of rowSizes) {
+                if (hiveIndex >= end) {
+                    break;
+                }
+
+                const row = document.createElement('div');
+                row.className = 'honeycomb-row';
+
+                const rowEnd = Math.min(hiveIndex + rowSize, end);
+
+                for (; hiveIndex < rowEnd; hiveIndex++) {
+                    const hiveNumber = hiveIndex + 1;
+                    const button = document.createElement('button');
+
+                    button.type = 'button';
+                    button.className = 'beehive-cell';
+                    button.dataset.hive = hiveNumber;
+                    button.innerHTML = `<span class="beehive-number">${hiveNumber}</span>`;
+                    button.addEventListener('click', function () {
+                        selectBeehive(this.dataset.hive);
+                    });
+
+                    if (usedBeehives[currentCategory].has(String(hiveNumber))) {
+                        button.classList.add('beehive-disabled');
+                        button.disabled = true;
+                    }
+
+                    row.appendChild(button);
+                }
+
+                page.appendChild(row);
+            }
+
+            grid.appendChild(page);
+        }
+
+        currentBeehivePage = 1;
+
+        previousButton.disabled = true;
+        nextButton.disabled = totalPages <= 1;
+        pageIndicator.textContent = `Page 1 of ${totalPages}`;
+    }
 
     const usedBeehives = {
         CAT11: new Set(),
@@ -136,20 +217,9 @@
 
     function filterBeehives() {
         currentCategory = document.getElementById('wordLengthSelect').value;
-
         currentHive = null;
 
-        document.querySelectorAll('.beehive-cell').forEach(cell => {
-            const hiveNumber = cell.dataset.hive;
-
-            if (usedBeehives[currentCategory].has(hiveNumber)) {
-                cell.classList.add('beehive-disabled');
-                cell.disabled = true;
-            } else {
-                cell.classList.remove('beehive-disabled');
-                cell.disabled = false;
-            }
-        });
+        renderBeehives();
     }
 
     function selectBeehive(number) {
@@ -230,5 +300,7 @@
     function closeModal(id) {
         document.getElementById(id).classList.remove('active');
     }
+
+    renderBeehives();
 </script>
 {% endblock %}

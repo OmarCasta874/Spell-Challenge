@@ -383,15 +383,98 @@ def my_groups(request):
 @never_cache
 @role_required('teacher')
 def view_groups(request, group_id):
-    grupo = get_object_or_404(Grupo, codigo=group_id)
+    profesor = request.user.profesor
+    
+    grupo = get_object_or_404(Grupo, codigo=group_id, profesor=profesor)
+    
+    print("LOGGED TEACHER ID: ",profesor.pk)
+    print("GROUP TEACHER ID: ",grupo.profesor_id)
+    
+    print("ASSIGNED LIST DETAILS: ", list(
+        Lista_Grupo.objects.filter(
+            grupo=grupo
+        ).values(
+            'lista__codigo',
+            'lista__nombre',
+            'lista__profesor_id'
+        )
+    ))
+    
+    max_word_lists = 5
+    
+    if request.method == 'POST':
+        lista_codigo = request.POST.get('lista_codigo', '').strip()
+        
+        current_count = Lista_Grupo.objects.filter(
+            grupo=grupo
+        ).count()
+        
+        if current_count >= max_word_lists:
+            messages.error(
+                request,
+                'This group has reached the maximum of 5 Word Lists.'
+            )
+            return redirect('view_group', group_id=grupo.codigo)
+        
+        lista = Lista.objects.filter(
+            codigo=lista_codigo,
+            profesor=profesor
+        ).first()
+        
+        if not lista:
+            messages.error(
+                request,
+                'The selected Word List is not valid.'
+            )
+            return redirect('view_group', group_id=grupo.codigo)
+        
+        if Lista_Grupo.objects.filter(
+            lista=lista,
+            grupo=grupo
+        ).exists():
+            messages.warning(
+                request,
+                'This Word List is already assigned to the group.'
+            )
+            return redirect('view_group', group_id=grupo.codigo)
+        
+        Lista_Grupo.objects.create(
+            lista=lista,
+            grupo=grupo
+        )
+        
+        messages.success(
+            request,
+            f'Word List "{lista.nombre}" added successfully.'
+        )
+        
+        return redirect('view_group', group_id=grupo.codigo)
     
     students = Alumno.objects.filter(
         grupo_alumnos__grupo=grupo
     )
     
-    word_list = Palabra.objects.filter(
-        lista_palabras__lista__lista_grupos__grupo=grupo
-    ).distinct()
+    word_lists = Lista.objects.filter(
+        profesor=profesor,
+        lista_grupos__grupo=grupo,
+    ).distinct().annotate(
+        total_words=Count('lista_palabras')
+    ).order_by('nombre')
+    
+    print("GROUP: ",grupo.codigo)
+    print("ASSIGNED WORD LISTS: ",list(
+        Lista_Grupo.objects.filter(grupo=grupo).values('lista', 'grupo')
+    ))
+    
+    available_word_lists = Lista.objects.filter(
+        profesor=profesor
+    ).exclude(
+        lista_grupos__grupo=grupo
+    ).distinct().annotate(
+        total_words=Count('lista_palabras')
+    ).order_by('nombre')
+    
+    can_add_word_list = word_lists.count() < max_word_lists
     
     return render(
         request, 
@@ -399,7 +482,10 @@ def view_groups(request, group_id):
         {
             'grupo': grupo,
             'students': students,
-            'word_list': word_list,
+            'word_lists': word_lists,
+            'available_word_lists': available_word_lists,
+            'max_word_lists': max_word_lists,
+            'can_add_word_list': can_add_word_list,
         }
     )
 
@@ -863,28 +949,29 @@ def teacher_competitions(request):
     
     if request.method == 'POST':
         nombre = request.POST.get('nombre', '').strip()
-        lista_codigo = request.POST.get('lista', '')
+        lista_codigo = request.POST.get('lista', '').strip()
+        general_spelling_bee = request.POST.get('general_spelling_bee') == 'yes'
         fecha = request.POST.get('fecha', '')
         hora = request.POST.get('hora', '')
         
-        if not nombre or not lista_codigo or not fecha or not hora:
+        if (not nombre or (not general_spelling_bee and not lista_codigo) or not fecha or not hora):
             messages.error(
                 request,
                 'Please complete all required fields.'
             )
             return redirect('teacher_competitions')
         
-        lista = Lista.objects.filter(
-            codigo=lista_codigo,
-            profesor=profesor
-        ).first()
+        lista = None
         
-        if not lista:
-            messages.error(
-                request,
-                'The selected word list is not valid.'
-            )
-            return redirect('teacher_competitions')
+        if not general_spelling_bee:
+            lista = Lista.objects.filter(
+                codigo=lista_codigo,
+                profesor=profesor
+            ).first()
+            
+            if not lista:
+                messages.error(request, 'The selected word list is not valid.')
+                return redirect('teacher_competitions')
         
         try:
             competition_datetime = timezone.make_aware(
@@ -921,13 +1008,15 @@ def teacher_competitions(request):
             nombre=nombre,
             fecha=fecha,
             hora=hora,
-            profesor=profesor
+            profesor=profesor,
+            tipo='GENERAL' if general_spelling_bee else 'LIST'
         )
         
-        Lista_Competencia.objects.create(
-            lista=lista,
-            competencia=competencia
-        )
+        if lista:
+            Lista_Competencia.objects.create(
+                lista=lista,
+                competencia=competencia
+            )
         
         number_bitacora = 1
         
@@ -2553,7 +2642,7 @@ def student_competitions_view(request, competition_code):
         }
     )
     
-    beehives = list(range(1, 31))
+    beehives = list(range(1, 61))
     
     palabras = (
         Palabra.objects.filter(
