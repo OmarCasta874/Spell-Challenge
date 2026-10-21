@@ -83,6 +83,7 @@
                 <h2 class="word-modal-word" id="currentWordText">WORD</h2>
             </div>
             <p class="word-modal-def" id="currentWordDef">Definition</p>
+            <hr class="word-modal-divider">
             <p class="word-modal-example" id="currentWordExample">Example</p>
             <button type="button" class="btn-word-next" onclick="finishWordModal()">
                 NEXT
@@ -133,10 +134,14 @@
         const pageIndicator = document.getElementById('pageIndicator');
 
         const availableWords = wordsByCategory[currentCategory] || [];
-        const totalBeehives = Math.min(60, availableWords.length);
-        const totalPages = Math.max(1, Math.ceil(totalBeehives / 30));
+        const totalBeehives = availableWords.length;
+
+        const HIVES_PER_PAGE = 30;
+        const totalPages = Math.max(1, Math.ceil(totalBeehives / HIVES_PER_PAGE));
 
         grid.innerHTML = '';
+
+        let globalHiveIndex = 0;
 
         for (let pageNumber = 1; pageNumber <= totalPages; pageNumber++) {
             const page = document.createElement('div');
@@ -147,8 +152,8 @@
                 page.classList.add('active');
             }
 
-            const start = (pageNumber - 1) * 30;
-            const end = Math.min(start + 30, totalBeehives);
+            const start = (pageNumber - 1) * HIVES_PER_PAGE;
+            const end = Math.min(start + HIVES_PER_PAGE, totalBeehives);
             const rowSizes = [10, 9, 10, 1];
             let hiveIndex = start;
 
@@ -163,7 +168,8 @@
                 const rowEnd = Math.min(hiveIndex + rowSize, end);
 
                 for (; hiveIndex < rowEnd; hiveIndex++) {
-                    const hiveNumber = hiveIndex + 1;
+                    globalHiveIndex += 1;
+                    const hiveNumber = globalHiveIndex;
                     const button = document.createElement('button');
 
                     button.type = 'button';

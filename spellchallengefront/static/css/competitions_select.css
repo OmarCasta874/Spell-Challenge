@@ -1,6 +1,6 @@
 /* ESTILOS PARA LA PANTALLA DE SELECCIÓN DE COMPETITIONS (PANAL) */
 .competition-select-container {
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 1.5rem 1rem;
     display: flex;
@@ -38,18 +38,18 @@
 .honeycomb-row {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .honeycomb-row + .honeycomb-row {
-    margin-top: -20px; /* aproximado, ajustar si el traslape no calza exacto */
+    margin-top: -24px;
 }
 
 /* DISEÑO HEXAGONAL (BEEHIVE) */
 .beehive-cell {
     position: relative;
-    width: 65px;
-    height: 75px;
+    width: 78px;
+    height: 90px;
     background-color: #E6DC00;
     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
     display: flex;
@@ -85,7 +85,7 @@
 .beehive-number {
     position: relative;
     z-index: 2;
-    font-size: 1.6rem;
+    font-size: 1.9rem;
     font-weight: 900;
     color: #1A1A1A;
     text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;
@@ -253,14 +253,6 @@
     overflow: hidden;
     display: flex;
     justify-content: center;
-}
-
-.word-modal-def,
-.word-modal-example {
-    font-weight: 700;
-    color: #1A1A1A;
-    font-size: 1.4rem;
-    margin-bottom: 0.75rem;
 }
 
 .btn-word-next {
@@ -438,4 +430,30 @@
 
 .beehive-cell.beehive-disabled:hover {
     transform: none;
+}
+
+/* MODAL DE PALABRA: Separador y cursiva */
+.word-modal-def {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1A1A1A;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.word-modal-divider {
+    border: none;
+    border-top: 2px dashed #8a5a00;
+    margin: 0.75rem auto;
+    width: 100%;
+    opacity: 0.6;
+}
+
+.word-modal-example {
+    font-size: 1.3rem;
+    font-style: italic;
+    color: #4a2e00;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    line-height: 1.4;
 }
