@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'css/admin_base.css' %}">
 <link rel="stylesheet" href="{% static 'css/admin_backups.css' %}">
 {% endblock %}
@@ -15,7 +16,7 @@
         <p class="subtitle">Manage system snapshots, automated schedules, and data recovery points</p>
     </div>
     <div class="header-actions">
-        <button class="btn btn-secondary" onclick="submitBackup()">
+        <button type="button" class="btn btn-secondary" onclick="openModal('submitBackupModal')">
             Submit Backup
         </button>
         <button class="btn btn-primary" onclick="openModal('createBackupModal')">
@@ -64,14 +65,14 @@
                 <td><strong class="text-primary">{{ b.nombre }}</strong></td>
                 <td>{{ b.fecha|date:"M d, Y" }}</td>
                 <td>{{ b.hora|time:"h:i A" }}</td>
+                <td>{{ b.size_display }}</td>  
                 <td>
-                    {% if "Size:" in b.datos %}
-                        {{ b.datos|cut:"Filename:"|cut:"Type:"|cut:"Description:" }}
+                    {% if "Type: Uploaded" in b.datos %}
+                        <span class="type-tag type-manual">Uploaded</span>
                     {% else %}
-                        —
+                        <span class="type-tag type-manual">Manual</span>
                     {% endif %}
                 </td>
-                <td><span class="type-tag type-manual">Manual</span></td>
                 <td class="actions-cell text-right">
                     <a href="{% url 'admin_backup_download' b.codigo %}" class="btn-pill-outline" title="Download File">
                         DOWNLOAD
@@ -148,9 +149,63 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- MODAL: RESTAURAR BASE DE DATOS             -->
-<!-- ========================================== -->
+<!-- MODAL: SUBIR BACKUP EXISTENTE -->
+<div id="submitBackupModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Submit Existing Backup</h3>
+            <button type="button" class="modal-close" onclick="closeModal('submitBackupModal')">
+                &times;
+            </button>
+        </div>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="submit_backup">
+            <div class="modal-body">
+                <p class="modal-description">
+                    Upload an existing SQL database backup
+                    to store it in the system.
+                </p>
+                <div class="form-field mt-1">
+                    <label for="backupFile">Select SQL Backup</label>
+                    <input
+                        type="file"
+                        id="backupFile"
+                        name="backup_file"
+                        class="form-input"
+                        accept=".sql"
+                        required
+                    >
+                </div>
+                <div class="form-field mt-1">
+                    <label for="backupDescription">Backup Description / Note</label>
+                    <input
+                        type="text"
+                        id="backupDescription"
+                        name="description"
+                        class="form-input"
+                        maxlength="200"
+                        placeholder="e.g. Backup before system maintenance"
+                    >
+                </div>
+                <p class="modal-description">
+                    Only SQL files are accepted. Uploading
+                    a file will not restore the database.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('submitBackupModal')">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Upload Backup
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: RESTAURAR BASE DE DATOS -->
 <div id="restoreModal" class="modal-overlay">
     <div class="modal-content modal-small">
         <div class="modal-header">

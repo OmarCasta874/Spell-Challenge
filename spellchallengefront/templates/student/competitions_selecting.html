@@ -156,6 +156,7 @@
             const end = Math.min(start + HIVES_PER_PAGE, totalBeehives);
             const rowSizes = [10, 9, 10, 1];
             let hiveIndex = start;
+            let localNumber = 1;
 
             for (const rowSize of rowSizes) {
                 if (hiveIndex >= end) {
@@ -169,23 +170,28 @@
 
                 for (; hiveIndex < rowEnd; hiveIndex++) {
                     globalHiveIndex += 1;
-                    const hiveNumber = globalHiveIndex;
+                    const hiveId = globalHiveIndex;
+                    const displayNumber = localNumber;
+
                     const button = document.createElement('button');
 
                     button.type = 'button';
                     button.className = 'beehive-cell';
-                    button.dataset.hive = hiveNumber;
-                    button.innerHTML = `<span class="beehive-number">${hiveNumber}</span>`;
+                    button.dataset.hive = hiveId;
+                    button.style.setProperty('--hive-index', localNumber);
+                    button.innerHTML = `<span class="beehive-number">${displayNumber}</span>`;
+
                     button.addEventListener('click', function () {
-                        selectBeehive(this.dataset.hive);
+                        selectBeehive(this.dataset.hive, displayNumber);
                     });
 
-                    if (usedBeehives[currentCategory].has(String(hiveNumber))) {
+                    if (usedBeehives[currentCategory].has(String(hiveId))) {
                         button.classList.add('beehive-disabled');
                         button.disabled = true;
                     }
 
                     row.appendChild(button);
+                    localNumber += 1;
                 }
 
                 page.appendChild(row);
@@ -228,9 +234,9 @@
         renderBeehives();
     }
 
-    function selectBeehive(number) {
-        currentHive = number;
-        document.getElementById('selectedHiveNum').innerText = number;
+    function selectBeehive(hiveId, displayNumber) {
+        currentHive = hiveId;
+        document.getElementById('selectedHiveNum').innerText = displayNumber;
         document.getElementById('confirmBeehiveModal').classList.add('active');
     }
 

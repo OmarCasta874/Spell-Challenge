@@ -457,3 +457,43 @@
     font-weight: 600;
     line-height: 1.4;
 }
+
+
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) translateY(10px);
+    }
+    70% {
+        transform: scale(1.05) translateY(-2px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.honeycomb-page.active .beehive-cell {
+    animation: popIn 0.4s ease-out forwards;
+    opacity: 0; /* Empieza invisible hasta que la animación lo haga visible */
+}
+
+/* Agregamos un pequeño retraso a cada colmena para el efecto cascada */
+.honeycomb-page.active .beehive-cell:nth-child(1) { animation-delay: 0.02s; }
+.honeycomb-page.active .beehive-cell:nth-child(2) { animation-delay: 0.04s; }
+.honeycomb-page.active .beehive-cell:nth-child(3) { animation-delay: 0.06s; }
+.honeycomb-page.active .beehive-cell:nth-child(4) { animation-delay: 0.08s; }
+.honeycomb-page.active .beehive-cell:nth-child(5) { animation-delay: 0.10s; }
+.honeycomb-page.active .beehive-cell:nth-child(6) { animation-delay: 0.12s; }
+.honeycomb-page.active .beehive-cell:nth-child(7) { animation-delay: 0.14s; }
+.honeycomb-page.active .beehive-cell:nth-child(8) { animation-delay: 0.16s; }
+.honeycomb-page.active .beehive-cell:nth-child(9) { animation-delay: 0.18s; }
+.honeycomb-page.active .beehive-cell:nth-child(10) { animation-delay: 0.20s; }
+
+/* Para las siguientes filas/colmenas, podemos usar un delay general más largo 
+   o simplemente usar una regla general para todas las colmenas y que el delay 
+   aumente con el nth-child. Para no escribir 30 reglas, usamos una aproximación. */
+
+.honeycomb-page.active .beehive-cell {
+    animation-delay: calc(var(--hive-index) * 0.03s);
+}

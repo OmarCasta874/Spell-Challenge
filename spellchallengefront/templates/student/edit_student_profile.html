@@ -12,17 +12,25 @@
 {% block student_content %}
 <div class="edit-profile-container">
 
+  <form method="POST" action="{% url 'edit_student_profile' %}" enctype="multipart/form-data" class="edit-profile-form" id="editStudentProfileForm">
+    {% csrf_token %}
+
   <!-- Avatar editable -->
   <div class="avatar-edit-wrapper">
-    <div class="avatar-edit-circle">
-      <img src="{% static 'img/student.png' %}" alt="Avatar del estudiante" class="avatar-edit-img">
-      <label for="avatar-upload" class="avatar-edit-icon">
-        <i data-lucide="camera"></i>
-      </label>
-      <input type="file" id="avatar-upload" name="avatar" accept="image/*" hidden>
+      <div class="avatar-edit-circle">
+        {% if request.user.alumno.foto %}
+          <img src="{{ request.user.alumno.foto.url }}" alt="Avatar del estudiante" class="avatar-edit-img" id="avatarPreview">
+        {% else %}
+          <img src="{% static 'img/student.png' %}" alt="Avatar del estudiante" class="avatar-edit-img" id="avatarPreview">
+        {% endif %}
+        
+        <label for="avatar-upload" class="avatar-edit-icon">
+          <i data-lucide="camera"></i>
+        </label>
+        <input type="file" id="avatar-upload" name="foto" accept="image/*" hidden onchange="previewAvatar(event)">
+      </div>
+      <label for="avatar-upload" class="avatar-edit-text">Change profile picture</label>
     </div>
-    <label for="avatar-upload" class="avatar-edit-text">Change profile picture</label>
-  </div>
 
   <!-- Formulario -->
   <form method="POST" action="{% url 'edit_student_profile' %}" class="edit-profile-form" id="editStudentProfileForm">
@@ -38,12 +46,6 @@
         <label for="last_name">Last Name:</label>
         <input type="text" id="last_name" name="last_name" value="{{ request.user.apellidoPaterno }} {{ request.user.apellidoMaterno }}" class="form-control">
       </div>
-
-      <div class="form-group">
-        <label for="age">Age:</label>
-        <input type="number" id="age" name="age" value="{{ request.user.edad }}" class="form-control">
-      </div>
-    </div>
 
     <div class="form-grid-3">
       <div class="form-group">
@@ -78,4 +80,20 @@
   {% include 'base/save_changes_modal.html' with avatar_img='img/student.png' form_id='editStudentProfileForm' %}
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  function previewAvatar(event) {
+    const reader = new FileReader();
+    reader.onload = function(){
+      const output = document.getElementById('avatarPreview');
+      output.src = reader.result;
+    };
+    if (event.target.files[0]) {
+      reader.readAsDataURL(event.target.files[0]);
+    }
+  }
+</script>
 {% endblock %}

@@ -117,9 +117,12 @@
 
 /* Footer */
 .competition-card-footer {
-  padding: 0.5rem 1.25rem 1rem;
+  padding: 0.75rem 1.25rem 1rem;
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .competition-card-link {
@@ -156,4 +159,50 @@
   .border-end-md {
     border-right: 1px solid #e0e0e0;
   }
+}
+
+.btn-comp-outline {
+  background-color: #ffffff;
+  color: #7a1f2b;
+  border: 1.5px solid #7a1f2b;
+  border-radius: 50px;
+  padding: 0.35rem 1.1rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.btn-comp-outline:hover {
+  background-color: rgba(122, 31, 43, 0.08);
+  color: #7a1f2b;
+  border-color: #7a1f2b;
+}
+
+.btn-comp-solid {
+  background-color: #7a1f2b;
+  color: #ffffff;
+  border: 1.5px solid #7a1f2b;
+  border-radius: 50px;
+  padding: 0.35rem 1.1rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.btn-comp-solid:hover {
+  background-color: #5c1620;
+  border-color: #5c1620;
+  color: #ffffff;
 }

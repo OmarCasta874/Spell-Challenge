@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'css/admin_base.css' %}">
 <link rel="stylesheet" href="{% static 'css/admin_teachers.css' %}">
 {% endblock %}
@@ -298,6 +299,10 @@
 
         // Password
         document.getElementById('passwordField').style.display = isView ? 'none' : 'block';
+
+        // Status: visible en View y Edit
+        document.getElementById('statusField').style.display = isCreate ? 'none' : 'block';
+        document.getElementById('statusRO').style.display = isCreate ? 'none': 'block';
 
         // Botones
         document.getElementById('saveBtn').style.display = isView ? 'none' : 'inline-block';

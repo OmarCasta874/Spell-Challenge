@@ -12,7 +12,11 @@
   <!-- Cabecera / Banner con Avatar y Nombre -->
   <div class="profile-header">
     <div class="avatar-wrapper">
-      <img src="{% static 'img/student.png' %}" alt="Avatar del estudiante" class="profile-avatar">
+      {% if request.user.alumno.foto %}
+        <img src="{{ request.user.alumno.foto.url }}" alt="Avatar del estudiante" class="profile-avatar">
+      {% else %}
+        <img src="{% static 'img/student.png' %}" alt="Avatar del estudiante" class="profile-avatar">
+      {% endif %}
     </div>
     <div class="user-main-info">
       <h1 class="user-fullname">
@@ -20,7 +24,7 @@
         {{ request.user.apellidoPaterno }}
         {{ request.user.apellidoMaterno }}
       </h1>
-      <p class="user-subtitle">20 YEARS • English Student</p>
+      <p class="user-subtitle">English Student</p>
     </div>
   </div>
 

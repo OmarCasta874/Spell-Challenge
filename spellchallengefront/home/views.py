@@ -1338,6 +1338,35 @@ def student_profile(request):
 @never_cache
 @role_required('student')
 def edit_student_profile(request):
+    alumno = request.alumno
+
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        if first_name:
+            request.user.nombre_pila = first_name
+        if last_name:
+            parts = last_name.split(' ', 1)
+            request.user.apellidoPaterno = parts[0]
+            if len(parts) > 1:
+                request.user.apellidoMaterno = parts[1]
+        if email:
+            request.user.correo = email
+        if password:
+            request.user.set_password(password)
+            
+        request.user.save()
+
+        if 'foto' in request.FILES:
+            alumno.foto = request.FILES['foto']
+            alumno.save()
+
+        messages.success(request, 'profile updated successfully.')
+        return redirect('student_profile')
+
     return render(request, 'student/edit_student_profile.html')
 
 @never_cache
@@ -2161,8 +2190,115 @@ def admin_backups(request):
     administrador = request.user.administrador
     
     if request.method == 'POST':
-        backup_type = request.POST.get('backup_type', 'Manual')
+        action = request.POST.get('action', 'create_backup')
         description = request.POST.get('description', '').strip()
+        
+        if action == 'submit_backup':
+            uploaded_file = request.FILES.get('backup_file')
+            
+            if not uploaded_file:
+                messages.error(
+                    request,
+                    'Please select an SQL backup file.'
+                )
+                return redirect('admin_backups')
+            
+            if not uploaded_file.name.lower().endswith('.sql'):
+                messages.error(
+                    request,
+                    'Only SQL backup files are allowed.'
+                )
+                return redirect('admin_backups')
+            
+            max_size = 50 * 1024 * 1024
+            
+            if uploaded_file.size > max_size:
+                messages.error(
+                    request,
+                    'The backup file cannot exceed 50 MB.'
+                )
+                return redirect('admin_backups')
+            
+            backup_dir = os.path.join(
+                settings.BASE_DIR,
+                'backups'
+            )
+            
+            os.makedirs(
+                backup_dir,
+                exist_ok=True
+            )
+            
+            now = timezone.localtime()
+            
+            number = 1
+            
+            while Copia_Seguridad.objects.filter(
+                codigo=f'COP{number:02d}'
+            ).exists():
+                number += 1
+                
+            codigo = f'COP{number:02d}'
+            
+            filename = f'{codigo}_uploaded.sql'
+            
+            backup_path = os.path.join(
+                backup_dir,
+                filename
+            )
+            
+            file_created = False
+            
+            try:
+                with open(backup_path, 'xb') as backup_file:
+                    file_created = True
+                    
+                    for chunk in uploaded_file.chunks():
+                        backup_file.write(chunk)
+                        
+                file_size = os.path.getsize(backup_path)
+                
+                if file_size >= 1024 * 1024:
+                    size_text = f'{file_size / (1024 * 1024):.2f} MB'
+                elif file_size >= 1024:
+                    size_text = f'{file_size / 1024:.2f} KB'
+                else:
+                    size_text = f'{file_size} B'
+                    
+                datos = (
+                    f'Filename: {filename}\n'
+                    f'Size: {size_text}\n'
+                    f'Type: Uploaded\n'
+                    f'Description: {description or "No description"}'
+                )
+                
+                Copia_Seguridad.objects.create(
+                    codigo=codigo,
+                    nombre=filename,
+                    fecha=now.date(),
+                    hora=now.time(),
+                    datos=datos,
+                    administrador=administrador
+                )
+                
+                messages.success(
+                    request,
+                    'Backup file uploaded successfully.'
+                )
+                
+            except Exception:
+                if file_created and os.path.exists(backup_path):
+                    os.remove(backup_path)
+                    
+                messages.error(
+                    request,
+                    'An error occurred while uploading the backup file.'
+                )
+                
+            return redirect('admin_backups')
+        
+        else:
+            backup_type = request.POST.get('backup_type', 'Manual')
         
         backup_dir = os.path.join(
             settings.BASE_DIR,
@@ -2225,7 +2361,7 @@ def admin_backups(request):
             )
             
             if file_size >= 1024 * 1024:
-                size_text = f'{file_size / (1024 * 1024):-2f} MB'
+                size_text = f'{file_size / (1024 * 1024):.2f} MB'
             elif file_size >= 1024:
                 size_text = f'{file_size / 1024:.2f} KB'
             else:
@@ -2287,6 +2423,14 @@ def admin_backups(request):
         )
     else:
         last_backup_date = 'No backups'
+        
+    for backup in backups:
+        backup.size_display = '-'
+        
+        for line in backup.datos.splitlines():
+            if line.startswith('Size:'):
+                backup.size_display = line.replace('Size: ', '', 1).strip()
+                break
         
     context = {
         'backups': backups,

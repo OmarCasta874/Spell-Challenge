@@ -56,14 +56,14 @@
             </div>
 
             <footer class="competition-card-footer">
-              <button type="button" class="competition-card-link bg-transparent border-0" data-bs-toggle="modal" data-bs-target="#detailsModalStudent{{ forloop.counter }}">
+              <button type="button" class="btn-comp-outline" data-bs-toggle="modal" data-bs-target="#detailsModalStudent{{ forloop.counter }}">
                 View Details
               </button>
 
               {% if competition.estado == 'Finished' or competition.fecha < today %}
-                <a href="{% url 'student_competition_results' competition.codigo %}" class="competition-card-link">View Results</a>
+                <a href="{% url 'student_competition_results' competition.codigo %}" class="btn-comp-solid">View Results</a>
               {% elif competition.estado == 'Active' %}
-                <a href="{% url 'student_competitions_select' competition.codigo %}" class="competition-card-link">Enter Competition</a>
+                <a href="{% url 'student_competitions_select' competition.codigo %}" class="btn-comp-solid">Enter Competition</a>
               {% endif %}
             </footer>
           </article>
