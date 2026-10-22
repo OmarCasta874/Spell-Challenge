@@ -12,69 +12,66 @@
 {% block student_content %}
 <div class="edit-profile-container">
 
-  <form method="POST" action="{% url 'edit_student_profile' %}" enctype="multipart/form-data" class="edit-profile-form" id="editStudentProfileForm">
-    {% csrf_token %}
+  <div class="edit-profile-card">
+    
+    <form method="POST" action="{% url 'edit_student_profile' %}" enctype="multipart/form-data" class="edit-profile-form" id="editStudentProfileForm">
+      {% csrf_token %}
 
-  <!-- Avatar editable -->
-  <div class="avatar-edit-wrapper">
-      <div class="avatar-edit-circle">
-        {% if request.user.alumno.foto %}
-          <img src="{{ request.user.alumno.foto.url }}" alt="Avatar del estudiante" class="avatar-edit-img" id="avatarPreview">
-        {% else %}
-          <img src="{% static 'img/student.png' %}" alt="Avatar del estudiante" class="avatar-edit-img" id="avatarPreview">
-        {% endif %}
-        
-        <label for="avatar-upload" class="avatar-edit-icon">
-          <i data-lucide="camera"></i>
-        </label>
-        <input type="file" id="avatar-upload" name="foto" accept="image/*" hidden onchange="previewAvatar(event)">
-      </div>
-      <label for="avatar-upload" class="avatar-edit-text">Change profile picture</label>
-    </div>
-
-  <!-- Formulario -->
-  <form method="POST" action="{% url 'edit_student_profile' %}" class="edit-profile-form" id="editStudentProfileForm">
-    {% csrf_token %}
-
-    <div class="form-grid-3">
-      <div class="form-group">
-        <label for="first_name">First Name:</label>
-        <input type="text" id="first_name" name="first_name" value="{{ request.user.nombre_pila }}" class="form-control">
+      <div class="avatar-edit-wrapper">
+        <div class="avatar-edit-circle">
+          {% if request.user.alumno.foto %}
+            <img src="{{ request.user.alumno.foto.url }}" alt="Avatar del estudiante" class="avatar-edit-img" id="avatarPreview">
+          {% else %}
+            <img src="{% static 'img/student.png' %}" alt="Avatar del estudiante" class="avatar-edit-img" id="avatarPreview">
+          {% endif %}
+          
+          <label for="avatar-upload" class="avatar-edit-icon" title="Change photo">
+            <i data-lucide="camera"></i>
+          </label>
+          <input type="file" id="avatar-upload" name="foto" accept="image/*" hidden onchange="previewAvatar(event)">
+        </div>
+        <label for="avatar-upload" class="avatar-edit-text">Change profile picture</label>
       </div>
 
-      <div class="form-group">
-        <label for="last_name">Last Name:</label>
-        <input type="text" id="last_name" name="last_name" value="{{ request.user.apellidoPaterno }} {{ request.user.apellidoMaterno }}" class="form-control">
-      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label for="first_name">First Name:</label>
+          <input type="text" id="first_name" name="first_name" value="{{ request.user.nombre_pila }}" class="form-control">
+        </div>
 
-    <div class="form-grid-3">
-      <div class="form-group">
-        <label for="email">Email Address:</label>
-        <input type="email" id="email" name="email" value="{{ request.user.correo }}" class="form-control">
-      </div>
+        <div class="form-group">
+          <label for="last_name">Last Name:</label>
+          <input type="text" id="last_name" name="last_name" value="{{ request.user.apellidoPaterno }} {{ request.user.apellidoMaterno }}" class="form-control">
+        </div>
 
-      <div class="form-group">
-        <label for="password">Password:</label>
-        <div class="password-field">
-          <input type="password" id="password" name="password" value="{{ request.user.contrasena }}" class="form-control">
-          <button type="button" class="toggle-password" data-target="password">
-            <i data-lucide="eye"></i>
-          </button>
+        <div class="form-group">
+          <label for="email">Email Address:</label>
+          <input type="email" id="email" name="email" value="{{ request.user.correo }}" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <div class="password-field">
+            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••">
+            <button type="button" class="toggle-password" data-target="password">
+              <i data-lucide="eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="role">Role:</label>
+          <input type="text" id="role" value="{{ request.user.tipo_usuario.nombre }}" class="form-control" disabled>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="role">Role:</label>
-        <input type="text" id="role" value="{{ request.user.tipo_usuario.nombre }}" class="form-control" disabled>
+      <div class="edit-profile-actions">
+        <button type="button" class="btn btn-cancel" data-bs-toggle="modal" data-bs-target="#cancelModal">CANCEL</button>
+        <button type="button" class="btn btn-save" data-bs-toggle="modal" data-bs-target="#saveChangesModal">SAVE CHANGES</button>
       </div>
-    </div>
+    </form>
 
-    <!-- Acciones -->
-    <div class="edit-profile-actions">
-      <button type="button" class="btn btn-cancel" data-bs-toggle="modal" data-bs-target="#cancelModal">CANCEL</button>
-      <button type="button" class="btn btn-save" data-bs-toggle="modal" data-bs-target="#saveChangesModal">SAVE CHANGES</button>
-    </div>
-  </form>
+  </div>
 
   {% include 'base/cancel_modal.html' with avatar_img='img/student.png' cancel_url='student_profile' %}
   {% include 'base/save_changes_modal.html' with avatar_img='img/student.png' form_id='editStudentProfileForm' %}

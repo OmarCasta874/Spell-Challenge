@@ -4,7 +4,6 @@
   padding: 40px 20px;
 }
 
-/* Avatar */
 .avatar-edit-wrapper {
   display: flex;
   flex-direction: column;
@@ -14,13 +13,11 @@
 
 .avatar-edit-circle {
   position: relative;
-  width: 130px;
-  height: 130px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
-  overflow: hidden;
+  overflow: visible; 
   background-color: #f28f89;
-  border: 4px solid #7a1f2b;
-  box-shadow: 0 4px 10px rgba(0 , 0, 0, 0.12);
 }
 
 .avatar-edit-img {
@@ -28,27 +25,43 @@
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
+  border: 4px solid #7a1f2b; 
 }
 
 .avatar-edit-icon {
   position: absolute;
-  bottom: 6px;
-  right: 6px;
-  width: 34px;
-  height: 34px;
+  bottom: -4px;        
+  left: 50%;           
+  transform: translateX(-50%); 
+  
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background-color: #7a1f2b;
   color: #ffffff;
+  
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  
   border: 2px solid #ffffff;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  z-index: 5;
+  padding: 0;
+  margin: 0;
 }
 
-.avatar-edit-icon i {
-  width: 16px;
-  height: 16px;
+.avatar-edit-icon:hover {
+  transform: translateX(-50%) scale(1.1);
+  background-color: #5c1620;
+}
+
+.avatar-edit-icon i,
+.avatar-edit-icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
 .avatar-edit-text {

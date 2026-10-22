@@ -15,8 +15,10 @@
         ← {{ group.nombre }}
     </a>
 </div>
+
 <div class="group-view-grid">
     <div class="left-column">
+        <!-- Panel Profesor -->
         <div class="panel-card panel-border-red mb-1">
             <table class="data-table compact-table">
                 <thead>
@@ -33,6 +35,8 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Panel Compañeros -->
         <div class="panel-card table-card panel-border-red">
             <div class="table-responsive">
                 <table class="data-table">
@@ -58,8 +62,9 @@
                                     onclick="openClassmateModal(
                                         '{{ classmate.matricula }}',
                                         '{{ classmate.nombre_pila|escapejs }} {{ classmate.apellidoPaterno|escapejs }} {{ classmate.apellidoMaterno|default:""|escapejs }}',
-                                        '{{ classmate.edad }}',
-                                        '{{ classmate.email|escapejs }}'
+                                        '{{ classmate.edad|default:"—" }}',
+                                        '{{ classmate.usuario.correo|escapejs }}',
+                                        '{% if classmate.foto %}{{ classmate.foto.url }}{% else %}{% static "img/student.png" %}{% endif %}'
                                     )">
                                     VIEW
                                 </button>
@@ -77,6 +82,8 @@
             </div>
         </div>
     </div>
+
+    <!-- Columna Derecha: Palabras -->
     <div class="right-column">
         <div class="panel-card table-card header-red-table">
             <div class="table-responsive">
@@ -127,12 +134,13 @@
         </div>
     </div>
 </div>
+
 <div id="classmateModal" class="modal-overlay">
   <div class="modal-content classmate-theme">
     <button class="modal-close" onclick="closeModal('classmateModal')">&times;</button>
     <h3 class="classmate-modal-title">View Classmate</h3>
 
-    <img src="{% static 'img/student.png' %}" alt="Student avatar" class="classmate-avatar">
+    <img id="cmAvatar" src="{% static 'img/student.png' %}" alt="Student avatar" class="classmate-avatar">
 
     <h4 id="cmName" class="classmate-name"></h4>
     <p id="cmAge" class="classmate-detail"></p>
@@ -142,6 +150,7 @@
     <button type="button" class="btn-accept" onclick="closeModal('classmateModal')">ACCEPT</button>
   </div>
 </div>
+
 <div id="wordModal" class="modal-overlay">
     <div class="modal-content modal-small">
         <div class="modal-header">
@@ -160,6 +169,7 @@
     </div>
 </div>
 {% endblock %}
+
 {% block extra_js %}
 {{ block.super }}
 <script>
@@ -171,11 +181,19 @@
         document.getElementById(id).classList.remove('active');
     }
 
-    function openClassmateModal(enrollment, name, age, email) {
+    function openClassmateModal(enrollment, name, age, email, photoUrl) {
         document.getElementById('cmName').innerText = name;
-        document.getElementById('cmAge').innerText = age + ' years';
+        document.getElementById('cmAge').innerText = (age && age !== '—' && age !== 'None') ? age + ' years' : 'Age not specified';
         document.getElementById('cmEmail').innerText = email;
         document.getElementById('cmEnrollment').innerText = enrollment;
+        
+        const avatarImg = document.getElementById('cmAvatar');
+        if (photoUrl && photoUrl.trim() !== '') {
+            avatarImg.src = photoUrl;
+        } else {
+            avatarImg.src = "{% static 'img/student.png' %}";
+        }
+        
         openModal('classmateModal');
     }
 

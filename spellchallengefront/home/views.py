@@ -1338,14 +1338,14 @@ def student_profile(request):
 @never_cache
 @role_required('student')
 def edit_student_profile(request):
-    alumno = request.alumno
-
+    alumno = request.user.alumno
+    
     if request.method == 'POST':
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
-
+        
         if first_name:
             request.user.nombre_pila = first_name
         if last_name:
@@ -1359,12 +1359,12 @@ def edit_student_profile(request):
             request.user.set_password(password)
             
         request.user.save()
-
+        
         if 'foto' in request.FILES:
             alumno.foto = request.FILES['foto']
             alumno.save()
-
-        messages.success(request, 'profile updated successfully.')
+            
+        messages.success(request, 'Profile updated successfully.')
         return redirect('student_profile')
 
     return render(request, 'student/edit_student_profile.html')
@@ -2614,6 +2614,7 @@ def group_view(request, group_id):
         Alumno.objects
         .filter(grupo_alumnos__grupo=grupo)
         .select_related('usuario')
+        .order_by('apellidoPaterno', 'nombre_pila')
     )
     
     lista_palabras = (
