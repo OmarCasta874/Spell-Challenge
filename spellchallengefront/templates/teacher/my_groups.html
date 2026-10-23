@@ -4,7 +4,7 @@
 {% block extra_css %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'css/teacher_base.css' %}">
-<link rel="stylesheet" href="{% static 'css/my_groups.css' %}">
+<link rel="stylesheet" href="{% static 'css/my_groups.css' %}?v=1.1">
 {% endblock %}
 
 {% block teacher_content %}
@@ -14,26 +14,38 @@
     + Create New Group
   </button>
 </div>
+
 <div class="groups-row">
   {% for grupo in grupos %}
   <div class="group-card">
-    <div class="group-card-header">
-      <div class="group-card-header-text">
-        <h5>{{ grupo.nombre }}</h5>
-        <p class="group-teacher">
+    
+    <!-- CABECERA DE LA TARJETA -->
+    <div class="group-card-header" style="display: flex; justify-content: space-between; align-items: center; background-color: #7a1f2b; padding: 1rem 1.15rem;">
+      <div class="group-card-header-text" style="min-width: 0; flex: 1;">
+        <h5 style="margin: 0 0 0.15rem; color: #ffffff; font-weight: 800; font-size: 1rem;">{{ grupo.nombre }}</h5>
+        <p class="group-teacher" style="margin: 0; color: #f2c9ce; font-weight: 600; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
           Prof. {{ grupo.profesor.nombre_pila }} {{ grupo.profesor.apellidoPaterno }}
         </p>
       </div>
-      <div class="group-avatar">{{ grupo.profesor.nombre_pila|slice:":2"|upper }}</div>
+
+      <!-- AVATAR CIRCULAR FIJO DE 56x56px -->
+      <div style="width: 56px !important; height: 56px !important; min-width: 56px !important; max-width: 56px !important; min-height: 56px !important; max-height: 56px !important; border-radius: 50% !important; border: 3px solid #7A1F2B !important; background-color: #ffffff !important; overflow: hidden !important; flex-shrink: 0 !important; box-shadow: 0 2px 6px rgba(0,0,0,0.25); display: flex !important; align-items: center !important; justify-content: center !important;">
+        {% if grupo.profesor.foto %}
+          <img src="{{ grupo.profesor.foto.url }}" alt="Prof. {{ grupo.profesor.nombre_pila }}" style="width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; object-fit: cover !important; border-radius: 50% !important; display: block !important; margin: 0 !important;">
+        {% else %}
+          <img src="{% static 'img/teacher.png' %}" alt="Prof. {{ grupo.profesor.nombre_pila }}" style="width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; object-fit: cover !important; border-radius: 50% !important; display: block !important; margin: 0 !important;">
+        {% endif %}
+      </div>
     </div>
+
+    <!-- CUERPO DE LA TARJETA -->
     <div class="group-card-body">
       <div class="group-stats">
         <span class="group-stat">{{ grupo.grupo_alumnos.count }} students</span>
         <span class="group-stat">{{ grupo.lista_grupos.count }} Lists</span>
       </div>
       <div class="group-actions">
-        <a href="{% url 'view_group' grupo.codigo %}"
-           class="group-btn group-btn-view">
+        <a href="{% url 'view_group' grupo.codigo %}" class="group-btn group-btn-view">
           VIEW
         </a>
         <button type="button" class="group-btn group-btn-edit" data-bs-toggle="modal" data-bs-target="#editGroupModal{{ forloop.counter }}">
@@ -44,7 +56,10 @@
         </button>
       </div>
     </div>
+
   </div>
+
+  <!-- MODAL EDIT GROUP -->
   <div class="modal fade" id="editGroupModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="editGroupModalLabel{{ forloop.counter }}" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content create-group-modal">
@@ -79,6 +94,8 @@
       </div>
     </div>
   </div>
+
+  <!-- MODAL DELETE GROUP -->
   <div class="modal fade" id="deleteGroupModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="deleteGroupModalLabel{{ forloop.counter }}" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content create-group-modal">
@@ -106,6 +123,8 @@
   </div>
   {% endfor %}
 </div>
+
+<!-- MODAL CREATE NEW GROUP -->
 <div class="modal fade" id="createGroupModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content create-group-modal">

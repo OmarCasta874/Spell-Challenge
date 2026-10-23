@@ -11,8 +11,12 @@
 <div class="profile-container">
   <!-- Cabecera con Avatar y Nombre del Profesor -->
   <div class="profile-header">
-    <div class="avatar-wrapper">
-      <img src="{% static 'img/teacher.png' %}" alt="Avatar del profesor" class="profile-avatar">
+    <div class="avatar-wrapper" style="width: 160px; height: 160px; border-radius: 50%; border: 4px solid #7A1F2B; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); background-color: #ffffff;">
+      {% if request.user.profesor.foto %}
+        <img src="{{ request.user.profesor.foto.url }}" alt="Avatar del profesor" class="profile-avatar" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+      {% else %}
+        <img src="{% static 'img/teacher.png' %}" alt="Avatar del profesor" class="profile-avatar" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+      {% endif %}
     </div>
     <div class="user-main-info">
       <h1 class="user-fullname">
@@ -20,7 +24,7 @@
         {{ request.user.apellidoPaterno }}
         {{ request.user.apellidoMaterno }}
       </h1>
-      <p class="user-subtitle">35 YEARS</p>
+      <!-- Se eliminó el campo de la edad -->
       <p class="user-subtitle">English Teacher</p>
     </div>
   </div>
@@ -31,7 +35,7 @@
       <div class="form-grid">
         <div class="form-group">
           <label for="first_name">First Name:</label>
-          <input type="text" id="first_name" name="first_name" value="{{ request.user.nombre_pila}}" class="form-control" readonly>
+          <input type="text" id="first_name" name="first_name" value="{{ request.user.nombre_pila }}" class="form-control" readonly>
         </div>
 
         <div class="form-group">

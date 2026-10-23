@@ -33,7 +33,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
-  max-width: 720px;
+  width: 100%;
+  max-width: 100%; /* Se cambia de 720px a 100% para aprovechar todo el ancho */
 }
 
 .group-card {

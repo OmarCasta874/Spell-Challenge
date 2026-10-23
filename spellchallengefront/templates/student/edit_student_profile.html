@@ -17,21 +17,30 @@
     <form method="POST" action="{% url 'edit_student_profile' %}" enctype="multipart/form-data" class="edit-profile-form" id="editStudentProfileForm">
       {% csrf_token %}
 
-      <div class="avatar-edit-wrapper">
-        <div class="avatar-edit-circle">
-          {% if request.user.alumno.foto %}
-            <img src="{{ request.user.alumno.foto.url }}" alt="Avatar del estudiante" class="avatar-edit-img" id="avatarPreview">
-          {% else %}
-            <img src="{% static 'img/student.png' %}" alt="Avatar del estudiante" class="avatar-edit-img" id="avatarPreview">
-          {% endif %}
-          
-          <label for="avatar-upload" class="avatar-edit-icon" title="Change photo">
-            <i data-lucide="camera"></i>
-          </label>
-          <input type="file" id="avatar-upload" name="foto" accept="image/*" hidden onchange="previewAvatar(event)">
-        </div>
-        <label for="avatar-upload" class="avatar-edit-text">Change profile picture</label>
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; width: 100%;">
+      
+      <!-- Círculo recortado con dimensiones fijas de 140x140px y trazo guinda -->
+      <div style="position: relative; width: 140px; height: 140px; border-radius: 50%; background-color: #f28f89; border: 4px solid #7a1f2b; box-shadow: 0 4px 10px rgba(0,0,0,0.15); box-sizing: border-box; margin: 0 auto;">
+        
+        <!-- Imagen recortada perfectamente -->
+        {% if request.user.alumno.foto %}
+          <img src="{{ request.user.alumno.foto.url }}" alt="Avatar" id="avatarPreview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">
+        {% else %}
+          <img src="{% static 'img/student.png' %}" alt="Avatar" id="avatarPreview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">
+        {% endif %}
+
+        <!-- Botón de la cámara centrado horizontalmente en la parte inferior -->
+        <label for="avatar-upload" title="Change photo" style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background-color: #7a1f2b; color: #ffffff; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 10; margin: 0; padding: 0;">
+          <i data-lucide="camera" style="width: 18px; height: 18px; stroke-width: 2.2;"></i>
+        </label>
+        
+        <input type="file" id="avatar-upload" name="foto" accept="image/*" hidden onchange="previewAvatar(event)">
       </div>
+
+      <label for="avatar-upload" style="margin-top: 12px; color: #7a1f2b; font-weight: 700; font-size: 0.9rem; cursor: pointer;">
+        Change profile picture
+      </label>
+    </div>
 
       <div class="form-grid-2">
         <div class="form-group">

@@ -36,16 +36,20 @@
   border-radius: 50%;
   background-color: #7a1f2b;
   color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   cursor: pointer;
   border: 2px solid #ffffff;
+  padding: 0 !important;
+  line-height: 0 !important;
 }
 
-.avatar-edit-icon i {
-  width: 16px;
-  height: 16px;
+.avatar-edit-icon i,
+.avatar-edit-icon svg {
+  width: 18px !important;
+  height: 18px !important;
+  display: block;
 }
 
 .avatar-edit-text {

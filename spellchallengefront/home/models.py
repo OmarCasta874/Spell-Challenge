@@ -139,6 +139,12 @@ class Profesor(models.Model):
         db_column='usuario',
         to_field='codigo'
     )
+    
+    foto = models.ImageField(
+        upload_to='profesores_fotos/', 
+        blank=True, 
+        null=True
+    )
 
     class Meta:
         db_table = 'profesor'
@@ -171,6 +177,7 @@ class Alumno(models.Model):
         db_column='usuario',
         to_field='codigo'
     )
+    
     nivel = models.ForeignKey(
         'Nivel',
         on_delete=models.PROTECT,
@@ -184,6 +191,12 @@ class Alumno(models.Model):
         related_name='alumnos',
         db_column='carrera',
         to_field='clave'
+    )
+    
+    foto = models.ImageField(
+        upload_to='alumnos_fotos/', 
+        blank=True, 
+        null=True
     )
 
     class Meta:

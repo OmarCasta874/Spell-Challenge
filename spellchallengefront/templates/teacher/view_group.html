@@ -57,12 +57,11 @@
             <button
               type="button"
               class="student-btn-view"
-              onclick="openClassmateModal(
-                  '{{ student.matricula }}',
-                  '{{ student.nombre_pila|escapejs }} {{ student.apellidoPaterno|escapejs }} {{ student.apellidoMaterno|escapejs }}',
-                  '{{ student.edad }}',
-                  '{{ student.email|escapejs }}'
-              )">
+              data-enrollment="{{ student.matricula }}"
+              data-name="{{ student.nombre_pila }} {{ student.apellidoPaterno }} {{ student.apellidoMaterno }}"
+              data-email="{{ student.usuario.correo }}"
+              data-avatar="{% if student.foto %}{{ student.foto.url }}{% else %}{% static 'img/student.png' %}{% endif %}"
+              onclick="openClassmateModalFromBtn(this)">
               VIEW
             </button>
           </td>
@@ -204,12 +203,14 @@
     <button class="modal-close" onclick="closeModal('classmateModal')">&times;</button>
     <h3 class="classmate-modal-title">View Classmate</h3>
 
-    <img src="{% static 'img/student.png' %}" alt="Student avatar" class="classmate-avatar">
+    <!-- AVATAR CIRCULAR CON BORDE GUINDA -->
+    <div style="width: 100px; height: 100px; margin: 15px auto; border-radius: 50%; border: 4px solid #7A1F2B; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); background-color: #ffffff;">
+      <img id="cmAvatar" src="{% static 'img/student.png' %}" alt="Student avatar" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+    </div>
 
     <h4 id="cmName" class="classmate-name"></h4>
-    <p id="cmAge" class="classmate-detail"></p>
-    <p id="cmEmail" class="classmate-detail"></p>
-    <p id="cmEnrollment" class="classmate-enrollment"></p>
+    <p id="cmEmail" class="classmate-detail" style="margin: 6px 0; color: #ffffff; text-align: center; font-size: 0.95rem; font-weight: 500;"></p>
+    <p id="cmEnrollment" class="classmate-enrollment" style="margin-top: 6px; text-align: center; font-weight: bold;"></p>
 
     <button type="button" class="btn-accept" onclick="closeModal('classmateModal')">ACCEPT</button>
   </div>
@@ -267,13 +268,35 @@
         document.getElementById(id).classList.remove('active');
     }
 
-    function openClassmateModal(enrollment, name, age, email) {
-        document.getElementById('cmName').innerText = name;
-        document.getElementById('cmAge').innerText = age + ' years';
-        document.getElementById('cmEmail').innerText = email;
-        document.getElementById('cmEnrollment').innerText = enrollment;
-        openModal('classmateModal');
+    function openClassmateModal(enrollment, name, email, photoUrl) {
+    document.getElementById('cmName').innerText = name || '';
+
+    // Manejo de Correo
+    const emailElem = document.getElementById('cmEmail');
+    if (emailElem) {
+        if (email && email !== 'None' && email !== '-') {
+            emailElem.innerText = email;
+            emailElem.style.display = 'block';
+        } else {
+            emailElem.innerText = '';
+            emailElem.style.display = 'none';
+        }
     }
+
+    // Matrícula
+    const enrollmentElem = document.getElementById('cmEnrollment');
+    if (enrollmentElem) {
+        enrollmentElem.innerText = enrollment || '';
+    }
+
+    // Avatar
+    const avatarImg = document.getElementById('cmAvatar');
+    if (avatarImg && photoUrl) {
+        avatarImg.src = photoUrl;
+    }
+
+    openModal('classmateModal');
+}
 
     function openWordModal(word, meaning, phonetic) {
         document.getElementById('wWord').innerText = word;
@@ -310,5 +333,34 @@
             e.target.classList.remove('active');
         }
     }
+
+    function openClassmateModalFromBtn(button) {
+        const enrollment = button.getAttribute('data-enrollment') || '';
+        const name = button.getAttribute('data-name') || '';
+        const email = button.getAttribute('data-email') || '';
+        const avatarUrl = button.getAttribute('data-avatar') || '';
+
+        document.getElementById('cmName').innerText = name;
+        document.getElementById('cmEnrollment').innerText = enrollment;
+
+        const emailElem = document.getElementById('cmEmail');
+        if (emailElem) {
+            if (email && email.trim() !== '') {
+                emailElem.innerText = email;
+                emailElem.style.display = 'block';
+            } else {
+                emailElem.innerText = '';
+                emailElem.style.display = 'none';
+            }
+        }
+
+        const avatarImg = document.getElementById('cmAvatar');
+        if (avatarImg && avatarUrl) {
+            avatarImg.src = avatarUrl;
+        }
+
+        openModal('classmateModal');
+    }
+
 </script>
 {% endblock %}

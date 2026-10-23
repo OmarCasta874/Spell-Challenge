@@ -8,67 +8,77 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 40px;
+  margin-bottom: 1.5rem;
 }
 
-.avatar-edit-circle {
+.avatar-container {
   position: relative;
   width: 140px;
   height: 140px;
-  border-radius: 50%;
-  overflow: visible; 
+  margin: 0 auto;
+}
+
+.avatar-crop-circle {
+  width: 140px !important;
+  height: 140px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important; /* Fuerza la máscara circular */
   background-color: #f28f89;
+  border: 4px solid #7a1f2b !important; /* Trazo guinda definido */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
 }
 
 .avatar-edit-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 4px solid #7a1f2b; 
-}
-
-.avatar-edit-icon {
-  position: absolute;
-  bottom: -4px;        
-  left: 50%;           
-  transform: translateX(-50%); 
-  
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: #7a1f2b;
-  color: #ffffff;
-  
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  border: 2px solid #ffffff;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-  z-index: 5;
-  padding: 0;
-  margin: 0;
-}
-
-.avatar-edit-icon:hover {
-  transform: translateX(-50%) scale(1.1);
-  background-color: #5c1620;
-}
-
-.avatar-edit-icon i,
-.avatar-edit-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important; /* Mantiene la proporción redonda sin deformar la foto */
+  border-radius: 50% !important;
   display: block;
 }
 
+.avatar-camera-btn {
+  position: absolute;
+  bottom: -4px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important; /* Centrado matemático en X */
+  
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background-color: #7a1f2b !important;
+  color: #ffffff !important;
+  
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  
+  border: 2px solid #ffffff !important;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  z-index: 25;
+  padding: 0;
+  margin: 0;
+  line-height: 0;
+}
+
+.avatar-camera-btn:hover {
+  transform: translateX(-50%) scale(1.1) !important;
+  background-color: #5c1620 !important;
+}
+
+.avatar-camera-btn i,
+.avatar-camera-btn svg {
+  width: 18px !important;
+  height: 18px !important;
+  stroke-width: 2.2;
+}
+
 .avatar-edit-text {
-  margin-top: 10px;
+  margin-top: 12px;
   color: #7a1f2b;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   cursor: pointer;
 }
 

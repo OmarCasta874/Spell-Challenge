@@ -12,70 +12,98 @@
 {% block teacher_content %}
 <div class="edit-profile-container">
 
-  <!-- Avatar editable -->
-  <div class="avatar-edit-wrapper">
-    <div class="avatar-edit-circle">
-      <img src="{% static 'img/teacher.png' %}" alt="Avatar del profesor" class="avatar-edit-img">
-      <label for="avatar-upload" class="avatar-edit-icon">
-        <i data-lucide="camera"></i>
-      </label>
-      <input type="file" id="avatar-upload" name="avatar" accept="image/*" hidden>
-    </div>
-    <label for="avatar-upload" class="avatar-edit-text">Change profile picture</label>
-  </div>
+  <div class="edit-profile-card">
+    
+    <!-- Formulario con soporte para archivos -->
+    <form method="POST" action="{% url 'edit_teacher_profile' %}" enctype="multipart/form-data" class="edit-profile-form" id="editTeacherProfileForm">
+      {% csrf_token %}
 
-  <!-- Formulario -->
-  <form method="POST" action="{% url 'edit_teacher_profile' %}" class="edit-profile-form" id="editTeacherProfileForm">
-    {% csrf_token %}
+      <!-- Bloque del Avatar centrado idéntico al de Student -->
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; width: 100%;">
+      
+        <!-- Círculo recortado de 140x140px con trazo guinda -->
+        <div style="position: relative; width: 140px; height: 140px; border-radius: 50%; background-color: #f28f89; border: 4px solid #7a1f2b; box-shadow: 0 4px 10px rgba(0,0,0,0.15); box-sizing: border-box; margin: 0 auto;">
+          
+          <!-- Imagen del avatar -->
+          {% if request.user.profesor.foto %}
+            <img src="{{ request.user.profesor.foto.url }}" alt="Avatar" id="avatarPreview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">
+          {% else %}
+            <img src="{% static 'img/teacher.png' %}" alt="Avatar" id="avatarPreview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">
+          {% endif %}
 
-    <div class="form-grid-3">
-      <div class="form-group">
-        <label for="first_name">First Name:</label>
-        <input type="text" id="first_name" name="first_name" value="{{ request.user.nombre_pila }}" class="form-control">
+          <!-- Botón de la cámara centrado horizontalmente abajo (left: 50%, transform: translateX(-50%)) -->
+          <label for="avatar-upload" title="Change photo" style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background-color: #7a1f2b; color: #ffffff; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 10; margin: 0; padding: 0;">
+            <i data-lucide="camera" style="width: 18px; height: 18px; stroke-width: 2.2;"></i>
+          </label>
+          
+          <input type="file" id="avatar-upload" name="foto" accept="image/*" hidden onchange="previewAvatar(event)">
+        </div>
+
+        <label for="avatar-upload" style="margin-top: 12px; color: #7a1f2b; font-weight: 700; font-size: 0.9rem; cursor: pointer;">
+          Change profile picture
+        </label>
       </div>
 
-      <div class="form-group">
-        <label for="last_name">Last Name:</label>
-        <input type="text" id="last_name" name="last_name" value="{{ request.user.apellidoPaterno }} {{ request.user.apellidoMaterno }}" class="form-control">
-      </div>
+      <!-- Campos del Formulario (Grid sin el campo Age) -->
+      <div class="form-grid-2" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 24px;">
+        <div class="form-group">
+          <label for="first_name">First Name:</label>
+          <input type="text" id="first_name" name="first_name" value="{{ request.user.nombre_pila }}" class="form-control">
+        </div>
 
-      <div class="form-group">
-        <label for="age">Age:</label>
-        <input type="number" id="age" name="age" value="{{ request.user.edad }}" class="form-control">
-      </div>
-    </div>
+        <div class="form-group">
+          <label for="last_name">Last Name:</label>
+          <input type="text" id="last_name" name="last_name" value="{{ request.user.apellidoPaterno }} {{ request.user.apellidoMaterno }}" class="form-control">
+        </div>
 
-    <div class="form-grid-3">
-      <div class="form-group">
-        <label for="email">Email Address:</label>
-        <input type="email" id="email" name="email" value="{{ request.user.correo }}" class="form-control">
-      </div>
+        <div class="form-group">
+          <label for="email">Email Address:</label>
+          <input type="email" id="email" name="email" value="{{ request.user.correo }}" class="form-control">
+        </div>
 
-      <div class="form-group">
-        <label for="password">Password:</label>
-        <div class="password-field">
-          <input type="password" id="password" name="password" value="{{ request.user.contrasena }}" class="form-control">
-          <button type="button" class="toggle-password" data-target="password">
-            <i data-lucide="eye"></i>
-          </button>
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <div class="password-field">
+            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••">
+            <button type="button" class="toggle-password" data-target="password">
+              <i data-lucide="eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="role">Role:</label>
+          <input type="text" id="role" value="{{ request.user.tipo_usuario.nombre }}" class="form-control" disabled>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="role">Role:</label>
-        <input type="text" id="role" value="{{ request.user.tipo_usuario.nombre }}" class="form-control" disabled>
+      <!-- Acciones -->
+      <div class="edit-profile-actions">
+        <button type="button" class="btn btn-cancel" data-bs-toggle="modal" data-bs-target="#cancelModal">CANCEL</button>
+        <button type="button" class="btn btn-save" data-bs-toggle="modal" data-bs-target="#saveChangesModal">SAVE CHANGES</button>
       </div>
-    </div>
+    </form>
 
-    <!-- Acciones -->
-    <div class="edit-profile-actions">
-      <button type="button" class="btn btn-cancel" data-bs-toggle="modal" data-bs-target="#cancelModal">CANCEL</button>
-      <button type="button" class="btn btn-save" data-bs-toggle="modal" data-bs-target="#saveChangesModal">SAVE CHANGES</button>
-    </div>
-  </form>
+  </div>
 
   {% include 'base/cancel_modal.html' with avatar_img='img/teacher.png' cancel_url='teacher_profile' %}
   {% include 'base/save_changes_modal.html' with avatar_img='img/teacher.png' form_id='editTeacherProfileForm' %}
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  function previewAvatar(event) {
+    const reader = new FileReader();
+    reader.onload = function(){
+      const output = document.getElementById('avatarPreview');
+      output.src = reader.result;
+    };
+    if (event.target.files[0]) {
+      reader.readAsDataURL(event.target.files[0]);
+    }
+  }
+</script>
 {% endblock %}

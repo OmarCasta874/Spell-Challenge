@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth import authenticate, login as auth_login, logout
+from django.contrib.auth import authenticate, login as auth_login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
@@ -884,6 +884,7 @@ def student_groups(request):
                 'teacher_name': teacher_name,
                 'student_count': student_count,
                 'list_count': list_count,
+                'profesor': teacher,  # <--- AGREGAR ESTA LÍNEA
             })
             
         return groups
@@ -1353,20 +1354,30 @@ def edit_student_profile(request):
             request.user.apellidoPaterno = parts[0]
             if len(parts) > 1:
                 request.user.apellidoMaterno = parts[1]
+            else:
+                request.user.apellidoMaterno = ''
+                
         if email:
             request.user.correo = email
+            
+        password_changed = False
         if password:
             request.user.set_password(password)
+            password_changed = True
             
         request.user.save()
         
+        if password_changed:
+            update_session_auth_hash(request, request.user)
+            
         if 'foto' in request.FILES:
             alumno.foto = request.FILES['foto']
             alumno.save()
             
         messages.success(request, 'Profile updated successfully.')
+        
         return redirect('student_profile')
-
+        
     return render(request, 'student/edit_student_profile.html')
 
 @never_cache
@@ -1374,9 +1385,24 @@ def edit_student_profile(request):
 def teacher_profile(request):
     return render(request, 'teacher/teacher_profile.html')
 
-@never_cache
-@role_required('teacher')
+@login_required
 def edit_teacher_profile(request):
+    profesor = request.user.profesor
+    
+    if request.method == 'POST':
+        # Guardar imagen recibida
+        if 'foto' in request.FILES:
+            profesor.foto = request.FILES['foto']
+            profesor.save()
+            
+        # Actualizar campos de texto
+        nombre = request.POST.get('first_name')
+        if nombre:
+            request.user.nombre_pila = nombre
+            request.user.save()
+            
+        return redirect('teacher_profile')
+
     return render(request, 'teacher/edit_teacher_profile.html')
 
 @require_POST

@@ -30,38 +30,44 @@
 }
 
 .groups-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  max-width: 720px;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  gap: 1.5rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 .group-card {
-  background: #fff;
+  background: #ffffff;
   border: none;
   border-radius: 10px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  width: 100%;
 }
 
 .group-card-header {
   background: #7a1f2b;
   padding: 1rem 1.15rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
   gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .group-card-header-text {
   min-width: 0;
+  flex: 1;
 }
 
 .group-card-header-text h5 {
   margin: 0 0 0.15rem;
-  color: #fff;
+  color: #ffffff;
   font-weight: 800;
   font-size: 1rem;
 }
@@ -76,28 +82,37 @@
   white-space: nowrap;
 }
 
+/* AVATAR ESTANDARIZADO */
 .group-avatar {
-  width: 56px;
-  height: 56px;
-  min-width: 56px;
-  border-radius: 50%;
-  background: #F2908A;
-  color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  font-weight: 800;
-  letter-spacing: 1px;
-  flex-shrink: 0;
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 56px !important;
+  max-width: 56px !important;
+  border-radius: 50% !important;
+  border: 2px solid #ffffff !important;
+  background-color: #ffffff !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.group-avatar-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 50% !important;
 }
 
 .group-card-body {
-  background: #fff;
+  background: #ffffff;
   padding: 1.25rem 1.15rem;
   flex: 1;
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
   gap: 1rem;
 }
 
