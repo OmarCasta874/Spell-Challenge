@@ -248,6 +248,56 @@
     outline-offset: 3px;
 }
 
+.add-word-ai-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 9px 16px;
+    border: 1px solid #7A1C1C;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+    color: #7A1C1C;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add-word-ai-button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.add-word-ai-button i {
+    width: 17px;
+    height: 17px;
+}
+
+.add-word-ai-status {
+    margin-top: 9px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.add-word-ai-status:empty {
+    display: none;
+}
+
+.add-word-ai-status.success {
+    color: #198754;
+}
+
+.add-word-ai-status.error {
+    color: #B02A37;
+}
+
+.add-word-ai-status.loading {
+    color: #7A1C1C;
+}
+
 @media (max-width: 650px) {
     .add-word-page {
         padding: 24px 14px 36px;

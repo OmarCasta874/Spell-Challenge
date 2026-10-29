@@ -19,8 +19,9 @@ from datetime import date, timedelta, datetime
 import random, string
 from django.utils import timezone
 from django.conf import settings
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, JsonResponse
 from django.urls import reverse
+from home.services.gemini_service import generate_word_content
 
 # Create your views here.
 
@@ -656,6 +657,58 @@ def add_word_to_list(request, codigo):
             'niveles': niveles,
         }
     )
+    
+@never_cache
+@require_POST
+@role_required('teacher')
+def generate_word_suggestions(request, codigo):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+    
+    significado = request.POST.get('significado', '').strip()
+    
+    if not significado:
+        return JsonResponse(
+            {'error': 'Please enter a word first.'},
+            status=400
+        )
+        
+    if len(significado) > 50:
+        return JsonResponse(
+            {'error': 'The word cannot exceed 50 characters.'},
+            status=400
+        )
+        
+    try:
+        suggestions = generate_word_content(significado)
+        
+        return JsonResponse({
+            'success': True,
+            'definition': suggestions['definition'],
+            'example': suggestions['example'],
+            'pronunciation': suggestions['pronunciation'],
+        })
+        
+    except ValueError as error:
+        return JsonResponse(
+            {'error': str(error)},
+            status=400
+        )
+        
+    except Exception:
+        return JsonResponse(
+            {
+                'error': (
+                    'The AI service is currently unavailable. '
+                    'Please check your Internet connection and try again, '
+                    'or enter the information manually.'
+                )
+            },
+            status=502
+        )
     
 @never_cache
 @role_required('teacher')
@@ -1970,7 +2023,8 @@ def admin_users(request):
         'tipo_usuario'
     ).prefetch_related(
         'alumno__grupo_alumnos__grupo',
-        'profesor__grupos'
+        'profesor__grupos',
+        'administrador'
     )
 
     if search_query:
@@ -2018,17 +2072,31 @@ def admin_users(request):
             role = user.tipo_usuario.nombre.upper()
 
         groups = []
+        foto_url = None
+
         if role == 'STUDENT':
             try:
                 for membership in user.alumno.grupo_alumnos.all():
                     groups.append(membership.grupo.nombre)
+                if user.alumno.foto:
+                    foto_url = user.alumno.foto.url
             except Alumno.DoesNotExist:
                 pass
+
         elif role == 'TEACHER':
             try:
                 for group in user.profesor.grupos.all():
                     groups.append(group.nombre)
+                if user.profesor.foto:
+                    foto_url = user.profesor.foto.url
             except Profesor.DoesNotExist:
+                pass
+
+        elif role == 'ADMIN':
+            try:
+                if hasattr(user, 'administrador') and user.administrador.foto:
+                    foto_url = user.administrador.foto.url
+            except Exception:
                 pass
 
         group_display = ', '.join(groups) if groups else 'N/A'
@@ -2056,6 +2124,7 @@ def admin_users(request):
             'career': career_code,
             'status': 'ACTIVE' if user.is_active else 'INACTIVE',
             'date_joined': 'N/A',
+            'foto_url': foto_url,
         })
 
     available_groups = (

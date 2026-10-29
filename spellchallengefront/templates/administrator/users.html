@@ -75,7 +75,11 @@
             <tr>
                 <td class="user-cell">
                     <div class="user-avatar avatar-{{ u.role|lower }}">
-                        {{ u.full_name|slice:":2"|upper }}
+                        {% if u.foto_url %}
+                            <img src="{{ u.foto_url }}" alt="{{ u.full_name }}" class="user-avatar-img">
+                        {% else %}
+                            <span>{{ u.full_name|slice:":2"|upper }}</span>
+                        {% endif %}
                     </div>
                     <div>
                         <strong>{{ u.full_name }}</strong>

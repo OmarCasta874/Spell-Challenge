@@ -63,6 +63,16 @@
                             required
                         >
                         <p class="add-word-help">Enter the English vocabulary word.</p>
+                        <button type="button" id="generate-suggestions-btn" class="add-word-ai-button">
+                            <i data-lucide="sparkles"></i>
+                            Generate Suggestions
+                        </button>
+                        <div
+                            id="ai-suggestions-status"
+                            class="add-word-ai-status"
+                            role="status"
+                            aria-live="polite"
+                        ></div>
                     </div>
                     <div class="add-word-field">
                         <label for="pronunciacion" class="form-label">
@@ -176,4 +186,99 @@
         </form>
     </section>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const generateButton = document.getElementById(
+        'generate-suggestions-btn'
+    );
+
+    const wordInput = document.getElementById('significado');
+    const definitionInput = document.getElementById('definicion');
+    const exampleInput = document.getElementById('ejemplo');
+    const pronunciationInput = document.getElementById('pronunciacion');
+
+    const statusMessage = document.getElementById(
+        'ai-suggestions-status'
+    );
+
+    generateButton.addEventListener('click', async function () {
+        const word = wordInput.value.trim();
+
+        if (!word) {
+            statusMessage.className =
+                'add-word-ai-status error';
+
+            statusMessage.textContent =
+                'Please enter a word before generating suggestions.';
+
+            wordInput.focus();
+            return;
+        }
+
+        generateButton.disabled = true;
+        generateButton.innerHTML =
+            '<i data-lucide="loader-circle"></i> Generating...';
+
+        statusMessage.className = 'add-word-ai-status loading';
+        statusMessage.textContent =
+            'Please wait while the AI generates suggestions.';
+
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+        try {
+            const csrfToken = document.querySelector(
+                '[name=csrfmiddlewaretoken]'
+            ).value;
+
+            const response = await fetch(
+                "{% url 'generate_word_suggestions' lista.codigo %}",
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':
+                            'application/x-www-form-urlencoded;charset=UTF-8',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: new URLSearchParams({
+                        significado: word
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error || 'Suggestions could not be generated.'
+                );
+            }
+
+            definitionInput.value = data.definition;
+            exampleInput.value = data.example;
+            pronunciationInput.value = data.pronunciation;
+
+            statusMessage.className = 'add-word-ai-status success';
+            statusMessage.textContent =
+                'Suggestions generated! Review and edit them before saving.';
+
+        } catch (error) {
+            statusMessage.className = 'add-word-ai-status error';
+
+            statusMessage.textContent = error.message ||
+                'The AI service is currently unavailable. Please check your internet connection and try again, or enter the information manually.';
+
+        } finally {
+            generateButton.disabled = false;
+            generateButton.innerHTML =
+                '<i data-lucide="sparkles"></i> Generate Suggestions';
+
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

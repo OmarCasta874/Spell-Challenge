@@ -13,6 +13,7 @@ urlpatterns = [
     path('word_lists/create/', views.create_word_list, name='create_word_list'),
     path('word_lists/<str:codigo>/', views.view_word_list, name='view_word_list'),
     path('word_lists/<str:codigo>/add-word', views.add_word_to_list, name='add_word_to_list'),
+    path('word_lists/<str:codigo>/generate-suggestions/', views.generate_word_suggestions, name='generate_word_suggestions'),
     path('word_lists/', views.word_lists, name='teacher_word_lists'),
     path('home/', views.student_home, name='student_home'),
     path('mygroups_student/', views.student_groups, name='student_groups'),
