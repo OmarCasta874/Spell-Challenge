@@ -10,8 +10,12 @@ __pycache__/
 # VENV
 venv/
 .venv/
-env/
 .env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
 
 # Django
 *.log

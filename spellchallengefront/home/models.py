@@ -229,7 +229,11 @@ class Administrador(models.Model):
         db_column='usuario',
         to_field='codigo'
     )
-
+    foto = models.ImageField(
+            upload_to='administradores_fotos/', 
+            blank=True, 
+            null=True
+    )
     class Meta:
         db_table = 'administrador'
 

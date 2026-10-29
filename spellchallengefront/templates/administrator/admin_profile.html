@@ -10,11 +10,15 @@
 {% block title %}Admin Profile - Spell-Challenge Admin{% endblock %}
 
 {% block admin_content %}
-<div class="profile-header">
+<div class="profile-header"> 
     <div class="avatar-large">
-        <span class="avatar-initials">
-            {{ admin.nombre_pila|first }}{{ admin.apellidoPaterno|first }}
-        </span>
+        {% if admin.foto %}
+            <img src="{{ admin.foto.url }}" alt="{{ admin.nombre_pila }}">
+        {% else %}
+            <span class="avatar-initials">
+                {{ admin.nombre_pila|first }}{{ admin.apellidoPaterno|first }}
+            </span>
+        {% endif %}
     </div>
     <div class="profile-header-info">
         <h1 class="profile-name">
@@ -33,7 +37,7 @@
         </div>
         <div class="form-field">
             <label>Last Name</label>
-            <input type="text" class="form-input" value="{{ admin.apellidoPaterno }} {{ admin.apellidoMaterno }}" readonly>
+            <input type="text" class="form-input" value="{{ admin.apellidoPaterno }} {{ admin.apellidoMaterno|default:'' }}" readonly>
         </div>
     </div>
 

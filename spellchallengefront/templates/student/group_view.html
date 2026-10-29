@@ -110,7 +110,8 @@
                                     onclick="openWordModal(
                                         '{{ word.word|escapejs }}',
                                         '{{ word.meaning|escapejs }}',
-                                        '{{ word.pronunciation|escapejs }}'
+                                        '{{ word.pronunciation|escapejs }}',
+                                        '{{ word.image|default:""|escapejs }}'
                                     )">
                                     VIEW
                                 </button>
@@ -159,6 +160,10 @@
         </div>
         <div class="modal-body text-center">
             <h2 id="wWord" style="color: #7a1f2b; font-size: 2rem;"></h2>
+
+            <img id="wImage" src="" alt="Word Image" 
+            style="display: none; max-width: 100%; max-height: 220px; object-fit: contain; margin:15px auto; border-radius: 12px;">
+
             <p id="wPhonetic" style="font-style: italic; color: #8a8a8a;"></p>
             <p class="mt-1"><strong>Meaning:</strong> <span id="wMeaning"></span></p>
         </div>
@@ -197,10 +202,21 @@
         openModal('classmateModal');
     }
 
-    function openWordModal(word, meaning, phonetic) {
+    function openWordModal(word, meaning, phonetic, imageUrl) {
         document.getElementById('wWord').innerText = word;
         document.getElementById('wMeaning').innerText = meaning;
         document.getElementById('wPhonetic').innerText = phonetic;
+
+        const wordImage = document.getElementById('wImage');
+
+        if (imageUrl) {
+            wordImage.src = imageUrl;
+            wordImage.style.display = 'block';
+        } else {
+            wordImage.removeAttribute('src');
+            wordImage.style.display = 'none';
+        }
+
         openModal('wordModal');
     }
 

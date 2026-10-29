@@ -10,34 +10,39 @@
 {% block title %}Edit Profile - Spell-Challenge Admin{% endblock %}
 
 {% block admin_content %}
-<form method="POST" action="{% url 'edit_admin_profile' %}" id="editAdminProfileForm">
+<form method="POST" action="{% url 'edit_admin_profile' %}" id="editAdminProfileForm" enctype="multipart/form-data">
     {% csrf_token %}
 
     <div class="edit-avatar-wrap">
         <label for="avatarUpload" class="edit-avatar-circle">
-            <span class="avatar-camera-icon">📷</span>
-            <span class="avatar-camera-text">Change profile picture</span>
+            {% if admin.foto %}
+                <img id="avatarPreview" src="{{ admin.foto.url }}" alt="{{ admin.nombre_pila }}" class="avatar-preview-img">
+            {% else %}
+                <div id="avatarInitials" class="avatar-preview-initials">
+                    {{ admin.nombre_pila|first }}{{ admin.apellidoPaterno|first }}
+                </div>
+                <img id="avatarPreview" src="" alt="Preview" class="avatar-preview-img d-none">
+            {% endif %}
+            
+            <div class="avatar-overlay">
+                <span class="avatar-camera-icon">📷</span>
+                <span class="avatar-camera-text">Change photo</span>
+            </div>
         </label>
-        <input type="file" id="avatarUpload" name="avatar" accept="image/*" hidden>
+        <input type="file" id="avatarUpload" name="foto" accept="image/*" hidden>
     </div>
 
-    <!-- Nombre y apellidos (texto plano con caja) -->
     <div class="form-row-2">
         <div class="form-field">
             <label>First Name:</label>
-            <span class="form-readonly">{{ admin.nombre_pila }}</span>
+            <input type="text" name="first_name" class="form-input" value="{{ admin.nombre_pila }}" required>
         </div>
         <div class="form-field">
             <label>Last Name:</label>
-            <span class="form-readonly">{{ admin.apellidoPaterno }} {{ admin.apellidoMaterno|default:"" }}</span>
+            <input type="text" name="last_name" class="form-input" value="{{ admin.apellidoPaterno }} {{ admin.apellidoMaterno|default:'' }}" required>
         </div>
     </div>
 
-    <!-- Hidden para que el backend siga recibiendo first_name y last_name -->
-    <input type="hidden" name="first_name" value="{{ admin.nombre_pila }}">
-    <input type="hidden" name="last_name" value="{{ admin.apellidoPaterno }}">
-
-    <!-- Email, Password, Role -->
     <div class="form-row-3">
         <div class="form-field">
             <label>Email Address:</label>
@@ -46,7 +51,7 @@
         <div class="form-field">
             <label>Password:</label>
             <div class="password-field-wrap">
-                <input type="password" name="password" id="adminPassword" class="form-input" placeholder="Leave blank to keep current password">
+                <input type="password" name="password" id="adminPassword" class="form-input" placeholder="Leave blank to keep current">
                 <button type="button" class="password-toggle-btn" onclick="togglePassword()" aria-label="Show password">👁️</button>
             </div>
         </div>
@@ -72,5 +77,23 @@
         const input = document.getElementById('adminPassword');
         input.type = input.type === 'password' ? 'text' : 'password';
     }
+
+    document.getElementById('avatarUpload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = document.getElementById('avatarPreview');
+                const initials = document.getElementById('avatarInitials');
+                
+                img.src = event.target.result;
+                img.classList.remove('d-none');
+                if (initials) {
+                    initials.style.display = 'none';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 </script>
 {% endblock %}

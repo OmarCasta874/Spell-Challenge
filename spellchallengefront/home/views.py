@@ -2673,6 +2673,7 @@ def group_view(request, group_id):
             'meaning': palabra.definicion,
             'pronunciation': palabra.pronunciacion,
             'audio': palabra.audio,
+            'image': palabra.imagen.url if palabra.imagen else None,
         })
     
     return render(
@@ -2860,15 +2861,35 @@ def edit_admin_profile(request):
     )
     
     if request.method == 'POST':
-        admin.nombre_pila = request.POST.get('first_name', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
-        admin.apellidoPaterno = last_name
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
-        admin.usuario.correo = email
         
+        if first_name:
+            admin.nombre_pila = first_name
+            admin.usuario.nombre_pila = first_name
+            
+        if last_name:
+            parts = last_name.split(' ', 1)
+            admin.apellidoPaterno = parts[0]
+            admin.usuario.apellidoPaterno = parts[0]
+            
+            if len(parts) > 1:
+                admin.apellidoMaterno = parts[1]
+                admin.usuario.apellidoMaterno = parts[1]
+            else:
+                admin.apellidoMaterno = ''
+                admin.usuario.apellidoMaterno = ''
+                
+        if email:
+            admin.usuario.correo = email
+            
         if password:
             admin.usuario.set_password(password)
+            
+        if 'foto' in request.FILES:
+            admin.foto = request.FILES['foto']
             
         admin.save()
         admin.usuario.save()
