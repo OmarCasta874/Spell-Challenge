@@ -154,7 +154,7 @@
       <div id="speechResult9" class="exercise-feedback"></div>
       <div id="feedback9" class="exercise-feedback"></div>
 
-      <button type="button" class="btn-lesson-check" onclick="nextExercise(9, 10)">CHECK</button>
+      <button type="button" class="btn-lesson-check" onclick="checkSpeaking(9, 10)">CHECK</button>
     </div>
 
     <!-- EJERCICIO 10: Speaking -->
@@ -168,7 +168,7 @@
 
       <div id="speechResult10" class="exercise-feedback"></div>
       <div id="feedback10" class="exercise-feedback"></div>
-      <button type="button" class="btn-lesson-check" onclick="finishLesson()">FINISH LESSON</button>
+      <button type="button" class="btn-lesson-check" onclick="checkSpeaking(10, 'completed')">FINISH LESSON</button>
     </div>
 
     <!-- PANTALLA: LESSON COMPLETED -->
@@ -300,148 +300,227 @@
   function playAudio(exerciseNum) {
     console.log('Playing audio for Exercise ' + exerciseNum);
   }
-
   
-  let speechRecognition = null;
+  let mediaRecorder = null;
+  let audioChunks = [];
   let recognizedText = {};
+  let currentSpeakingExercise = null;
 
-  function startSpeaking(exerciseNum) {
+  function getCookie(name) {
+    let cookieValue = null;
 
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
 
-    const speechResult =
-      document.getElementById('speechResult' + exerciseNum);
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
 
-    if (!SpeechRecognition) {
+        if (cookie.startsWith(name + '=')) {
+          cookieValue = decodeURIComponent(
+            cookie.substring(name.length + 1)
+          );
+          break;
+        }
+      }
+    }
+
+    return cookieValue;
+  }
+
+  async function startSpeaking(exerciseNum) {
+
+    const speechResult = document.getElementById(
+      'speechResult' + exerciseNum
+    );
+
+    const speakButton = document.querySelector(
+      '#ex' + exerciseNum + ' .speak-link'
+    );
+
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      return;
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       speechResult.textContent =
-        'Speech recognition is not supported in this browser.';
+        'Microphone access is not supported in this browser.';
+
       speechResult.style.color = '#dc3545';
       return;
     }
 
-    // Si ya existe una sesión anterior, detenerla
-    if (speechRecognition) {
-      speechRecognition.stop();
-    }
-
-    speechRecognition = new SpeechRecognition();
-
-    speechRecognition.lang = 'en-US';
-    speechRecognition.interimResults = false;
-    speechRecognition.continuous = false;
-    speechRecognition.maxAlternatives = 1;
-
-    speechResult.textContent = 'Listening... 🎙️';
-    speechResult.style.color = '#6c757d';
-
-    speechRecognition.onstart = function () {
-      speechResult.textContent = 'Listening... Speak now! 🎙️';
-    };
-
-    speechRecognition.onresult = function (event) {
-
-      console.log('ONRESULT FIRED');
-      console.log('Speech event:', event);
-
-      let transcript = '';
-
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-
-        transcript += event.results[i][0].transcript;
-      }
-
-      transcript = transcript.trim();
-
-      console.log('Transcript:', transcript);
-
-      if (transcript) {
-
-        recognizedText[exerciseNum] = transcript;
-
-        speechResult.textContent =
-          'You said: "' + transcript + '"';
-
-        speechResult.style.color = '#198754';
-      }
-    };
-
-    speechRecognition.onerror = function (event) {
-
-      console.error('SPEECH ERROR');
-      console.error('Error type: ',event.error);
-      console.error('Full event:',event);
-
+    if (!window.MediaRecorder) {
       speechResult.textContent =
-        'Speech error: ' + event.error;
+        'Audio recording is not supported in this browser.';
 
       speechResult.style.color = '#dc3545';
-    };
-
-    speechRecognition.onend = function () {
-
-      console.log(
-        'Speech recognition ended for Exercise ' + exerciseNum
-      );
-
-      console.log(
-        'Recognized text at end: ',
-        recognizedText[exerciseNum]
-      );
-
-    };
+      return;
+    }
 
     try {
-      speechRecognition.start();
-    } catch (error) {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true
+      });
 
-      console.error('Could not start speech recognition:', error);
+      audioChunks = [];
+      delete recognizedText[exerciseNum];
+      currentSpeakingExercise = exerciseNum;
+
+      const mimeType = MediaRecorder.isTypeSupported(
+        'audio/webm;codecs=opus'
+      ) ? 'audio/webm;codecs=opus' : 'audio/webm';
+      
+      mediaRecorder = new MediaRecorder(stream, {
+        mimeType: mimeType
+      });
+
+      mediaRecorder.ondataavailable = function (event) {
+
+        if (event.data.size > 0) {
+          audioChunks.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async function () {
+        speechResult.textContent = 'Processing your recording... ';
+        speechResult.style.color = '#6c757d';
+
+        speakButton.textContent = 'Speak';
+
+        const audioBlob = new Blob(audioChunks, {
+          type: mediaRecorder.mimeType
+        });
+
+        stream.getTracks().forEach(track => track.stop());
+
+        try {
+          const formData = new FormData();
+
+          formData.append(
+            'audio',
+            audioBlob,
+            'speaking-recording.webm'
+          );
+
+          const response = await fetch(
+            "{% url 'transcribe_speaking' %}",
+            {
+              method: 'POST',
+              headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+              },
+              body: formData
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Transcription failed.');
+          }
+
+          recognizedText[currentSpeakingExercise] = 
+            data.transcription;
+
+          speechResult.textContent = 
+            'You said: "' + data.transcription + '"';
+
+          speechResult.style.color = '#198754';
+
+          console.log(
+            'Gemini transcription: ',
+            data.transcription
+          );
+        } catch (error) {
+          console.error('Transcription error: ', error);
+
+          speechResult.textContent = error.message;
+          speechResult.style.color = '#dc3545';
+        } finally {
+
+          currentSpeakingExercise = null;
+          mediaRecorder = null;
+          audioChunks = [];
+
+        }
+      };
+
+      mediaRecorder.start();
 
       speechResult.textContent =
-        'Could not start speech recognition. Please try again.';
+        'Recording... Speak now! Click again to stop.';
+
+      speechResult.style.color = '#6C757D';
+      speakButton.textContent = 'Stop';
+    } catch (error) {
+      console.error('Microphone error: ', error);
+
+      speechResult.textContent =
+        'Could not access the microphone. Please check your permissions.';
 
       speechResult.style.color = '#dc3545';
     }
   }
 
+  function checkSpeaking(currentNum, nextNum) {
 
-  function checkSpeaking(currentNum, nextNum) { 
-    const feedback = document.getElementById('feedback' + currentNum); 
-    
-    const result = recognizedText[currentNum]; 
+    const feedback = document.getElementById(
+      'feedback' + currentNum
+    );
 
-    console.log('Recognized text: ',result);
-    
-    if (!result) { 
-      feedback.textContent = 'Please use the Speak button first.'; 
-      feedback.style.color = '#dc3545'; 
-      return; 
-    } 
-    
-    const expectedWords = {
-       9: 'good morning', 
-       10: 'see you later' 
-      }; 
-      
-    const expected = expectedWords[currentNum]; 
-    const answer = result.toLowerCase().trim(); 
+    const result = recognizedText[currentNum];
 
-    console.log('Expected: ',expected);
-    console.log('Student answer: ',answer);
-    
-    if (answer === expected) { 
-      feedback.textContent = 'Correct! Great job! 🎉'; 
-      feedback.style.color = '#198754'; 
-      
-      setTimeout(() => { 
-        nextExercise(currentNum, nextNum); 
-      }, 800); 
-    
-    } else { 
-      feedback.textContent = 'Incorrect. Try again!'; 
+    console.log('Recognized text:', result);
+
+    if (!result) {
+      feedback.textContent =
+        'Please use the Speak button and wait for the transcription.';
+
       feedback.style.color = '#dc3545';
-     } 
+      return;
+    }
+
+    const expectedWords = {
+      9: 'good morning',
+      10: 'see you later'
+    };
+
+    const expected = expectedWords[currentNum];
+
+    const answer = result
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s]/g, '')
+      .replace(/\s+/g, ' ');
+
+    console.log('Expected:', expected);
+    console.log('Student answer:', answer);
+
+    if (answer === expected) {
+
+      feedback.textContent = 'Correct! Great job! 🎉';
+      feedback.style.color = '#198754';
+
+      if (window.MascotFeedback) {
+        MascotFeedback.answer(true, studentName);
+      }
+
+      setTimeout(() => {
+        nextExercise(currentNum, nextNum);
+      }, 800);
+
+    } else {
+
+      feedback.textContent = 'Incorrect. Try again!';
+      feedback.style.color = '#dc3545';
+
+      if (window.MascotFeedback) {
+        MascotFeedback.answer(false, studentName);
+      }
+    }
   }
+
 
   function finishLesson() {
 

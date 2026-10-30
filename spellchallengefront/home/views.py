@@ -22,6 +22,7 @@ from django.conf import settings
 from django.http import FileResponse, Http404, JsonResponse
 from django.urls import reverse
 from home.services.gemini_service import generate_word_content
+from home.services.transcription_service import transcribe_audio
 
 # Create your views here.
 
@@ -1175,6 +1176,65 @@ def student_competitions(request):
 @role_required('student')
 def lesson1(request):
     return render(request, 'student/lesson1.html')
+
+@never_cache
+@require_POST
+@role_required('student')
+def transcribe_speaking(request):
+    audio_file = request.FILES.get('audio')
+    
+    if not audio_file:
+        return JsonResponse(
+            {'error': 'No audio recording was received.'},
+            status=400
+        )
+        
+    if audio_file.size == 0:
+        return JsonResponse(
+            {'error': 'The audio recording is empty.'},
+            status=400
+        )
+        
+    if audio_file.size > 5 * 1024 * 1024:
+        return JsonResponse(
+            {'error': 'The audio recording cannot exceed 5 MB.'},
+            status=400
+        )
+        
+    allowed_types = {
+        'audio/webm',
+        'audio/webm;codecs=opus',
+        'audio/ogg',
+        'audio/mp4',
+        'audio/mpeg',
+        'audio/wav',
+    }
+    
+    if audio_file.content_type not in allowed_types:
+        return JsonResponse(
+            {'error': 'Unsupported audio format.'},
+            status=400
+        )
+        
+    try:
+        transcription = transcribe_audio(audio_file)
+        
+        return JsonResponse({
+            'success': True,
+            'transcription': transcription,
+        })
+        
+    except Exception as error:
+        print("TRANSCRIPTION ERROR: ", repr(error))
+        return JsonResponse(
+            {
+                'error': (
+                    'The transcription service is currently unavailable. '
+                    'Please try again.'
+                )
+            },
+            status=502
+        )
 
 @never_cache
 @role_required('student')
@@ -2954,14 +3014,19 @@ def edit_admin_profile(request):
         if email:
             admin.usuario.correo = email
             
-        if password:
+        password_changed = False
+        if password:  
             admin.usuario.set_password(password)
+            password_changed = True
             
         if 'foto' in request.FILES:
             admin.foto = request.FILES['foto']
             
         admin.save()
         admin.usuario.save()
+        
+        if password_changed:
+            update_session_auth_hash(request, admin.usuario)
         
         messages.success(
             request,

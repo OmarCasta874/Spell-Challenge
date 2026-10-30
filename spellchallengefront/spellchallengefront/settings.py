@@ -25,6 +25,8 @@ GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
 
 GEMINI_TEXT_MODEL = 'gemini-3.5-flash-lite'
 
+GEMINI_TRANSCRIPTION_MODEL = 'gemini-3.5-transcribe'
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 

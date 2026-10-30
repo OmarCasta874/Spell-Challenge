@@ -20,6 +20,7 @@ urlpatterns = [
     path('teacher_competitions/', views.teacher_competitions, name='teacher_competitions'),
     path('student_competitions/', views.student_competitions, name='student_competitions'),
     path('lesson_1/', views.lesson1, name='lesson_1'),
+    path('transcribe-speaking/', views.transcribe_speaking, name='transcribe_speaking'),
     path('student_progress/', views.progress, name='student_progress'),
     path('statistics/', views.statistics, name='statistics'),
     path('practices/', views.practices, name='student_practices'),
