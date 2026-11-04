@@ -80,6 +80,29 @@
 /* =========================================================
    Tarjeta de ejercicio
    ========================================================= */
+.pk-speech-result {
+  color: #6c757d;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  min-height: 24px;
+  overflow-wrap: anywhere;
+}
+
+.pk-feedback {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  min-height: 24px;
+}
+
+/* Estado de procesamiento */
+.pk-speak-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .pk-exercise-card {
   text-align: center;
 }

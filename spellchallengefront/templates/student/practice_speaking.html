@@ -34,6 +34,10 @@
       <button type="button" class="pk-speak-btn" id="pkSpeakBtn" onclick="pkSpeak()">
         <i data-lucide="mic"></i> Speak
       </button>
+
+      <p class="pk-speech-result" id="pkSpeechResult"></p>
+
+      <p class="pk-feedback" id="pkFeedback"></p>
     </div>
 
   </div>
@@ -74,37 +78,305 @@
   var pkCurrentIndex = 0;
   var pkTotal = 10;
 
-  function pkSpeak() {
-    var btn = document.getElementById('pkSpeakBtn');
-    btn.disabled = true;
+  var pkMediaRecorder = null;
+  var pkAudioChunks = [];
+  var pkRecognizedText = null;
+  var pkIsProcessing = false;
+  var pkRetryAfter = 0;
+  var pkRetryInterval = null;
 
-    // Simulación de grabación/validación, sin lógica real aún
-    setTimeout(function () {
-      pkCurrentIndex++;
+  function pkGetCookie(name) {
+    let cookieValue = null;
 
-      var pct = (pkCurrentIndex / pkTotal) * 100;
-      document.getElementById('pkProgressFill').style.width = pct + '%';
-      document.getElementById('pkBeeMarker').style.left = pct + '%';
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
 
-      if (pkCurrentIndex === pkTotal) {
-        document.getElementById('pkExercises').classList.add('d-none');
-        document.getElementById('pkCompleted').classList.remove('d-none');
-      } else {
-        document.getElementById('pkCounter').textContent = 'Words: ' + (pkCurrentIndex + 1) + '/' + pkTotal;
-        document.getElementById('pkWord').textContent = '"' + pkWords[pkCurrentIndex] + '"';
-        btn.disabled = false;
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+
+        if (cookie.startsWith(name + '=')) {
+          cookieValue = decodeURIComponent(
+            cookie.substring(name.length + 1)
+          );
+          break;
+        }
       }
-    }, 600);
+    }
+
+    return cookieValue;
+  }
+
+  function pkStartRetryCountdown() {
+    if (pkRetryInterval) {
+      clearInterval(pkRetryInterval);
+    }
+
+    function updateCountdown() {
+      var remainingSeconds = Math.ceil(
+        (pkRetryAfter - Date.now()) / 1000
+      );
+
+      if (remainingSeconds <= 0) {
+        clearInterval(pkRetryInterval);
+        pkRetryInterval = null;
+
+        document.getElementById('pkSpeechResult').textContent = 'You can try again now!';
+        document.getElementById('pkSpeechResult').style.color = '#198754';
+
+        return;
+      }
+
+      document.getElementById('pkSpeechResult').textContent = 'Please wait ' + remainingSeconds + ' seconds before trying again.';
+      document.getElementById('pkSpeechResult').style.color = '#dc3545';
+    }
+
+    updateCountdown();
+
+    pkRetryInterval = setInterval(updateCountdown, 1000);
+  }
+
+  async function pkSpeak() {
+    var btn = document.getElementById('pkSpeakBtn');
+    var speechResult = document.getElementById('pkSpeechResult');
+    var feedback = document.getElementById('pkFeedback');
+
+    if (pkIsProcessing) {
+      return;
+    }
+
+    if (Date.now() < pkRetryAfter) {
+      var remainingSeconds = Math.cell(
+        (pkRetryAfter - Date.now()) / 1000
+      );
+
+      speechResult.textContent = 'Please wait ' + remainingSeconds + ' seconds before trying again.';
+      speechResult.style.color = '#dc3545';
+      return;
+    }
+
+    if (pkMediaRecorder && pkMediaRecorder.state === 'recording') {
+      pkMediaRecorder.stop();
+      return;
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      speechResult.textContent = 'Microphone access is not supported in this browser.';
+
+      speechResult.style.color = '#dc3545';
+      return;
+    }
+
+    if (!window.MediaRecorder) {
+      speechResult.textContent = 'Audio recording is not supported in this browser.';
+
+      speechResult.style.color = '#dc3545';
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true
+      });
+
+      pkAudioChunks = [];
+      pkRecognizedText = null;
+
+      speechResult.textContent = '';
+      feedback.textContent = '';
+
+      const mimeType = MediaRecorder.isTypeSupported(
+        'audio/webm;codecs=opus'
+      ) ? 'audio/webm;codecs=opus' : 'audio/webm';
+
+      pkMediaRecorder = new MediaRecorder(stream, {
+        mimeType: mimeType
+      });
+
+      pkMediaRecorder.ondataavailable = function (event) {
+        if (event.data.size > 0) {
+          pkAudioChunks.push(event.data);
+        }
+      };
+
+      pkMediaRecorder.onstop = async function () {
+        pkIsProcessing = true;
+        btn.disabled = true;
+
+        speechResult.textContent = 'Processing your recording...';
+        speechResult.style.color = '#6c757d';
+
+        btn.innerHTML = '<i data-lucide="loader-circle"></i> Processing';
+
+        const audioBlob = new Blob(pkAudioChunks, {
+          type: pkMediaRecorder.mimeType
+        });
+
+        stream.getTracks().forEach(track => track.stop());
+
+        try {
+          const formData = new FormData();
+
+          formData.append(
+            'audio',
+            audioBlob,
+            'practice-speaking-recording.webm'
+          );
+
+          const response = await fetch(
+            "{% url 'transcribe_speaking' %}",
+            {
+              method: 'POST',
+              headers: {
+                'X-CSRFToken': pkGetCookie('csrftoken')
+              },
+              body: formData
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+
+            if (response.status === 429) {
+              pkRetryAfter = Date.now() + 22000;
+              pkStartRetryCountdown();
+            }
+
+            throw new Error(data.error || 'Transcription failed.');
+          }
+
+          pkRecognizedText = data.transcription;
+
+          speechResult.textContent = 'You said: "' + data.transcription + '"';
+
+          speechResult.style.color = '#198754';
+
+          console.log('Gemini transcription: ', data.transcription);
+
+          pkCheckAnswer();
+        } catch (error) {
+          console.error('Transcription error: ',error);
+
+          if (Date.now() >= pkRetryAfter) {
+            speechResult.textContent = error.message;
+            speechResult.style.color = '#dc3545';
+          }
+        } finally {
+          pkIsProcessing = false;
+          pkMediaRecorder = null;
+          pkAudioChunks = [];
+
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="mic"></i> Speak';
+
+          if (window.lucide) {
+            lucide.createIcons();
+          }
+        }
+      };
+
+      pkMediaRecorder.start();
+
+      speechResult.textContent = 'Recording... Speak now! Click again to stop.';
+      speechResult.style.color = '#6c757d';
+
+      btn.innerHTML = '<i data-lucide="square"></i> Stop';
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    } catch (error) {
+      console.error('Microphone error: ',error);
+      speechResult.textContent = 'Could not access the microphone. Please check your permissions.';
+      speechResult.style.color = '#dc3545';
+    }
+  }
+
+  function pkCheckAnswer() {
+    var feedback = document.getElementById('pkFeedback');
+
+    if (!pkRecognizedText || !pkRecognizedText.trim()) {
+      feedback.textContent = 'We could not recognize your answer. Please try again!';
+
+      feedback.style.color = '#dc3545';
+      return;
+    }
+
+    var expected = pkWords[pkCurrentIndex];
+
+    var answer = pkRecognizedText
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s]/g, '')
+      .replace(/\s+/g, ' ');
+
+    expected = expected
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s]/g, '')
+      .replace(/\s+/g, ' ');
+
+    console.log('Expected: ',expected);
+    console.log('Student answer: ',answer);
+
+    if (answer === expected) {
+      feedback.textContent = 'Correct! Great job!';
+      feedback.style.color = '#198754';
+
+      setTimeout(function () {
+        pkNextWord();
+      }, 1000);
+    } else {
+      feedback.textContent = 'Incorrect. Try again!';
+      feedback.style.color = '#dc3545';
+    }
+  }
+
+  function pkNextWord() {
+    pkCurrentIndex++;
+
+    var pct = (pkCurrentIndex / pkTotal) * 100;
+
+    document.getElementById('pkProgressFill').style.width = pct + '%';
+    document.getElementById('pkBeeMarker').style.left = pct + '%';
+
+    if (pkCurrentIndex === pkTotal) {
+      document.getElementById('pkExercises').classList.add('d-none');
+      document.getElementById('pkCompleted').classList.remove('d-none');
+      return;
+    }
+
+    document.getElementById('pkCounter').textContent = 'Words: ' + (pkCurrentIndex + 1) + '/' + pkTotal;
+    document.getElementById('pkWord').textContent = '"' + pkWords[pkCurrentIndex] + '"';
+
+    document.getElementById('pkSpeechResult').textContent = '';
+    document.getElementById('pkFeedback').textContent = '';
+
+    pkRecognizedText = null;
   }
 
   function pkRepeatLesson() {
     pkCurrentIndex = 0;
+
+    pkMediaRecorder = null;
+    pkAudioChunks = [];
+    pkRecognizedText = null;
+    pkIsProcessing = false;
 
     document.getElementById('pkProgressFill').style.width = '0%';
     document.getElementById('pkBeeMarker').style.left = '0%';
     document.getElementById('pkCounter').textContent = 'Words: 1/10';
     document.getElementById('pkWord').textContent = '"' + pkWords[0] + '"';
     document.getElementById('pkSpeakBtn').disabled = false;
+
+    var btn = document.getElementById('pkSpeakBtn');
+
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="mic"></i> Speak';
+
+    if (window.lucide) {
+      lucide.createIcons();
+    }
 
     document.getElementById('pkCompleted').classList.add('d-none');
     document.getElementById('pkExercises').classList.remove('d-none');

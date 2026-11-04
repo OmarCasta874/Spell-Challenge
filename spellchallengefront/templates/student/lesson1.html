@@ -15,7 +15,81 @@
 </div>
 
 <div class="lesson-body">
+    <!-- LESSON INTRODUCTION -->
+  <div id="lessonIntroduction" class="lesson-introduction">
+    <div class="introduction-card">
+      <div class="introduction-beenary">
+        <img
+          src="{% static 'img/beenary-left.png' %}"
+          alt="Beenary"
+          class="introduction-mascot"
+        >
+        <div class="introduction-message">
+          <span class="mascot-name">Beenary says:</span>
+          <h2>Hello, Student!</h2>
+          <p>
+            Are you ready for a new English lesson?
+            Let's see what we are going to learn today!
+          </p>
+        </div>
+      </div>
+      <div class="introduction-content">
+        <h3>Today's Lesson: Greetings and Introductions</h3>
+        <p>
+          In this lesson, you will learn how to greet people,
+          introduce yourself and use common expressions in English.
+        </p>
+        <div class="lesson-objectives">
+          <div class="objective-item">
+            <span class="objective-icon">📚</span>
+            <div>
+              <strong>Vocabulary</strong>
+              <p>Learn common greetings and everyday expressions.</p>
+            </div>
+          </div>
+          <div class="objective-item">
+            <span class="objective-icon">✏️</span>
+            <div>
+              <strong>Grammar</strong>
+              <p>Understand how to use basic greetings in conversations.</p>
+            </div>
+          </div>
+          <div class="objective-item">
+            <span class="objective-icon">🎧</span>
+            <div>
+              <strong>Listening</strong>
+              <p>Listen to English greetings and identify them.</p>
+            </div>
+          </div>
+          <div class="objective-item">
+            <span class="objective-icon">🎙️</span>
+            <div>
+              <strong>Speaking</strong>
+              <p>Practice pronouncing common expressions.</p>
+            </div>
+          </div>
+        </div>
+        <div class="beenary-tip">
+          <strong>Beenary's Tip 🐝</strong>
+          <p>
+            Don't worry about making mistakes!
+            Practice, listen carefully and have fun learning.
+          </p>
+        </div>
+        <div class="introduction-actions">
+          <button type="button" class="btn-skip-introduction" onclick="startLesson()">
+            SKIP INTRODUCTION
+          </button>
+          <button type="button" class="btn-start-lesson" onclick="startLesson()">
+            LET'S START! →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- CONTENEDOR DE LA LECCIÓN -->
+  <div id="lessonWorkspace" class="d-none">
   <!-- BARRA DE PROGRESO CON MASCOTA -->
   <div class="lesson-progress-wrap">
     <span class="bee-marker" id="beeMarker" style="left: 10%;">
@@ -31,11 +105,60 @@
     <span id="lessonProgress">1/10</span>
   </div>
 
+  <!-- LESSON NOTES BUTTON -->
+  <div class="lesson-notes-toolbar">
+
+    <button type="button" class="btn-lesson-notes" onclick="toggleLessonNotes()">
+      📖 LESSON NOTES
+    </button>
+    <div id="lessonNotesPanel" class="lesson-notes-panel d-none">
+      <div class="notes-header">
+        <h4>Lesson Notes</h4>
+        <button type="button" class="btn-close-notes" onclick="toggleLessonNotes()" aria-label="Close lesson notes">
+          ×
+        </button>
+      </div>
+      <p>
+        In this lesson, you will practice greetings and introductions.
+      </p>
+      <ul>
+        <li>Common greetings: Hello, Good morning and Good night.</li>
+        <li>Introductions: My name is...</li>
+        <li>Polite expressions: Nice to meet you and Thank you.</li>
+        <li>Farewells: Goodbye and See you later.</li>
+      </ul>
+    </div>
+  </div>
   <!-- CONTENEDOR PRINCIPAL DEL EJERCICIO -->
   <div class="lesson-exercise-wrap">
-
+    <!-- VOCABULARY SECTION -->
+    <div id="vocabularySection" class="exercise-card vocabulary-section">
+      <div class="skill-section-label">
+        <span>01</span>
+        VOCABULARY
+      </div>
+      <h3>Let's learn some new words!</h3>
+      <p>
+        Before practicing grammar, listening and speaking,
+        take a moment to explore the vocabulary of this lesson.
+      </p>
+      <div class="vocabulary-placeholder">
+        <span>📚</span>
+        <strong>Vocabulary activities</strong>
+        <p>
+          New words, meanings and examples will be available here.
+        </p>
+      </div>
+      <button type="button" class="btn-lesson-check" onclick="beginGrammar()">
+        CONTINUE →
+      </button>
+    </div>
     <!-- EJERCICIO 1: Grammar -->
-    <div id="ex1" class="exercise-card">
+    <div id="ex1" class="exercise-card d-none">
+      <div class="skill-section-label">
+        <span>02</span>
+        GRAMMAR
+      </div>
       <h4 class="exercise-question">1. Choose the correct word to complete the sentence.</h4>
       <p class="exercise-sentence">_____! My name is Emma.</p>
       <div class="options-row">
@@ -102,6 +225,10 @@
 
     <!-- EJERCICIO 6: Listening -->
     <div id="ex6" class="exercise-card d-none">
+      <div class="skill-section-label">
+        <span>03</span>
+        LISTENING
+      </div>
       <h4 class="exercise-question">6. Listen and choose what you hear.</h4>
       <button type="button" class="play-link" onclick="playAudio(6)">🔊 Play</button>
       <div class="options-row">
@@ -144,6 +271,10 @@
 
     <!-- EJERCICIO 9: Speaking -->
     <div id="ex9" class="exercise-card d-none">
+      <div class="skill-section-label">
+        <span>04</span>
+        SPEAKING
+      </div>
       <h4 class="exercise-question">9. Listen and repeat the word.</h4>
       <div class="speak-controls">
         <button type="button" class="play-link" onclick="playAudio(9)">🔊 Play</button>
@@ -168,34 +299,103 @@
 
       <div id="speechResult10" class="exercise-feedback"></div>
       <div id="feedback10" class="exercise-feedback"></div>
-      <button type="button" class="btn-lesson-check" onclick="checkSpeaking(10, 'completed')">FINISH LESSON</button>
+      <button type="button" class="btn-lesson-check" onclick="checkSpeaking(10, 'review')">FINISH LESSON</button>
     </div>
-
+    <!-- REVIEW SECTION -->
+    <div id="lessonReview" class="exercise-card lesson-review d-none">
+      <div class="skill-section-label">
+        <span>05</span>
+        REVIEW
+      </div>
+      <h2 class="review-title">What did you learn?</h2>
+      <p class="review-subtitle">
+        Let's remember the most important things from this lesson!
+      </p>
+      <div class="review-content">
+        <div class="review-item">
+          <h4>👋 Greetings</h4>
+          <p>Hello, Good morning, Good afternoon and Good night.</p>
+        </div>
+        <div class="review-item">
+          <h4>🙋 Introductions</h4>
+          <p>My name is... and Nice to meet you!</p>
+        </div>
+        <div class="review-item">
+          <h4>💬 Everyday Expressions</h4>
+          <p>How are you? I'm fine, thanks. Thank you.</p>
+        </div>
+        <div class="review-item">
+          <h4>👋 Farewells</h4>
+          <p>Goodbye and See you later.</p>
+        </div>
+      </div>
+      <div class="review-beenary">
+        <img src="{% static 'img/beenary-right.png' %}" alt="Beenary">
+        <p>
+          Great work! You have practiced all four English skills.
+          Keep reviewing and never stop learning!
+        </p>
+      </div>
+      <button type="button" class="btn-lesson-check" onclick="finishReview()">
+        FINISH REVIEW →
+      </button>
+    </div>
     <!-- PANTALLA: LESSON COMPLETED -->
     <div id="lessonCompleted" class="exercise-card completed-card d-none">
-      <h2 class="completed-title">Lesson Completed!</h2>
-      <p class="completed-subtitle">Great job, {{ request.user.nombre_pila }}! Let's check your results...</p>
-
-      <div class="results-box">
-        <span class="bee-decoration bee-left">🐝</span>
-        <div class="results-total">
-          <span class="results-total-number">10/10</span>
-          <span class="results-total-label">Exercises</span>
-        </div>
-        <div class="results-breakdown">
-          <div>Grammar 5/5</div>
-          <div>Listening 3/3</div>
-          <div>Speaking 2/2</div>
-        </div>
-        <span class="bee-decoration bee-right">🐝</span>
+      <div class="completed-celebration">
+        <div class="completed-trophy">🏆</div>
+        <h2 class="completed-title">Lesson Completed!</h2>
+        <p class="completed-subtitle">
+          Amazing work, {{ request.user.nombre_pila }}!
+          You have successfully completed this lesson.
+        </p>
       </div>
-
+      <div class="completed-beenary">
+        <img src="{% static 'img/beenary-right.png' %}" alt="Beenary celebrating">
+        <div class="completed-message">
+          <strong>Beenary says:</strong>
+          <p>You're doing great! Keep learning and never stop practicing!</p>
+        </div>
+      </div>
+      <div class="results-box">
+        <div class="results-total">
+          <span class="results-total-label">YOUR SCORE</span>
+          <span class="results-total-number">10/10</span>
+          <span class="results-total-description">Correct answers</span>
+        </div>
+        <div class="results-divider"></div>
+        <div class="results-breakdown">
+          <div class="result-skill">
+            <span class="result-skill-icon">📚</span>
+            <span class="result-skill-name">Vocabulary</span>
+            <strong>0/0</strong>
+          </div>
+          <div class="result-skill">
+            <span class="result-skill-icon">✏️</span>
+            <span class="result-skill-name">Grammar</span>
+            <strong>5/5</strong>
+          </div>
+          <div class="result-skill">
+            <span class="result-skill-icon">🎧</span>
+            <span class="result-skill-name">Listening</span>
+            <strong>3/3</strong>
+          </div>
+          <div class="result-skill">
+            <span class="result-skill-icon">🎤</span>
+            <span class="result-skill-name">Speaking</span>
+            <strong>2/2</strong>
+          </div>
+        </div>
+      </div>
       <div class="completed-actions">
-        <a href="{% url 'student_practices' %}" class="btn-outline-pill">BACK TO PRACTICE</a>
-        <a href="#" class="btn-solid-pill">GO TO NEXT LESSON</a>
+        <a href="{% url 'student_practices' %}" class="btn-outline-pill">
+          BACK TO PRACTICE
+        </a>
+        <a href="#" class="btn-solid-pill">
+          GO TO NEXT LESSON →
+        </a>
       </div>
     </div>
-
   </div>
 </div>
 {% include 'base/pet_messages.html' with mascot="beenary" mascot_img="beenary-left.png" %}
@@ -207,6 +407,34 @@
   const studentName = "{{ request.user.nombre_pila|escapejs }}"; 
 
   console.log('LESSON SCRIPT LOADED');
+
+  function startLesson() {
+
+    document.getElementById('lessonIntroduction').classList.add('d-none');
+    document.getElementById('lessonWorkspace').classList.remove('d-none');
+    document.getElementById('vocabularySection').classList.remove('d-none');
+    document.getElementById('lessonTitle').textContent = 'Vocabulary';
+    document.getElementById('lessonProgress').textContent = 'Introduction';
+  }
+
+  function beginGrammar() {
+
+    document.getElementById('vocabularySection').classList.add('d-none');
+    document.getElementById('ex1').classList.remove('d-none');
+    document.getElementById('lessonTitle').textContent = 'Grammar';
+    document.getElementById('lessonProgress').textContent = '1/10';
+  }
+
+  function toggleLessonNotes() {
+    document.getElementById('lessonNotesPanel').classList.toggle('d-none');
+  }
+
+  function finishReview() {
+    document.getElementById('lessonReview').classList.add('d-none');
+    document.getElementById('lessonCompleted').classList.remove('d-none');
+    document.getElementById('lessonHeading').style.display = 'none';
+    document.getElementById('lessonNotesPanel').classList.add('d-none');
+  }
 
   function checkExercise(currentNum, nextNum) {
     console.log('CHECK EXERCISE: ', currentNum);
@@ -283,22 +511,58 @@
   function nextExercise(currentNum, nextNum) {
     document.getElementById('ex' + currentNum).classList.add('d-none');
 
-    if (nextNum === 'completed') {
-      document.getElementById('lessonCompleted').classList.remove('d-none');
-      document.getElementById('lessonHeading').style.display = 'none';
-    } else {
-      document.getElementById('ex' + nextNum).classList.remove('d-none');
-      document.getElementById('lessonTitle').textContent = 'Exercise ' + nextNum;
-      document.getElementById('lessonProgress').textContent = nextNum + '/10';
+    if (nextNum === 'review') {
+      document.getElementById('lessonReview').classList.remove('d-none');
+      document.getElementById('lessonTitle').textContent = 'Lesson Review';
+      document.getElementById('progressFill').style.width = '100%';
+      document.getElementById('beeMarker').style.left = '100%';
 
-      var pct = (nextNum / 10) * 100;
-      document.getElementById('progressFill').style.width = pct + '%';
-      document.getElementById('beeMarker').style.left = pct + '%';
+      return;
     }
+
+    document.getElementById('ex' + nextNum).classList.remove('d-none');
+    document.getElementById('lessonTitle').textContent = 'Exercise ' + nextNum;
+    document.getElementById('lessonProgress').textContent = nextNum + '/10';
+
+    var pct = (nextNum / 10) * 100;
+
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('beeMarker').style.left = pct + '%';
   }
 
   function playAudio(exerciseNum) {
-    console.log('Playing audio for Exercise ' + exerciseNum);
+    const exercise = document.getElementById('ex' + exerciseNum);
+
+    const correctOption = exercise.querySelector('.option-btn[data-correct="true"]');
+
+    if (!correctOption) {
+      console.error('No correct answer was found for Exercise ' + exerciseNum);
+      return;
+    }
+
+    const correctAnswer = correctOption.textContent
+      .replace(/^[A-D]\s*/, '')
+      .trim();
+
+    if (!window.speechSynthesis) {
+      console.error('Speech synthesis is not supported.');
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(correctAnswer);
+
+    utterance.lang = 'en-US';
+    utterance.rate = 0.85;
+    utterance.pitch = 1;
+
+    window.speechSynthesis.speak(utterance);
+
+    console.log(
+      'Playing audio for Exercise ' + exerciseNum + ':',
+      correctAnswer
+    );
   }
   
   let mediaRecorder = null;

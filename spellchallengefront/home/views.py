@@ -1226,10 +1226,38 @@ def transcribe_speaking(request):
         
     except Exception as error:
         print("TRANSCRIPTION ERROR: ", repr(error))
+        
+        gemini_status = getattr(error, 'code', None)
+        
+        if gemini_status is None:
+            gemini_status = getattr(error, 'status_code', None)
+            
+        if gemini_status == 429:
+            return JsonResponse(
+                {
+                    'error': (
+                        'You have reached the transcription request limit.'
+                        'Please wait a moment befor trying again.'
+                    )
+                },
+                status=429
+            )
+            
+        if gemini_status == 503:
+            return JsonResponse(
+                {
+                    'error': (
+                        'The transcription service is temporarily busy.'
+                        'Please try again in a few moments.'
+                    )
+                },
+                status=503
+            )
+            
         return JsonResponse(
             {
                 'error': (
-                    'The transcription service is currently unavailable. '
+                    'The transcription service is currently unavailable.'
                     'Please try again.'
                 )
             },
