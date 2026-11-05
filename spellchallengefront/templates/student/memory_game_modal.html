@@ -254,7 +254,16 @@
       });
   }
 
+  function clearTimer() {
+    if (state && state.timer !== null && state.timer !== undefined) {
+      clearInterval(state.timer);
+      state.timer = null;
+    }
+  }
+
   function startTimer() {
+    clearTimer();
+
     if (!state || state.timeLeft === null) {
       return;
     }
@@ -268,8 +277,7 @@
       timerValueEl.innerText = state.timeLeft;
 
       if (state.timeLeft <= 0) {
-        clearInterval(state.timer);
-        state.timer = null;
+        clearTimer();
         timeOutGame();
       }
     }, 1000);
@@ -298,6 +306,9 @@
           return;
       }
 
+      clearTimer();
+      timerEl.style.display = 'none';
+
       document.getElementById('mgDifficulty').style.display = 'none';
 
       loadMemoryImages();
@@ -320,7 +331,8 @@
           matched: 0,
           pairs: rules.pairs,
           difficulty: difficultyKey,
-          timeLeft: rules.time
+          timeLeft: rules.time,
+          timer: null
       };
 
       renderBoard(state.deck);
@@ -411,6 +423,10 @@
   }
 
   function closeMemoryGame() {
+    clearTimer();
+
+    timerEl.style.display = 'none';
+    
     overlay.classList.remove('active');
     document.body.style.overflow = '';
   }

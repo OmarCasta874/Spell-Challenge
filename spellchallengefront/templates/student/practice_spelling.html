@@ -48,9 +48,8 @@
       <p class="ps-speech-result" id="psSpeechResult1"></p>
       <p class="ps-feedback" id="psFeedback1"></p>
 
-      <button type="button" class="ps-check-btn" onclick="psCheckAnswer(1)">
-        CHECK
-      </button>
+      <button type="button" class="ps-check-btn" onclick="psCheckAnswer(1)">CHECK</button>
+      <button type="button" class="ps-check-btn d-none" id="psSkip1" onclick="psSkipExercise(1)">SKIP EXERCISE</button>
     </div>
 
     <!-- EJERCICIO 2 -->
@@ -73,9 +72,8 @@
       <p class="ps-speech-result" id="psSpeechResult2"></p>
       <p class="ps-feedback" id="psFeedback2"></p>
 
-      <button type="button" class="ps-check-btn" onclick="psCheckAnswer(2)">
-        CHECK
-      </button>
+      <button type="button" class="ps-check-btn" onclick="psCheckAnswer(2)">CHECK</button>
+      <button type="button" class="ps-check-btn d-none" id="psSkip2" onclick="psSkipExercise(2)">SKIP EXERCISE</button>
     </div>
     
     <!-- EJERCICIO 3 -->
@@ -99,9 +97,8 @@
       <p class="ps-speech-result" id="psSpeechResult3"></p>
       <p class="ps-feedback" id="psFeedback3"></p>
 
-      <button type="button" class="ps-check-btn" onclick="psCheckAnswer(3)">
-        CHECK
-      </button>
+      <button type="button" class="ps-check-btn" onclick="psCheckAnswer(3)">CHECK</button>
+      <button type="button" class="ps-check-btn d-none" id="psSkip3" onclick="psSkipExercise(3)">SKIP EXERCISE</button>
     </div>
   </div>
   <!-- PANTALLA: LESSON COMPLETED -->
@@ -149,6 +146,56 @@
   var psAudioChunks = [];
   var psIsProcessing = false;
   var psCurrentSpeakingExercise = null;
+
+  var psTranscriptionFailures = {};
+  var psSkippedExercises = {};
+
+  function psUpdateSkipButton(exerciseNumber) {
+    var skipButton = document.getElementById('psSkip' + exerciseNumber);
+
+    if (!skipButton) {
+      return;
+    }
+
+    var failures = psTranscriptionFailures[exerciseNumber] || 0;
+
+    if (failures >= 3) {
+      skipButton.classList.remove('d-none');
+    } else {
+      skipButton.classList.add('d-none');
+    }
+  }
+
+  function psSkipExercise(exerciseNumber) {
+    var failures = psTranscriptionFailures[exerciseNumber] || 0;
+
+    if (failures < 3 || psIsProcessing) {
+      return;
+    }
+
+    psSkippedExercises[exerciseNumber] = true;
+
+    var skipButton = document.getElementById('psSkip' + exerciseNumber);
+
+    if (skipButton) {
+      skipButton.classList.add('d-none');
+    }
+
+    var feedback = document.getElementById('psFeedback' + exerciseNumber);
+
+    feedback.textContent = 'Exercise skipped. You can continue!';
+    feedback.style.color = '#6c757d';
+
+    console.log('Spelling exercise skipped: ',exerciseNumber);
+
+    setTimeout(function () {
+      if (exerciseNumber < 3) {
+          psNextExercise(exerciseNumber, exerciseNumber + 1);
+      } else {
+        psNextExercise(3, 'completed');
+      }
+    }, 800);
+  }
 
   function psGenerateInputs() {
     psWords.forEach(function (word, index) {
@@ -319,6 +366,18 @@
             throw new Error(data.error || 'Transcription failed.');
           }
 
+          if (
+            typeof data.transcription !== 'string' || !data.transcription.trim()
+          ) {
+            throw new Error('No speech could be transcribed.');
+          }
+
+          psTranscriptionFailures[exerciseNumber] = 0;
+
+          psSkippedExercises[exerciseNumber] = false;
+
+          psUpdateSkipButton(exerciseNumber);
+
           speechResult.textContent = 'You said: "' + data.transcription + '"';
           speechResult.style.color = '#198754';
 
@@ -330,9 +389,19 @@
         } catch (error) {
           console.error('Spelling transcription error:', error);
 
-          speechResult.textContent = error.message;
-          speechResult.style.color = '#dc3545';
+          psTranscriptionFailures[exerciseNumber] = 
+              (psTranscriptionFailures[exerciseNumber] || 0) + 1;
 
+          var failures = psTranscriptionFailures[exerciseNumber];
+
+          psUpdateSkipButton(exerciseNumber);
+
+          if (failures >= 3) {
+            speechResult.textContent = 'Transcription service unavailable after 3 attempts. You can retry or skip this exercise.';
+          } else {
+            speechResult.textContent = error.message + ' Attempt ' + failures + ' of 3.';
+          }
+          speechResult.style.color = '#dc3545';
         } finally {
           psIsProcessing = false;
           psMediaRecorder = null;
@@ -463,6 +532,12 @@
   }
 
   function psNextExercise(currentNum, nextNum) {
+    var skipButton = document.getElementById('psSkip' + currentNum);
+
+    if (skipButton) {
+      skipButton.classList.add('d-none');
+    }
+
     document.getElementById('psEx' + currentNum).classList.add('d-none');
 
     if (nextNum === 'completed') {
@@ -486,6 +561,14 @@
       window.speechSynthesis.cancel();
     }
 
+    psTranscriptionFailures = {};
+    psSkippedExercises = {};
+
+    psMediaRecorder = null;
+    psAudioChunks = [];
+    psIsProcessing = false;
+    psCurrentSpeakingExercise = null;
+
     for (var exerciseNumber = 1; exerciseNumber <= 3; exerciseNumber++) {
       var word = psWords[exerciseNumber - 1];
 
@@ -499,6 +582,8 @@
 
       document.getElementById('psSpeechResult' + exerciseNumber).textContent = '';
       document.getElementById('psFeedback' + exerciseNumber).textContent = '';
+
+      document.getElementById('psSkip' + exerciseNumber).classList.add('d-none');
     }
 
     document.getElementById('psCompleted').classList.add('d-none');

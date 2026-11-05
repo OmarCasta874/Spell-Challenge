@@ -38,6 +38,8 @@
       <p class="pk-speech-result" id="pkSpeechResult"></p>
 
       <p class="pk-feedback" id="pkFeedback"></p>
+
+      <button type="button" id="pkSkipBtn" class="pk-speak-btn d-none" onclick="pkSkipWord()">SKIP EXERCISE</button>
     </div>
 
   </div>
@@ -84,6 +86,51 @@
   var pkIsProcessing = false;
   var pkRetryAfter = 0;
   var pkRetryInterval = null;
+
+  var pkTranscriptionFailures = {};
+  var pkSkippedWords = {};
+
+  function pkUpdateSkipButton() {
+    var skipButton = document.getElementById('pkSkipBtn');
+
+    if (!skipButton) {
+      return;
+    }
+
+    var failures = pkTranscriptionFailures[pkCurrentIndex] || 0;
+
+    if (failures >= 3) {
+      skipButton.classList.remove('d-none');
+    } else {
+      skipButton.classList.add('d-none');
+    }
+  }
+
+  function pkSkipWord() {
+    var failures = pkTranscriptionFailures[pkCurrentIndex] || 0;
+
+    if (failures < 3 || pkIsProcessing) {
+      return;
+    }
+
+    pkSkippedWords[pkCurrentIndex] = true;
+
+    pkRecognizedText = null;
+
+    var skipButton = document.getElementById('pkSkipBtn');
+    skipButton.classList.add('d-none');
+
+    var feedback = document.getElementById('pkFeedback');
+
+    feedback.textContent = 'Exercise skipped. You can continue!';
+    feedback.style.color = '#6c757d';
+
+    console.log('Speaking exercise skipped: ', pkCurrentIndex + 1);
+
+    setTimeout(function () {
+        pkNextWord();
+    }, 800);
+  }
 
   function pkGetCookie(name) {
     let cookieValue = null;
@@ -145,7 +192,7 @@
     }
 
     if (Date.now() < pkRetryAfter) {
-      var remainingSeconds = Math.cell(
+      var remainingSeconds = Math.ceil(
         (pkRetryAfter - Date.now()) / 1000
       );
 
@@ -245,7 +292,19 @@
             throw new Error(data.error || 'Transcription failed.');
           }
 
+          if (
+            typeof data.transcription !== 'string' || !data.transcription.trim()
+          ) {
+            throw new Error('No speech could be transcribed.');
+          }
+
           pkRecognizedText = data.transcription;
+
+          pkTranscriptionFailures[pkCurrentIndex] = 0;
+
+          pkSkippedWords[pkCurrentIndex] = false;
+
+          pkUpdateSkipButton();
 
           speechResult.textContent = 'You said: "' + data.transcription + '"';
 
@@ -256,11 +315,23 @@
           pkCheckAnswer();
         } catch (error) {
           console.error('Transcription error: ',error);
+          
+          pkTranscriptionFailures[pkCurrentIndex] = 
+              (pkTranscriptionFailures[pkCurrentIndex] || 0) + 1;
 
-          if (Date.now() >= pkRetryAfter) {
-            speechResult.textContent = error.message;
-            speechResult.style.color = '#dc3545';
+          var failures = pkTranscriptionFailures[pkCurrentIndex];
+
+          pkUpdateSkipButton();
+
+          if (failures >= 3) {
+              speechResult.textContent = 'Transcription service unavailable after 3 attempts. You can retry or skip this exercise.';
+          } else if (Date.now() < pkRetryAfter) {
+            console.log('Waiting before retrying transcription.');
+          } else {
+            speechResult.textContent = error.message + ' Attempt ' + failures + ' of 3.';
           }
+          speechResult.style.color = '#dc3545';
+
         } finally {
           pkIsProcessing = false;
           pkMediaRecorder = null;
@@ -353,6 +424,7 @@
     document.getElementById('pkFeedback').textContent = '';
 
     pkRecognizedText = null;
+    pkUpdateSkipButton();
   }
 
   function pkRepeatLesson() {
@@ -363,10 +435,18 @@
     pkRecognizedText = null;
     pkIsProcessing = false;
 
+    pkTranscriptionFailures = {};
+    pkSkippedWords = {};
+    pkRetryAfter = 0;
+
     document.getElementById('pkProgressFill').style.width = '0%';
     document.getElementById('pkBeeMarker').style.left = '0%';
     document.getElementById('pkCounter').textContent = 'Words: 1/10';
     document.getElementById('pkWord').textContent = '"' + pkWords[0] + '"';
+
+    document.getElementById('pkSpeechResult').textContent = '';
+    document.getElementById('pkFeedback').textContent = '';
+    document.getElementById('pkSkipBtn').classList.add('d-none');
     document.getElementById('pkSpeakBtn').disabled = false;
 
     var btn = document.getElementById('pkSpeakBtn');

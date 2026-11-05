@@ -286,6 +286,7 @@
       <div id="feedback9" class="exercise-feedback"></div>
 
       <button type="button" class="btn-lesson-check" onclick="checkSpeaking(9, 10)">CHECK</button>
+      <button type="button" id="skipSpeaking9" class="btn-lesson-check d-none" onclick="skipSpeakingExercise(9, 10)">SKIP EXERCISE</button>
     </div>
 
     <!-- EJERCICIO 10: Speaking -->
@@ -300,6 +301,7 @@
       <div id="speechResult10" class="exercise-feedback"></div>
       <div id="feedback10" class="exercise-feedback"></div>
       <button type="button" class="btn-lesson-check" onclick="checkSpeaking(10, 'review')">FINISH LESSON</button>
+      <button type="button" id="skipSpeaking10" class="btn-lesson-check d-none" onclick="skipSpeakingExercise(10, 'review')">SKIP EXERCISE</button>
     </div>
     <!-- REVIEW SECTION -->
     <div id="lessonReview" class="exercise-card lesson-review d-none">
@@ -570,6 +572,52 @@
   let recognizedText = {};
   let currentSpeakingExercise = null;
 
+  let transcriptionFailures = {};
+  let skippedSpeakingExercises = {};
+
+  function updateSkipButton(exerciseNum) {
+    const skipButton = document.getElementById(
+      'skipSpeaking' + exerciseNum
+    );
+
+    if (!skipButton) {
+      return;
+    }
+
+    const failures = transcriptionFailures[exerciseNum] || 0;
+
+    if (failures >= 3) {
+      skipButton.classList.remove('d-none');
+    } else {
+      skipButton.classList.add('d-none');
+    }
+  }
+
+  function skipSpeakingExercise(currentNum, nextNum) {
+    const failures = transcriptionFailures[currentNum] || 0;
+
+    if (failures < 3) {
+      return;
+    }
+
+    skippedSpeakingExercises[currentNum] = true;
+
+    delete recognizedText[currentNum];
+
+    const skipButton = document.getElementById('skipSpeaking' + currentNum);
+
+    if (skipButton) {
+      skipButton.classList.add('d-none');
+    }
+
+    const feedback = document.getElementById('feedback' + currentNum);
+
+    feedback.textContent = 'Exercise skipped. You can continue!';
+    feedback.style.color = '#6c757d';
+
+    console.log('Speaking exercise skipped: ', currentNum);
+  }
+
   function getCookie(name) {
     let cookieValue = null;
 
@@ -687,6 +735,12 @@
           recognizedText[currentSpeakingExercise] = 
             data.transcription;
 
+          transcriptionFailures[currentSpeakingExercise] = 0;
+
+          skippedSpeakingExercises[currentSpeakingExercise] = false;
+
+          updateSkipButton(currentSpeakingExercise);
+
           speechResult.textContent = 
             'You said: "' + data.transcription + '"';
 
@@ -699,7 +753,24 @@
         } catch (error) {
           console.error('Transcription error: ', error);
 
-          speechResult.textContent = error.message;
+          const failedExercise = currentSpeakingExercise;
+
+          if (failedExercise !== null) {
+            transcriptionFailures[failedExercise] =
+                (transcriptionFailures[failedExercise] || 0) + 1;
+
+            const failures = transcriptionFailures[failedExercise];
+
+            updateSkipButton(failedExercise);
+
+            if (failures >= 3) {
+              speechResult.textContent = 'Transcription service unavailable after 3 attempts. You can retry or skip this exercise.';
+            } else {
+              speechResult.textContent = error.message + ' Attempt ' + failures + ' of 3.';
+            }
+          } else {
+            speechResult.textContent = error.message;
+          }
           speechResult.style.color = '#dc3545';
         } finally {
 

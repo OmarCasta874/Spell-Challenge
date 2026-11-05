@@ -1,64 +1,156 @@
-/* mascot.css — widget de mascota (Crowing = Teacher, Beenary = Student) */
+/* pet_messages.css - Widget de mascotas (Crowing = Teacher, Beenary = Student) */
+
 .mascot {
-  --mascot-bg: #141414;
-  --mascot-border: #3a3a3a;
-  --mascot-fg: #ffffff;
-  --mascot-close: #ffffff;
-  --mascot-radius: 6px;
+  --mascot-bg: #ffffff;
+  --mascot-border: #e5e5e5;
+  --mascot-fg: #292929;
+  --mascot-accent: #7a1c1c;
+  --mascot-close: #777777;
+
   position: fixed;
   left: 12px;
   bottom: 8px;
   z-index: 1030;
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 10px;
+
   max-width: calc(100vw - 32px);
-  pointer-events: none; 
+  pointer-events: none;
   font-family: 'Lato', sans-serif;
 }
-/* Beenary (Student): caja amarilla plana, texto negro, X vino */
+
+/* Beenary - Student */
 .mascot--beenary {
-  --mascot-bg: #f0ff00; 
-  --mascot-border: transparent;
-  --mascot-fg: #000000;
+  --mascot-bg: #fff9df;
+  --mascot-border: #f0d77c;
+  --mascot-fg: #292929;
+  --mascot-accent: #8b0000;
   --mascot-close: #8b0000;
-  --mascot-radius: 0;
 }
 
+/* Crowing - Teacher */
+.mascot--crowing {
+  --mascot-bg: #ffffff;
+  --mascot-border: #dedede;
+  --mascot-fg: #292929;
+  --mascot-accent: #7a1c1c;
+  --mascot-close: #777777;
+}
+
+/* Message Card */
 .mascot-bubble {
   position: relative;
-  width: 290px;
+  width: 310px;
   max-width: 100%;
-  padding: 10px 44px 12px 12px;
+  padding: 14px;
+
   background: var(--mascot-bg);
   color: var(--mascot-fg);
   border: 1px solid var(--mascot-border);
-  border-radius: var(--mascot-radius);
-  font-weight: 700;
-  font-size: 0.9rem;
-  line-height: 1.3;
-  pointer-events: auto;
-}
-.mascot-bubble[hidden] { display: none; }
-.mascot-bubble.is-visible { animation: mascot-pop 0.25s ease-out; }
-.mascot-title { margin: 0 0 12px; }
-.mascot-text  { margin: 0; }
+  border-radius: 16px;
 
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.14);
+
+  font-size: 0.9rem;
+  line-height: 1.45;
+
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+.mascot-bubble[hidden] {
+  display: none;
+}
+
+.mascot-bubble.is-visible {
+  animation: mascot-pop 0.25s ease-out;
+}
+
+/* Message Header */
+.mascot-message-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--mascot-border);
+}
+
+.mascot-message-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+
+  background: var(--mascot-accent);
+  border-radius: 50%;
+
+  font-size: 1rem;
+}
+
+.mascot-message-name {
+  color: var(--mascot-accent);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+/* Message Content */
+.mascot-message-content {
+  padding-right: 24px;
+}
+
+.mascot-title {
+  margin: 0 0 5px;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.mascot-text {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+/* Close Button */
 .mascot-close {
   position: absolute;
-  top: 2px;
-  right: 4px;
-  padding: 2px;
-  background: none;
+  top: 10px;
+  right: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 27px;
+  height: 27px;
+  padding: 3px;
+
+  background: transparent;
   border: none;
+  border-radius: 50%;
+
   color: var(--mascot-close);
   cursor: pointer;
-  line-height: 0;
+  transition: background 0.2s ease;
 }
-.mascot-close:focus-visible,
-.mascot-img:focus-visible { outline: 2px solid var(--mascot-close); outline-offset: 2px; }
 
+.mascot-close:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.mascot-close:focus-visible,
+.mascot-img:focus-visible {
+  outline: 2px solid var(--mascot-accent);
+  outline-offset: 3px;
+}
+
+/* Mascot Image */
 .mascot-img {
   display: block;
   width: 72px;
@@ -89,14 +181,52 @@
     visibility 0s linear 0s;
 }
 
+/* Entrance Animation */
 @keyframes mascot-pop {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
+/* Accesibility */
 @media (prefers-reduced-motion: reduce) {
-  .mascot-bubble.is-visible { animation: none; }
+  .mascot-bubble.is-visible {
+    animation: none;
+  }
+
+  .mascot-img,
+  .mascot-close {
+    transition: none;
+  }
 }
+
+/* Responsive Design */
 @media (max-width: 600px) {
-  .mascot-bubble { width: 240px; font-size: 0.85rem; }
-  .mascot-img { width: 76px; }
+  .mascot-bubble {
+    width: 270px;
+    padding: 12px;
+    font-size: 0.85rem;
+  }
+
+  .mascot-img {
+    width: 76px;
+  }
+
+  .mascot-message-name {
+    font-size: 0.9rem;
+  }
+
+  .mascot-title {
+    font-size: 0.9rem;
+  }
+
+  .mascot-text {
+    font-size: 0.84rem;
+  }
 }
