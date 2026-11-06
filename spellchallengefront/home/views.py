@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
 from functools import wraps
 from django.db import transaction
-from django.db.models import Count, Avg, Q
+from django.db.models import Count, Avg, Q, ProtectedError
 from home.models import Usuario, TipoUsuario, Profesor, Alumno, Administrador, Grupo, Palabra, Notificacion
 from home.models import Carrera, Categoria, Alumno_Insignia, Alumno_Practica, Lista_Grupo, Grupo_Alumno
 from home.models import Nivel, Dificultad, Dificultad_Juego, Insignia, Intento_Palabra, Lista, Lista_Palabra, Competencia_Profesor
@@ -25,6 +25,17 @@ from home.services.gemini_service import generate_word_content
 from home.services.transcription_service import transcribe_audio
 
 # Create your views here.
+
+def _update_numero_letras(lista):
+    significados = Palabra.objects.filter(
+        lista_palabras__lista=lista
+    ).values_list('significado', flat=True)
+    
+    lista.numero_letras = max(
+        (sum(1 for char in s if char.isalpha()) for s in significados),
+        default=0
+    )
+    lista.save(update_fields=['numero_letras'])
 
 def role_required(role):
     def decorator(view_func):
@@ -660,6 +671,142 @@ def add_word_to_list(request, codigo):
     )
     
 @never_cache
+@role_required('teacher')
+def edit_word_in_list(request, codigo, codigo_palabra):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+    relacion = get_object_or_404(
+        Lista_Palabra.objects.select_related('palabra', 'palabra__nivel'),
+        lista=lista,
+        palabra__codigo=codigo_palabra
+    )
+    palabra = relacion.palabra
+    
+    if request.method == 'POST':
+        significado = request.POST.get('significado', '').strip()
+        definicion = request.POST.get('definicion', '').strip()
+        ejemplo = request.POST.get('ejemplo', '').strip()
+        pronunciacion = request.POST.get('pronunciacion', '').strip()
+        nivel_codigo = request.POST.get('nivel', '').strip()
+        
+        redirect_error = redirect(
+            'edit_word_in_list',
+            codigo=lista.codigo,
+            codigo_palabra=palabra.codigo
+        )
+        
+        if not significado or len(significado) > 50:
+            messages.error(
+                request,
+                'The word must contain between 1 and 50 characters.'
+            )
+            return redirect_error
+        
+        if not pronunciacion or len(pronunciacion) > 100:
+            messages.error(request, 'Please enter a valid pronunciation.')
+            return redirect_error
+        
+        if len(definicion) > 255 or len(ejemplo) > 255:
+            messages.error(
+                request,
+                'The definition and example cannot exceed 255 characters.'
+            )
+            return redirect_error
+        
+        nivel = Nivel.objects.filter(codigo=nivel_codigo).first()
+        if nivel is None:
+            messages.error(request, 'Please select a valid level.')
+            return redirect_error
+        
+        try:
+            with transaction.atomic():
+                palabra.significado = significado
+                palabra.definicion = definicion
+                palabra.ejemplo = ejemplo
+                palabra.pronunciacion = pronunciacion
+                palabra.nivel = nivel
+                
+                nueva_imagen = request.FILES.get('imagen')
+                if nueva_imagen:
+                    if palabra.imagen:
+                        palabra.imagen.delete(save=False)
+                    palabra.imagen = nueva_imagen
+                elif request.POST.get('remove_imagen') and palabra.imagen:
+                    palabra.imagen.delete(save=False)
+                    
+                nuevo_audio = request.FILES.get('audio')
+                if nuevo_audio:
+                    if palabra.audio:
+                        palabra.audio.delete(save=False)
+                    palabra.audio = nuevo_audio
+                elif request.POST.get('remove_audio') and palabra.audio:
+                    palabra.audio.delete(save=False)
+                    
+                palabra.save()
+                _update_numero_letras(lista)
+                
+            messages.success(request, f'"{significado}" was updated.')
+            return redirect('view_word_list', codigo=lista.codigo)
+        
+        except Exception:
+            messages.error(
+                request,
+                'The word could not be updated. Please check the information and try again.'
+            )
+            return redirect_error
+        
+    niveles = Nivel.objects.all().order_by('codigo')
+    
+    return render(
+        request,
+        'teacher/edit_word_in_list.html',
+        {
+            'lista': lista,
+            'palabra': palabra,
+            'niveles': niveles,
+        }
+    )
+    
+@never_cache
+@role_required('teacher')
+@require_POST
+def delete_word_from_list(request, codigo, codigo_palabra):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+    relacion = get_object_or_404(
+        Lista_Palabra.objects.select_related('palabra', 'palabra__categoria'),
+        lista=lista,
+        palabra__codigo=codigo_palabra
+    )
+    palabra = relacion.palabra
+    nombre = palabra.significado
+    
+    try:
+        with transaction.atomic():
+            relacion.delete()
+            
+            if (not palabra.lista_palabras.exists() and palabra.categoria.nombre == lista.nombre):
+                try:
+                    with transaction.atomic():
+                        palabra.delete()
+                except ProtectedError:
+                    pass
+                
+            _update_numero_letras(lista)
+            
+        messages.success(request, f'"{nombre}" was removed from "{lista.nombre}".')
+    except Exception:
+        messages.error(request, 'The word could not be deleted. Please try again.')
+        
+    return redirect('view_word_list', codigo=lista.codigo)
+    
+@never_cache
 @require_POST
 @role_required('teacher')
 def generate_word_suggestions(request, codigo):
@@ -804,6 +951,147 @@ def create_word_list(request):
         request,
         'teacher/create_word_list.html'
     )
+    
+@never_cache
+@role_required('teacher')
+def edit_word_list(request, codigo):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+    
+    if request.method == 'POST':
+        list_name = request.POST.get('name', '').strip()
+        
+        if not list_name:
+            messages.error(
+                request,
+                'Please enter a name for the word list.'
+            )
+            return redirect('edit_word_list', codigo=lista.codigo)
+        
+        if len(list_name) > 30:
+            messages.error(
+                request,
+                'The word list name cannot exceed 30 characters.'
+            )
+            return redirect('edit_word_list', codigo=lista.codigo)
+        
+        if list_name == lista.nombre:
+            messages.info(
+                request,
+                'No changes were made to the word list.'
+            )
+            return redirect('view_word_list', codigo=lista.codigo)
+        
+        try:
+            with transaction.atomic():
+                
+                categoria = Categoria.objects.filter(
+                    nombre=list_name
+                ).first()
+                
+                if categoria is None:
+                    category_codes = Categoria.objects.values_list(
+                        'codigo',
+                        flat=True
+                    )
+                    
+                    category_numbers = [
+                        int(code[3:])
+                        for code in category_codes
+                        if code.startswith('CAT')
+                        and code[3:].isdigit()
+                    ]
+                    
+                    next_category_number = max(
+                        category_numbers,
+                        default=0
+                    ) + 1
+                    
+                    category_code = f'CAT{next_category_number:02d}'
+                    
+                    categoria = Categoria.objects.create(
+                        codigo=category_code,
+                        nombre=list_name
+                    )
+                    
+                lista.nombre = list_name
+                lista.save(update_fields=['nombre'])
+                
+            messages.success(
+                request,
+                f'Word list "{lista.nombre}" was updated successfully.'
+            )
+            
+            return redirect('view_word_list', codigo=lista.codigo)
+        
+        except Exception:
+            messages.error(
+                request,
+                'The word list could not be updated. Please try again.'
+            )
+            return redirect('edit_word_list', codigo=lista.codigo)
+        
+    return render(
+        request,
+        'teacher/edit_word_list.html',
+        {
+            'lista': lista,
+        }
+    )
+    
+@never_cache
+@role_required('teacher')
+def delete_word_list(request, codigo):
+    
+    if request.method != 'POST':
+        return redirect('teacher_word_lists')
+    
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+    
+    try:
+        with transaction.atomic():
+            
+            tiene_relaciones = (
+                lista.lista_grupos.exists()
+                or lista.procesos.exists()
+                or lista.practicas.exists()
+                or lista.lista_competencias.exists()
+                or lista.lista_lecciones.exists()
+            )
+            
+            if tiene_relaciones:
+                messages.error(
+                    request,
+                    f'"{lista.nombre}" cannot be deleted because it has '
+                    'associated groups, student progress, practices, '
+                    'competitions, or lessons.'
+                )
+                
+                return redirect('teacher_word_lists')
+            
+            nombre_lista = lista.nombre
+            
+            lista.delete()
+            
+        messages.success(
+            request,
+            f'Word list "{nombre_lista}" was deleted successfully.'
+        )
+        
+    except Exception:
+        messages.error(
+            request,
+            'The word list could not be deleted. Please try again.'
+        )
+        
+    return redirect('teacher_word_lists')
 
 @never_cache
 @role_required('student')

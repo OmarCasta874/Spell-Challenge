@@ -280,6 +280,53 @@
     color: #897C7C;
 }
 
+.word-details-card-header {
+    position: relative;
+}
+
+.word-details-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.word-details-menu {
+    margin-left: auto;
+}
+
+.word-menu-btn {
+    background: none;
+    border: none;
+    padding: 4px;
+    border-radius: 50%;
+    line-height: 0;
+    cursor: pointer;
+    color: inherit;
+}
+
+.word-menu-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.word-menu-list {
+    z-index: 1050;
+    min-width: 140px;
+}
+
+.word-menu-list .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.word-menu-list svg {
+    width: 16px;
+    height: 16px;
+}
+
+.word-menu-delete {
+    color: #b02a37;
+}
+
 @media (max-width: 576px) {
     .word-details-page {
         padding-right: 0;

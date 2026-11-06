@@ -298,6 +298,43 @@
     color: #7A1C1C;
 }
 
+.add-word-current {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: #FFFDFD;
+    border: 1px solid #EEE5E5;
+    border-radius: 11px;
+}
+
+.add-word-current-image {
+    max-width: 100%;
+    max-height: 120px;
+    object-fit: contain;
+    align-self: flex-start;
+    border-radius: 8px;
+}
+
+.add-word-current-audio {
+    width: 100%;
+}
+
+.add-word-remove {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #B02A37;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.add-word-remove input {
+    accent-color: #7A1C1C;
+}
+
 @media (max-width: 650px) {
     .add-word-page {
         padding: 24px 14px 36px;

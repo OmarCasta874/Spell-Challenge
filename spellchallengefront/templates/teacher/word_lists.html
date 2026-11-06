@@ -33,12 +33,17 @@
           <a href="{% url 'view_word_list' lista.codigo %}" class="btn btn-sm btn-pill-outline">
             VIEW
           </a>
-          <button type="button" class="btn btn-sm btn-pill-outline">
+          <a href="{% url 'edit_word_list' lista.codigo %}" class="btn btn-sm btn-pill-outline">
             EDIT
-          </button>
-          <button type="button" class="btn btn-sm btn-pill-delete">
-            DELETE
-          </button>
+          </a>
+          
+          <form method="POST" action="{% url 'delete_word_list' lista.codigo %}"
+                onsubmit="return confirm('Are you sure you want to delete this word list? This action cannot be undone.');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-pill-delete">
+                  DELETE
+                </button>
+              </form>
         </div>
       </div>
     </div>

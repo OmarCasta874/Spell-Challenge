@@ -39,11 +39,16 @@
       <h4>Vocabulary Collection</h4>
       <p>Explore each word's definition, example and available resources.</p>
     </div>
-
-    <a href="{% url 'add_word_to_list' lista.codigo %}" class="btn btn-create-list">
-      <i data-lucide="plus"></i>
-      Add Word
-    </a>
+    <div class="word-details-actions">
+        <a href="{% url 'edit_word_list' lista.codigo %}" class="btn btn-edit-list">
+            <i data-lucide="pencil"></i>
+            Edit List
+        </a>
+        <a href="{% url 'add_word_to_list' lista.codigo %}" class="btn btn-create-list">
+            <i data-lucide="plus"></i>
+            Add Word
+        </a>
+    </div>
   </section>
   <div class="word-details-grid">
     {% for relacion in lista_palabras %}
@@ -51,11 +56,32 @@
         <article class="word-details-card">
           <div class="word-details-card-header">
             <div class="word-details-number">{{ forloop.counter }}</div>
-            <div>
+            <div class="word-details-title">
               <h5 class="word-details-word">{{ palabra.significado }}</h5>
-              <span class="word-details-level">
-                {{ palabra.nivel }}
-              </span>
+              <span class="word-details-level">{{ palabra.nivel }}</span>
+            </div>
+
+            <div class="dropdown word-details-menu">
+              <button type="button" class="word-menu-btn"
+                      data-bs-toggle="dropdown" aria-expanded="false"
+                      aria-label="Word options">
+                <i data-lucide="ellipsis-vertical"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end word-menu-list">
+                <li>
+                  <a class="dropdown-item" href="{% url 'edit_word_in_list' lista.codigo palabra.codigo %}">
+                    <i data-lucide="pencil"></i> Edit
+                  </a>
+                </li>
+                <li>
+                  <button type="button" class="dropdown-item word-menu-delete"
+                          data-bs-toggle="modal" data-bs-target="#deleteWordModal"
+                          data-word="{{ palabra.significado }}"
+                          data-url="{% url 'delete_word_from_list' lista.codigo palabra.codigo %}">
+                    <i data-lucide="trash-2"></i> Delete
+                  </button>
+                </li>
+              </ul>
             </div>
           </div>
           <div class="word-details-field">
@@ -104,4 +130,33 @@
     {% endfor %}
   </div>
 </div>
+<div class="modal fade" id="deleteWordModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Word</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete "<strong id="deleteWordName"></strong>" from this list?
+        This action cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="post" id="deleteWordForm">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('deleteWordModal').addEventListener('show.bs.modal', function (e) {
+    const btn = e.relatedTarget;
+    document.getElementById('deleteWordName').textContent = btn.dataset.word;
+    document.getElementById('deleteWordForm').action = btn.dataset.url;
+  });
+</script>
 {% endblock %}
