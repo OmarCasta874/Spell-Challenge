@@ -95,7 +95,7 @@
 
 /* PASSWORD TOOGLE */
 
-.toogle-password {
+.toggle-password {
     position: absolute;
     right: 8px;
     background: none;
@@ -107,7 +107,7 @@
     align-items: center;
 }
 
-.toogle-password svg {
+.toggle-password svg {
     width: 18px;
     height: 18px;
 }

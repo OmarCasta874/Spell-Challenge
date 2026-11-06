@@ -679,7 +679,7 @@
   color: var(--sc-maroon-dark);
 }
 
-/* VOCABULARY PLACEHOLDER */
+/* VOCABULARY SECTION */
 .vocabulary-section h3 {
   color: var(--sc-maroon);
   font-weight: 800;
@@ -691,12 +691,117 @@
   line-height: 1.6;
 }
 
+/* VOCABULARY GRID */
+.vocabulary-words {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin: 1.8rem 0;
+}
+
+/* VOCABULARY CARD */
+.vocabulary-word-card {
+  background: #ffffff;
+  border: 1px solid #e9e9e9;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.vocabulary-word-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 9px 22px rgba(122, 28, 28, 0.12);
+}
+
+/* WORD IMAGE */
+.vocabulary-word-image {
+  width: 100%;
+  height: 190px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #faf8f8;
+}
+
+.vocabulary-word-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transition: transform 0.35s ease;
+}
+
+.vocabulary-word-card:hover .vocabulary-word-image img {
+  transform: scale(1.03);
+}
+
+/* WORD CONTENT */
+.vocabulary-word-content {
+  padding: 1.3rem;
+}
+
+.vocabulary-word-content h4 {
+  color: var(--sc-maroon);
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+/* PRONUNCIATION */
+.vocabulary-pronunciation {
+  display: inline-block;
+  background: #fff3f1;
+  color: #a33b3b;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+
+/* DEFINITION */
+.vocabulary-definition {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+/* EXAMPLE */
+.vocabulary-example {
+  background: #fff9e9;
+  border-left: 4px solid #e8b93f;
+  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  color: #5f5540;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.vocabulary-example strong {
+  color: var(--sc-maroon);
+}
+
+/* AUDIO PLAYER */
+.vocabulary-word-content audio {
+  display: block;
+  width: 100%;
+  height: 38px;
+  margin-top: 0.5rem;
+}
+
+/* EMPTY VOCABULARY */
 .vocabulary-placeholder {
   background-color: #f8f9fa;
   border: 2px dashed #ced4da;
   border-radius: 14px;
   padding: 2rem 1rem;
   margin: 1.5rem 0;
+  text-align: center;
 }
 
 .vocabulary-placeholder span {
@@ -713,6 +818,22 @@
 .vocabulary-placeholder p {
   color: #6c757d;
   margin: 0.5rem 0 0;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 576px) {
+  .vocabulary-words {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .vocabulary-word-image {
+    height: 194px;
+  }
+
+  .vocabulary-word-content {
+    padding: 1.1rem;
+  }
 }
 
 /* REVIEW SECTION */

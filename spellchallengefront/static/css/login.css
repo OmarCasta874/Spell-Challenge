@@ -132,3 +132,39 @@
     flex: none;
   }
 }
+
+.forgot-password-link {
+  text-align: right;
+  margin-top: -6px;
+  margin-bottom: 12px;
+}
+
+.forgot-password-link a {
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #7a1f2b;
+  text-decoration: underline;
+}
+
+/* INSTRUCTIONS */
+.auth-instruction {
+  text-align: center;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.88rem;
+  color: #555;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.form-error {
+  background-color: #fdf2f2;
+  border: 1px solid #7a1f2b;
+  color: #7a1f2b;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+}

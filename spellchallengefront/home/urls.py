@@ -23,7 +23,8 @@ urlpatterns = [
     path('mygroups_student/', views.student_groups, name='student_groups'),
     path('teacher_competitions/', views.teacher_competitions, name='teacher_competitions'),
     path('student_competitions/', views.student_competitions, name='student_competitions'),
-    path('lesson_1/', views.lesson1, name='lesson_1'),
+    path('lesson_1/', views.lesson, {'clave_leccion': 'LEC01'}, name='lesson_1'),
+    path('lesson/<str:clave_leccion>/', views.lesson, name='lesson'),
     path('transcribe-speaking/', views.transcribe_speaking, name='transcribe_speaking'),
     path('student_progress/', views.progress, name='student_progress'),
     path('statistics/', views.statistics, name='statistics'),
@@ -59,4 +60,7 @@ urlpatterns = [
     path('mygroups/delete/<str:group_id>/', views.delete_group, name='delete_group'),
     path('student/competitions/results/<str:codigo>/', views.student_competition_results, name='student_competition_results'),
     path('student/notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
+    path('password-reset/', views.password_reset_request, name='password_reset_request'),
+    path('password-reset/verify/', views.password_reset_code, name='password_reset_code'),
+    path('password-reset/confirm/', views.password_reset_confirm, name='password_reset_confirm'),
 ]

@@ -23,6 +23,7 @@ from django.http import FileResponse, Http404, JsonResponse
 from django.urls import reverse
 from home.services.gemini_service import generate_word_content
 from home.services.transcription_service import transcribe_audio
+from django.core.mail import send_mail
 
 # Create your views here.
 
@@ -195,6 +196,69 @@ def signup_student(request):
     })
 
 def signup_teacher(request):
+    """Registro público para profesores"""
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name', '').strip()
+        paternal_last_name = request.POST.get('paternal_last_name', '').strip()
+        maternal_last_name = request.POST.get('maternal_last_name', '').strip()
+        teacher_id = request.POST.get('teacher_id', '').strip()
+        email = request.POST.get('email', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        password = request.POST.get('password', '').strip()
+        confirm_password = request.POST.get('confirm_password', '').strip()
+
+        # Validaciones de campos obligatorios
+        if not all([first_name, paternal_last_name, teacher_id, email, password, confirm_password]):
+            messages.error(request, 'Please fill out all required fields.')
+            return render(request, 'users/signup_teacher.html')
+
+        if password != confirm_password:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'users/signup_teacher.html')
+
+        # Verificar unicidad de Código y Correo
+        if Usuario.objects.filter(codigo=teacher_id).exists():
+            messages.error(request, 'A user with this Teacher Code already exists.')
+            return render(request, 'users/signup_teacher.html')
+
+        if Usuario.objects.filter(correo=email).exists():
+            messages.error(request, 'An account with this email address already exists.')
+            return render(request, 'users/signup_teacher.html')
+
+        try:
+            with transaction.atomic():
+                # Obtener Tipo de Usuario Profesor (TUSR02)
+                tipo_teacher = TipoUsuario.objects.get(clave='TUSR02')
+
+                # Crear Usuario Django
+                usuario = Usuario.objects.create_user(
+                    correo=email,
+                    password=password,
+                    codigo=teacher_id,
+                    nombre_pila=first_name,
+                    apellidoPaterno=paternal_last_name,
+                    apellidoMaterno=maternal_last_name,
+                    numero_telefono=phone,
+                    tipo_usuario=tipo_teacher,
+                    is_active=True,
+                    is_staff=False,
+                )
+
+                # Crear Perfil Profesor
+                Profesor.objects.create(
+                    clave=teacher_id,
+                    nombre_pila=first_name,
+                    apellidoPaterno=paternal_last_name,
+                    apellidoMaterno=maternal_last_name,
+                    usuario=usuario,
+                )
+
+                messages.success(request, 'Teacher account created successfully! You can now log in.')
+                return redirect('login')
+
+        except Exception as e:
+            messages.error(request, f'An error occurred during registration: {str(e)}')
+
     return render(request, 'users/singup_teacher.html')
 
 @never_cache
@@ -1462,8 +1526,23 @@ def student_competitions(request):
 
 @never_cache
 @role_required('student')
-def lesson1(request):
-    return render(request, 'student/lesson1.html')
+def lesson(request, clave_leccion):
+    
+    leccion = get_object_or_404(
+        Leccion,
+        clave=clave_leccion
+    )
+    
+    palabras = Palabra.objects.filter(
+        lista_palabras__lista__lista_lecciones__leccion=leccion
+    ).distinct().order_by('significado')
+    
+    context = {
+        'leccion': leccion,
+        'palabras': palabras,
+    }
+    
+    return render(request, 'student/lesson1.html', context)
 
 @never_cache
 @require_POST
@@ -3869,3 +3948,95 @@ def student_competition_results(request, codigo):
     }
     
     return render(request, 'student/student_competition_results.html', context)
+
+def password_reset_request(request):
+    """Paso 1: Solicitar correo electrónico"""
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        usuario = Usuario.objects.filter(correo=email, is_active=True).first()
+        
+        if usuario:
+            # Generar PIN de 6 dígitos
+            pin = f"{random.randint(100000, 999999)}"
+            
+            # Guardar en la sesión con tiempo límite (10 minutos)
+            request.session['reset_email'] = email
+            request.session['reset_pin'] = pin
+            request.session['reset_pin_expires'] = (timezone.now() + timedelta(minutes=10)).timestamp()
+            
+            subject = "Password Reset Code - Spell-Challenge"
+            message = f"Hello {usuario.nombre_pila},\n\nYour verification code to reset your password is: {pin}\n\nThis code will expire in 10 minutes.\n\nIf you did not request this, please ignore this email."
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],  
+                fail_silently=False,
+            )
+            
+            messages.success(request, f"A 6-digit verification code has been sent to {email}.")
+            return redirect('password_reset_code')
+        else:
+            messages.error(request, "No active account found with this email address.")
+            
+    return render(request, 'users/password_reset_request.html')
+
+
+def password_reset_code(request):
+    """Paso 2: Validar PIN de 6 dígitos"""
+    email = request.session.get('reset_email')
+    stored_pin = request.session.get('reset_pin')
+    expires_at = request.session.get('reset_pin_expires')
+    
+    if not email or not stored_pin:
+        messages.error(request, "Session expired or invalid request. Please try again.")
+        return redirect('password_reset_request')
+        
+    if request.method == 'POST':
+        pin_entered = request.POST.get('pin', '').strip()
+        
+        # Validar expiración (10 min)
+        if timezone.now().timestamp() > expires_at:
+            messages.error(request, "The verification code has expired. Please request a new one.")
+            return redirect('password_reset_request')
+            
+        if pin_entered == stored_pin:
+            request.session['reset_pin_verified'] = True
+            return redirect('password_reset_confirm')
+        else:
+            messages.error(request, "Invalid verification code. Please check and try again.")
+            
+    return render(request, 'users/password_reset_code.html', {'email': email})
+
+
+def password_reset_confirm(request):
+    """Paso 3: Establecer nueva contraseña"""
+    email = request.session.get('reset_email')
+    verified = request.session.get('reset_pin_verified')
+    
+    if not email or not verified:
+        messages.error(request, "Unauthorized access. Please restart the reset process.")
+        return redirect('password_reset_request')
+        
+    if request.method == 'POST':
+        password = request.POST.get('password', '').strip()
+        confirm_password = request.POST.get('confirm_password', '').strip()
+        
+        if len(password) < 6:
+            messages.error(request, "Password must be at least 6 characters long.")
+        elif password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+        else:
+            usuario = Usuario.objects.get(correo=email)
+            usuario.set_password(password)
+            usuario.save()
+            
+            del request.session['reset_email']
+            del request.session['reset_pin']
+            del request.session['reset_pin_expires']
+            del request.session['reset_pin_verified']
+            
+            messages.success(request, "Password updated successfully! You can now log in.")
+            return redirect('login')
+            
+    return render(request, 'users/password_reset_confirm.html')

@@ -37,10 +37,13 @@
       </div>
     </div>
 
+    <div class="forgot-password-link">
+      <a href="{% url 'password_reset_request' %}">Forgot Password?</a>
+    </div>
+
     <div class="auth-actions">
       <button type="submit" class="btn btn-outline">Log In</button>
     </div>
-  </form>
 
   <p class="auth-footer">Don't have an account?<a href="{% url 'choose_role' %}">Sign Up</a></p>
 </div>

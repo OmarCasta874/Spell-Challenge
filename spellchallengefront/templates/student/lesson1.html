@@ -130,7 +130,7 @@
     </div>
   </div>
   <!-- CONTENEDOR PRINCIPAL DEL EJERCICIO -->
-  <div class="lesson-exercise-wrap">
+  <div class="lesson-exercise-wrap"> 
     <!-- VOCABULARY SECTION -->
     <div id="vocabularySection" class="exercise-card vocabulary-section">
       <div class="skill-section-label">
@@ -142,12 +142,50 @@
         Before practicing grammar, listening and speaking,
         take a moment to explore the vocabulary of this lesson.
       </p>
-      <div class="vocabulary-placeholder">
-        <span>📚</span>
-        <strong>Vocabulary activities</strong>
-        <p>
-          New words, meanings and examples will be available here.
-        </p>
+      <div class="vocabulary-words">
+        {% for palabra in palabras %}
+          <div class="vocabulary-word-card">
+            {% if palabra.imagen %}
+              <div class="vocabulary-word-image">
+                <img src="{{ palabra.imagen.url }}"
+                    alt="{{ palabra.significado }}">
+              </div>
+            {% endif %}
+            <div class="vocabulary-word-content">
+              <h4>{{ palabra.significado }}</h4>
+              {% if palabra.pronunciacion %}
+                <p class="vocabulary-pronunciation">
+                  🔊 {{ palabra.pronunciacion }}
+                </p>
+              {% endif %}
+              {% if palabra.definicion %}
+                <p class="vocabulary-definition">
+                  {{ palabra.definicion }}
+                </p>
+              {% endif %}
+              {% if palabra.ejemplo %}
+                <p class="vocabulary-example">
+                  <strong>Example:</strong>
+                  {{ palabra.ejemplo }}
+                </p>
+              {% endif %}
+              {% if palabra.audio %}
+                <audio controls>
+                  <source src="{{ palabra.audio.url }}">
+                  Your browser does not support audio.
+                </audio>
+              {% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="vocabulary-placeholder">
+            <span>📚</span>
+            <strong>No vocabulary available yet.</strong>
+            <p>
+              The words for this lesson will appear here.
+            </p>
+          </div>
+        {% endfor %}
       </div>
       <button type="button" class="btn-lesson-check" onclick="beginGrammar()">
         CONTINUE →
