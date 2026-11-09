@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'spellchallengefront.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'spell_challenge',
+        'NAME': 'spellchallenge',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': 'localhost',
