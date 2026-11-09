@@ -16,7 +16,15 @@
 <div class="ps-body">
 
   <div id="psExercises">
-
+    <!-- FORMULARIO PARA ENVIAR LA RECOMPENSA -->
+    <form id="psRewardForm" class="d-none">
+      {% csrf_token %}
+      <input
+        type="hidden"
+        name="round_token"
+        value="{{ round_token }}"
+      >
+    </form>
     <!-- BARRA DE PROGRESO CON BEENARY -->
     <div class="ps-progress-wrap" id="psProgressWrap">
       <span class="ps-bee-marker" id="psBeeMarker" style="left: 0%;">
@@ -112,6 +120,7 @@
       <div class="ps-results-total">
         <span class="ps-results-total-number">3/3</span>
         <span class="ps-results-total-label">Exercises</span>
+        <p class="ps-results-xp" id="psResultsXP">+0 XP</p>
       </div>
 
       <div class="ps-results-breakdown">
@@ -149,6 +158,9 @@
 
   var psTranscriptionFailures = {};
   var psSkippedExercises = {};
+
+  var psErrorCount = 0;
+  var psRewardSent = false;
 
   function psUpdateSkipButton(exerciseNumber) {
     var skipButton = document.getElementById('psSkip' + exerciseNumber);
@@ -454,6 +466,8 @@
     } else {
       feedback.textContent = 'Incorrect Spelling. Listen and try again!';
       feedback.style.color = '#dc3545';
+
+      psErrorCount++;
     }
   }
 
@@ -505,6 +519,8 @@
     } else {
       feedback.textContent = 'Incorrect Spelling. Try Again!';
       feedback.style.color = '#dc3545';
+
+      psErrorCount++;
     }
   }
 
@@ -531,6 +547,58 @@
     window.speechSynthesis.speak(speech);
   }
 
+  async function psCompleteGame() {
+    if (psRewardSent) {
+      return;
+    }
+
+    psRewardSent = true;
+
+    var rewardForm = document.getElementById('psRewardForm');
+    var formData = new FormData(rewardForm);
+
+    formData.append('errors', psErrorCount);
+
+    try {
+      var response = await fetch(window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+
+      var data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.message || 'Could not save experience points.'
+        );
+      }
+
+      // Mostrar los XP obtenidos.
+      document.getElementById('psResultsXP').textContent =
+        '+' + data.xp_earned + ' XP';
+
+      // Mostrar la pantalla de finalización.
+      document.getElementById('psProgressWrap').style.display = 'none';
+      document.getElementById('psCompleted').classList.remove('d-none');
+
+      console.log('Errors:', data.errors);
+      console.log('XP earned:', data.xp_earned);
+      console.log('Total XP:', data.total_xp);
+
+    } catch (error) {
+      console.error('Error saving experience:', error);
+
+      psRewardSent = false;
+
+      alert(
+        'Your experience points could not be saved: ' + error.message
+      );
+    }
+  }
+
   function psNextExercise(currentNum, nextNum) {
     var skipButton = document.getElementById('psSkip' + currentNum);
 
@@ -544,8 +612,7 @@
       document.getElementById('psProgressFill').style.width = '100%';
       document.getElementById('psBeeMarker').style.left = '100%';
 
-      document.getElementById('psProgressWrap').style.display = 'none';
-      document.getElementById('psCompleted').classList.remove('d-none');
+      psCompleteGame();
 
       return;
     }
@@ -561,39 +628,7 @@
       window.speechSynthesis.cancel();
     }
 
-    psTranscriptionFailures = {};
-    psSkippedExercises = {};
-
-    psMediaRecorder = null;
-    psAudioChunks = [];
-    psIsProcessing = false;
-    psCurrentSpeakingExercise = null;
-
-    for (var exerciseNumber = 1; exerciseNumber <= 3; exerciseNumber++) {
-      var word = psWords[exerciseNumber - 1];
-
-      for (var i = 0; i < word.length; i++) {
-        var input = document.getElementById('psLetter' + exerciseNumber + '_' + i);
-
-        if (input) {
-          input.value = '';
-        }
-      }
-
-      document.getElementById('psSpeechResult' + exerciseNumber).textContent = '';
-      document.getElementById('psFeedback' + exerciseNumber).textContent = '';
-
-      document.getElementById('psSkip' + exerciseNumber).classList.add('d-none');
-    }
-
-    document.getElementById('psCompleted').classList.add('d-none');
-    document.getElementById('psEx3').classList.add('d-none');
-    document.getElementById('psEx2').classList.add('d-none');
-    document.getElementById('psEx1').classList.remove('d-none');
-
-    document.getElementById('psProgressWrap').style.display = '';
-    document.getElementById('psProgressFill').style.width = '0%';
-    document.getElementById('psBeeMarker').style.left = '0%';
+    window.location.reload();
   }
 </script>
 {% endblock %}

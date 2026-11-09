@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
 from functools import wraps
 from django.db import transaction
-from django.db.models import Count, Avg, Q, ProtectedError
+from django.db.models import Count, Avg, Q, ProtectedError, Prefetch, F
 from home.models import Usuario, TipoUsuario, Profesor, Alumno, Administrador, Grupo, Palabra, Notificacion
 from home.models import Carrera, Categoria, Alumno_Insignia, Alumno_Practica, Lista_Grupo, Grupo_Alumno
 from home.models import Nivel, Dificultad, Dificultad_Juego, Insignia, Intento_Palabra, Lista, Lista_Palabra, Competencia_Profesor
@@ -16,7 +16,7 @@ from home.models import Bitacora_Profesor, Puntaje, Contenido_Leccion, Ejercicio
 import json, os, subprocess
 from .mascot import say
 from datetime import date, timedelta, datetime
-import random, string
+import random, string, secrets
 from django.utils import timezone
 from django.conf import settings
 from django.http import FileResponse, Http404, JsonResponse
@@ -24,6 +24,7 @@ from django.urls import reverse
 from home.services.gemini_service import generate_word_content
 from home.services.transcription_service import transcribe_audio
 from django.core.mail import send_mail
+from home.services.achievement_service import unlock_achievement
 
 # Create your views here.
 
@@ -1171,25 +1172,74 @@ def student_home(request):
     
     notificaciones_no_leidas = notificaciones.filter(leida=False).count()
     
-    grupo_actual = (
+    grupos_alumno = (
         Grupo.objects
         .filter(grupo_alumnos__alumno=alumno)
-        .first()
+        .distinct()
+        .order_by('nombre')
     )
     
+    grupo_seleccionado = request.GET.get('grupo')
+    
+    if grupo_seleccionado:
+        grupo_actual = grupos_alumno.filter(
+            codigo=grupo_seleccionado
+        ).first()
+    else:
+        grupo_actual = grupos_alumno.first()
+        
+    if grupo_actual is None:
+        grupo_actual = grupos_alumno.first()
+        
     leaderboard = []
     
     if grupo_actual:
-        leaderboard = (
+        leaderboard = list(
             Alumno.objects
             .filter(grupo_alumnos__grupo=grupo_actual)
-            .annotate(
-                average_score=Avg(
-                    'practicas__practica_sesion__porcentaje_aciertos'
-                )
+            .order_by(
+                '-puntos_experiencia',
+                'nombre_pila',
+                'apellidoPaterno',
+                'matricula'
             )
-            .order_by('-average_score')[:4]
         )
+        
+        posicion = 0
+        xp_anterior = None
+        alumno.posicion_ranking = None
+        
+        for indice, estudiante in enumerate(leaderboard):
+            if estudiante.puntos_experiencia != xp_anterior:
+                posicion = indice + 1
+                
+            estudiante.posicion_ranking = posicion
+            
+            if estudiante.matricula == alumno.matricula:
+                alumno.posicion_ranking = posicion
+                
+            xp_anterior = estudiante.puntos_experiencia
+            
+        global_leaderboard = list(
+            Alumno.objects
+            .all()
+            .order_by(
+                '-puntos_experiencia',
+                'nombre_pila',
+                'apellidoPaterno',
+                'matricula'
+            )
+        )
+        
+        posicion = 0
+        xp_anterior = None
+        
+        for indice, estudiante in enumerate(global_leaderboard):
+            if estudiante.puntos_experiencia != xp_anterior:
+                posicion = indice + 1
+                
+            estudiante.posicion_ranking = posicion
+            xp_anterior = estudiante.puntos_experiencia
     
     proceso_actual = (
         Proceso_Lista.objects
@@ -1226,7 +1276,9 @@ def student_home(request):
             'practica_actual': practica_actual,
             'mini_games': mini_games,
             'grupo_actual': grupo_actual,
+            'grupos_alumno': grupos_alumno,
             'leaderboard': leaderboard,
+            'global_leaderboard': global_leaderboard,
             'notificaciones': notificaciones,
             'notificaciones_no_leidas': notificaciones_no_leidas,
         }
@@ -1361,7 +1413,8 @@ def teacher_competitions(request):
         fecha = request.POST.get('fecha', '')
         hora = request.POST.get('hora', '')
         
-        if (not nombre or (not general_spelling_bee and not lista_codigo) or not fecha or not hora):
+        # Validar campos obligatorios
+        if not nombre or (not general_spelling_bee and not lista_codigo) or not fecha or not hora:
             messages.error(
                 request,
                 'Please complete all required fields.'
@@ -1370,6 +1423,7 @@ def teacher_competitions(request):
         
         lista = None
         
+        # Validación de la lista seleccionada
         if not general_spelling_bee:
             lista = Lista.objects.filter(
                 codigo=lista_codigo,
@@ -1379,7 +1433,16 @@ def teacher_competitions(request):
             if not lista:
                 messages.error(request, 'The selected word list is not valid.')
                 return redirect('teacher_competitions')
+            
+            # VALIDACIÓN CLAVE: Impedir listas con 0 palabras
+            if not lista.lista_palabras.exists():
+                messages.error(
+                    request,
+                    f'The word list "{lista.nombre}" contains no words. Please select a list with at least 1 word.'
+                )
+                return redirect('teacher_competitions')
         
+        # Validar que la fecha y hora no hayan pasado
         try:
             competition_datetime = timezone.make_aware(
                 datetime.combine(
@@ -1401,58 +1464,65 @@ def teacher_competitions(request):
             )
             return redirect('teacher_competitions')
         
-        number = 1
-        
-        while Competencia.objects.filter(
-            codigo=f'COM{number:02d}'
-        ).exists():
-            number += 1
+        # Generar código correlativo para la competencia (COM01, COM02, ...)
+        try:
+            with transaction.atomic():
+                number = 1
+                while Competencia.objects.filter(
+                    codigo=f'COM{number:02d}'
+                ).exists():
+                    number += 1
+                    
+                codigo = f'COM{number:02d}'
+                
+                competencia = Competencia.objects.create(
+                    codigo=codigo,
+                    nombre=nombre,
+                    fecha=fecha,
+                    hora=hora,
+                    profesor=profesor,
+                    estado='Upcoming',
+                    tipo='GENERAL' if general_spelling_bee else 'LIST'
+                )
+                
+                # Asociar la lista de palabras si no es General Spelling Bee
+                if lista:
+                    Lista_Competencia.objects.create(
+                        lista=lista,
+                        competencia=competencia
+                    )
+                
+                # Registro en la bitácora del profesor
+                number_bitacora = 1
+                while Bitacora_Profesor.objects.filter(
+                    codigo=f'BITP{number_bitacora:02d}'
+                ).exists():
+                    number_bitacora += 1
+                    
+                codigo_bitacora = f'BITP{number_bitacora:02d}'
+                now = timezone.localtime()
+                
+                Bitacora_Profesor.objects.create(
+                    codigo=codigo_bitacora,
+                    fecha_generacion=now.date(),
+                    hora_generacion=now.time(),
+                    accion=f'Created a new competition: {nombre}.',
+                    profesor=profesor
+                )
+                
+                messages.success(
+                    request,
+                    'Competition created successfully.'
+                )
+        except Exception as e:
+            messages.error(request, f'Error creating competition: {str(e)}')
             
-        codigo = f'COM{number:02d}'
-        
-        competencia = Competencia.objects.create(
-            codigo=codigo,
-            nombre=nombre,
-            fecha=fecha,
-            hora=hora,
-            profesor=profesor,
-            tipo='GENERAL' if general_spelling_bee else 'LIST'
-        )
-        
-        if lista:
-            Lista_Competencia.objects.create(
-                lista=lista,
-                competencia=competencia
-            )
-        
-        number_bitacora = 1
-        
-        while Bitacora_Profesor.objects.filter(
-            codigo=f'BITP{number_bitacora:02d}'
-        ).exists():
-            number_bitacora += 1
-            
-        codigo_bitacora = f'BITP{number_bitacora:02d}'
-        
-        now = timezone.localtime()
-        
-        Bitacora_Profesor.objects.create(
-            codigo=codigo_bitacora,
-            fecha_generacion=now.date(),
-            hora_generacion=now.time(),
-            accion=f'Created a new competition: {nombre}.',
-            profesor=profesor
-        )
-        
-        messages.success(
-            request,
-            'Competition created successfully.'
-        )
-        
         return redirect('teacher_competitions')
     
     competitions = Competencia.objects.filter(
         profesor=profesor
+    ).prefetch_related(
+        'lista_competencias__lista'
     ).order_by('-fecha', 'hora')
     
     groups = Grupo.objects.filter(
@@ -1461,25 +1531,17 @@ def teacher_competitions(request):
     
     word_lists = Lista.objects.filter(
         profesor=profesor
+    ).annotate(
+        total_words=Count('lista_palabras')
     ).order_by('nombre')
     
     now = timezone.localtime()
     today = now.date()
-    current_time = now.time()
     
     total_competitions = competitions.count()
-    
-    active_competitions = competitions.filter(
-        estado='Active'
-    ).count()
-    
-    finished_competitions = competitions.filter(
-        estado='Finished'
-    ).count()
-    
-    upcoming_competitions = competitions.filter(
-        estado='Upcoming'
-    ).count()
+    active_competitions = competitions.filter(estado='Active').count()
+    finished_competitions = competitions.filter(estado='Finished').count()
+    upcoming_competitions = competitions.filter(estado='Upcoming').count()
     
     context = {
         'competitions': competitions,
@@ -1533,13 +1595,71 @@ def lesson(request, clave_leccion):
         clave=clave_leccion
     )
     
-    palabras = Palabra.objects.filter(
-        lista_palabras__lista__lista_lecciones__leccion=leccion
+    siguiente_numero = int(leccion.clave[3:]) + 1
+    
+    siguiente_leccion = Leccion.objects.filter(
+        clave=f'LEC{siguiente_numero:02d}'
+    ).first()
+    
+    additional_words = Palabra.objects.filter(
+        lista_palabras__lista__lista_grupos__grupo__grupo_alumnos__alumno=request.user.alumno
     ).distinct().order_by('significado')
+    
+    curricular_words = Palabra.objects.filter(
+        leccion_palabras__leccion=leccion
+    ).distinct().order_by('significado')
+    
+    vocabulary_exercises = Ejercicio.objects.filter(
+        leccion=leccion,
+        contenido_leccion__codigo='CON02'
+    ).order_by('clave')
+    
+    grammar_exercises = Ejercicio.objects.filter(
+        leccion=leccion,
+        contenido_leccion__codigo='CON03'
+    ).order_by('clave')
+    
+    listening_exercises = Ejercicio.objects.filter(
+        leccion=leccion,
+        contenido_leccion__codigo='CON04'
+    ).order_by('clave')
+    
+    speaking_exercises = Ejercicio.objects.filter(
+        leccion=leccion,
+        contenido_leccion__codigo='CON05'
+    ).order_by('clave')
+    
+    speaking_round_token = secrets.token_urlsafe(32)
+    
+    lesson_token_key = f'lesson_speaking_token_{leccion.clave}'
+    lesson_exercises_key = f'lesson_speaking_exercises_{leccion.clave}'
+    lesson_counted_key = f'lesson_speaking_counted_{leccion.clave}'
+    
+    expected_speaking_exercises = {
+        ejercicio.clave: ejercicio.descripcion
+        for ejercicio in speaking_exercises
+    }
+    
+    request.session[lesson_token_key] = speaking_round_token
+    request.session[lesson_exercises_key] = expected_speaking_exercises
+    request.session[lesson_counted_key] = []
+    
+    review_exercises = Ejercicio.objects.filter(
+        leccion=leccion,
+        contenido_leccion__codigo='CON06'
+    ).order_by('clave')
     
     context = {
         'leccion': leccion,
-        'palabras': palabras,
+        'siguiente_leccion': siguiente_leccion,
+        'additional_words': additional_words,
+        'curricular_words': curricular_words,
+        'vocabulary_exercises': vocabulary_exercises,
+        'grammar_exercises': grammar_exercises,
+        'listening_exercises': listening_exercises,
+        'speaking_exercises': speaking_exercises,
+        'speaking_round_token': speaking_round_token,
+        'review_exercises': review_exercises,
     }
     
     return render(request, 'student/lesson1.html', context)
@@ -1548,26 +1668,119 @@ def lesson(request, clave_leccion):
 @require_POST
 @role_required('student')
 def transcribe_speaking(request):
+
+    activity_type = request.POST.get('activity_type', 'practice')
+
+    # PRACTICE SPEAKING
+    if activity_type == 'practice':
+
+        round_token = request.POST.get('round_token')
+        session_token = request.session.get('pk_round_token')
+
+        if not round_token or round_token != session_token:
+            return JsonResponse(
+                {'error': 'Invalid or expired game session.'},
+                status=400
+            )
+
+        try:
+            word_index = int(request.POST.get('word_index'))
+        except (TypeError, ValueError):
+            return JsonResponse(
+                {'error': 'Invalid exercise index.'},
+                status=400
+            )
+
+        expected_words = request.session.get(
+            'pk_expected_words',
+            []
+        )
+
+        if word_index < 0 or word_index >= len(expected_words):
+            return JsonResponse(
+                {'error': 'Invalid exercise index.'},
+                status=400
+            )
+
+        expected_answer = expected_words[word_index]
+
+        counted_items = request.session.get(
+            'pk_counted_words',
+            []
+        )
+
+        counted_key = 'pk_counted_words'
+
+    # LESSON SPEAKING
+    elif activity_type == 'lesson':
+
+        round_token = request.POST.get('round_token')
+        lesson_code = request.POST.get('lesson_code')
+        exercise_code = request.POST.get('exercise_code')
+
+        if not lesson_code or not exercise_code or not round_token:
+            return JsonResponse(
+                {'error': 'Missing lesson exercise information.'},
+                status=400
+            )
+
+        lesson_token_key = f'lesson_speaking_token_{lesson_code}'
+        lesson_exercises_key = f'lesson_speaking_exercises_{lesson_code}'
+        lesson_counted_key = f'lesson_speaking_counted_{lesson_code}'
+
+        session_token = request.session.get(lesson_token_key)
+
+        if round_token != session_token:
+            return JsonResponse(
+                {'error': 'Invalid or expired lesson session.'},
+                status=400
+            )
+
+        expected_exercises = request.session.get(
+            lesson_exercises_key,
+            {}
+        )
+
+        if exercise_code not in expected_exercises:
+            return JsonResponse(
+                {'error': 'Invalid lesson exercise.'},
+                status=400
+            )
+
+        expected_answer = expected_exercises[exercise_code]
+
+        counted_items = request.session.get(
+            lesson_counted_key,
+            []
+        )
+
+        counted_key = lesson_counted_key
+
+    else:
+        return JsonResponse(
+            {'error': 'Invalid speaking activity.'},
+            status=400
+        )
+
     audio_file = request.FILES.get('audio')
-    
+
     if not audio_file:
         return JsonResponse(
             {'error': 'No audio recording was received.'},
             status=400
         )
-        
+
     if audio_file.size == 0:
         return JsonResponse(
             {'error': 'The audio recording is empty.'},
             status=400
         )
-        
+
     if audio_file.size > 5 * 1024 * 1024:
         return JsonResponse(
             {'error': 'The audio recording cannot exceed 5 MB.'},
             status=400
         )
-        
     allowed_types = {
         'audio/webm',
         'audio/webm;codecs=opus',
@@ -1576,35 +1789,121 @@ def transcribe_speaking(request):
         'audio/mpeg',
         'audio/wav',
     }
-    
     if audio_file.content_type not in allowed_types:
         return JsonResponse(
             {'error': 'Unsupported audio format.'},
             status=400
         )
-        
+
     try:
         transcription = transcribe_audio(audio_file)
+
+        if not transcription or not transcription.strip():
+            return JsonResponse(
+                {'error': 'No speech could be transcribed.'},
+                status=400
+            )
+
+        import re
+
+        answer = re.sub(
+            r'\s+',
+            ' ',
+            re.sub(
+                r'[^\w\s]',
+                '',
+                transcription.lower()
+            ).strip()
+        )
+
+        expected = re.sub(
+            r'\s+',
+            ' ',
+            re.sub(
+                r'[^\w\s]',
+                '',
+                expected_answer.lower()
+            ).strip()
+        )
+
+        is_correct = answer == expected
         
+        current_item = (
+            word_index
+            if activity_type == 'practice'
+            else exercise_code
+        )
+
+        if is_correct and current_item not in counted_items:
+
+            alumno = request.user.alumno
+
+            Alumno.objects.filter(pk=alumno.pk).update(
+                palabras_pronunciadas=F('palabras_pronunciadas') + 1
+            )
+
+            counted_items.append(current_item)
+
+            request.session[counted_key] = counted_items
+
+            alumno.refresh_from_db(
+                fields=['palabras_pronunciadas']
+            )
+
+            # INS17 - Voice Explorer
+            if alumno.palabras_pronunciadas >= 50:
+                unlock_achievement(alumno, 'INS17')
+
+            # INS18 - Speaking Star
+            if alumno.palabras_pronunciadas >= 100:
+                unlock_achievement(alumno, 'INS18')
+
+            # INS19 - Voice Champion
+            if alumno.palabras_pronunciadas >= 500:
+                unlock_achievement(alumno, 'INS19')
+
         return JsonResponse({
             'success': True,
             'transcription': transcription,
+            'is_correct': is_correct,
+            'words_counted': len(counted_items)
         })
-        
+
     except Exception as error:
         print("TRANSCRIPTION ERROR: ", repr(error))
-        
+
         gemini_status = getattr(error, 'code', None)
-        
+
         if gemini_status is None:
             gemini_status = getattr(error, 'status_code', None)
             
+        error_details = str(error).lower()
+
         if gemini_status == 429:
+            
+            daily_quota = (
+                'per day' in error_details
+                or 'daily' in error_details
+            )
+            
+            if daily_quota:
+                return JsonResponse(
+                    {
+                        'error_type': 'daily_quota',
+                        'error': (
+                            'The daily transcription quota has been reached. '
+                            'Please try again after the quota resets.'
+                        )
+                    }, 
+                    status=429
+                )
+                
             return JsonResponse(
                 {
+                    'error_type': 'rate_limit',
                     'error': (
-                        'You have reached the transcription request limit.'
-                        'Please wait a moment befor trying again.'
+                        'The transcription request limit has been reached. '
+                        'Please wait before trying again.'
                     )
                 },
                 status=429
@@ -1613,18 +1912,19 @@ def transcribe_speaking(request):
         if gemini_status == 503:
             return JsonResponse(
                 {
+                    'error_type': 'service_busy',
                     'error': (
-                        'The transcription service is temporarily busy.'
+                        'The transcription service is temporarily busy. '
                         'Please try again in a few moments.'
                     )
                 },
                 status=503
             )
-            
         return JsonResponse(
             {
+                'error_type': 'service_unavailable',
                 'error': (
-                    'The transcription service is currently unavailable.'
+                    'The transcription service is currently unavailable. '
                     'Please try again.'
                 )
             },
@@ -1634,7 +1934,16 @@ def transcribe_speaking(request):
 @never_cache
 @role_required('student')
 def practices(request):
-    return render(request, 'student/practices.html')
+    
+    niveles = Nivel.objects.prefetch_related(
+        'practicas__lecciones'
+    ).order_by('codigo')
+    
+    context = {
+        'niveles': niveles,
+    }
+    
+    return render(request, 'student/practices.html', context)
 
 @never_cache
 @role_required('student')
@@ -3340,37 +3649,67 @@ def student_competitions_view(request, competition_code):
     
     beehives = list(range(1, 61))
     
-    palabras = (
-        Palabra.objects.filter(
-            categoria__codigo__in=[
-                'CAT11', 'CAT12', 'CAT13', 'CAT14', 'CAT15', 'CAT16', 'CAT17',
-            ]
-        ).select_related('categoria', 'nivel')
-        .order_by('codigo')
-    )
+    if competencia.tipo == 'GENERAL':
+        palabras_qs = (
+            Palabra.objects.all()
+            .select_related('categoria', 'nivel')
+            .order_by('codigo')
+        )
+    else:
+        relacion = Lista_Competencia.objects.filter(
+            competencia=competencia
+        ).select_related('lista').first()
+        
+        if relacion and relacion.lista:
+            palabras_qs = (
+                Palabra.objects.filter(
+                    lista_palabras__lista=relacion.lista
+                )
+                .select_related('categoria', 'nivel')
+                .distinct()
+                .order_by('codigo')
+            )
+        else:
+            palabras_qs = Palabra.objects.none()
     
     words_by_category = {
-        'CAT11': [],
-        'CAT12': [],
-        'CAT13': [],
-        'CAT14': [],
-        'CAT15': [],
-        'CAT16': [],
-        'CAT17': [],
+        'CAT11': [], 
+        'CAT12': [], 
+        'CAT13': [], 
+        'CAT14': [], 
+        'CAT15': [], 
+        'CAT16': [], 
+        'CAT17': [], 
     }
     
-    for palabra in palabras:
-        words_by_category[palabra.categoria.codigo].append({
-            'texto': palabra.significado,
-            'definicion': palabra.definicion,
-            'ejemplo': palabra.ejemplo,
-            'pronunciacion': palabra.pronunciacion,
-            'categoria': palabra.categoria.codigo,
-            'letras': palabra.categoria.nombre,
-            'nivel': palabra.nivel.codigo,
-        })
+    length_to_cat = {
+        6: 'CAT11',
+        7: 'CAT12',
+        8: 'CAT13',
+        9: 'CAT14',
+        10: 'CAT15',
+        11: 'CAT16',
+        12: 'CAT17',
+    }
+    
+    for palabra in palabras_qs:
+        if palabra.significado:
+            num_letras = len([char for char in palabra.significado if char.isalpha()])
+            cat_key = length_to_cat.get(num_letras)
+            
+            if cat_key and cat_key in words_by_category:
+                words_by_category[cat_key].append({
+                    'texto': palabra.significado,
+                    'definicion': palabra.definicion,
+                    'ejemplo': palabra.ejemplo,
+                    'pronunciacion': palabra.pronunciacion,
+                    'categoria': cat_key,
+                    'letras': f'{num_letras} Letters',
+                    'nivel': palabra.nivel.codigo if palabra.nivel else '',
+                })
     
     context = {
+        'competencia': competencia,
         'beehives': beehives,
         'words_by_category': json.dumps(words_by_category),
     }
@@ -3446,26 +3785,123 @@ def student_practice_english(request):
 @never_cache
 @role_required('student')
 def practice_spelling(request):
-    return render(request, 'student/practice_spelling.html')
+    
+    if request.method == 'POST':
+        round_token = request.POST.get('round_token')
+        session_token = request.session.get('ps_round_token')
+        
+        if not round_token or round_token != session_token:
+            return JsonResponse(
+                {
+                    'success': False,
+                    'message': 'Invalid or expired game session.'
+                },
+                status=400
+            )
+            
+        del request.session['ps_round_token']
+        
+        try:
+            errors = int(request.POST.get('errors', 0))
+        except (TypeError, ValueError):
+            errors = 0
+            
+        errors = max(0, errors)
+        
+        xp_earned = max(0, 20 - errors)
+        
+        alumno = request.user.alumno
+        
+        Alumno.objects.filter(pk=alumno.pk).update(
+            puntos_experiencia=F('puntos_experiencia') + xp_earned
+        )
+        
+        alumno.refresh_from_db(
+            fields=['puntos_experiencia']
+        )
+        
+        return JsonResponse(
+            {
+                'success': True,
+                'errors': errors,
+                'xp_earned': xp_earned,
+                'total_xp': alumno.puntos_experiencia
+            }
+        )
+        
+    round_token = secrets.token_urlsafe(32)
+    
+    request.session['ps_round_token'] = round_token
+    
+    return render(
+        request, 
+        'student/practice_spelling.html',
+        {
+            'round_token': round_token,
+        }
+    )
 
 @never_cache
 @role_required('student')
 def student_match_words(request):
-
+    
+    if request.method == 'POST':
+        
+        round_token = request.POST.get('round_token')
+        session_token = request.session.get('mw_round_token')
+        
+        if not round_token or round_token != session_token:
+            return JsonResponse(
+                {
+                    'success': False,
+                    'message': 'Invalid or expired game session.'
+                },
+                status=400
+            )
+            
+        del request.session['mw_round_token']
+        
+        try:
+            errors = int(request.POST.get('errors', 0))
+        except (TypeError, ValueError):
+            errors = 0
+            
+        errors = max(0, errors)
+        
+        xp_earned = max(0, 20 - errors)
+        
+        alumno = request.user.alumno
+        
+        Alumno.objects.filter(pk=alumno.pk).update(
+            puntos_experiencia=F('puntos_experiencia') + xp_earned
+        )
+        
+        alumno.refresh_from_db(
+            fields=['puntos_experiencia']
+        )
+        
+        if alumno.puntos_experiencia >= 100:
+            unlock_achievement(alumno, 'INS14')
+            
+        if alumno.puntos_experiencia >= 500:
+            unlock_achievement(alumno, 'INS16')
+        
+        return JsonResponse(
+            {
+                'success': True,
+                'errors': errors,
+                'xp_earned': xp_earned,
+                'total_xp': alumno.puntos_experiencia
+            }
+        )
+        
     categories = list(
         Categoria.objects
         .filter(
             codigo__in=[
-                'CAT01',
-                'CAT02',
-                'CAT03',
-                'CAT04',
-                'CAT05',
-                'CAT06',
-                'CAT07',
-                'CAT08',
-                'CAT09',
-                'CAT10',
+                'CAT01', 'CAT02', 'CAT03', 'CAT04', 'CAT05', 'CAT06', 'CAT07', 'CAT08',
+                'CAT09', 'CAT10', 'CAT11', 'CAT12', 'CAT13', 'CAT14', 'CAT15', 'CAT16',
+                'CAT17',
             ]
         )
     )
@@ -3488,19 +3924,86 @@ def student_match_words(request):
             
     random.shuffle(words)
     
+    round_token = secrets.token_urlsafe(32)
+    
+    request.session['mw_round_token'] = round_token
+    
     return render(
         request,
         'student/match_words.html',
         {
             'words': words,
             'categories': selected_categories,
+            'round_token': round_token,
         }
     )
 
 @never_cache
 @role_required('student')
 def practice_speaking(request):
-    return render(request, 'student/practice_speaking.html')
+    
+    if request.method == 'POST':
+        round_token = request.POST.get('round_token')
+        session_token = request.session.get('pk_round_token')
+        
+        if not round_token or round_token != session_token:
+            return JsonResponse(
+                {
+                    'success': False,
+                    'message': 'Invalid or expired game session.'
+                },
+                status=400
+            )
+            
+        del request.session['pk_round_token']
+        
+        try:
+            errors = int(request.POST.get('errors', 0))
+        except (TypeError, ValueError):
+            errors = 0
+            
+        errors = max(0, errors)
+        
+        xp_earned = max(0, 20 - errors)
+        
+        alumno = request.user.alumno
+        
+        Alumno.objects.filter(pk=alumno.pk).update(
+            puntos_experiencia=F('puntos_experiencia') + xp_earned
+        )
+        
+        alumno.refresh_from_db(
+            fields=['puntos_experiencia']
+        )
+        
+        return JsonResponse(
+            {
+                'success': True,
+                'errors': errors,
+                'xp_earned': xp_earned,
+                'total_xp': alumno.puntos_experiencia
+            }
+        )
+        
+    round_token = secrets.token_urlsafe(32)
+    
+    pk_words = [
+        'Photography', 'Mountain', 'Loyalty', 'Umbrella', 'Journey', 'Kitchen', 'Freedom',
+        'Spotlight', 'Whisper', 'Adventure',
+    ]
+    
+    request.session['pk_round_token'] = round_token
+    request.session['pk_expected_words'] = pk_words
+    request.session['pk_counted_words'] = []
+    
+    return render(
+        request, 
+        'student/practice_speaking.html', 
+        {
+            'round_token': round_token,
+            'pk_words': pk_words,
+        }
+    )
 
 @never_cache
 @role_required('teacher')

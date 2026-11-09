@@ -16,6 +16,15 @@
 <div class="pk-body">
 
   <div id="pkExercises">
+    <!-- FORMULARIO PARA ENVIAR LA RECOMPENSA -->
+    <form id="pkRewardForm" class="d-none">
+      {% csrf_token %}
+      <input
+        type="hidden"
+        name="round_token"
+        value="{{ round_token }}"
+      >
+    </form>
 
     <!-- BARRA DE PROGRESO CON BEENARY -->
     <div class="pk-progress-wrap" id="pkProgressWrap">
@@ -54,7 +63,8 @@
 
       <div class="pk-results-text">
         <p class="pk-results-lead">Excellent! Your Speaking is improving...</p>
-        <p class="pk-results-score">10/10 EXERCISES</p>
+        <p class="pk-results-score" id="pkResultsScore">10/10 EXERCISES</p>
+        <p class="pk-results-xp" id="pkResultsXP">+0 XP</p>
       </div>
 
       <img src="{% static 'img/beenary-right.png' %}" class="pk-bee-decoration pk-bee-right">
@@ -72,20 +82,24 @@
 
 {% block extra_js %}
 {{ block.super }}
+{{ pk_words|json_script:"pk-words-data" }}
 <script>
-  var pkWords = [
-    'Photography', 'Mountain', 'Loyalty', 'Umbrella', 'Journey',
-    'Kitchen', 'Freedom', 'Rhythm', 'Whisper', 'Adventure'
-  ];
+  var pkWords = JSON.parse(document.getElementById('pk-words-data').textContent);
+
   var pkCurrentIndex = 0;
   var pkTotal = 10;
+
+  var pkErrorCount = 0;
+  var pkRewardSent = false;
 
   var pkMediaRecorder = null;
   var pkAudioChunks = [];
   var pkRecognizedText = null;
+  var pkRecognizedCorrect = null;
   var pkIsProcessing = false;
   var pkRetryAfter = 0;
   var pkRetryInterval = null;
+  var pkDailyQuotaReached = false;
 
   var pkTranscriptionFailures = {};
   var pkSkippedWords = {};
@@ -116,6 +130,7 @@
     pkSkippedWords[pkCurrentIndex] = true;
 
     pkRecognizedText = null;
+    pkRecognizedCorrect = null;
 
     var skipButton = document.getElementById('pkSkipBtn');
     skipButton.classList.add('d-none');
@@ -191,6 +206,16 @@
       return;
     }
 
+    if (pkDailyQuotaReached) {
+      pkTranscriptionFailures[pkCurrentIndex] = 3;
+      pkUpdateSkipButton();
+
+      speechResult.textContent = 'The daily transcription quota has been reached. Please skip this exercise and continue.';
+
+      speechResult.style.color = '#dc3545';
+      return;
+    }
+
     if (Date.now() < pkRetryAfter) {
       var remainingSeconds = Math.ceil(
         (pkRetryAfter - Date.now()) / 1000
@@ -227,6 +252,7 @@
 
       pkAudioChunks = [];
       pkRecognizedText = null;
+      pkRecognizedCorrect = null;
 
       speechResult.textContent = '';
       feedback.textContent = '';
@@ -269,6 +295,15 @@
             'practice-speaking-recording.webm'
           );
 
+          formData.append('activity_type', 'practice');
+
+          formData.append(
+            'round_token',
+            document.querySelector('#pkRewardForm [name="round_token"]').value
+          );
+
+          formData.append('word_index', pkCurrentIndex);
+
           const response = await fetch(
             "{% url 'transcribe_speaking' %}",
             {
@@ -284,12 +319,21 @@
 
           if (!response.ok) {
 
-            if (response.status === 429) {
+            if (
+              response.status === 429 &&
+              data.error_type !== 'daily_quota'
+            ) {
               pkRetryAfter = Date.now() + 22000;
               pkStartRetryCountdown();
             }
 
-            throw new Error(data.error || 'Transcription failed.');
+            var transcriptionError = new Error(
+              data.error || 'Transcription failed.'
+            );
+
+            transcriptionError.errorType = data.error_type;
+
+            throw transcriptionError;
           }
 
           if (
@@ -299,6 +343,7 @@
           }
 
           pkRecognizedText = data.transcription;
+          pkRecognizedCorrect = data.is_correct;
 
           pkTranscriptionFailures[pkCurrentIndex] = 0;
 
@@ -316,22 +361,42 @@
         } catch (error) {
           console.error('Transcription error: ',error);
           
-          pkTranscriptionFailures[pkCurrentIndex] = 
+          if (error.errorType === 'daily_quota') {
+
+            pkDailyQuotaReached = true;
+
+            pkTranscriptionFailures[pkCurrentIndex] = 3;
+
+            pkUpdateSkipButton();
+
+            speechResult.textContent =
+              'The daily transcription quota has been reached. You can skip this exercise and continue.';
+
+            speechResult.style.color = '#dc3545';
+
+            console.log('Gemini daily quota exhausted.');
+
+          } else {
+
+            pkTranscriptionFailures[pkCurrentIndex] =
               (pkTranscriptionFailures[pkCurrentIndex] || 0) + 1;
 
-          var failures = pkTranscriptionFailures[pkCurrentIndex];
+            var failures = pkTranscriptionFailures[pkCurrentIndex];
 
-          pkUpdateSkipButton();
+            pkUpdateSkipButton();
 
-          if (failures >= 3) {
-              speechResult.textContent = 'Transcription service unavailable after 3 attempts. You can retry or skip this exercise.';
-          } else if (Date.now() < pkRetryAfter) {
-            console.log('Waiting before retrying transcription.');
-          } else {
-            speechResult.textContent = error.message + ' Attempt ' + failures + ' of 3.';
+            if (failures >= 3) {
+              speechResult.textContent =
+                'Transcription service unavailable after 3 attempts. You can retry or skip this exercise.';
+            } else if (Date.now() < pkRetryAfter) {
+              console.log('Waiting before retrying transcription.');
+            } else {
+              speechResult.textContent =
+                error.message + ' Attempt ' + failures + ' of 3.';
+            }
+
+            speechResult.style.color = '#dc3545';
           }
-          speechResult.style.color = '#dc3545';
-
         } finally {
           pkIsProcessing = false;
           pkMediaRecorder = null;
@@ -368,29 +433,14 @@
 
     if (!pkRecognizedText || !pkRecognizedText.trim()) {
       feedback.textContent = 'We could not recognize your answer. Please try again!';
-
       feedback.style.color = '#dc3545';
       return;
     }
 
-    var expected = pkWords[pkCurrentIndex];
+    console.log('Student answer: ', pkRecognizedText);
+    console.log('Server validation: ', pkRecognizedCorrect);
 
-    var answer = pkRecognizedText
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s]/g, '')
-      .replace(/\s+/g, ' ');
-
-    expected = expected
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s]/g, '')
-      .replace(/\s+/g, ' ');
-
-    console.log('Expected: ',expected);
-    console.log('Student answer: ',answer);
-
-    if (answer === expected) {
+    if (pkRecognizedCorrect === true) {
       feedback.textContent = 'Correct! Great job!';
       feedback.style.color = '#198754';
 
@@ -398,11 +448,15 @@
         pkNextWord();
       }, 1000);
     } else {
+      pkErrorCount++;
+
       feedback.textContent = 'Incorrect. Try again!';
       feedback.style.color = '#dc3545';
+
+      console.log('Speaking errors: ', pkErrorCount);
     }
   }
-
+ 
   function pkNextWord() {
     pkCurrentIndex++;
 
@@ -412,54 +466,92 @@
     document.getElementById('pkBeeMarker').style.left = pct + '%';
 
     if (pkCurrentIndex === pkTotal) {
-      document.getElementById('pkExercises').classList.add('d-none');
-      document.getElementById('pkCompleted').classList.remove('d-none');
+      pkCompleteGame();
       return;
     }
 
-    document.getElementById('pkCounter').textContent = 'Words: ' + (pkCurrentIndex + 1) + '/' + pkTotal;
-    document.getElementById('pkWord').textContent = '"' + pkWords[pkCurrentIndex] + '"';
+    document.getElementById('pkCounter').textContent =
+      'Words: ' + (pkCurrentIndex + 1) + '/' + pkTotal;
+
+    document.getElementById('pkWord').textContent =
+      '"' + pkWords[pkCurrentIndex] + '"';
 
     document.getElementById('pkSpeechResult').textContent = '';
     document.getElementById('pkFeedback').textContent = '';
 
     pkRecognizedText = null;
+    pkRecognizedCorrect = null;
+
+    if (pkDailyQuotaReached) {
+      pkTranscriptionFailures[pkCurrentIndex] = 3;
+    }
+
     pkUpdateSkipButton();
   }
 
-  function pkRepeatLesson() {
-    pkCurrentIndex = 0;
+  async function pkCompleteGame() {
 
-    pkMediaRecorder = null;
-    pkAudioChunks = [];
-    pkRecognizedText = null;
-    pkIsProcessing = false;
+    if (pkRewardSent) return;
 
-    pkTranscriptionFailures = {};
-    pkSkippedWords = {};
-    pkRetryAfter = 0;
+    pkRewardSent = true;
 
-    document.getElementById('pkProgressFill').style.width = '0%';
-    document.getElementById('pkBeeMarker').style.left = '0%';
-    document.getElementById('pkCounter').textContent = 'Words: 1/10';
-    document.getElementById('pkWord').textContent = '"' + pkWords[0] + '"';
+    var rewardForm = document.getElementById('pkRewardForm');
+    var formData = new FormData(rewardForm);
 
-    document.getElementById('pkSpeechResult').textContent = '';
-    document.getElementById('pkFeedback').textContent = '';
-    document.getElementById('pkSkipBtn').classList.add('d-none');
-    document.getElementById('pkSpeakBtn').disabled = false;
+    formData.append('errors', pkErrorCount);
 
-    var btn = document.getElementById('pkSpeakBtn');
+    try {
+      var response = await fetch(window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
 
-    btn.disabled = false;
-    btn.innerHTML = '<i data-lucide="mic"></i> Speak';
+      var data = await response.json();
 
-    if (window.lucide) {
-      lucide.createIcons();
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.message || 'Could not save experience points.'
+        );
+      }
+
+      var skippedCount = Object.values(pkSkippedWords).filter(
+        skipped => skipped === true
+      ).length;
+
+      var completedCount = pkTotal - skippedCount;
+
+      // Actualizar resultados.
+      document.getElementById('pkResultsScore').textContent =
+        completedCount + '/' + pkTotal + ' EXERCISES';
+
+      document.getElementById('pkResultsXP').textContent =
+        '+' + data.xp_earned + ' XP';
+
+      // Mostrar pantalla de finalización.
+      document.getElementById('pkExercises').classList.add('d-none');
+      document.getElementById('pkCompleted').classList.remove('d-none');
+
+      console.log('Speaking errors:', data.errors);
+      console.log('Skipped exercises: ', skippedCount);
+      console.log('Experience earned:', data.xp_earned);
+      console.log('Total experience:', data.total_xp);
+
+    } catch (error) {
+      console.error('Practice Speaking reward error:', error);
+
+      alert(
+        'Your exercises were completed, but your experience points could not be saved. Please reload the activity.'
+      );
+
+      window.location.reload();
     }
+  }
 
-    document.getElementById('pkCompleted').classList.add('d-none');
-    document.getElementById('pkExercises').classList.remove('d-none');
+  function pkRepeatLesson() {
+    window.location.reload();
   }
 </script>
 {% endblock %}

@@ -16,6 +16,15 @@
 <div class="mw-body">
 
   <div id="mwGame">
+    <!-- FORMULARIO PARA ENVIAR LA RECOMPENSA -->
+    <form id="mwRewardForm" class="d-none">
+      {% csrf_token %}
+      <input
+        type="hidden"
+        name="round_token"
+        value="{{ round_token }}"
+      >
+    </form>
 
     <!-- BARRA DE PROGRESO CON BEENARY -->
     <div class="mw-progress-wrap" id="mwProgressWrap">
@@ -63,7 +72,8 @@
 
       <div class="mw-results-text">
         <p class="mw-results-lead">Excellent! You got...</p>
-        <p class="mw-results-score">5/5 MATCHES</p>
+        <p class="mw-results-score" id="mwResultsScore">5/5 MATCHES</p>
+        <p class="mw-results-xp" id="mwResultsXP">+0 XP</p>
       </div>
 
       <img src="{% static 'img/beenary-right.png' %}" class="mw-bee-decoration mw-bee-right">
@@ -84,7 +94,9 @@
 <script>
   var mwSelectedWordBtn = null;
   var mwMatchedCount = 0;
+  var mwErrorCount = 0;
   var mwTotalPairs = {{ words|length }};
+  var mwRewardSent = false;
 
   function mwSelectWord(btn) {
     if (btn.classList.contains('mw-item-matched')) return;
@@ -105,8 +117,7 @@
     var selectedCategory = mwSelectedWordBtn.dataset.category;
     var clickedCategory = btn.dataset.category;
 
-    var isCorrect =
-      selectedCategory === clickedCategory;
+    var isCorrect = selectedCategory === clickedCategory;
 
     if (isCorrect) {
 
@@ -125,27 +136,84 @@
       document.getElementById('mwBeeMarker').style.left = pct + '%';
 
       if (mwMatchedCount === mwTotalPairs) {
-
         setTimeout(function () {
-          document.getElementById('mwGame').classList.add('d-none');
-          document.getElementById('mwCompleted').classList.remove('d-none');
+          mwCompleteGame();
         }, 400);
       }
 
     } else {
 
-      mwSelectedWordBtn.classList.remove('mw-item-selected');
+      // Guardar la referencia antes de limpiar la selección.
+      var incorrectWordBtn = mwSelectedWordBtn;
 
-      mwSelectedWordBtn.classList.add('mw-item-incorrect');
+      mwErrorCount++;
+
+      incorrectWordBtn.classList.remove('mw-item-selected');
+      incorrectWordBtn.classList.add('mw-item-incorrect');
+
       btn.classList.add('mw-item-incorrect');
 
       setTimeout(function () {
-        mwSelectedWordBtn.classList.remove('mw-item-incorrect');
+        incorrectWordBtn.classList.remove('mw-item-incorrect');
         btn.classList.remove('mw-item-incorrect');
       }, 700);
 
       mwSelectedWordBtn = null;
     }
+  }
+
+  function mwCompleteGame() {
+
+    if (mwRewardSent) return;
+
+    mwRewardSent = true;
+
+    var rewardForm = document.getElementById('mwRewardForm');
+    var formData = new FormData(rewardForm);
+
+    formData.append('errors', mwErrorCount);
+
+    fetch(window.location.href, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error('Could not save experience points.');
+      }
+
+      return response.json();
+    })
+    .then(function (data) {
+
+      if (!data.success) {
+        throw new Error(data.message || 'Reward could not be saved.');
+      }
+
+      // Actualizar resultados.
+      document.getElementById('mwResultsScore').textContent =
+        mwMatchedCount + '/' + mwTotalPairs + ' MATCHES';
+
+      document.getElementById('mwResultsXP').textContent =
+        '+' + data.xp_earned + ' XP';
+
+      // Mostrar pantalla de finalización.
+      document.getElementById('mwGame').classList.add('d-none');
+      document.getElementById('mwCompleted').classList.remove('d-none');
+
+    })
+    .catch(function (error) {
+      console.error('Match Words reward error:', error);
+
+      alert(
+        'Your game was completed, but your experience points could not be saved. Please try again.'
+      );
+
+      window.location.reload();
+    });
   }
 
   function mwRepeatLesson() {

@@ -95,21 +95,33 @@
             {% endif %}
           </h5>
         </div>
-        <span class="leaderboard-column-label">AVERAGE SCORE%</span>
+        <span class="leaderboard-column-label">EXPERIENCE POINTS</span>
       </div>
-
+      <!-- GROUP SELECTOR -->
+      {% if grupos_alumno|length > 1 %}
+      <form method="GET" class="leaderboard-group-selector">
+        <select name="grupo" class="form-select" onchange="this.form.submit()">
+          {% for grupo in grupos_alumno %}
+          <option value="{{ grupo.codigo }}"
+            {% if grupo_actual.codigo == grupo.codigo %}selected{% endif %}>
+            {{ grupo.nombre }}
+          </option>
+          {% endfor %}
+        </select>
+      </form>
+      {% endif %}
       <ul class="leaderboard-list">
-        {% for student in leaderboard %}
+        {% for student in leaderboard|slice:":4" %}
         <li class="leaderboard-item">
-          {% if forloop.counter == 1 %}
+          {% if student.posicion_ranking == 1 %}
             <span class="rank-icon rank-gold">
               <i data-lucide="star"></i>
             </span>
-          {% elif forloop.counter == 2 %}
+          {% elif student.posicion_ranking == 2 %}
             <span class="rank-icon rank-silver">
               <i data-lucide="star"></i>
             </span>
-          {% elif forloop.counter == 3 %}
+          {% elif student.posicion_ranking == 3 %}
             <span class="rank-icon rank-bronze">
               <i data-lucide="star"></i>
             </span>
@@ -117,13 +129,13 @@
             <span class="rank-icon rank-plain"></span>
           {% endif %}
           <span class="leaderboard-name">
-            #{{ forloop.counter }} -
+            #{{ student.posicion_ranking }} -
             {{ student.nombre_pila }}
             {{ student.apellidoPaterno }}
-            {{ student.apellidoMaterno }}
+            {{ student.apellidoMaterno|default:"" }}
           </span>
           <span class="leaderboard-score">
-            {{ student.average_score|floatformat:1 }}%
+            {{ student.puntos_experiencia }} XP
           </span>
         </li>
         {% empty %}
@@ -134,8 +146,63 @@
         </li>
         {% endfor %}
       </ul>
-      <button type="button" class="view-leaderboard-link" data-bs-toggle="modal" data-bs-target="#leaderboardModal">
+      <button type="button" class="view-leaderboard-link"
+        data-bs-toggle="modal" data-bs-target="#leaderboardModal">
         VIEW LEADERBOARD <i data-lucide="arrow-right"></i>
+      </button>
+    </div>        
+    <!-- GLOBAL LEADERBOARD -->
+    <div class="leaderboard-card global-leaderboard-card">
+      <div class="leaderboard-header">
+        <div class="leaderboard-title-group">
+          <i data-lucide="globe"></i>
+          <h5 class="leaderboard-title">
+            Global Leaderboard
+          </h5>
+        </div>
+        <span class="leaderboard-column-label">EXPERIENCE POINTS</span>
+      </div>
+      <ul class="leaderboard-list">
+        {% for student in global_leaderboard|slice:":4" %}
+        <li class="leaderboard-item">
+          {% if student.posicion_ranking == 1 %}
+            <span class="rank-icon rank-gold">
+              <i data-lucide="star"></i>
+            </span>
+          {% elif student.posicion_ranking == 2 %}
+            <span class="rank-icon rank-silver">
+              <i data-lucide="star"></i>
+            </span>
+          {% elif student.posicion_ranking == 3 %}
+            <span class="rank-icon rank-bronze">
+              <i data-lucide="star"></i>
+            </span>
+          {% else %}
+            <span class="rank-icon rank-plain"></span>
+          {% endif %}
+          <span class="leaderboard-name">
+            #{{ student.posicion_ranking }} -
+            {{ student.nombre_pila }}
+            {{ student.apellidoPaterno }}
+            {{ student.apellidoMaterno|default_if_none:"" }}
+          </span>
+          <span class="leaderboard-score">
+            {{ student.puntos_experiencia }} XP
+          </span>
+        </li>
+        {% empty %}
+        <li class="leaderboard-item">
+          <span class="leaderboard-name">
+            No global leaderboard data available yet.
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+      <button type="button" class="view-leaderboard-link"
+        data-bs-toggle="modal" data-bs-target="#globalLeaderboardModal"
+      >
+        VIEW GLOBAL LEADERBOARD
+        <i data-lucide="arrow-right"></i>
       </button>
     </div>
   </div>
@@ -156,67 +223,78 @@
       <div class="modal-body leaderboard-modal-body">
         <!-- TOP 3 -->
         <div class="lb-top3-row">
+          {% if leaderboard|length >= 2 %}
           <div class="lb-top3-item">
             <span class="lb-star lb-star-silver"><i data-lucide="star"></i></span>
-            <p class="lb-top3-name">Castañón<br>Castañón<br>Jesús Omar</p>
-            <p class="lb-top3-score">320%</p>
+            <p class="lb-top3-name">
+              {{ leaderboard.1.apellidoPaterno }}<br>
+              {{ leaderboard.1.apellidoMaterno|default:"" }}<br>
+              {{ leaderboard.1.nombre_pila }}
+            </p>
+            <p class="lb-top3-score">{{ leaderboard.1.puntos_experiencia }} XP</p>
           </div>
+          {% endif %}
+          {% if leaderboard|length >= 1 %}
           <div class="lb-top3-item lb-top3-first">
             <span class="lb-star lb-star-gold"><i data-lucide="star"></i></span>
-            <p class="lb-top3-name">Sanchez<br>Hernandez<br>Diego</p>
-            <p class="lb-top3-score">375%</p>
+            <p class="lb-top3-name">
+              {{ leaderboard.0.apellidoPaterno }}<br>
+              {{ leaderboard.0.apellidoMaterno|default:"" }}<br>
+              {{ leaderboard.0.nombre_pila }}
+            </p>
+            <p class="lb-top3-score">{{ leaderboard.0.puntos_experiencia }} XP</p>
           </div>
+          {% endif %}
+          {% if leaderboard|length >= 3 %}
           <div class="lb-top3-item">
             <span class="lb-star lb-star-bronze"><i data-lucide="star"></i></span>
-            <p class="lb-top3-name">Villegas<br>Hernandez<br>Josué Alberto</p>
-            <p class="lb-top3-score">290%</p>
+            <p class="lb-top3-name">
+              {{ leaderboard.2.apellidoPaterno }}<br>
+              {{ leaderboard.2.apellidoMaterno|default:"" }}<br>
+              {{ leaderboard.2.nombre_pila }}
+            </p>
+            <p class="lb-top3-score">{{ leaderboard.2.puntos_experiencia }} XP</p>
           </div>
+          {% endif %}
         </div>
-
         <hr class="lb-divider">
-
-        <!-- POSICIONES 4-7 -->
+        <!-- REST OF THE STUDENTS -->
         <div class="lb-rest-grid">
+          {% for student in leaderboard|slice:"3:" %}
+          {% if student.matricula != alumno.matricula %}
           <div class="lb-rest-item">
-            <span class="lb-rank-circle">4</span>
+            <span class="lb-rank-circle">{{ student.posicion_ranking }}</span>
             <div class="lb-rest-text">
-              <p class="lb-rest-name">Aycardo Balcázar Eric</p>
-              <p class="lb-rest-score">275%</p>
+              <p class="lb-rest-name">
+                {{ student.apellidoPaterno }}
+                {{ student.apellidoMaterno|default:"" }}
+                {{ student.nombre_pila }}
+              </p>
+              <p class="lb-rest-score">{{ student.puntos_experiencia }} XP</p>
             </div>
           </div>
-          <div class="lb-rest-item">
-            <span class="lb-rank-circle">5</span>
-            <div class="lb-rest-text">
-              <p class="lb-rest-name">Cardoza Pérez Brandon</p>
-              <p class="lb-rest-score">250%</p>
-            </div>
-          </div>
-          <div class="lb-rest-item">
-            <span class="lb-rank-circle">6</span>
-            <div class="lb-rest-text">
-              <p class="lb-rest-name">Flores Ojeda Alvaro Alejandro</p>
-              <p class="lb-rest-score">215%</p>
-            </div>
-          </div>
-          <div class="lb-rest-item">
-            <span class="lb-rank-circle">7</span>
-            <div class="lb-rest-text">
-              <p class="lb-rest-name">Diaz Sebastián</p>
-              <p class="lb-rest-score">180%</p>
-            </div>
-          </div>
+          {% endif %}
+          {% endfor %}
         </div>
-
         <hr class="lb-divider">
-
         <!-- YOUR POSITION -->
         <div class="lb-your-position">
           <p class="lb-your-position-label">YOUR POSITION</p>
           <div class="lb-rest-item">
-            <span class="lb-rank-circle">12</span>
+            <span class="lb-rank-circle">
+              {% if alumno.posicion_ranking %}
+                {{ alumno.posicion_ranking }}
+              {% else %}
+                -
+              {% endif %}
+            </span>
             <div class="lb-rest-text">
-              <p class="lb-rest-name">{{ alumno.nombre_pila }} {{ alumno.apellidoPaterno }} {{ alumno.apellidoMaterno }}</p>
-              <p class="lb-rest-score">15%</p>
+              <p class="lb-rest-name">
+                {{ alumno.nombre_pila }}
+                {{ alumno.apellidoPaterno }}
+                {{ alumno.apellidoMaterno|default:"" }}
+              </p>
+              <p class="lb-rest-score">{{ alumno.puntos_experiencia }} XP</p>
             </div>
           </div>
         </div>
@@ -224,7 +302,99 @@
     </div>
   </div>
 </div>
-
+<!-- MODAL: GLOBAL LEADERBOARD -->
+<div class="modal fade" id="globalLeaderboardModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content leaderboard-modal-content global-leaderboard-modal-content">
+      <div class="modal-header leaderboard-modal-header">
+        <i data-lucide="globe"></i>
+        <h5 class="modal-title leaderboard-modal-title">
+          GLOBAL LEADERBOARD
+        </h5>
+        <button
+          type="button"
+          class="btn-close leaderboard-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body leaderboard-modal-body global-leaderboard-body">
+        <!-- TOP 3 -->
+        <div class="lb-top3-row">
+          {% for student in global_leaderboard %}
+            {% if forloop.counter <= 3 %}
+            <div class="lb-top3-item {% if student.posicion_ranking == 1 %}lb-top3-first{% endif %}">
+              <span class="lb-star {% if forloop.counter == 1 %}lb-star-gold{% elif forloop.counter == 2 %}lb-star-silver{% else %}lb-star-bronze{% endif %}">
+                <i data-lucide="star"></i>
+              </span>
+              <p class="lb-top3-name">
+                {{ student.apellidoPaterno }}
+                {{ student.apellidoMaterno|default_if_none:"" }}
+                <br>
+                {{ student.nombre_pila }}
+              </p>
+              <p class="lb-top3-score">
+                {{ student.puntos_experiencia }} XP
+              </p>
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <hr class="lb-divider">
+        <!-- REMAINING POSITIONS -->
+        <div class="lb-rest-grid">
+          {% for student in global_leaderboard %}
+            {% if forloop.counter > 3 %}
+            <div class="lb-rest-item">
+              <span class="lb-rank-circle">
+                {{ student.posicion_ranking }}
+              </span>
+              <div class="lb-rest-text">
+                <p class="lb-rest-name">
+                  {{ student.nombre_pila }}
+                  {{ student.apellidoPaterno }}
+                  {{ student.apellidoMaterno|default_if_none:"" }}
+                </p>
+                <p class="lb-rest-score">
+                  {{ student.puntos_experiencia }} XP
+                </p>
+              </div>
+            </div>
+            {% endif %}
+          {% empty %}
+            <p>No global leaderboard data available yet.</p>
+          {% endfor %}
+        </div>
+        <hr class="lb-divider">
+        <!-- YOUR GLOBAL POSITION -->
+        <div class="lb-your-position">
+          <p class="lb-your-position-label">
+            YOUR GLOBAL POSITION
+          </p>
+          <div class="lb-rest-item">
+            <span class="lb-rank-circle">
+              {% for student in global_leaderboard %}
+                {% if student.matricula == alumno.matricula %}
+                  {{ student.posicion_ranking }}
+                {% endif %}
+              {% endfor %}
+            </span>
+            <div class="lb-rest-text">
+              <p class="lb-rest-name">
+                {{ alumno.nombre_pila }}
+                {{ alumno.apellidoPaterno }}
+                {{ alumno.apellidoMaterno|default_if_none:"" }}
+              </p>
+              <p class="lb-rest-score">
+                {{ alumno.puntos_experiencia }} XP
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- MODAL: STUDENT NOTIFICATIONS -->
 <div class="modal fade" id="notificationsModal" tabindex="-1"
      aria-labelledby="notificationsModalLabel" aria-hidden="true">

@@ -1,3 +1,4 @@
+
 # Spell-Challenge - Git Ignore
 
 # Python
@@ -7,10 +8,10 @@ __pycache__/
 *.pyo
 *.pyd
 
-# VENV
+# Virtual environments
 venv/
 .venv/
-.env/
+env/
 
 # Environment variables and secrets
 .env
@@ -23,26 +24,53 @@ db.sqlite3
 db.sqlite3-journal
 staticfiles/
 media/
+local_settings.py
 
-# VS Code
+# VS Code and IDEs
 .vscode/
-!.vscode/settings.json
-
 .idea/
 *.iml
 
+# Testing and coverage
 .coverage
 .coverage.*
 htmlcov/
 .pytest_cache/
 
+# Build files
 build/
 dist/
 *.egg-info/
 .eggs/
 
+# SQLite databases
 *.sqlite
 *.sqlite3
 
-# Database backups
+# Database backups and exports
 backups/
+database_backups/
+sql_backups/
+*.sql.gz
+*.dump
+*.bak
+*.backup
+*_backup.sql
+*-backup.sql
+backup_*.sql
+*_dump.sql
+dump_*.sql
+
+# Private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Credentials
+credentials*.json
+service-account*.json
+
+# Operating system files
+.DS_Store
+Thumbs.db

@@ -7,30 +7,34 @@
 {% endblock %}
 
 {% block student_content %}
-
 <div class="practice-header">
-
   <div class="unit-dropdown">
     <button class="unit-badge" onclick="toggleUnitDropdown()">
-      <span id="currentUnitLabel">Unit #1: A1 - BEGINNER</span>
+      <span id="currentUnitLabel">
+        {% if niveles %}
+          UNIT #1: {{ niveles.0.codigo }} - {{ niveles.0.descripcion|upper }}
+        {% else %}
+          NO UNITS AVAILABLE
+        {% endif %}
+      </span>
     </button>
-
     <div class="unit-dropdown-panel" id="unitDropdownPanel">
       <div class="unit-dropdown-header">
         <span class="unit-dropdown-title">UNITS</span>
         <button class="unit-dropdown-close" onclick="toggleUnitDropdown()">&times;</button>
       </div>
       <div class="unit-dropdown-list">
-        <button class="unit-option" data-unit="1" onclick="selectUnit(this)">UNIT #1: A1 Begineer</button>
-        <button class="unit-option" data-unit="2" onclick="selectUnit(this)">UNIT #2: A2 Begineer-Intermediate</button>
-        <button class="unit-option" data-unit="3" onclick="selectUnit(this)">UNIT #3: B1 Intermediate</button>
-        <button class="unit-option" data-unit="4" onclick="selectUnit(this)">UNIT #4: B2 Intermediate-Advanced</button>
-        <button class="unit-option" data-unit="5" onclick="selectUnit(this)">UNIT #5: C1 Advanced #1</button>
-        <button class="unit-option" data-unit="6" onclick="selectUnit(this)">UNIT #6: C2 Advanced #2</button>
+        {% for nivel in niveles %}
+          <button
+            class="unit-option"
+            data-unit="{{ forloop.counter }}"
+            onclick="selectUnit(this)">
+            UNIT #{{ forloop.counter }}: {{ nivel.codigo }} - {{ nivel.descripcion|upper }}
+          </button>
+        {% endfor %}
       </div>
     </div>
-</div>
-
+  </div>
   <div class="practice-header-icons">
     <a href="{% url 'practice_your_english' %}" class="dumbbell-btn" title="Practice Your English">
       <i data-lucide="dumbbell"></i>
@@ -39,119 +43,84 @@
     <i data-lucide="bell" class="notification-bell"></i>
   </div>
 </div>
-
-<div class="practice-path-wrapper">
-
+{% for nivel in niveles %}
+<div
+  class="practice-path-wrapper unit-content {% if not forloop.first %}d-none{% endif %}"
+  id="unit-{{ forloop.counter }}">
   <div class="practice-label">
-    <p class="practice-label-title">Practice #1</p>
-    <p class="practice-label-subtitle">Greetings</p>
+    <p class="practice-label-title">UNIT #{{ forloop.counter }} - {{ nivel.codigo }}</p>
+    <p class="practice-label-subtitle">{{ nivel.descripcion }}</p>
   </div>
-
   <div class="practice-path">
-
-    <div class="path-node-wrap node-low">
-      <button class="path-node node-star" data-bs-toggle="modal" data-bs-target="#practiceModal">
-        <svg viewBox="0 0 24 24" class="star-icon"><path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 16.9 5.8 20.3l1.6-6.8L2.2 8.9l6.9-.6L12 2z"/></svg>
-      </button>
-    </div>
-
-    <div class="path-connector connector-active"></div>
-
-    <div class="path-node-wrap node-high">
-      <button class="path-node node-locked" disabled>
-        <i data-lucide="lock"></i>
-      </button>
-    </div>
-
-    <div class="path-connector"></div>
-
-    <div class="path-node-wrap node-low">
-      <button class="path-node node-locked" disabled>
-        <i data-lucide="lock"></i>
-      </button>
-    </div>
-
-    <div class="path-connector"></div>
-
-    <div class="path-node-wrap node-high">
-      <button class="path-node node-locked" disabled>
-        <i data-lucide="lock"></i>
-      </button>
-    </div>
-
-    <div class="path-connector"></div>
-
-    <div class="path-node-wrap node-low">
-      <button class="path-node node-locked" disabled>
-        <i data-lucide="lock"></i>
-      </button>
-    </div>
-
-    <div class="path-connector"></div>
-
-    <div class="path-node-wrap node-high">
-      <button class="path-node node-locked" disabled>
-        <i data-lucide="lock"></i>
-      </button>
-    </div>
-
-    <div class="path-connector"></div>
-
-    <div class="path-node-wrap node-low">
-      <button class="path-node node-locked" disabled>
-        <i data-lucide="lock"></i>
-      </button>
-    </div>
-
-    <div class="path-connector"></div>
-
-    <div class="path-node-wrap node-high">
-      <button class="path-node node-locked" disabled>
-        <i data-lucide="lock"></i>
-      </button>
-    </div>
-
+    {% for practica in nivel.practicas.all %}
+      <div class="path-node-wrap {% cycle 'node-low' 'node-high' %}">
+        <button
+          class="path-node node-star"
+          data-bs-toggle="modal"
+          data-bs-target="#practiceModal{{ practica.clave }}"
+          title="{{ practica.lista.nombre }}">
+          <svg viewBox="0 0 24 24" class="star-icon">
+            <path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 16.9 5.8 20.3l1.6-6.8L2.2 8.9l6.9-.6L12 2z"/>
+          </svg>
+        </button>
+      </div>
+      {% if not forloop.last %}
+        <div class="path-connector"></div>
+      {% endif %}
+    {% endfor %}
   </div>
-
-  <button class="next-unit-btn">
-    <i data-lucide="arrow-right"></i>
-  </button>
-
+  {% if not forloop.last %}
+    <button
+      class="next-unit-btn"
+      onclick="showNextUnit({{ forloop.counter }})"
+      title="Next Unit">
+      <i data-lucide="arrow-right"></i>
+    </button>
+  {% endif %}
 </div>
-
-<div class="modal fade" id="practiceModal" tabindex="-1" aria-hidden="true">
+{% for practica in nivel.practicas.all %}
+<div
+  class="modal fade"
+  id="practiceModal{{ practica.clave }}"
+  tabindex="-1"
+  aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content practice-modal">
-
       <div class="modal-header practice-modal-header">
-        <h5 class="modal-title">PRACTICE #1 - GREETINGS</h5>
+        <h5 class="modal-title">
+          PRACTICE #{{ forloop.counter }} - {{ practica.lista.nombre|upper }}
+        </h5>
         <span class="practice-percent">0%</span>
-        <button type="button" class="btn-close practice-modal-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button
+          type="button"
+          class="btn-close practice-modal-close"
+          data-bs-dismiss="modal"
+          aria-label="Close">
+        </button>
       </div>
-
       <div class="modal-body practice-modal-body">
-        <div class="lesson-row">
-          <span class="lesson-label">LESSON 1</span>
-          <a href="{% url 'lesson_1' %}" class="lesson-play-btn">PLAY</a>
-        </div>
-        <div class="lesson-row">
-          <span class="lesson-label lesson-label-locked">LESSON 2</span>
-          <button class="lesson-locked-btn" disabled>LOCKED</button>
-        </div>
-        <div class="lesson-row">
-          <span class="lesson-label lesson-label-locked">LESSON 3</span>
-          <button class="lesson-locked-btn" disabled>LOCKED</button>
-        </div>
-        <div class="lesson-row">
-          <span class="lesson-label lesson-label-locked">LESSON 4</span>
-          <button class="lesson-locked-btn" disabled>LOCKED</button>
-        </div>
+        {% for leccion in practica.lecciones.all %}
+          <div class="lesson-row">
+            <span class="lesson-label">
+              LESSON {{ forloop.counter }}
+            </span>
+            <a
+              href="{% url 'lesson' clave_leccion=leccion.clave %}"
+              class="lesson-play-btn">
+              PLAY
+            </a>
+          </div>
+        {% empty %}
+          <p>No lessons available for this practice.</p>
+        {% endfor %}
       </div>
-
     </div>
   </div>
 </div>
-
+{% endfor %}
+{% empty %}
+<p>No practices available for this unit.</p>
+{% endfor %}
 {% endblock student_content %}
 
 {% block extra_js %}
@@ -162,13 +131,36 @@
   }
 
   function selectUnit(button) {
+
+    const unitNumber = button.dataset.unit;
     const unitText = button.textContent.trim();
+
     document.getElementById('currentUnitLabel').textContent = unitText;
-    toggleUnitDropdown();
+
+    document.querySelectorAll('.unit-content').forEach(unit => {
+      unit.classList.add('d-none');
+    });
+
+    document.getElementById(`unit-${unitNumber}`).classList.remove('d-none');
+
+    document.getElementById('unitDropdownPanel').classList.remove('active');
+  }
+
+  function showNextUnit(currentUnit) {
+
+    const nextUnit = document.querySelector(
+      `.unit-option[data-unit="${currentUnit + 1}"]`
+    );
+
+    if (nextUnit) {
+      selectUnit(nextUnit);
+    }
   }
 
   document.addEventListener('click', function (event) {
+
     const wrapper = document.querySelector('.unit-dropdown');
+
     if (wrapper && !wrapper.contains(event.target)) {
       document.getElementById('unitDropdownPanel').classList.remove('active');
     }

@@ -198,6 +198,16 @@ class Alumno(models.Model):
         blank=True, 
         null=True
     )
+    
+    puntos_experiencia = models.PositiveIntegerField(
+        default=0,
+        db_column='puntos_experiencia'
+    )
+    
+    palabras_pronunciadas = models.PositiveIntegerField(
+        default=0,
+        db_column='palabras_pronunciadas'
+    )
 
     class Meta:
         db_table = 'alumno'
@@ -571,6 +581,15 @@ class Practica_Sesion(models.Model):
         related_name='practicas',
         db_column='lista',
         to_field='codigo'
+    )
+    
+    nivel = models.ForeignKey(
+        Nivel,
+        on_delete=models.PROTECT,
+        related_name='practicas',
+        db_column='nivel',
+        to_field='codigo',
+        null=True
     )
     
     class Meta:
@@ -1149,6 +1168,14 @@ class Ejercicio(models.Model):
         db_column='leccion'
     )
     
+    contenido_leccion = models.ForeignKey(
+        Contenido_Leccion,
+        on_delete=models.PROTECT,
+        db_column='contenido_leccion',
+        null=True,
+        blank=True
+    )
+    
     class Meta:
         db_table = 'ejercicio'
         managed = False
@@ -1180,6 +1207,9 @@ class Opcion(models.Model):
         
 #MODELO EJERCICIO_OPCION
 class Ejercicio_Opcion(models.Model):
+    
+    pk = models.CompositePrimaryKey('ejercicio', 'opcion')
+    
     ejercicio = models.ForeignKey(
         Ejercicio,
         on_delete=models.CASCADE,
@@ -1250,3 +1280,25 @@ class Notificacion(models.Model):
         
     def __str__(self):
         return f"{self.titulo} - {self.alumno}"
+    
+#MODELO LECCION_PALABRA
+class Leccion_Palabra(models.Model):
+    leccion = models.ForeignKey(
+        Leccion,
+        on_delete=models.CASCADE,
+        related_name='leccion_palabras',
+        db_column='leccion'
+    )
+    
+    palabra = models.ForeignKey(
+        Palabra,
+        on_delete=models.CASCADE,
+        related_name='leccion_palabras',
+        db_column='palabra'
+    )
+    
+    pk = models.CompositePrimaryKey('leccion', 'palabra')
+    
+    class Meta:
+        db_table = 'leccion_palabra'
+        managed = False

@@ -104,6 +104,32 @@
     let currentHive = null;
     let currentBeehivePage = 1;
 
+    function initCategorySelector() {
+        const selectEl = document.getElementById('wordLengthSelect');
+        if (!selectEl) return;
+
+        const availableCategories = Object.keys(wordsByCategory).filter(
+            cat => wordsByCategory[cat] && wordsByCategory[cat].length > 0
+        );
+
+        if (availableCategories.length > 0) {
+            currentCategory = availableCategories[0];
+            selectEl.value = currentCategory;
+        }
+
+        Array.from(selectEl.options).forEach(option => {
+            const cat = option.value;
+            const count = wordsByCategory[cat] ? wordsByCategory[cat].length : 0;
+            const baseText = option.text.split(' (')[0];
+            
+            if (count === 0) {
+                option.text = `${baseText} (0 words)`;
+            } else {
+                option.text = `${baseText} (${count} words)`;
+            }
+        });
+    }
+
     function changeBeehivePage(direction) {
         const pages = document.querySelectorAll('.honeycomb-page');
         const newPage = currentBeehivePage + direction;
@@ -285,9 +311,7 @@
         usedWords[currentCategory].add(word.texto);
 
         document.getElementById('currentWordText').textContent = word.texto;
-
         document.getElementById('currentWordDef').textContent = word.definicion;
-
         document.getElementById('currentWordExample').textContent = word.ejemplo;
 
         document.getElementById('wordModal').classList.add('active');
@@ -313,6 +337,9 @@
         document.getElementById(id).classList.remove('active');
     }
 
-    renderBeehives();
+    document.addEventListener('DOMContentLoaded', function() {
+        initCategorySelector();
+        renderBeehives();
+    });
 </script>
 {% endblock %}

@@ -257,7 +257,17 @@
               <select class="form-select" id="compWordList" name="lista" required>
                 <option value="" selected disabled>Select a Word List</option>
                 {% for word_list in word_lists %}
-                  <option value="{{ word_list.codigo }}">{{ word_list.nombre }}</option>
+                  {% with total_words=word_list.lista_palabras.count %}
+                    {% if total_words > 0 %}
+                      <option value="{{ word_list.codigo }}">
+                        {{ word_list.nombre }} ({{ total_words }} words)
+                      </option>
+                    {% else %}
+                      <option value="{{ word_list.codigo }}" disabled>
+                        {{ word_list.nombre }} (0 words - empty)
+                      </option>
+                    {% endif %}
+                  {% endwith %}
                 {% empty %}
                   <option value="" disabled>No word lists available</option>
                 {% endfor %}
