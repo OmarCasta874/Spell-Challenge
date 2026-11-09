@@ -1805,26 +1805,46 @@ def transcribe_speaking(request):
             )
 
         import re
-
+        
         answer = re.sub(
             r'\s+',
             ' ',
             re.sub(
-                r'[^\w\s]',
+                r'^\s*say\b[\s,:-]*',
                 '',
                 transcription.lower()
-            ).strip()
+            )
+        )
+
+        answer = re.sub(
+            r'[^\w\s]',
+            '',
+            answer
+        ).strip()
+        
+        answer = re.sub(
+            r'\s+',
+            ' ',
+            answer
         )
 
         expected = re.sub(
+            r'^\s*say\b[\s,:-]*',
+            '',
+            expected_answer.lower()
+        )
+        
+        expected = re.sub(
+            r'[^\w\s]',
+            '',
+            expected
+        )
+        
+        expected = re.sub(
             r'\s+',
             ' ',
-            re.sub(
-                r'[^\w\s]',
-                '',
-                expected_answer.lower()
-            ).strip()
-        )
+            expected
+        ).strip()
 
         is_correct = answer == expected
         
