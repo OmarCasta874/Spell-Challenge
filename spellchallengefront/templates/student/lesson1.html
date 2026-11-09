@@ -147,7 +147,7 @@
   <!-- CONTENEDOR PRINCIPAL DEL EJERCICIO -->
   <div class="lesson-exercise-wrap"> 
   <!-- VOCABULARY SECTION -->
-  {% if curricular_words or additional_words %}
+  {% if curricular_words or additional_words or vocabulary_exercises %}
   <div id="vocabularySection" class="exercise-card vocabulary-section">
     <div class="skill-section-label">
       <span>01</span>
@@ -251,6 +251,51 @@
     </button>
   </div>
   {% endif %}
+  <!-- VOCABULARY: DYNAMIC EXERCISES -->
+{% for ejercicio in vocabulary_exercises %}
+    <div
+      id="vocabulary-ex{{ forloop.counter }}"
+      class="exercise-card d-none"
+      data-section="vocabulary"
+      data-exercise-number="{{ forloop.counter }}"
+      data-total-exercises="{{ vocabulary_exercises|length }}"
+    >
+      <div class="skill-section-label">
+        <span>01</span>
+        VOCABULARY
+      </div>
+
+      <h4 class="exercise-question">
+        {{ forloop.counter }}. {{ ejercicio.descripcion }}
+      </h4>
+
+      <div class="options-row">
+        {% for relacion in ejercicio.ejercicio_opcion_set.all %}
+          <button
+            type="button"
+            class="option-btn"
+            data-correct="{% if relacion.opcion.estado_opcion.clave == 'EST01' %}true{% else %}false{% endif %}"
+          >
+            {{ relacion.opcion.nombre }}
+          </button>
+        {% endfor %}
+      </div>
+
+      <div
+        id="vocabulary-feedback{{ forloop.counter }}"
+        class="exercise-feedback">
+      </div>
+
+      <button
+        type="button"
+        class="btn-lesson-check"
+        onclick="checkGrammarExercise({{ forloop.counter }}, 'vocabulary')"
+      >
+        CHECK
+      </button>
+    </div>
+  {% endfor %}
+  <!-- END VOCABULARY EXERCISES -->
     <!-- GRAMMAR: DYNAMIC EXERCISES -->
     <!-- DEBUG GRAMMAR -->
     {% for ejercicio in grammar_exercises %}
@@ -470,8 +515,12 @@
                         {% endfor %}
                     </p>
                 {% else %}
-                    <p>No vocabulary available for this lesson yet.</p>
+                    <p>No vocabulary words available for this lesson yet.</p>
                 {% endif %}
+                <p>
+                    You practiced {{ vocabulary_exercises|length }}
+                    vocabulary exercises.
+                </p>
             </div>
             <!-- GRAMMAR REVIEW -->
             <div class="review-item">
@@ -539,11 +588,16 @@
         <div class="results-divider"></div>
         <div class="results-breakdown">
           <div class="result-skill">
-            <span class="result-skill-icon">📚</span>
-            <span class="result-skill-name">Vocabulary</span>
-            <strong id="vocabularyWordsCount">
-                {{ curricular_words|length }} words
-            </strong>
+              <span class="result-skill-icon">📚</span>
+              <span class="result-skill-name">Vocabulary</span>
+
+              <div class="result-skill-details">
+                  <strong id="result-vocabulary">0/0</strong>
+                  <small id="skipped-vocabulary">0 skipped</small>
+                  <span id="vocabularyWordsCount">
+                      {{ curricular_words|length }} words
+                  </span>
+              </div>
           </div>
           <div class="result-skill">
             <span class="result-skill-icon">✏️</span>
@@ -661,12 +715,14 @@
 
   const lessonResults = {
     correct: {
+      vocabulary: 0,
       grammar: 0,
       listening: 0,
       speaking: 0
     },
     completed: new Set(),
     skipped: {
+      vocabulary: 0,
       grammar: 0,
       listening: 0,
       speaking: 0
@@ -692,7 +748,7 @@
   }
 
   function updateCompletedResults() {
-    const sections = ['grammar', 'listening', 'speaking'];
+    const sections = ['vocabulary', 'grammar', 'listening', 'speaking'];
 
     let totalCorrect = 0;
     let totalExercises = 0;
@@ -783,16 +839,16 @@
     document.getElementById('lessonNotesPanel').classList.add('d-none');
   }
 
-  function checkGrammarExercise(currentNum) {
-      const exercise = document.getElementById('grammar-ex' + currentNum);
+  function checkGrammarExercise(currentNum, section = 'grammar') {
+      const exercise = document.getElementById(section + '-ex' + currentNum);
 
       if (!exercise) {
-          console.error('Grammar exercise not found:', currentNum);
+          console.error('Exercise not found:', section, currentNum);
           return;
       }
 
       const options = exercise.querySelectorAll('.option-btn');
-      const feedback = document.getElementById('grammar-feedback' + currentNum);
+      const feedback = document.getElementById(section + '-feedback' + currentNum);
 
       let selectedOption = null;
 

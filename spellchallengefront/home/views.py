@@ -1191,6 +1191,27 @@ def student_home(request):
     if grupo_actual is None:
         grupo_actual = grupos_alumno.first()
         
+    global_leaderboard = list(
+        Alumno.objects
+        .all()
+        .order_by(
+            '-puntos_experiencia',
+            'nombre_pila',
+            'apellidoPaterno',
+            'matricula'
+        )
+    )
+            
+    posicion = 0
+    xp_anterior = None
+            
+    for indice, estudiante in enumerate(global_leaderboard):
+        if estudiante.puntos_experiencia != xp_anterior:
+            posicion = indice + 1
+                    
+        estudiante.posicion_ranking = posicion
+        xp_anterior = estudiante.puntos_experiencia
+        
     leaderboard = []
     
     if grupo_actual:
@@ -1218,27 +1239,6 @@ def student_home(request):
             if estudiante.matricula == alumno.matricula:
                 alumno.posicion_ranking = posicion
                 
-            xp_anterior = estudiante.puntos_experiencia
-            
-        global_leaderboard = list(
-            Alumno.objects
-            .all()
-            .order_by(
-                '-puntos_experiencia',
-                'nombre_pila',
-                'apellidoPaterno',
-                'matricula'
-            )
-        )
-        
-        posicion = 0
-        xp_anterior = None
-        
-        for indice, estudiante in enumerate(global_leaderboard):
-            if estudiante.puntos_experiencia != xp_anterior:
-                posicion = indice + 1
-                
-            estudiante.posicion_ranking = posicion
             xp_anterior = estudiante.puntos_experiencia
     
     proceso_actual = (
