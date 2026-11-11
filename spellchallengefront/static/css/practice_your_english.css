@@ -1,111 +1,150 @@
-.pye-header {
-  margin-bottom: 8px;
-}
-
-.pye-back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #7a1f2b;
-  font-weight: 700;
-  text-decoration: none;
-  font-size: 0.95rem;
-}
-
-.pye-back-link:hover {
-  text-decoration: underline;
-}
-
-.pye-back-link i {
-  width: 18px;
-  height: 18px;
-}
+/* ===== PRACTICE YOUR ENGLISH ===== */
 
 .pye-title {
-  color: #7a1f2b;
-  font-weight: 800;
-  font-size: 1.75rem;
-  margin: 8px 0 32px;
+    color: #7a1f2b;
+    font-weight: 800;
+    font-size: 1.65rem;
+    margin: 2.8rem 0 1.5rem;
+    text-align: center;
+}
+
+.pye-subtitle {
+  color: #704747;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+  margin: -1rem 0 1.8rem;
 }
 
 .pye-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
 }
 
-.pye-column-label {
-  color: #7a1f2b;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
+/* TARJETAS */
 
 .pye-card {
-  background-color: #7a1f2b;
-  border-radius: 14px;
-  padding: 20px;
-  color: #fff;
-  min-height: 160px;
+    background: #7a1f2b;
+    border: 1px solid #68202a;
+    border-radius: 18px;
+    padding: 1.5rem;
+    color: #fff;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.8rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.pye-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
+.pye-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 18px rgba(122, 31, 43, 0.2);
 }
+
+/* ICONOS */
+
+.pye-card-icon {
+    width: 40px;
+    height: 40px;
+    color: #f9b7b2;
+    stroke-width: 1.8;
+}
+
+/* TÍTULOS Y DESCRIPCIONES */
 
 .pye-card-title {
-  font-weight: 700;
-  font-size: 1.05rem;
+    font-weight: 800;
+    font-size: 1.05rem;
+    margin: 0;
 }
 
-.pye-practice-btn {
-  background-color: #fff;
-  color: #7a1f2b;
-  font-weight: 700;
-  font-size: 0.75rem;
-  padding: 6px 14px;
-  border-radius: 20px;
-  text-decoration: none;
-  white-space: nowrap;
+.pye-card-description {
+    color: #f8e5e5;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin: 0;
+    min-height: 40px;
 }
 
-.pye-practice-btn:hover {
-  background-color: #f28f89;
-  color: #fff;
-}
+/* CONTENIDO DE EJEMPLO */
 
 .pye-word-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .pye-word-list li {
-  font-weight: 600;
-  padding: 6px 0;
+    font-weight: 600;
+    padding: 4px 0;
+    font-size: 0.85rem;
 }
 
 .pye-match-pair {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .pye-match-pill {
-  background-color: rgba(255, 255, 255, 0.15);
-  border: 1px solid #fff;
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.85rem;
-  padding: 8px 18px;
-  border-radius: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 7px 14px;
+    border-radius: 20px;
 }
 
+/* BOTONES */
+
+.pye-practice-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+    background: #fff;
+    color: #7a1f2b;
+    font-weight: 800;
+    font-size: 0.8rem;
+    padding: 9px 22px;
+    border-radius: 22px;
+    text-decoration: none;
+    white-space: nowrap;
+    margin-top: auto;
+    transition: all 0.2s ease;
+}
+
+.pye-practice-btn:hover {
+    background: #f28f89;
+    color: #fff;
+}
+
+.pye-practice-btn i {
+    width: 15px;
+    height: 15px;
+}
+
+/* RESPONSIVE */
+
 @media (max-width: 900px) {
-  .pye-grid {
-    grid-template-columns: 1fr;
-  }
+    .pye-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .pye-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pye-title {
+        font-size: 1.4rem;
+    }
 }

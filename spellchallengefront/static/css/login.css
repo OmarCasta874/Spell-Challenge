@@ -168,3 +168,53 @@
   text-align: center;
   margin-bottom: 16px;
 }
+
+/* Estilos para el campo contenedor */
+.field-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.field-input input[type="password"],
+.field-input input[type="text"] {
+  width: 100%;
+  padding-right: 45px !important; 
+  box-sizing: border-box;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px; 
+  background: transparent !important; 
+  border: none !important; 
+  outline: none !important;
+  box-shadow: none !important; 
+  padding: 6px !important;
+  margin: 0 !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, transform 0.1s ease;
+  color: #7a1f2b !important; 
+  opacity: 0.8;
+  z-index: 5;
+}
+
+.toggle-password:hover {
+  opacity: 1;
+  transform: scale(1.1); 
+}
+
+.toggle-password:active {
+  transform: scale(0.95);
+}
+
+.toggle-password svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+}

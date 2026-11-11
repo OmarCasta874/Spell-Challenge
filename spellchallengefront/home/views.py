@@ -1815,6 +1815,12 @@ def transcribe_speaking(request):
                 transcription.lower()
             )
         )
+        
+        answer = re.sub(
+            r'[-]',
+            ' ',
+            answer
+        )
 
         answer = re.sub(
             r'[^\w\s]',
@@ -1835,6 +1841,12 @@ def transcribe_speaking(request):
         )
         
         expected = re.sub(
+            r'[-]',
+            ' ',
+            expected
+        )
+        
+        expected = re.sub(
             r'[^\w\s]',
             '',
             expected
@@ -1845,7 +1857,82 @@ def transcribe_speaking(request):
             ' ',
             expected
         ).strip()
-
+        
+        def normalize_number_words(text):
+            small_numbers = {
+                'zero': 0,
+                'one': 1,
+                'two': 2,
+                'three': 3,
+                'four': 4,
+                'five': 5,
+                'six': 6,
+                'seven': 7,
+                'eight': 8,
+                'nine': 9,
+                'ten': 10,
+                'eleven': 11,
+                'twelve': 12,
+                'thirteen': 13,
+                'fourteen': 14,
+                'fifteen': 15,
+                'sixteen': 16,
+                'seventeen': 17,
+                'eighteen': 18,
+                'nineteen': 19,
+            }
+                    
+            tens_numbers = {
+                'twenty': 20,
+                'thirty': 30,
+                'forty': 40,
+                'fifty': 50,
+                'sixty': 60,
+                'seventy': 70,
+                'eighty': 80,
+                'ninety': 90,
+            }
+                    
+            words = text.split()
+            normalized = []
+                    
+            i = 0
+                    
+            while i < len(words):
+                word = words[i]
+                        
+                if word in tens_numbers:
+                    number = tens_numbers[word]
+                            
+                    if (
+                        i + 1 < len(words)
+                        and words[i + 1] in small_numbers
+                        and 1 <= small_numbers[words[i + 1]] <= 9
+                    ):
+                        number += small_numbers[words[i + 1]]
+                        i += 1
+                                
+                    normalized.append(str(number))
+                        
+                elif word in small_numbers:
+                    normalized.append(str(small_numbers[word]))
+                            
+                else:
+                    normalized.append(word)
+                            
+                i += 1
+                        
+            return ' '.join(normalized)
+        
+        print("ANSWER BEFORE NORMALIZATION: ", answer)
+        print("EXPECTED BEFORE NORMALIZATION: ", expected)
+        
+        answer = normalize_number_words(answer)
+        expected = normalize_number_words(expected)
+        
+        print("ANSWER AFTER NORMALIZATION: ", answer)
+        print("EXPECTED AFTER NORMALIZATION: ", expected)
+        
         is_correct = answer == expected
         
         current_item = (
@@ -1890,9 +1977,20 @@ def transcribe_speaking(request):
         })
 
     except Exception as error:
+        print("TRANSCRIPTION ERROR TYPE: ", type(error).__name__)
         print("TRANSCRIPTION ERROR: ", repr(error))
+        print("TRANSCRIPTION ERROR CODE: ", getattr(error, 'code', None))
+        print("TRANSCRIPTION ERROR STATUS: ", getattr(error, 'status_code', None))
+        print("TRANSCRIPTION ERROR MESSAGE: ", str(error))
 
         gemini_status = getattr(error, 'code', None)
+        
+        if not isinstance(gemini_status, int):
+            gemini_status = getattr(error, 'status_code', None)
+            
+        if not isinstance(gemini_status, int):
+            response = getattr(error, 'response', None)
+            gemini_status = getattr(response, 'status_code', None)
 
         if gemini_status is None:
             gemini_status = getattr(error, 'status_code', None)
@@ -1955,12 +2053,149 @@ def transcribe_speaking(request):
 @role_required('student')
 def practices(request):
     
+    alumno = request.user.alumno
+    
+    if request.method == 'POST':
+        game = request.POST.get('game')
+        round_token = request.POST.get('round_token')
+        
+        valid_games = {
+            'hangman': 'ph_hangman_round_token',
+            'missing_letters': 'ph_missing_round_token',
+            'memory_game': 'ph_memory_round_token',
+        }
+        
+        if game not in valid_games:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid or expired game session.'
+            }, staus=400)
+            
+        session_key = valid_games[game]
+        session_token = request.session.get(session_key)
+        
+        if not round_token or round_token != session_token:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid or expired game session.'
+            }, status=400)
+            
+        del request.session[session_key]
+        
+        try:
+            errors = int(request.POST.get('errors', 0))
+        except (TypeError, ValueError):
+            errors = 0
+            
+        errors = max(0, errors)
+        
+        completed = request.POST.get('completed', 'true') == 'true'
+        
+        if game == 'memory_game':
+            if not completed:
+                xp_earned = 0
+            else:
+                xp_earned = max(0, 20 - (errors // 5))
+        else:
+            xp_earned = max(0, 20 - errors)
+            
+        Alumno.objects.filter(pk=alumno.pk).update(
+            puntos_experiencia=F('puntos_experiencia') + xp_earned
+        )
+        
+        alumno.refresh_from_db(
+            fields=['puntos_experiencia']
+        )
+        
+        new_round_token = secrets.token_urlsafe(32)
+        request.session[session_key] = new_round_token
+        
+        return JsonResponse({
+            'success': True,
+            'game': game,
+            'errors': errors,
+            'xp_earned': xp_earned,
+            'total_xp': alumno.puntos_experiencia,
+            'round_token': new_round_token,
+        })
+    
     niveles = Nivel.objects.prefetch_related(
         'practicas__lecciones'
     ).order_by('codigo')
     
+    grupos = Grupo_Alumno.objects.filter(
+        alumno=alumno
+    ).values_list(
+        'grupo',
+        flat=True
+    )
+    
+    listas = Lista_Grupo.objects.filter(
+        grupo__in=grupos
+    ).values_list(
+        'lista',
+        flat=True
+    )
+    
+    palabras = Palabra.objects.filter(
+        lista_palabras__lista__in=listas
+    ).distinct().order_by('codigo')
+    
+    vocabulary = []
+    
+    for palabra in palabras:
+        vocabulary.append({
+            'word': palabra.significado.upper(),
+            'meaning': palabra.definicion,
+            'example': palabra.ejemplo,
+            'image': palabra.imagen.url if palabra.imagen else '',
+            'audio': palabra.audio.url if palabra.audio else '',
+            'category': palabra.categoria.nombre,
+            'level': palabra.nivel.codigo,
+        })
+        
+    memory_words = Palabra.objects.filter(
+        imagen__isnull=False
+    ).exclude(
+        imagen=''
+    )
+    
+    memory_vocabulary = []
+    
+    for palabra in memory_words:
+        memory_vocabulary.append({
+            'word': palabra.significado.upper(),
+            'image': palabra.imagen.url,
+        })
+        
+    memory_difficulties = list(
+        Dificultad_Juego.objects.filter(
+            juego='J04'
+        ).select_related(
+            'dificultad'
+        ).values(
+            'dificultad__clave',
+            'dificultad__nombre',
+            'dificultad__descripcion'
+        )
+    )
+    
+    round_tokens = {
+        'hangman': secrets.token_urlsafe(32),
+        'missing_letters': secrets.token_urlsafe(32),
+        'memory_game': secrets.token_urlsafe(32),
+    }
+    
+    request.session['ph_hangman_round_token'] = round_tokens['hangman']
+    request.session['ph_missing_round_token'] = round_tokens['missing_letters']
+    request.session['ph_memory_round_token'] = round_tokens['memory_game']
+    
     context = {
         'niveles': niveles,
+        'vocabulary': vocabulary,
+        'memory_vocabulary': memory_vocabulary,
+        'memory_difficulties': memory_difficulties,
+        'round_tokens': round_tokens,
     }
     
     return render(request, 'student/practices.html', context)

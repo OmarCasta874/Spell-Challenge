@@ -1,0 +1,528 @@
+{{ vocabulary|json_script:"miniGamesVocabulary" }}
+{{ memory_vocabulary|json_script:"memoryGameVocabulary" }}
+{{ memory_difficulties|json_script:"memoryGameDifficulties" }}
+{{ round_tokens|json_script:"miniGameRoundTokens" }}
+<form id="miniGamesCsrfForm" hidden>
+    {% csrf_token %}
+</form>
+<script>
+    const vocabulary = JSON.parse(
+        document.getElementById('miniGamesVocabulary').textContent
+    );
+
+    const memoryDifficulties = JSON.parse(
+        document.getElementById('memoryGameDifficulties').textContent
+    );
+
+    const miniGameRoundTokens = JSON.parse(
+        document.getElementById('miniGameRoundTokens').textContent
+    );
+
+    function miniGames_getCsrfToken() {
+        return document.querySelector(
+            '#miniGamesCsrfForm [name=csrfmiddlewaretoken]'
+        ).value;
+    }
+
+    async function miniGames_registerResult(game, errors, completed = true) {
+
+        const response = await fetch(window.location.pathname, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': miniGames_getCsrfToken()
+            },
+            body: new URLSearchParams({
+                game: game,
+                errors: errors,
+                completed: completed,
+                round_token: miniGameRoundTokens[game]
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.message || 'Could not register game experience.'
+            );
+        }
+        miniGameRoundTokens[game] = data.round_token;
+
+        return data;
+    }
+
+
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+        // CORRECCIÓN: Si el modal cerrado es parte de Missing Letters, detenemos el timer inmediatamente
+        if (id === 'missingModal' || id === 'missingResultModal') {
+            if (typeof missing_timerInterval !== 'undefined') {
+                clearInterval(missing_timerInterval);
+            }
+        }
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function openGameModal(title, description) {
+        document.getElementById('gTitle').innerText = title;
+        document.getElementById('gDescription').innerText = description;
+        openModal('gameModal');
+    }
+
+    function startGame() {
+        const game = document.getElementById('gTitle').innerText;
+        alert('Starting ' + game + '...');
+        closeModal('gameModal');
+    }
+
+    window.onclick = function(e) {
+        if (e.target.classList.contains('modal-overlay')) {
+            // CORRECCIÓN: Al hacer clic fuera de cualquier modal de Missing Letters, cancelamos el timer
+            if (e.target.id === 'missingModal' || e.target.id === 'missingResultModal') {
+                if (typeof missing_timerInterval !== 'undefined') {
+                    clearInterval(missing_timerInterval);
+                }
+            }
+            e.target.classList.remove('active');
+        }
+    }
+
+    const hangman_vocabularyList = vocabulary;
+
+    let hangman_currentWordIndex = 0;
+    let hangman_selectedWord = '';
+    let hangman_guessedLetters = [];
+    let hangman_attemptsLeft = 5;
+    let hangman_score = 0;
+    let hangman_errors = 0;
+    let hangman_finished = false;
+
+    function hangman_initGame() {
+        hangman_currentWordIndex = Math.floor(
+            Math.random() * hangman_vocabularyList.length
+        );
+
+        const item = hangman_vocabularyList[hangman_currentWordIndex];
+
+        hangman_selectedWord = item.word.toUpperCase();
+
+        document.getElementById('hangmanHint').innerText = item.meaning;
+
+        const imageElement = document.getElementById('hangmanImage');
+
+        if (item.image) {
+            imageElement.src = item.image;
+            imageElement.alt = `Image of ${item.word}`;
+            imageElement.style.display = 'block';
+        } else {
+            imageElement.src = '';
+            imageElement.style.display = 'none';
+        }
+
+        const audioButton = document.getElementById('hangmanAudioButton');
+
+        if (item.audio) {
+            audioButton.disabled = false;
+            audioButton.innerText = '🔊 Listen Word';
+        } else {
+            audioButton.disabled = true;
+            audioButton.innerText = '🔊 Audio Unavailable';
+        }
+
+        hangman_guessedLetters = [];
+        hangman_attemptsLeft = 5;
+        hangman_errors = 0;
+        hangman_finished = false;
+
+        hangman_renderHearts();
+        hangman_renderWordDisplay();
+        hangman_renderKeyboard();
+    }
+
+    function hangman_renderHearts() {
+        const container = document.getElementById('hangmanHearts');
+        container.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const icon = document.createElement('i');
+            icon.setAttribute('data-lucide', 'heart');
+            if (i >= hangman_attemptsLeft) icon.classList.add('lost');
+            container.appendChild(icon);
+        }
+        lucide.createIcons();
+    }
+
+    function hangman_renderWordDisplay() {
+        const container = document.getElementById('hangmanWordDisplay');
+        container.innerHTML = '';
+        hangman_selectedWord.split('').forEach(letter => {
+            const letterBox = document.createElement('div');
+            
+            if (letter === ' ' || letter === '-' || letter === '—') {
+                letterBox.className = 'letter-slot-transparent';
+            } else {
+                letterBox.className = 'letter-slot';
+                letterBox.innerText = hangman_guessedLetters.includes(letter) ? letter : '';
+            }
+            container.appendChild(letterBox);
+        });
+    }
+
+    function hangman_renderKeyboard() {
+        const keyboard = document.getElementById('hangmanKeyboard');
+        keyboard.innerHTML = '';
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter => {
+            const btn = document.createElement('button');
+            btn.className = 'key-btn';
+            btn.innerText = letter;
+            btn.disabled = hangman_guessedLetters.includes(letter);
+            btn.onclick = () => hangman_handleGuess(letter, btn);
+            keyboard.appendChild(btn);
+        });
+    }
+
+        
+    function hangman_handleGuess(letter, btnElement) {
+
+        if (hangman_finished) return;
+
+        hangman_guessedLetters.push(letter);
+        btnElement.disabled = true;
+
+        if (hangman_selectedWord.includes(letter)) {
+            btnElement.classList.add('correct');
+            hangman_renderWordDisplay();
+            hangman_checkWin();
+        } else {
+            btnElement.classList.add('wrong');
+            hangman_attemptsLeft--;
+            hangman_errors++;
+
+            hangman_renderHearts();
+
+            if (hangman_attemptsLeft === 0) {
+                hangman_showResult(false);
+            }
+        }
+    }
+
+
+    function hangman_checkWin() {
+        const lettersOnly = hangman_selectedWord.replace(/[^A-Z]/g, '').split('');
+        const isWon = lettersOnly.every(l => hangman_guessedLetters.includes(l));
+        
+        if (isWon && lettersOnly.length > 0) {
+            hangman_score += 10;
+            hangman_showResult(true);
+        }
+    }
+
+    async function hangman_showResult(isWin) {
+
+        if (hangman_finished) return;
+
+        hangman_finished = true;
+
+        document.getElementById('hangmanResTitle').innerText =
+            isWin ? '🎉 Excellent!' : '❌ Game Over';
+
+        document.getElementById('hangmanResMessage').innerText =
+            isWin ? 'You guessed the word correctly!' : 'You ran out of attempts.';
+
+        document.getElementById('hangmanResWord').innerText =
+            hangman_selectedWord;
+
+        try {
+            const result = await miniGames_registerResult(
+                'hangman',
+                hangman_errors
+            );
+
+            document.getElementById('hangmanResMessage').innerText +=
+                ` You earned ${result.xp_earned} XP!`;
+
+        } catch (error) {
+            console.error('Hangman XP error:', error);
+
+            document.getElementById('hangmanResMessage').innerText +=
+                ' Your experience could not be registered.';
+        }
+
+        openModal('hangmanResultModal');
+    }
+
+    function hangman_resetGame() {
+        closeModal('hangmanResultModal');
+        hangman_initGame();
+    }
+
+    function hangman_exitGame() {
+        closeModal('hangmanResultModal');
+        closeModal('hangmanModal');
+    }
+
+    function hangman_playAudioHint() {
+        const audioUrl = hangman_vocabularyList[hangman_currentWordIndex].audio;
+
+        if (!audioUrl) {
+            return;
+        }
+
+        const audio = new Audio(audioUrl);
+        audio.play();
+    }
+
+    function openHangmanModal() {
+        hangman_initGame();
+        openModal('hangmanModal');
+    }
+
+    const missing_vocabularyList = vocabulary;
+
+    let missing_currentItem = null;
+    let missing_selectedWord = '';
+    let missing_missingIndices = [];
+    let missing_filledMap = {};
+    let missing_completedWords = 0;
+    let missing_timeLeft = 60;
+    let missing_timerInterval = null;
+    let missing_errors = 0;
+    let missing_finished = false;
+
+    function missing_initGame() {
+        // CORRECCIÓN: Limpiar cualquier temporizador activo previamente
+        clearInterval(missing_timerInterval);
+
+        missing_completedWords = 0;
+        missing_timeLeft = 60;
+        missing_errors = 0;
+        missing_finished = false;
+
+        document.getElementById('missingCompletedCount').innerText = missing_completedWords;
+        missing_updateTimerDisplay();
+        missing_loadNewWord();
+        missing_startTimer();
+    }
+
+    function missing_startTimer() {
+        clearInterval(missing_timerInterval);
+        missing_timerInterval = setInterval(() => {
+            missing_timeLeft--;
+            missing_updateTimerDisplay();
+            if (missing_timeLeft <= 0) {
+                clearInterval(missing_timerInterval);
+                missing_endGame();
+            }
+        }, 1000);
+    }
+
+    function missing_updateTimerDisplay() {
+        const mins = String(Math.floor(missing_timeLeft / 60)).padStart(2, '0');
+        const secs = String(missing_timeLeft % 60).padStart(2, '0');
+        const el = document.getElementById('missingTimer');
+        if (el) {
+            el.innerText = `${mins}:${secs}`;
+            if (el.parentElement) {
+                el.parentElement.classList.toggle('warning', missing_timeLeft <= 10);
+            }
+        }
+    }
+
+    function missing_loadNewWord() {
+        missing_currentItem = missing_vocabularyList[
+            Math.floor(Math.random() * missing_vocabularyList.length)
+        ];
+
+        missing_selectedWord = missing_currentItem.word.toUpperCase();
+
+        const imageElement = document.getElementById('missingImage');
+
+        if (missing_currentItem.image) {
+            imageElement.src = missing_currentItem.image;
+            imageElement.alt = `Image of ${missing_currentItem.word}`;
+            imageElement.style.display = 'block';
+        } else {
+            imageElement.src = '';
+            imageElement.style.display = 'none';
+        }
+
+        missing_missingIndices = [];
+
+        missing_selectedWord.split('').forEach((_, i) => {
+            if (Math.random() < 0.4) {
+                missing_missingIndices.push(i);
+            }
+        });
+
+        if (missing_missingIndices.length === 0) {
+            missing_missingIndices.push(0);
+        }
+
+        missing_filledMap = {};
+        missing_renderWordSlots();
+        missing_renderLetterBank();
+    }
+
+    function missing_renderWordSlots() {
+        const container = document.getElementById('missingWordDisplay');
+        container.innerHTML = '';
+        missing_selectedWord.split('').forEach((letter, index) => {
+            const span = document.createElement('span');
+            if (missing_missingIndices.includes(index)) {
+                span.className = 'blank-letter';
+                span.dataset.index = index;
+                span.innerText = '_';
+            } else {
+                span.className = 'fixed-letter';
+                span.innerText = letter;
+            }
+            container.appendChild(span);
+        });
+    }
+
+    function missing_renderLetterBank() {
+        const bank = document.getElementById('missingLetterBank');
+        bank.innerHTML = '';
+
+        const neededLetters = missing_missingIndices.map(i => missing_selectedWord[i]);
+        const distractors = ['A', 'E', 'I', 'O', 'U', 'R', 'S', 'T', 'N']
+            .filter(l => !neededLetters.includes(l)).slice(0, 4);
+        const options = [...neededLetters, ...distractors].sort(() => Math.random() - 0.5);
+
+        options.forEach(letter => {
+            const btn = document.createElement('button');
+            btn.className = 'key-btn';
+            btn.innerText = letter;
+            btn.onclick = () => missing_handleLetterClick(letter, btn);
+            bank.appendChild(btn);
+        });
+    }
+
+    function missing_handleLetterClick(letter, btnElement) {
+        if (missing_finished) return;
+
+        const nextBlank = document.querySelector('.blank-letter:not(.filled)');
+        if (!nextBlank) return;
+
+        const index = parseInt(nextBlank.dataset.index);
+        nextBlank.innerText = letter;
+        nextBlank.classList.add('filled');
+        missing_filledMap[index] = letter;
+        btnElement.disabled = true;
+
+        const allFilled = missing_missingIndices.every(i => missing_filledMap[i]);
+        if (allFilled) missing_checkWord();
+    }
+
+    function missing_checkWord() {
+
+        if (missing_finished) return;
+
+        const isCorrect = missing_missingIndices.every(
+            i => missing_filledMap[i] === missing_selectedWord[i]
+        );
+
+        if (isCorrect) {
+
+            missing_completedWords++;
+
+            document.getElementById('missingCompletedCount').innerText =
+                missing_completedWords;
+
+            setTimeout(missing_loadNewWord, 500);
+
+        } else {
+
+            missing_errors++;
+
+            document.querySelectorAll('.blank-letter').forEach(
+                el => el.classList.add('filled')
+            );
+
+            setTimeout(() => {
+                missing_filledMap = {};
+                missing_renderWordSlots();
+                missing_renderLetterBank();
+            }, 700);
+        }
+    }
+
+
+    function missing_skipWord() {
+        missing_loadNewWord();
+    }
+
+    async function missing_endGame() {
+
+        if (missing_finished) return;
+
+        missing_finished = true;
+
+        clearInterval(missing_timerInterval);
+
+        document.getElementById('missingFinalScore').innerText =
+            missing_completedWords + ' words';
+
+        try {
+            const result = await miniGames_registerResult(
+                'missing_letters',
+                missing_errors
+            );
+
+            document.getElementById('missingFinalScore').innerText +=
+                ` | ${result.xp_earned} XP earned`;
+
+        } catch (error) {
+            console.error('Missing Letters XP error:', error);
+
+            document.getElementById('missingFinalScore').innerText +=
+                ' | Experience could not be registered.';
+        }
+
+        openModal('missingResultModal');
+    }
+
+    function missing_resetGame() {
+        closeModal('missingResultModal');
+        missing_initGame();
+    }
+
+    function missing_exitGame() {
+        // CORRECCIÓN: Asegurar limpiar el intervalo al presionar Exit Game
+        clearInterval(missing_timerInterval);
+        closeModal('missingResultModal');
+        closeModal('missingModal');
+    }
+
+    function missing_playAudioHint() {
+        const audioUrl = missing_currentItem.audio;
+
+        if (!audioUrl) {
+            return;
+        }
+
+        const audio = new Audio(audioUrl);
+        audio.play();
+    }
+
+    function openMissingModal() {
+        missing_initGame();
+        openModal('missingModal');
+    }
+
+    function mini_games_checkAutoOpen() {
+        const params = new URLSearchParams(window.location.search);
+        const game = params.get('game');
+
+        if (game === 'hangman') {
+            openHangmanModal();
+        } else if (game === 'missing-letters') {
+            openMissingModal();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', mini_games_checkAutoOpen);
+</script>

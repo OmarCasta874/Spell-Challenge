@@ -1159,7 +1159,7 @@ class Lista_Leccion(models.Model):
         
 #MODELO EJERCICIO
 class Ejercicio(models.Model):
-    clave = models.CharField(max_length=5, primary_key=True)
+    clave = models.CharField(max_length=8, primary_key=True)
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField()
     leccion = models.ForeignKey(
@@ -1192,7 +1192,7 @@ class Estado_Opcion(models.Model):
         
 #MODELO OPCION
 class Opcion(models.Model):
-    clave = models.CharField(max_length=5, primary_key=True)
+    clave = models.CharField(max_length=8, primary_key=True)
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField()
     estado_opcion = models.ForeignKey(

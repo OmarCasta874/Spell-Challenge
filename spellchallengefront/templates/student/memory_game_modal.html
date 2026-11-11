@@ -34,6 +34,8 @@
 
 <script>
 (function () {
+  console.log('Memory Game script loaded');
+
   'use strict';
 
   var MG_LOGO = "{% static 'img/spell-challenge_red.png' %}";
@@ -77,6 +79,7 @@
 
   var state = null;
   var preloaded = false;
+  var mgFinished = false;
 
   var MG_DIFFICULTIES = {};
 
@@ -284,20 +287,64 @@
   }
 
   function timeOutGame() {
-    if (!state) {
-      return;
-    }
 
-    state.lock = true;
+      if (!state || mgFinished) {
+          return;
+      }
 
-    setTimeout(function () {
-      board.style.display = 'none';
-      resultEl.classList.add('active');
+      mgFinished = true;
+      state.lock = true;
+      console.log('Memory Game: timeOutGame ejecutada');
 
-      document.querySelector('.mg-result-title').innerText = 'Time is up!';
-      document.querySelector('.mg-result-text').innerText = 'You ran out of time. Try again!';
-    }, 300);
+      var resultText = 'You ran out of time. Try again!';
+
+      var playAgainBtn = document.getElementById('mgPlayAgainBtn');
+      var exitBtn = document.getElementById('mgExitBtn');
+
+      playAgainBtn.disabled = true;
+      exitBtn.disabled = true;
+
+      setTimeout(function () {
+
+          board.style.display = 'none';
+
+          document.querySelector('.mg-result-title').innerText =
+              'Time is up!';
+
+          document.querySelector('.mg-result-text').innerText =
+              resultText + ' Registering experience...';
+
+          resultEl.classList.add('active');
+
+      }, 300);
+
+      miniGames_registerResult(
+          'memory_game',
+          state.errors,
+          false
+      )
+      .then(function (result) {
+
+          document.querySelector('.mg-result-text').innerText =
+              resultText + ' You earned ' + result.xp_earned + ' XP.';
+
+      })
+      .catch(function (error) {
+
+          console.error('Memory Game XP error:', error);
+
+          document.querySelector('.mg-result-text').innerText =
+              resultText + ' Your experience could not be registered.';
+
+      })
+      .finally(function () {
+
+          playAgainBtn.disabled = false;
+          exitBtn.disabled = false;
+
+      });
   }
+
 
   function startGame(difficultyKey) {
       var rules = MG_GAME_RULES[difficultyKey];
@@ -330,10 +377,13 @@
           lock: false,
           matched: 0,
           pairs: rules.pairs,
+          errors: 0,
           difficulty: difficultyKey,
           timeLeft: rules.time,
           timer: null
       };
+
+      mgFinished = false;
 
       renderBoard(state.deck);
 
@@ -349,7 +399,7 @@
 
   function onCardClick(e) {
     var btn = e.target.closest('.mg-card');
-    if (!btn || !state || state.lock) return;
+    if (!btn || !state || state.lock || mgFinished) return;
     if (btn.classList.contains('flipped') || btn.classList.contains('matched')) return;
 
     btn.classList.add('flipped');
@@ -374,12 +424,25 @@
         c.classList.add('matched', 'pop');
       });
       state.matched++;
-      if (state.matched === state.pairs) finishGame();
-      return;
+
+      console.log(
+          'Memory Game: pairs matched',
+          state.matched,
+          '/',
+          state.pairs
+      );
+
+      if (state.matched === state.pairs) {
+          console.log('Memory Game: calling finishGame');
+          finishGame();
+      }
     }
 
     // No es par: se muestran un momento y se regresan
     state.lock = true;
+    state.errors++;
+    console.log('Memory Game: error registrado', state.errors);
+
     setTimeout(function () {
       [a, b].forEach(function (c) { c.classList.add('wrong'); });
     }, 350);
@@ -388,22 +451,79 @@
       state.lock = false;
     }, FLIP_BACK_MS + 350);
   }
-
+    
   function finishGame() {
-    if (state && state.timer) {
-      clearInterval(state.timer);
-      state.timer = null;
-    }
 
-    if (state) {
+      if (!state || mgFinished) {
+          return;
+      }
+      console.log(
+          'Memory Game XP function:',
+          typeof miniGames_registerResult
+      );
+
+      console.log(
+          'Memory Game XP tokens:',
+          typeof miniGameRoundTokens,
+          miniGameRoundTokens
+      );
+
+      mgFinished = true;
       state.lock = true;
-    }
 
-    setTimeout(function () {
-      board.style.display = 'none';
-      resultEl.classList.add('active');
-    }, 1200);
+      console.log('Memory Game: finishGame ejecutada');
+
+      clearTimer();
+
+      var resultText = 'You found all the pairs.';
+
+      var playAgainBtn = document.getElementById('mgPlayAgainBtn');
+      var exitBtn = document.getElementById('mgExitBtn');
+
+      playAgainBtn.disabled = true;
+      exitBtn.disabled = true;
+
+      setTimeout(function () {
+
+          board.style.display = 'none';
+
+          document.querySelector('.mg-result-title').innerText =
+              'Well done!';
+
+          document.querySelector('.mg-result-text').innerText =
+              resultText + ' Registering experience...';
+
+          resultEl.classList.add('active');
+
+      }, 1200);
+
+      miniGames_registerResult(
+          'memory_game',
+          state.errors,
+          true
+      )
+      .then(function (result) {
+
+          document.querySelector('.mg-result-text').innerText =
+              resultText + ' You earned ' + result.xp_earned + ' XP!';
+
+      })
+      .catch(function (error) {
+
+          console.error('Memory Game XP error:', error);
+
+          document.querySelector('.mg-result-text').innerText =
+              resultText + ' Your experience could not be registered.';
+
+      })
+      .finally(function () {
+
+          playAgainBtn.disabled = false;
+          exitBtn.disabled = false;
+
+      });
   }
+
 
   /* ---------- Abrir / cerrar ---------- */
   function openMemoryGame() {

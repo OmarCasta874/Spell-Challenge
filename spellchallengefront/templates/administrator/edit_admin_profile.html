@@ -104,6 +104,8 @@
     </div>
   </div>
 </div>
+
+{% include 'base/avatar_crop_modal.html' %}
 {% endblock %}
 
 {% block extra_js %}
@@ -114,22 +116,8 @@
         input.type = input.type === 'password' ? 'text' : 'password';
     }
 
-    document.getElementById('avatarUpload').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = document.getElementById('avatarPreview');
-                const initials = document.getElementById('avatarInitials');
-                
-                img.src = event.target.result;
-                img.classList.remove('d-none');
-                if (initials) {
-                    initials.style.display = 'none';
-                }
-            };
-            reader.readAsDataURL(file);
-        }
+    document.addEventListener('DOMContentLoaded', function() {
+        initAvatarCropper('avatarUpload');
     });
 </script>
 {% endblock %}

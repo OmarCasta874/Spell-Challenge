@@ -3,167 +3,47 @@
 
 {% block extra_css %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'css/practice.css' %}">
+<link rel="stylesheet" href="{% static 'css/mini_games.css' %}">
+<link rel="stylesheet" href="{% static 'css/hangman_modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/missing_letters_modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/memory_game_modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/practice_your_english.css' %}">
+
+<style>
+    .hangman-word-display .letter-slot-transparent {
+        width: 16px;
+        height: 24px;
+        border-bottom: none !important;
+        background: transparent !important;
+    }
+</style>
 {% endblock %}
 
+{% block title %}Practice Hall - Spell-Challenge Student{% endblock %}
+
 {% block student_content %}
-<div class="practice-header">
-  <div class="unit-dropdown">
-    <button class="unit-badge" onclick="toggleUnitDropdown()">
-      <span id="currentUnitLabel">
-        {% if niveles %}
-          UNIT #1: {{ niveles.0.codigo }} - {{ niveles.0.descripcion|upper }}
-        {% else %}
-          NO UNITS AVAILABLE
-        {% endif %}
-      </span>
-    </button>
-    <div class="unit-dropdown-panel" id="unitDropdownPanel">
-      <div class="unit-dropdown-header">
-        <span class="unit-dropdown-title">UNITS</span>
-        <button class="unit-dropdown-close" onclick="toggleUnitDropdown()">&times;</button>
-      </div>
-      <div class="unit-dropdown-list">
-        {% for nivel in niveles %}
-          <button
-            class="unit-option"
-            data-unit="{{ forloop.counter }}"
-            onclick="selectUnit(this)">
-            UNIT #{{ forloop.counter }}: {{ nivel.codigo }} - {{ nivel.descripcion|upper }}
-          </button>
-        {% endfor %}
-      </div>
+
+<div class="text-center">
+    <h1 class="main-title">PRACTICE HALL</h1>
+    <p class="sub-title">Learn, Practice, Challenge, Spell!</p>
+</div>
+
+{% include 'student/partials/mini_games_content.html' %}
+
+<div class="practice-hall-divider">
+    <span></span>
+    <div class="divider-label">
+        <i data-lucide="sparkles"></i>
+        <span>MORE WAYS TO PRACTICE</span>
     </div>
-  </div>
-  <div class="practice-header-icons">
-    <a href="{% url 'practice_your_english' %}" class="dumbbell-btn" title="Practice Your English">
-      <i data-lucide="dumbbell"></i>
-    </a>
-    <i data-lucide="bar-chart-2"></i>
-    <i data-lucide="bell" class="notification-bell"></i>
-  </div>
+    <span></span>
 </div>
-{% for nivel in niveles %}
-<div
-  class="practice-path-wrapper unit-content {% if not forloop.first %}d-none{% endif %}"
-  id="unit-{{ forloop.counter }}">
-  <div class="practice-label">
-    <p class="practice-label-title">UNIT #{{ forloop.counter }} - {{ nivel.codigo }}</p>
-    <p class="practice-label-subtitle">{{ nivel.descripcion }}</p>
-  </div>
-  <div class="practice-path">
-    {% for practica in nivel.practicas.all %}
-      <div class="path-node-wrap {% cycle 'node-low' 'node-high' %}">
-        <button
-          class="path-node node-star"
-          data-bs-toggle="modal"
-          data-bs-target="#practiceModal{{ practica.clave }}"
-          title="{{ practica.lista.nombre }}">
-          <svg viewBox="0 0 24 24" class="star-icon">
-            <path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 16.9 5.8 20.3l1.6-6.8L2.2 8.9l6.9-.6L12 2z"/>
-          </svg>
-        </button>
-      </div>
-      {% if not forloop.last %}
-        <div class="path-connector"></div>
-      {% endif %}
-    {% endfor %}
-  </div>
-  {% if not forloop.last %}
-    <button
-      class="next-unit-btn"
-      onclick="showNextUnit({{ forloop.counter }})"
-      title="Next Unit">
-      <i data-lucide="arrow-right"></i>
-    </button>
-  {% endif %}
-</div>
-{% for practica in nivel.practicas.all %}
-<div
-  class="modal fade"
-  id="practiceModal{{ practica.clave }}"
-  tabindex="-1"
-  aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content practice-modal">
-      <div class="modal-header practice-modal-header">
-        <h5 class="modal-title">
-          PRACTICE #{{ forloop.counter }} - {{ practica.lista.nombre|upper }}
-        </h5>
-        <span class="practice-percent">0%</span>
-        <button
-          type="button"
-          class="btn-close practice-modal-close"
-          data-bs-dismiss="modal"
-          aria-label="Close">
-        </button>
-      </div>
-      <div class="modal-body practice-modal-body">
-        {% for leccion in practica.lecciones.all %}
-          <div class="lesson-row">
-            <span class="lesson-label">
-              LESSON {{ forloop.counter }}
-            </span>
-            <a
-              href="{% url 'lesson' clave_leccion=leccion.clave %}"
-              class="lesson-play-btn">
-              PLAY
-            </a>
-          </div>
-        {% empty %}
-          <p>No lessons available for this practice.</p>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-</div>
-{% endfor %}
-{% empty %}
-<p>No practices available for this unit.</p>
-{% endfor %}
+
+{% include 'student/partials/practice_english_content.html' %}
+
 {% endblock student_content %}
 
 {% block extra_js %}
 {{ block.super }}
-<script>
-  function toggleUnitDropdown() {
-    document.getElementById('unitDropdownPanel').classList.toggle('active');
-  }
-
-  function selectUnit(button) {
-
-    const unitNumber = button.dataset.unit;
-    const unitText = button.textContent.trim();
-
-    document.getElementById('currentUnitLabel').textContent = unitText;
-
-    document.querySelectorAll('.unit-content').forEach(unit => {
-      unit.classList.add('d-none');
-    });
-
-    document.getElementById(`unit-${unitNumber}`).classList.remove('d-none');
-
-    document.getElementById('unitDropdownPanel').classList.remove('active');
-  }
-
-  function showNextUnit(currentUnit) {
-
-    const nextUnit = document.querySelector(
-      `.unit-option[data-unit="${currentUnit + 1}"]`
-    );
-
-    if (nextUnit) {
-      selectUnit(nextUnit);
-    }
-  }
-
-  document.addEventListener('click', function (event) {
-
-    const wrapper = document.querySelector('.unit-dropdown');
-
-    if (wrapper && !wrapper.contains(event.target)) {
-      document.getElementById('unitDropdownPanel').classList.remove('active');
-    }
-  });
-</script>
+{% include 'student/partials/mini_games_scripts.html' %}
 {% endblock %}

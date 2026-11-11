@@ -1,0 +1,58 @@
+<div class="pye-section-heading">
+    <h2 class="pye-title">PRACTICE YOUR ENGLISH</h2>
+    <p class="pye-subtitle">
+        Improve your English skills, one practice at a time!
+    </p>
+</div>
+<div class="pye-grid">
+    <!-- SPELLING -->
+    <div class="pye-card">
+        <i data-lucide="spell-check" class="pye-card-icon"></i>
+        <h3 class="pye-card-title">SPELLING</h3>
+        <p class="pye-card-description">
+            Listen, speak and spell words correctly.
+        </p>
+        <ul class="pye-word-list">
+            <li>Apologize</li>
+            <li>Customs</li>
+            <li>Embarrassment</li>
+        </ul>
+        <a href="{% url 'practice_spelling' %}" class="pye-practice-btn">
+            <i data-lucide="play"></i>
+            START PRACTICE
+        </a>
+    </div>
+    <!-- VOCABULARY -->
+    <div class="pye-card">
+        <i data-lucide="book-open" class="pye-card-icon"></i>
+        <h3 class="pye-card-title">VOCABULARY</h3>
+        <p class="pye-card-description">
+            Match words with their corresponding categories.
+        </p>
+        <div class="pye-match-pair">
+            <span class="pye-match-pill">CAT</span>
+            <span class="pye-match-pill">ANIMALS</span>
+        </div>
+        <a href="{% url 'match_words' %}" class="pye-practice-btn">
+            <i data-lucide="play"></i>
+            START PRACTICE
+        </a>
+    </div>
+    <!-- SPEAKING -->
+    <div class="pye-card">
+        <i data-lucide="mic" class="pye-card-icon"></i>
+        <h3 class="pye-card-title">SPEAKING</h3>
+        <p class="pye-card-description">
+            Practice pronunciation and improve your speaking skills.
+        </p>
+        <ul class="pye-word-list">
+            <li>Photography</li>
+            <li>Mountain</li>
+            <li>Loyalty</li>
+        </ul>
+        <a href="{% url 'practice_speaking' %}" class="pye-practice-btn">
+            <i data-lucide="play"></i>
+            START PRACTICE
+        </a>
+    </div>
+</div>

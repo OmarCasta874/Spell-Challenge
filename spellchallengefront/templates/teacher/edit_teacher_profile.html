@@ -18,7 +18,7 @@
     <form method="POST" action="{% url 'edit_teacher_profile' %}" enctype="multipart/form-data" class="edit-profile-form" id="editTeacherProfileForm">
       {% csrf_token %}
 
-      <!-- Bloque del Avatar centrado idéntico al de Student -->
+      <!-- Bloque del Avatar centrado -->
       <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; width: 100%;">
       
         <!-- Círculo recortado de 140x140px con trazo guinda -->
@@ -31,12 +31,12 @@
             <img src="{% static 'img/teacher.png' %}" alt="Avatar" id="avatarPreview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">
           {% endif %}
 
-          <!-- Botón de la cámara centrado horizontalmente abajo (left: 50%, transform: translateX(-50%)) -->
+          <!-- Botón de la cámara centrado horizontalmente abajo -->
           <label for="avatar-upload" title="Change photo" style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background-color: #7a1f2b; color: #ffffff; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 10; margin: 0; padding: 0;">
             <i data-lucide="camera" style="width: 18px; height: 18px; stroke-width: 2.2;"></i>
           </label>
           
-          <input type="file" id="avatar-upload" name="foto" accept="image/*" hidden onchange="previewAvatar(event)">
+          <input type="file" id="avatar-upload" name="foto" accept="image/*" hidden>
         </div>
 
         <label for="avatar-upload" style="margin-top: 12px; color: #7a1f2b; font-weight: 700; font-size: 0.9rem; cursor: pointer;">
@@ -44,7 +44,7 @@
         </label>
       </div>
 
-      <!-- Campos del Formulario (Grid sin el campo Age) -->
+      <!-- Campos del Formulario -->
       <div class="form-grid-2" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 24px;">
         <div class="form-group">
           <label for="first_name">First Name:</label>
@@ -88,6 +88,7 @@
 
   {% include 'base/cancel_modal.html' with avatar_img='img/teacher.png' cancel_url='teacher_profile' %}
   {% include 'base/save_changes_modal.html' with avatar_img='img/teacher.png' form_id='editTeacherProfileForm' %}
+  {% include 'base/avatar_crop_modal.html' %}
 
 </div>
 {% endblock %}
@@ -95,15 +96,8 @@
 {% block extra_js %}
 {{ block.super }}
 <script>
-  function previewAvatar(event) {
-    const reader = new FileReader();
-    reader.onload = function(){
-      const output = document.getElementById('avatarPreview');
-      output.src = reader.result;
-    };
-    if (event.target.files[0]) {
-      reader.readAsDataURL(event.target.files[0]);
-    }
-  }
+  document.addEventListener('DOMContentLoaded', function() {
+      initAvatarCropper('avatar-upload');
+  });
 </script>
 {% endblock %}

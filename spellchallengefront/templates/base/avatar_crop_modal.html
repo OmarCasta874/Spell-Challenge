@@ -1,0 +1,239 @@
+<!-- CDN de Cropper.js (Estilos y Script) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+<style>
+    /* Estilos del Modal de Recorte */
+    .cropper-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        z-index: 1050;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .cropper-modal-overlay.active {
+        display: flex;
+    }
+
+    .cropper-modal-card {
+        background: #ffffff;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 460px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        overflow: hidden;
+        border: 4px solid #7a1f2b;
+    }
+
+    .cropper-modal-header {
+        background-color: #7a1f2b;
+        color: #ffffff;
+        padding: 1rem 1.2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .cropper-modal-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 800;
+    }
+
+    .cropper-modal-body {
+        padding: 1.2rem;
+        background-color: #f7f7f7;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .cropper-img-wrapper {
+        width: 100%;
+        max-height: 360px;
+        overflow: hidden;
+    }
+
+    .cropper-img-wrapper img {
+        max-width: 100%;
+        display: block;
+    }
+
+    /* Forzar que el visor de recorte se vea circular */
+    .cropper-view-box,
+    .cropper-face {
+        border-radius: 50%;
+    }
+
+    .cropper-modal-footer {
+        padding: 1rem 1.2rem;
+        background-color: #ffffff;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.8rem;
+    }
+
+    .btn-crop-cancel {
+        background-color: #e0e0e0;
+        color: #333333;
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 20px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-crop-apply {
+        background-color: #7a1f2b;
+        color: #ffffff;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 20px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .btn-crop-apply:hover {
+        background-color: #500000;
+    }
+</style>
+
+<div id="cropperModal" class="cropper-modal-overlay">
+    <div class="cropper-modal-card">
+        <div class="cropper-modal-header">
+            <h3>Crop Profile Picture</h3>
+            <button type="button" class="btn-close btn-close-white" onclick="closeCropperModal()"></button>
+        </div>
+
+        <div class="cropper-modal-body">
+            <div class="cropper-img-wrapper">
+                <img id="cropperImageToCrop" src="" alt="Picture to crop">
+            </div>
+        </div>
+
+        <div class="cropper-modal-footer">
+            <button type="button" class="btn-crop-cancel" onclick="closeCropperModal()">Cancel</button>
+            <button type="button" class="btn-crop-apply" onclick="applyCroppedAvatar()">Apply Picture</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let avatarCropperInstance = null;
+    let originalFileInputElement = null;
+
+    /**
+     * Inicializa la escucha en el input file indicado por ID
+     */
+    function initAvatarCropper(inputId) {
+        originalFileInputElement = document.getElementById(inputId);
+        if (!originalFileInputElement) return;
+
+        originalFileInputElement.addEventListener('change', function(e) {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                const file = files[0];
+                const reader = new FileReader();
+
+                reader.onload = function(event) {
+                    const img = document.getElementById('cropperImageToCrop');
+                    img.src = event.target.result;
+
+                    // Abrir el modal
+                    document.getElementById('cropperModal').classList.add('active');
+
+                    // Destruir cropper previo si existía
+                    if (avatarCropperInstance) {
+                        avatarCropperInstance.destroy();
+                    }
+
+                    // Crear nueva instancia de Cropper.js
+                    avatarCropperInstance = new Cropper(img, {
+                        aspectRatio: 1, // Proporción cuadrada 1:1 (ideal para avatares circulares)
+                        viewMode: 1,
+                        dragMode: 'move',
+                        autoCropArea: 0.95,
+                        restore: false,
+                        guides: true,
+                        center: true,
+                        highlight: false,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                        toggleDragModeOnDblclick: false,
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    /**
+     * Cierra el modal y destruye la instancia del Cropper
+     */
+    function closeCropperModal() {
+        document.getElementById('cropperModal').classList.remove('active');
+        if (avatarCropperInstance) {
+            avatarCropperInstance.destroy();
+            avatarCropperInstance = null;
+        }
+        if (originalFileInputElement) {
+            originalFileInputElement.value = ''; // Limpiar selección si cancela
+        }
+    }
+
+    /**
+     * Extrae la imagen recortada, actualiza la vista previa del perfil y adjunta la nueva imagen recortada al input file
+     */
+    function applyCroppedAvatar() {
+        if (!avatarCropperInstance || !originalFileInputElement) return;
+
+        // Generar canvas de 300x300 px
+        const canvas = avatarCropperInstance.getCroppedCanvas({
+            width: 300,
+            height: 300,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+        });
+
+        canvas.toBlob(function(blob) {
+            // 1. Crear un File virtual a partir del Blob recortado
+            const croppedFile = new File([blob], "avatar_cropped.png", { type: "image/png" });
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(croppedFile);
+            originalFileInputElement.files = dataTransfer.files;
+
+            const croppedDataURL = canvas.toDataURL('image/png');
+            
+            const mainPreview = document.getElementById('avatarPreview');
+            if (mainPreview) {
+                mainPreview.src = croppedDataURL;
+                mainPreview.classList.remove('d-none');
+            }
+
+            const initials = document.getElementById('avatarInitials');
+            if (initials) {
+                initials.style.display = 'none';
+            }
+
+            const modalPreview = document.getElementById('modalAvatarPreview');
+            if (modalPreview) {
+                modalPreview.src = croppedDataURL;
+                modalPreview.classList.remove('d-none');
+            }
+            const modalInitials = document.getElementById('modalAvatarInitials');
+            if (modalInitials) {
+                modalInitials.classList.add('d-none');
+            }
+
+            document.getElementById('cropperModal').classList.remove('active');
+            if (avatarCropperInstance) {
+                avatarCropperInstance.destroy();
+                avatarCropperInstance = null;
+            }
+        }, 'image/png');
+    }
+</script>
