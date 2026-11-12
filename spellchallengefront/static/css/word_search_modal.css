@@ -1,0 +1,352 @@
+/* WORD SEARCH MODAL */
+:root {
+    --ws-red: #a62a2a;
+    --ws-cell: #fb6b6b;
+    --ws-cell-hover: #ff8080;
+    --ws-selected: #f2b93f;
+    --ws-found: #4cc17b;
+    --ws-found-dark: #2e8f57;
+}
+
+.ws-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(30, 8, 12, 0.55);
+}
+
+.ws-overlay.active {
+    display: flex;
+}
+
+.ws-content {
+    width: min(95vw, 850px);
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    padding: 22px 28px 30px;
+    border-radius: 22px;
+    background: var(--ws-red);
+    color: #fff;
+    font-family: 'Lato', 'Inter', sans-serif;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.4);
+
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.45) transparent;
+}
+
+.ws-content::-webkit-scrollbar {
+    width: 7px;
+}
+
+.ws-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.ws-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 999px;
+}
+
+.ws-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ws-back span {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.ws-back svg {
+    width: 24px;
+    height: 24px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.2s;
+}
+
+.ws-back:hover svg {
+    transform: translateX(-3px);
+}
+
+.ws-back:focus-visible,
+.ws-btn:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+.ws-title {
+    margin: 8px 0 8px;
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+}
+
+.ws-instructions {
+    margin: 0 0 24px;
+    text-align: center;
+    font-size: 1rem;
+    opacity: 0.95;
+}
+
+.ws-game-info {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    margin-bottom: 24px;
+}
+
+.ws-info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.ws-info-label {
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.1rem;
+    opacity: 0.8;
+}
+
+.ws-info-item strong {
+    font-size: 1.25rem;
+    font-weight: 900;
+}
+
+.ws-word-panel {
+    margin-bottom: 22px;
+    padding: 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.ws-word-panel h3 {
+    margin: 0 0 14px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: 0.06rem;
+}
+
+.ws-word-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.ws-word-item {
+    padding: 7px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 900;
+    letter-spacing: 0.04rem;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+.ws-word-item.found {
+    border-color: var(--ws-found);
+    background: var(--ws-found);
+    color: #fff;
+    text-decoration: line-through;
+    opacity: 0.85;
+}
+
+.ws-board-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.ws-board {
+    display: grid;
+    grid-template-columns: repeat(15, minmax(0, 1fr));
+    gap: 3px;
+    width: min(100%, 600px);
+    aspect-ratio: 1;
+    padding: 8px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.15);
+    user-select: none;
+    touch-action: none;
+}
+
+.ws-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: none;
+    border-radius: 5px;
+    background: var(--ws-cell);
+    color: #fff;
+    font-family: 'Lato', 'Inter', sans-serif;
+    font-size: clamp(0.55rem, 2vw, 1.15rem);
+    font-weight: 900;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ws-cell:hover {
+    background: var(--ws-cell-hover);
+}
+
+.ws-cell-selected {
+    background: var(--ws-selected);
+    color: #5c1414;
+    transform: scale(0.95);
+}
+
+.ws-cell.found {
+    background: var(--ws-found);
+    color: #fff;
+    cursor: default;
+}
+
+.ws-cell:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -2px;
+}
+
+.ws-feedback {
+    min-height: 24px;
+    margin: 18px 0 0;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.ws-result {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 35px 0 10px;
+    text-align: center;
+}
+
+.ws-result.active {
+    display: flex;
+}
+
+.ws-result-title {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 900;
+}
+
+.ws-result-text {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.ws-result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.ws-btn {
+    padding: 10px 26px;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s;
+}
+
+.ws-btn:hover {
+    transform: translateY(-1px);
+}
+
+.ws-btn-solid {
+    background: #fff;
+    color: var(--ws-red);
+}
+
+.ws-btn-ghost {
+    background: transparent;
+    color: #fff;
+}
+
+.ws-btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+    .ws-content {
+        padding: 16px 12px 22px;
+    }
+
+    .ws-title {
+        font-size: 1.35rem;
+    }
+
+    .ws-instructions {
+        font-size: 0.9rem;
+    }
+
+    .ws-game-info {
+        gap: 35px;
+    }
+
+    .ws-board {
+        gap: 2px;
+        padding: 5px;
+    }
+
+    .ws-cell {
+        border-radius: 3px;
+        font-size: clamp(0.48rem, 3.1vw, 0.85rem);
+    }
+
+    .ws-word-item {
+        padding: 6px 9px;
+        font-size: 0.75rem;
+    }
+
+    .ws-result-title {
+        font-size: 1.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ws-back svg,
+    .ws-cell,
+    .ws-word-item,
+    .ws-btn {
+        transition: none;
+    }
+}

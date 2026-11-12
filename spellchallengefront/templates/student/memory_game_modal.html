@@ -434,8 +434,13 @@
 
       if (state.matched === state.pairs) {
           console.log('Memory Game: calling finishGame');
-          finishGame();
+
+          setTimeout(function () {
+            finishGame();
+          }, 1200);
       }
+
+      return;
     }
 
     // No es par: se muestran un momento y se regresan
@@ -451,12 +456,13 @@
       state.lock = false;
     }, FLIP_BACK_MS + 350);
   }
-    
+
   function finishGame() {
 
       if (!state || mgFinished) {
           return;
       }
+
       console.log(
           'Memory Game XP function:',
           typeof miniGames_registerResult
@@ -483,19 +489,15 @@
       playAgainBtn.disabled = true;
       exitBtn.disabled = true;
 
-      setTimeout(function () {
+      board.style.display = 'none';
 
-          board.style.display = 'none';
+      document.querySelector('.mg-result-title').innerText =
+          'Well done!';
 
-          document.querySelector('.mg-result-title').innerText =
-              'Well done!';
+      document.querySelector('.mg-result-text').innerText =
+          resultText + ' Registering experience...';
 
-          document.querySelector('.mg-result-text').innerText =
-              resultText + ' Registering experience...';
-
-          resultEl.classList.add('active');
-
-      }, 1200);
+      resultEl.classList.add('active');
 
       miniGames_registerResult(
           'memory_game',
@@ -523,7 +525,6 @@
 
       });
   }
-
 
   /* ---------- Abrir / cerrar ---------- */
   function openMemoryGame() {

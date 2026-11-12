@@ -1,0 +1,694 @@
+<div class="ws-overlay" id="wordSearchModal" role="dialog" aria-modal="true" aria-labelledby="wsTitle">
+    <div class="ws-content">
+        <button type="button" class="ws-back" id="wsBackBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Mini Games</span>
+        </button>
+
+        <h2 class="ws-title" id="wsTitle">WORD SEARCH</h2>
+
+        <p class="ws-instructions">
+            Find all the hidden English words in the letter grid!
+        </p>
+        <div class="ws-game-info" id="wsGameInfo">
+            <div class="ws-info-item">
+                <span class="ws-info-label">FOUND</span>
+                <strong id="wsFoundCount">0 / 0</strong>
+            </div>
+
+            <div class="ws-info-item">
+                <span class="ws-info-label">TIME</span>
+                <strong id="wsTimerValue">00:00</strong>
+            </div>
+        </div>
+        <div class="ws-word-panel">
+            <h3>FIND THESE WORDS</h3>
+            <div class="ws-word-list" id="wsWordList">
+            </div>
+        </div>
+
+        <div class="ws-board-container">
+            <div class="ws-board" id="wsBoard" role="grid" aria-label="Word search puzzle">
+            </div>
+        </div>
+
+        <p class="ws-feedback" id="wsFeedback" aria-live="polite">
+            Select letters to find a word.
+        </p>
+
+        <div class="ws-result" id="wsResult">
+            <h3 class="ws-result-title" id="wsResultTitle">
+                Well done!
+            </h3>
+
+            <p class="ws-result-text" id="wsResultText">
+                You found all the hidden words.
+            </p>
+
+            <div class="ws-result-actions">
+                <button type="button" class="ws-btn ws-btn-solid" id="wsPlayAgainBtn">
+                    PLAY AGAIN
+                </button>
+
+                <button type="button" class="ws-btn ws-btn-ghost" id="wsExitBtn">
+                    BACK TO MINI GAMES
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{{ word_search_vocabulary|json_script:"wordSearchVocabularyData" }}
+<script>
+(function () {
+    'use strict';
+
+    console.log('Word Search script loaded');
+
+    const overlay = document.getElementById('wordSearchModal');
+    const board = document.getElementById('wsBoard');
+    const result = document.getElementById('wsResult');
+
+    const wordSearchVocabularyElement = document.getElementById('wordSearchVocabularyData');
+
+    const wordSearchVocabulary = JSON.parse(
+        wordSearchVocabularyElement.textContent
+    );
+
+    const WS_GRID_SIZE = 15;
+
+    function wordSearch_getRandomWords() {
+        let availableWords = [];
+
+        // Reunir palabras de todas las longitudes disponibles.
+        for (let length = 6; length <= 12; length++) {
+            const words = wordSearchVocabulary[length] || [];
+
+            availableWords.push(...words);
+        }
+
+        // Eliminar posibles duplicados.
+        availableWords = [...new Set(availableWords)];
+
+        // Mezclar aleatoriamente las palabras.
+        availableWords.sort(() => Math.random() - 0.5);
+
+        // Seleccionar entre 10 y 15 palabras.
+        const averageLength = availableWords.length > 0
+            ? availableWords.reduce((sum, word) => sum + word.length, 0)
+                / availableWords.length
+            : 0;
+
+        let targetCount = 15;
+
+        if (averageLength >= 10) {
+            targetCount = 10;
+        } else if (averageLength >= 8) {
+            targetCount = 12;
+        }
+
+        return availableWords.slice(
+            0,
+            Math.min(targetCount, availableWords.length)
+        );
+    }
+
+    const WS_DIRECTIONS = [
+        { row: 0, col: 1 },
+        { row: 0, col: -1 },
+        { row: 1, col: 0 },
+        { row: -1, col: 0 },
+        { row: 1, col: 1 },
+        { row: 1, col: -1 },
+        { row: -1, col: 1 },
+        { row: -1, col: -1 }
+    ];
+
+    let wordSearch_grid = [];
+    let wordSearch_placedWords = [];
+
+    let wordSearch_timer = null;
+    let wordSearch_elapsedSeconds = 0;
+    let wordSearch_penaltyApplied = false;
+    let wordSearch_finished = false;
+
+    function wordSearch_formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+
+        return (
+            String(minutes).padStart(2, '0') + 
+            ':' +
+            String(remainingSeconds).padStart(2, '0')
+        );
+    }
+
+    function wordSearch_stopTimer() {
+        if (wordSearch_timer !== null) {
+            clearInterval(wordSearch_timer);
+            wordSearch_timer = null;
+        }
+    }
+
+    function wordSearch_startTimer() {
+        wordSearch_stopTimer();
+
+        wordSearch_elapsedSeconds = 0;
+        wordSearch_penaltyApplied = false;
+
+        const timerDisplay = document.getElementById('wsTimerValue');
+
+        timerDisplay.textContent = '00:00';
+
+        wordSearch_timer = setInterval(function () {
+
+            if (wordSearch_finished) {
+                wordSearch_stopTimer();
+                return;
+            }
+
+            wordSearch_elapsedSeconds++;
+
+            timerDisplay.textContent = wordSearch_formatTime(
+                wordSearch_elapsedSeconds
+            );
+
+            // Penalización al alcanzar los cinco minutos.
+            if (
+                wordSearch_elapsedSeconds >= 300 &&
+                !wordSearch_penaltyApplied
+            ) {
+                wordSearch_penaltyApplied = true;
+
+                document.getElementById('wsFeedback').textContent =
+                    'Time limit reached! Your reward will be reduced by 1 XP.';
+            }
+
+        }, 1000);
+    }
+
+    function wordSearch_finishGame() {
+        if (wordSearch_finished) return;
+
+        wordSearch_finished = true;
+        wordSearch_stopTimer();
+
+        const errors = wordSearch_penaltyApplied ? 1 : 0;
+
+        document.getElementById('wsFeedback').textContent =
+            'Puzzle completed! Calculating your reward...';
+
+        miniGames_registerResult(
+            'word_search',
+            errors,
+            true
+        )
+        .then(function (response) {
+            document.getElementById('wsResultTitle').textContent =
+                'Excellent work!';
+
+            document.getElementById('wsResultText').textContent =
+                'You found all the hidden words and earned ' +
+                response.xp_earned + ' XP!';
+
+            result.classList.add('active');
+        })
+        .catch(function (error) {
+            console.error('Word Search XP error:', error);
+
+            document.getElementById('wsResultTitle').textContent =
+                'Puzzle completed!';
+
+            document.getElementById('wsResultText').textContent =
+                'Your puzzle was completed, but your XP could not be registered.';
+
+            result.classList.add('active');
+        });
+    }
+
+    let wordSearch_foundWords = new Set();
+    let wordSearch_selectedCells = [];
+    let wordSearch_isSelecting = false;
+    let wordSearch_startCell = null;
+
+    function wordSearch_generateGrid() {
+        wordSearch_grid = [];
+
+        for (let row = 0; row < WS_GRID_SIZE; row++) {
+            let currentRow = [];
+
+            for (let col = 0; col < WS_GRID_SIZE; col++) {
+                currentRow.push('');
+            }
+
+            wordSearch_grid.push(currentRow);
+        }
+    }
+    // ---------- Colocar palabras en la cuadrícula ----------
+
+    function wordSearch_placeWords(words) {
+
+        wordSearch_placedWords = [];
+
+        // Primero intentamos colocar las palabras más largas.
+        const sortedWords = [...words].sort(
+            (a, b) => b.length - a.length
+        );
+
+        sortedWords.forEach(function (word) {
+
+            let placed = false;
+            let attempts = 0;
+            const maxAttempts = 1000;
+
+            while (!placed && attempts < maxAttempts) {
+
+                attempts++;
+
+                const direction = WS_DIRECTIONS[
+                    Math.floor(Math.random() * WS_DIRECTIONS.length)
+                ];
+
+                const startRow = Math.floor(
+                    Math.random() * WS_GRID_SIZE
+                );
+
+                const startCol = Math.floor(
+                    Math.random() * WS_GRID_SIZE
+                );
+
+                const endRow =
+                    startRow + direction.row * (word.length - 1);
+
+                const endCol =
+                    startCol + direction.col * (word.length - 1);
+
+                // Comprobar que la palabra no salga del tablero.
+                if (
+                    endRow < 0 ||
+                    endRow >= WS_GRID_SIZE ||
+                    endCol < 0 ||
+                    endCol >= WS_GRID_SIZE
+                ) {
+                    continue;
+                }
+
+                let validPosition = true;
+
+                // Comprobar que no existan letras incompatibles.
+                for (let i = 0; i < word.length; i++) {
+
+                    const row = startRow + direction.row * i;
+                    const col = startCol + direction.col * i;
+
+                    const existingLetter = wordSearch_grid[row][col];
+
+                    if (
+                        existingLetter !== '' &&
+                        existingLetter !== word[i]
+                    ) {
+                        validPosition = false;
+                        break;
+                    }
+                }
+
+                if (!validPosition) {
+                    continue;
+                }
+
+                // Colocar las letras.
+                for (let i = 0; i < word.length; i++) {
+
+                    const row = startRow + direction.row * i;
+                    const col = startCol + direction.col * i;
+
+                    wordSearch_grid[row][col] = word[i];
+                }
+
+                wordSearch_placedWords.push({
+                    word: word,
+                    startRow: startRow,
+                    startCol: startCol,
+                    endRow: endRow,
+                    endCol: endCol
+                });
+
+                placed = true;
+            }
+
+            if (!placed) {
+                console.warn(
+                    'Word Search: could not place word:',
+                    word
+                );
+            }
+        });
+
+        // Devolver únicamente las palabras que sí fueron colocadas.
+        return wordSearch_placedWords.map(
+            item => item.word
+        );
+    }
+
+
+    function wordSearch_fillEmptyCells() {
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        for (let row = 0; row < WS_GRID_SIZE; row++) {
+            for (let col = 0; col < WS_GRID_SIZE; col++) {
+                if (wordSearch_grid[row][col] === '') {
+                    const randomIndex = Math.floor(
+                        Math.random() * alphabet.length
+                    );
+
+                    wordSearch_grid[row][col] = alphabet[randomIndex];
+                }
+            }
+        }
+    }
+    // ---------- Renderizar tablero ----------
+
+    function wordSearch_renderGrid() {
+
+        board.innerHTML = '';
+
+        for (let row = 0; row < WS_GRID_SIZE; row++) {
+
+            for (let col = 0; col < WS_GRID_SIZE; col++) {
+
+                const cell = document.createElement('button');
+
+                cell.type = 'button';
+                cell.className = 'ws-cell';
+
+                cell.innerText = wordSearch_grid[row][col];
+
+                cell.dataset.row = row;
+                cell.dataset.col = col;
+
+                cell.setAttribute(
+                    'aria-label',
+                    'Row ' + (row + 1) +
+                    ', Column ' + (col + 1) +
+                    ', Letter ' + wordSearch_grid[row][col]
+                );
+
+                board.appendChild(cell);
+            }
+        }
+    }
+
+    // ---------- Renderizar lista de palabras ----------
+
+    function wordSearch_renderWordList() {
+        const wordList = document.getElementById('wsWordList');
+        wordList.innerHTML = '';
+
+        wordSearch_placedWords.forEach(item => {
+            const wordElement = document.createElement('span');
+
+            wordElement.className = 'ws-word-item';
+            wordElement.textContent = item.word;
+            wordElement.dataset.word = item.word;
+
+            wordList.appendChild(wordElement);
+        });
+
+        document.getElementById('wsFoundCount').textContent =
+            `0 / ${wordSearch_placedWords.length}`;
+    }
+
+    function wordSearch_getSelectionPath(startRow, startCol, endRow, endCol) {
+        const rowDifference = endRow - startRow;
+        const colDifference = endCol - startCol;
+
+        const rowStep = Math.sign(rowDifference);
+        const colStep = Math.sign(colDifference);
+
+        // Solo permite líneas horizontales, verticales o diagonales.
+        if (
+            rowDifference !== 0 &&
+            colDifference !== 0 &&
+            Math.abs(rowDifference) !== Math.abs(colDifference)
+        ) {
+            return [];
+        }
+
+        const steps = Math.max(
+            Math.abs(rowDifference),
+            Math.abs(colDifference)
+        );
+
+        const path = [];
+
+        for (let i = 0; i <= steps; i++) {
+            const row = startRow + (rowStep * i);
+            const col = startCol + (colStep * i);
+
+            path.push({
+                row,
+                col,
+                element: board.querySelector(
+                    `[data-row="${row}"][data-col="${col}"]`
+                )
+            });
+        }
+
+        return path;
+    }
+
+    function wordSearch_updateSelection(endCell) {
+        if (!wordSearch_startCell) return;
+
+        const endRow = Number(endCell.dataset.row);
+        const endCol = Number(endCell.dataset.col);
+
+        const path = wordSearch_getSelectionPath(
+            wordSearch_startCell.row,
+            wordSearch_startCell.col,
+            endRow,
+            endCol
+        );
+
+        if (path.length === 0) return;
+
+        wordSearch_selectedCells.forEach(cell => {
+            cell.element.classList.remove('selected');
+        });
+
+        wordSearch_selectedCells = path;
+
+        wordSearch_selectedCells.forEach(cell => {
+            cell.element.classList.add('selected');
+        });
+    }
+
+    function wordSearch_checkSelection() {
+        if (wordSearch_selectedCells.length < 2) return;
+
+        const selectedWord = wordSearch_selectedCells
+            .map(cell => wordSearch_grid[cell.row][cell.col])
+            .join('');
+
+        const reversedWord = selectedWord.split('').reverse().join('');
+
+        const matchedWord = wordSearch_placedWords.find(item =>
+            !wordSearch_foundWords.has(item.word) &&
+            (item.word === selectedWord || item.word === reversedWord)
+        );
+
+        if (matchedWord) {
+            wordSearch_foundWords.add(matchedWord.word);
+
+            wordSearch_selectedCells.forEach(cell => {
+                cell.element.classList.remove('selected');
+                cell.element.classList.add('found');
+            });
+
+            const wordElement = document.querySelector(
+                `.ws-word-item[data-word="${matchedWord.word}"]`
+            );
+
+            if (wordElement) {
+                wordElement.classList.add('found');
+            }
+
+            document.getElementById('wsFoundCount').textContent =
+                `${wordSearch_foundWords.size} / ${wordSearch_placedWords.length}`;
+
+            document.getElementById('wsFeedback').textContent =
+                `Great job! You found ${matchedWord.word}!`;
+
+            // Comprueba si se encontraron todas las palabras.
+            if (wordSearch_foundWords.size === wordSearch_placedWords.length) {
+                wordSearch_finishGame();
+            }
+
+        } else {
+            wordSearch_selectedCells.forEach(cell => {
+                cell.element.classList.remove('selected');
+            });
+
+            document.getElementById('wsFeedback').textContent =
+                'Not quite! Try another word.';
+        }
+
+        wordSearch_selectedCells = [];
+    }
+
+    // ---------- Eventos de selección ----------
+
+    board.addEventListener('pointerdown', function (event) {
+        const cell = event.target.closest('.ws-cell');
+
+        if (!cell || cell.classList.contains('found')) return;
+
+        event.preventDefault();
+
+        wordSearch_isSelecting = true;
+
+        wordSearch_startCell = {
+            row: Number(cell.dataset.row),
+            col: Number(cell.dataset.col)
+        };
+
+        wordSearch_selectedCells = [];
+
+        wordSearch_updateSelection(cell);
+    });
+
+    board.addEventListener('pointerover', function (event) {
+        if (!wordSearch_isSelecting) return;
+
+        const cell = event.target.closest('.ws-cell');
+
+        if (!cell) return;
+
+        wordSearch_updateSelection(cell);
+    });
+
+    document.addEventListener('pointerup', function () {
+        if (!wordSearch_isSelecting) return;
+
+        wordSearch_isSelecting = false;
+
+        wordSearch_checkSelection();
+
+        wordSearch_startCell = null;
+    });
+
+    document.addEventListener('pointercancel', function () {
+        wordSearch_isSelecting = false;
+
+        wordSearch_selectedCells.forEach(cell => {
+            cell.element.classList.remove('selected');
+        });
+
+        wordSearch_selectedCells = [];
+        wordSearch_startCell = null;
+    });
+
+    function wordSearch_initGame() {
+        wordSearch_foundWords.clear();
+        wordSearch_selectedCells = [];
+        wordSearch_isSelecting = false;
+        wordSearch_startCell = null;
+
+        wordSearch_stopTimer();
+
+        wordSearch_elapsedSeconds = 0;
+        wordSearch_penaltyApplied = false;
+        wordSearch_finished = false;
+
+        const selectedWords = wordSearch_getRandomWords();
+
+        if (selectedWords.length === 0) {
+            document.getElementById('wsFeedback').textContent =
+                'No words are currently available. Please try again later.';
+
+            board.innerHTML = '';
+            return;
+        }
+
+        wordSearch_generateGrid();
+
+        const placedWords = wordSearch_placeWords(selectedWords);
+
+        if (placedWords.length === 0) {
+            document.getElementById('wsFeedback').textContent =
+                'Unable to generate the puzzle. Please try again.';
+
+            board.innerHTML = '';
+            return;
+        }
+
+        wordSearch_fillEmptyCells();
+
+        wordSearch_renderGrid();
+
+        wordSearch_renderWordList();
+
+        result.classList.remove('active');
+
+        board.style.display = '';
+
+        document.getElementById('wsGameInfo').style.display = '';
+
+        document.getElementById('wsFeedback').innerText = 'Select letters to find a word.';
+
+        console.log('Word Search: words placed', wordSearch_placedWords);
+
+        wordSearch_startTimer();
+    }
+
+    function openWordSearch() {
+        wordSearch_initGame();
+
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeWordSearch() {
+        wordSearch_stopTimer();
+        
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    window.openWordSearch = openWordSearch;
+    window.closeWordSearch = closeWordSearch;
+
+    document.getElementById('wsBackBtn').addEventListener(
+        'click',
+        closeWordSearch
+    );
+
+    document.getElementById('wsExitBtn').addEventListener(
+        'click',
+        closeWordSearch
+    );
+
+    document.getElementById('wsPlayAgainBtn').addEventListener('click', function () {
+        wordSearch_initGame();
+    });
+
+    overlay.addEventListener('click', function (event) {
+        if (event.target === overlay) {
+            closeWordSearch();
+        }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (
+            event.key === 'Escape' &&
+            overlay.classList.contains('active')
+        ) {
+            closeWordSearch();
+        }
+    });
+
+})();
+</script>

@@ -13,7 +13,7 @@ from home.models import Nivel, Dificultad, Dificultad_Juego, Insignia, Intento_P
 from home.models import Proceso_Lista, Rango, Ranking, Reporte, TipoRanking, UsuarioManager, Juego, Practica_Sesion, Competencia_Alumno
 from home.models import Leccion, Lista_Leccion, Competencia, Lista_Competencia, Alumno_Leccion, Grupo_Carrera, Bitacora_Administrador
 from home.models import Bitacora_Profesor, Puntaje, Contenido_Leccion, Ejercicio, Ejercicio_Opcion, Estado_Opcion, Copia_Seguridad, Opcion
-import json, os, subprocess
+import json, os, subprocess, re, unicodedata
 from .mascot import say
 from datetime import date, timedelta, datetime
 import random, string, secrets
@@ -2063,13 +2063,14 @@ def practices(request):
             'hangman': 'ph_hangman_round_token',
             'missing_letters': 'ph_missing_round_token',
             'memory_game': 'ph_memory_round_token',
+            'word_search': 'ph_word_search_round_token',
         }
         
         if game not in valid_games:
             return JsonResponse({
                 'success': False,
                 'message': 'Invalid or expired game session.'
-            }, staus=400)
+            }, status=400)
             
         session_key = valid_games[game]
         session_token = request.session.get(session_key)
@@ -2096,6 +2097,11 @@ def practices(request):
                 xp_earned = 0
             else:
                 xp_earned = max(0, 20 - (errors // 5))
+        elif game == 'word_search':
+            if not completed:
+                xp_earned = 0
+            else:
+                xp_earned = max(0, 20 - errors)
         else:
             xp_earned = max(0, 20 - errors)
             
@@ -2154,6 +2160,40 @@ def practices(request):
             'level': palabra.nivel.codigo,
         })
         
+    word_search_vocabulary = {
+        length: [] for length in range(6, 13)
+    }
+    
+    all_words = Palabra.objects.all().order_by(
+        'codigo'
+    ).values_list(
+        'significado',
+        flat=True
+    )
+    
+    for significado in all_words:
+        normalized_word = unicodedata.normalize(
+            'NFKD',
+            significado.upper()
+        ).encode(
+            'ASCII',
+            'ignore'
+        ).decode('ASCII')
+        
+        normalized_word = re.sub(
+            r'[^A-Z]',
+            '',
+            normalized_word
+        )
+        
+        word_length = len(normalized_word)
+        
+        if 6 <= word_length <= 12:
+            if normalized_word not in word_search_vocabulary[word_length]:
+                word_search_vocabulary[word_length].append(
+                    normalized_word
+                )
+        
     memory_words = Palabra.objects.filter(
         imagen__isnull=False
     ).exclude(
@@ -2184,17 +2224,20 @@ def practices(request):
         'hangman': secrets.token_urlsafe(32),
         'missing_letters': secrets.token_urlsafe(32),
         'memory_game': secrets.token_urlsafe(32),
+        'word_search': secrets.token_urlsafe(32),
     }
     
     request.session['ph_hangman_round_token'] = round_tokens['hangman']
     request.session['ph_missing_round_token'] = round_tokens['missing_letters']
     request.session['ph_memory_round_token'] = round_tokens['memory_game']
+    request.session['ph_word_search_round_token'] = round_tokens['word_search']
     
     context = {
         'niveles': niveles,
         'vocabulary': vocabulary,
         'memory_vocabulary': memory_vocabulary,
         'memory_difficulties': memory_difficulties,
+        'word_search_vocabulary': word_search_vocabulary,
         'round_tokens': round_tokens,
     }
     
