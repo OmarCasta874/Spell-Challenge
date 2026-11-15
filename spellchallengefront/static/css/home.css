@@ -15,6 +15,17 @@
   margin-bottom: 1.25rem;
 }
 
+.dashboard-welcome-card {
+  min-height: 145px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dashboard-welcome-card .current-unit-subtitle {
+  margin-bottom: 0;
+}
+
 .welcome-text {
   font-size: 0.8rem;
   color: #777;
@@ -72,7 +83,7 @@
 /* UNIT STAT CARDS */
 .unit-stats-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   margin-bottom: 1.25rem;
 }
@@ -97,6 +108,17 @@
   font-size: 1.5rem;
   color: #111;
   margin: 0;
+}
+
+.dashboard-stat-card {
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dashboard-stat-card .unit-stat-value {
+  color: #7a1f2b;
 }
 
 /* UNIT 2 PROGRESS CARD */
@@ -157,9 +179,9 @@
 
 .mini-games-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .mini-game-card {
@@ -193,6 +215,39 @@
 
 .play-link i { width: 14px; height: 14px; }
 .play-link:hover { color: #5c1620; }
+
+.practice-hall-prompt {
+  text-align: center;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.practice-hall-title {
+  color: #7a1f2b;
+  font-weight: 800;
+  font-size: 0.9rem;
+  margin: 0 0 0.25rem;
+}
+
+.practice-hall-description {
+  color: #777;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.practice-hall-description a {
+  color: #7a1f2b;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.practice-hall-description a:hover {
+  color: #5c1620;
+  text-decoration: underline;
+}
 
 .mini-game-card-view-all {
   align-items: center;
@@ -788,6 +843,6 @@
 /* RESPONSIVE */
 @media (max-width: 992px) {
   .home-row { grid-template-columns: 1fr; }
-  .unit-stats-row { grid-template-columns: 1fr 1fr; }
-  .mini-games-row { grid-template-columns: 1fr; }
+  .unit-stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mini-games-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

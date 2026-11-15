@@ -6,8 +6,8 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
 from functools import wraps
 from django.db import transaction
-from django.db.models import Count, Avg, Q, ProtectedError, Prefetch, F
-from home.models import Usuario, TipoUsuario, Profesor, Alumno, Administrador, Grupo, Palabra, Notificacion
+from django.db.models import Count, Avg, Q, ProtectedError, Prefetch, F, Sum
+from home.models import Usuario, TipoUsuario, Profesor, Alumno, Administrador, Grupo, Palabra, Notificacion, Pista_Boss_Battle
 from home.models import Carrera, Categoria, Alumno_Insignia, Alumno_Practica, Lista_Grupo, Grupo_Alumno
 from home.models import Nivel, Dificultad, Dificultad_Juego, Insignia, Intento_Palabra, Lista, Lista_Palabra, Competencia_Profesor
 from home.models import Proceso_Lista, Rango, Ranking, Reporte, TipoRanking, UsuarioManager, Juego, Practica_Sesion, Competencia_Alumno
@@ -299,7 +299,7 @@ def dashboard(request):
         ).values(
             'nivel__codigo'
         ).annotate(
-            total=Count('matricula')
+            total=Count('matricula', distinct=True)
         ).order_by('nivel__codigo')
     
     level_counts = {
@@ -325,65 +325,27 @@ def dashboard(request):
         else:
             level_percentages[level] = 0
             
-    group_performance = []
+    alumnos_ids = Grupo_Alumno.objects.filter(
+        grupo__in=grupos
+    ).values_list(
+        'alumno_id',
+        flat=True
+    ).distinct()
     
-    for grupo in grupos:
-        average = Practica_Sesion.objects.filter(
-            alumnos__alumno__grupo_alumnos__grupo=grupo
-        ).aggregate(
-            average=Avg('porcentaje_aciertos')
-        )['average']
-        
-        group_performance.append({
-            'nombre': grupo.nombre,
-            'average': round(average, 1) if average is not None else 0
-        })
-        
-    all_performance = Practica_Sesion.objects.filter(
-        alumnos__alumno__grupo_alumnos__grupo__in=grupos
-    ).aggregate(
-        average=Avg('porcentaje_aciertos')
-    )['average']
-    
-    average_score = round(
-        all_performance, 1
-    ) if all_performance is not None else 0
-    
-    challenging_words = (
-        Intento_Palabra.objects
-        .filter(
-            practica_sesion__alumnos__alumno__grupo_alumnos__grupo__in=grupos
-        )
-        .values(
-            'palabra__significado'
-        )
-        .annotate(
-            total_attempts=Count('clave'),
-            failed_attempts=Count(
-                'clave',
-                filter=Q(acertado=0)
-            )
-        )
+    alumnos = Alumno.objects.filter(
+        matricula__in=alumnos_ids
     )
     
-    challenging_words_data = []
+    total_xp = alumnos.aggregate(
+        total=Sum('puntos_experiencia')
+    )['total'] or 0
     
-    for word in challenging_words:
-        miss_rate = (
-            (word['failed_attempts'] / word['total_attempts']) * 100
-        )
-        
-        challenging_words_data.append({
-            'word': word['palabra__significado'],
-            'miss_rate': round(miss_rate, 1)
-        })
-        
-    challenging_words_data.sort(
-        key=lambda x: x['miss_rate'],
-        reverse=True
-    )
-    
-    challenging_words_data = challenging_words_data[:5]
+    top_students = alumnos.select_related(
+        'nivel'
+    ).order_by(
+        '-puntos_experiencia',
+        'nombre_pila'
+    )[:5]
     
     return render(
         request, 
@@ -396,9 +358,8 @@ def dashboard(request):
             'total_competitions': total_competitions,
             'level_counts': level_counts,
             'level_percentages': level_percentages,
-            'group_performance': group_performance,
-            'average_score': average_score,
-            'challenging_words': challenging_words_data,
+            'total_xp': total_xp,
+            'top_students': top_students,
             'bitacoras': bitacoras,
         }
     )
@@ -449,6 +410,13 @@ def my_groups(request):
             return redirect('teacher_groups')
     
     grupos = Grupo.objects.filter(profesor=profesor)
+    
+    if not grupos.exists() and not request.session.get("mascot_msg"):
+        say(
+            request,
+            "Ready to build your classroom?",
+            "Create your first group and invite your students to join Spell-Challenge. Your teaching adventure starts here!"
+        )
     
     return render(
         request, 
@@ -579,6 +547,13 @@ def word_lists(request):
     
     categorias = Categoria.objects.all().order_by('nombre')
     niveles = Nivel.objects.all().order_by('codigo')
+    
+    if not listas.exists() and not request.session.get("mascot_msg"):
+        say(
+            request,
+            "Let's build your vocabulary!",
+            "Create your first Word List and start preparing exciting spelling challenges for your students!"
+        )
     
     return render(request, 'teacher/word_lists.html', {
         'listas': listas,
@@ -1228,52 +1203,28 @@ def student_home(request):
         
         posicion = 0
         xp_anterior = None
-        alumno.posicion_ranking = None
+        alumno.posicion_global_ranking = None
         
-        for indice, estudiante in enumerate(leaderboard):
+        for indice, estudiante in enumerate(global_leaderboard):
             if estudiante.puntos_experiencia != xp_anterior:
                 posicion = indice + 1
                 
             estudiante.posicion_ranking = posicion
             
             if estudiante.matricula == alumno.matricula:
-                alumno.posicion_ranking = posicion
+                alumno.posicion_global_ranking = posicion
                 
             xp_anterior = estudiante.puntos_experiencia
-    
-    proceso_actual = (
-        Proceso_Lista.objects
-        .filter(alumno=alumno)
-        .select_related('lista')
-        .order_by('-fecha_completado')
-        .first()
-    )
-    
-    practica_actual = None
-    
-    if proceso_actual:
-        practica_actual = (
-            Practica_Sesion.objects
-            .filter(
-                lista=proceso_actual.lista,
-                alumnos__alumno=alumno
-            )
-            .select_related('juego')
-            .order_by('-fecha')
-            .first()
-        )
         
     mini_games = Juego.objects.filter(
-        nombre__in=['Hangman', 'Missing Letters']
-    )
+        nombre__in=['Hangman', 'Missing Letters', 'Memory Game', 'Word Scramble', 'Boss Battle']
+    ).order_by('clave')[:2]
     
     return render(
         request, 
         'student/home.html',
         {
             'alumno': alumno,
-            'proceso_actual': proceso_actual,
-            'practica_actual': practica_actual,
             'mini_games': mini_games,
             'grupo_actual': grupo_actual,
             'grupos_alumno': grupos_alumno,
@@ -1393,11 +1344,20 @@ def student_groups(request):
         
         return redirect('student_groups')
     
+    groups = get_groups()
+    
+    if not groups and not request.session.get("mascot_msg"):
+        say(
+            request,
+            "Ready to join your classroom?",
+            "Ask your teacher for a Group Code and enter it to join your class. Your learning adventure starts here!"
+        )
+    
     return render(
         request, 
         'student/my_groups_student.html',
         {
-            'groups': get_groups()
+            'groups': groups
         }
     )
 
@@ -1514,6 +1474,13 @@ def teacher_competitions(request):
                     request,
                     'Competition created successfully.'
                 )
+                
+                say(
+                    request,
+                    "A new challenge is ready!",
+                    "Your competition has been created successfully. Get ready to see your students shine!"
+                )
+                
         except Exception as e:
             messages.error(request, f'Error creating competition: {str(e)}')
             
@@ -1524,6 +1491,13 @@ def teacher_competitions(request):
     ).prefetch_related(
         'lista_competencias__lista'
     ).order_by('-fecha', 'hora')
+    
+    if not competitions.exists() and not request.session.get("mascot_msg"):
+        say(
+            request,
+            "Ready for the next challenge?",
+            "Create your first Spelling Bee competition and give your students a chance to show what they have learned!"
+        )
     
     groups = Grupo.objects.filter(
         profesor=profesor
@@ -1577,6 +1551,20 @@ def student_competitions(request):
             'hora'
         )
     )
+    
+    if not request.session.get("mascot_msg"):
+        if competencias.exists():
+            say(
+                request,
+                "Ready to bee a champion?",
+                "Your next spelling challenge awaits! Give it your best, trust your knowledge and show everyone what you can do!"
+            )
+        else:
+            say(
+                request,
+                "No challenges yet?",
+                "Don't worry! New competitions may be coming soon. Keep practicing and get ready to show off your spelling skills!"
+            )
     
     return render(
         request, 
@@ -2048,6 +2036,31 @@ def transcribe_speaking(request):
             },
             status=502
         )
+        
+def normalize_boss_word(word):
+    normalized = unicodedata.normalize(
+        'NFKD',
+        word.upper().strip()
+    ).encode(
+        'ASCII',
+        'ignore'
+    ).decode('ASCII')
+    
+    return re.sub(
+        r'[^A-Z]',
+        '',
+        normalized
+    )
+    
+def get_boss_battle_clue(word, round_index):
+    
+    if round_index < 3:
+        return word['clue_easy']
+    
+    elif round_index < 6:
+        return word['clue_medium']
+    
+    return word['clue_hard']
 
 @never_cache
 @role_required('student')
@@ -2124,6 +2137,13 @@ def practices(request):
             'total_xp': alumno.puntos_experiencia,
             'round_token': new_round_token,
         })
+        
+    if not request.session.get("mascot_msg"):
+        say(
+            request,
+            "Ready for a new challenge?",
+            "Welcome to Practice Hall! Play Mini Games, improve your English skills, and earn XP along the way. Let's make learning fun!"
+        )
     
     niveles = Nivel.objects.prefetch_related(
         'practicas__lecciones'
@@ -2243,6 +2263,469 @@ def practices(request):
     
     return render(request, 'student/practices.html', context)
 
+def generate_boss_battle_options(correct_answer, correct_display, excluded_answers=None):
+    excluded_answers = set(excluded_answers or [])
+    excluded_answers.add(correct_answer)
+    
+    distractors = []
+    used_answers = set(excluded_answers)
+    
+    #GET GENERAL WORD CATALOG
+    
+    all_words = Palabra.objects.values_list(
+        'significado',
+        flat=True
+    )
+    
+    for meaning in all_words:
+        normalized = normalize_boss_word(meaning)
+        
+        if not normalized or not 3 <= len(normalized) <= 10:
+            continue
+        
+        if normalized in used_answers:
+            continue
+        
+        used_answers.add(normalized)
+        
+        distractors.append(meaning.strip())
+        
+    #VERIFY AVAILABLE DISTRACTORS
+    
+    if len(distractors) < 3:
+        return None
+    
+    #GENERATE FOUR RANDOM OPTIONS
+    
+    options = random.sample(distractors, 3)
+    
+    options.append(correct_display)
+    
+    random.shuffle(options)
+    
+    return options
+
+@never_cache
+@role_required('student')
+@require_POST
+def boss_battle_start(request):
+
+    # GET WORDS WITH STORED BOSS BATTLE CLUES
+
+    all_words = Pista_Boss_Battle.objects.select_related(
+        'palabra'
+    ).all()
+
+    candidates = []
+    used_words = set()
+
+    # FILTER VALID WORDS
+
+    for record in all_words:
+
+        answer = normalize_boss_word(
+            record.palabra.significado
+        )
+
+        clue_easy = record.pista_facil.strip()
+        clue_medium = record.pista_intermedia.strip()
+        clue_hard = record.pista_dificil.strip()
+
+        if not 3 <= len(answer) <= 10:
+            continue
+
+        if not clue_easy or not clue_medium or not clue_hard:
+            continue
+
+        if answer in used_words:
+            continue
+
+        used_words.add(answer)
+
+        candidates.append({
+            'codigo': record.palabra.codigo,
+            'answer': answer,
+            'display_answer': record.palabra.significado.strip(),
+            'clue_easy': clue_easy,
+            'clue_medium': clue_medium,
+            'clue_hard': clue_hard,
+        })
+
+    # VERIFY AVAILABLE WORDS
+
+    if len(candidates) < 10:
+
+        return JsonResponse({
+            'success': False,
+            'message': 'Not enough words with Boss Battle clues available.'
+        }, status=400)
+
+    # SELECT 10 RANDOM WORDS
+
+    selected_words = random.sample(
+        candidates,
+        10
+    )
+    
+    excluded_answers = {
+        word['answer'] for word in selected_words
+    }
+    
+    for word in selected_words:
+        
+        word['options'] = generate_boss_battle_options(
+            correct_answer=word['answer'],
+            correct_display=word['display_answer'],
+            excluded_answers=excluded_answers
+        )
+    
+        if word['options'] is None:
+            
+            return JsonResponse({
+                'success': False,
+                'message': 'Not enough words available to generate answer options.'
+            }, status=400)
+
+    # INITIALIZE BATTLE SESSION
+
+    battle_token = secrets.token_urlsafe(32)
+
+    request.session['boss_battle'] = {
+        'battle_token': battle_token,
+        'round_token': secrets.token_urlsafe(16),
+        'words': selected_words,
+        'current_index': 0,
+        'king_bee_lives': 10,
+        'beenary_lives': 10,
+        'correct_answers': 0,
+        'incorrect_answers': 0,
+        'xp_awarded': False,
+        'sudden_death': False,
+        'finished': False,
+    }
+
+    request.session.modified = True
+
+    # RETURN FIRST ROUND
+    
+    return JsonResponse({
+        'success': True,
+        'battle_token': battle_token,
+        'round_token': request.session['boss_battle']['round_token'],
+        'round': 1,
+        'total_rounds': 10,
+        'king_bee_lives': 10,
+        'beenary_lives': 10,
+        'clue': selected_words[0]['clue_easy'],
+        'options': selected_words[0]['options'],
+    })
+    
+@never_cache
+@role_required('student')
+@require_POST
+def boss_battle_answer(request):
+    #GET CURRENT BATTLE
+    
+    battle = request.session.get('boss_battle')
+
+    if (
+        not battle
+        or 'king_bee_lives' not in battle
+        or 'beenary_lives' not in battle
+        or 'current_index' not in battle
+        or 'words' not in battle
+    ):
+
+        request.session.pop('boss_battle', None)
+
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid or expired Boss Battle session. Please start a new battle.'
+        }, status=400)
+        
+    #VALIDATE BATTLE TOKEN
+    
+    battle_token = request.POST.get('battle_token')
+    
+    if not battle_token or battle_token != battle.get('battle_token'):
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid or expired Boss Battle session.'
+        })
+        
+    #VALIDATE ROUND TOKEN
+    
+    round_token = request.POST.get('round_token')
+    
+    #CHECK IF THIS ROUND WAS ALREADY PROCESSED
+    
+    if (
+        round_token
+        and round_token == battle.get('last_round_token')
+        and battle.get('last_response')
+    ):
+        return JsonResponse(
+            battle['last_response']
+        )
+        
+    #CHECK IF BATTLE HAS ALREADY FINISHED
+    
+    if battle.get('finished'):
+        return JsonResponse({
+            'success': False,
+            'message': 'This Boss Battle has already finished.'
+        }, status=400)
+        
+    #VERIFY CURRENT ROUND TOKEN
+    
+    if not round_token or round_token != battle.get('round_token'):
+        return JsonResponse({
+            'success': False,
+            'message': 'This round has already been processed or has expired.'
+        }, status=409)
+        
+    #GET CURRENT WORD
+    
+    words = battle.get('words', [])
+    current_index = battle.get('current_index', 0)
+    
+    if current_index >= len(words):
+        return JsonResponse({
+            'success': False,
+            'message': 'No more words available.'
+        }, status=400)
+        
+    current_word = words[current_index]
+    
+    #VALIDATE STUDENT ANSWER
+    student_answer = normalize_boss_word(
+        request.POST.get('answer', '')
+    )
+    
+    if not student_answer:
+        return JsonResponse({
+            'success': False,
+            'message': 'Please enter an answer.'
+        }, status=400)
+        
+    correct_answer = current_word['answer']
+    
+    is_correct = student_answer == correct_answer
+    
+    #APPLY DAMAGE
+    
+    if is_correct:
+        battle['king_bee_lives'] -= 1
+        battle['correct_answers'] += 1
+        
+        feedback = 'Correct! King Bee has lost one life!'
+        
+    else:
+        battle['beenary_lives'] -= 1
+        battle['incorrect_answers'] += 1
+        
+        feedback = 'Incorrect! King Bee has attacked Beenary!'
+        
+    #CHECK BATTLE RESULT
+    king_bee_lives = battle['king_bee_lives']
+    beenary_lives = battle['beenary_lives']
+    
+    battle_finished = False
+    result = None
+    
+    if king_bee_lives <= 0:
+        battle_finished = True
+        result = 'victory'
+        
+    elif beenary_lives <= 0:
+        battle_finished = True
+        result = 'defeat'
+        
+    #ADVANCE ROUND
+    battle['current_index'] += 1
+    
+    #CHECK SUDDEN DEATH
+    
+    if not battle_finished and battle['current_index'] >= len(words):
+        if king_bee_lives == beenary_lives:
+            battle['sudden_death'] = True
+            
+            used_answers = {
+                word['answer'] for word in words
+            }
+            
+            candidate_answers = set(used_answers)
+            
+            additional_words = Pista_Boss_Battle.objects.select_related(
+                'palabra'
+            ).all()
+            
+            candidates = []
+            
+            for record in additional_words:
+                answer = normalize_boss_word(
+                    record.palabra.significado
+                )
+                
+                clue_easy = record.pista_facil.strip()
+                clue_medium = record.pista_intermedia.strip()
+                clue_hard = record.pista_dificil.strip()
+                
+                if not 3 <= len(answer) <= 10:
+                    continue
+                
+                if not clue_easy or not clue_medium or not clue_hard:
+                    continue
+                
+                if answer in candidate_answers:
+                    continue
+                
+                candidate_answers.add(answer)
+                
+                candidates.append({
+                    'codigo': record.palabra.codigo,
+                    'answer': answer,
+                    'display_answer': record.palabra.significado.strip(),
+                    'clue_easy': clue_easy,
+                    'clue_medium': clue_medium,
+                    'clue_hard': clue_hard,
+                })
+                
+            random.shuffle(candidates)
+            
+            next_word = None
+            
+            for candidate in candidates:
+                options = generate_boss_battle_options(
+                    correct_answer=candidate['answer'],
+                    correct_display=candidate['display_answer'],
+                    excluded_answers=candidate_answers
+                )
+                
+                if options is not None:
+                    candidate['options'] = options
+                    next_word = candidate
+                    break
+                
+            if next_word:
+                battle['words'].append(next_word)
+                
+            else:
+                #No more words available
+                battle_finished = True
+                
+                if king_bee_lives > beenary_lives:
+                    result = 'victory'
+                elif beenary_lives > king_bee_lives:
+                    result = 'defeat'
+                else:
+                    result = 'draw'
+                    
+        else:
+            battle_finished = True
+            
+            if beenary_lives > king_bee_lives:
+                result = 'victory'
+            else:
+                result = 'defeat'
+                
+    #FINALIZE BATTLE
+    
+    xp_earned = 0
+    total_xp = None
+    
+    if battle_finished:
+        battle['finished'] = True
+        battle['result'] = result
+        
+        #REGISTER EXPERIENCE POINTS
+        
+        if not battle.get('xp_awarded', False):
+            if result == 'victory':
+                xp_earned = 20
+                
+                alumno = request.user.alumno
+                
+                Alumno.objects.filter(
+                    pk=alumno.pk
+                ).update(
+                    puntos_experiencia=F('puntos_experiencia') + xp_earned
+                )
+                
+                alumno.refresh_from_db(
+                    fields=['puntos_experiencia']
+                )
+                
+                total_xp = alumno.puntos_experiencia
+                
+            else:
+                alumno = request.user.alumno
+                
+                alumno.refresh_from_db(
+                    fields=['puntos_experiencia']
+                )
+                
+                total_xp = alumno.puntos_experiencia
+                
+            battle['xp_awarded'] = True
+            
+        else:
+            
+            alumno = request.user.alumno
+            
+            alumno.refresh_from_db(
+                fields=['puntos_experiencia']
+            )
+            
+            total_xp = alumno.puntos_experiencia
+    
+    #PREPARE RESPONSE 
+    
+    response_data = {
+        'success': True,
+        'correct': is_correct,
+        'feedback': feedback,
+        'king_bee_lives': king_bee_lives,
+        'beenary_lives': beenary_lives,
+        'round': battle['current_index'] + 1,
+        'sudden_death': battle['sudden_death'],
+        'finished': battle_finished,
+        'result': result,
+        'xp_earned': xp_earned,
+        'total_xp': total_xp,
+    }
+    
+    if not battle_finished:
+        next_index = battle['current_index']
+        
+        next_word = battle['words'][next_index]
+        
+        response_data['clue'] = get_boss_battle_clue(
+            next_word,
+            next_index
+        )
+        
+        response_data['options'] = next_word['options']
+        
+    # GENERATE NEXT ROUND TOKEN
+    
+    next_round_token = None
+    
+    if not battle_finished:
+        next_round_token = secrets.token_urlsafe(16)
+        response_data['round_token'] = next_round_token
+        
+    #SAVE PROCESSED ROUND
+    battle['last_round_token'] = round_token
+    battle['last_response'] = response_data
+    battle['round_token'] = next_round_token
+    
+    #SAVE SESSION
+    request.session['boss_battle'] = battle
+    request.session.modified = True
+        
+    return JsonResponse(response_data)
+    
 @never_cache
 @role_required('student')
 def progress(request):
@@ -2382,8 +2865,56 @@ def statistics(request):
         
     total_students = students.count()
     total_groups = groups.count()
-    total_competitions = competitions.count()
+    total_competitions = Competencia.objects.filter(
+        profesor=profesor
+    ).count()
     total_word_lists = word_lists.count()
+    
+    xp_statistics = students.aggregate(
+        total_xp=Sum('puntos_experiencia'),
+        average_xp=Avg('puntos_experiencia')
+    )
+    
+    total_xp = xp_statistics['total_xp'] or 0
+    
+    average_xp = round(
+        xp_statistics['average_xp'] or 0,
+        1
+    )
+    
+    top_students = students.order_by(
+        '-puntos_experiencia',
+        'apellidoPaterno',
+        'nombre_pila'
+    )[:5]
+    
+    student_groups = {}
+    
+    group_relations = Grupo_Alumno.objects.filter(
+        alumno__in=students,
+        grupo__in=groups
+    ).select_related(
+        'alumno',
+        'grupo'
+    ).order_by(
+        'grupo__nombre'
+    )
+    
+    for relation in group_relations:
+        matricula = relation.alumno_id
+        
+        if matricula not in student_groups:
+            student_groups[matricula] = []
+            
+        student_groups[matricula].append(
+            relation.grupo.nombre
+        )
+        
+    for student in students:
+        student.teacher_groups = student_groups.get(
+            student.matricula,
+            []
+        )
     
     word_list_data = []
     
@@ -2431,6 +2962,9 @@ def statistics(request):
         'total_groups': total_groups,
         'total_competitions': total_competitions,
         'total_word_lists': total_word_lists,
+        'total_xp': total_xp,
+        'average_xp': average_xp,
+        'top_students': top_students,
         'word_list_data': word_list_data,
         'competitions': competitions,
         'competition_chart': competition_chart,
@@ -3806,6 +4340,13 @@ def group_view(request, group_id):
             'audio': palabra.audio,
             'image': palabra.imagen.url if palabra.imagen else None,
         })
+        
+    if not words and not request.session.get("mascot_msg"):
+        say(
+            request,
+            "Your vocabulary is waiting!",
+            "There are no words assigned to this group yet. Check back later and ask your teacher about upcoming Word Lists!"
+        )
     
     return render(
         request, 
@@ -3841,6 +4382,13 @@ def leave_group(request, group_id):
                 request,
                 f'You have left "{grupo.nombre}" successfully.'
             )
+            
+            say(
+                request,
+                "A new chapter bee-gins!",
+                "You have left this group. Remember, you can always join another classroom using your teacher's Group Code!"
+            )
+            
         else:
             messages.error(
                 request,
@@ -4328,7 +4876,10 @@ def teacher_competition_results(request, pk):
         )
         .order_by(
             '-palabras_correctas',
-            'alumno__apellidoPaterno'
+            'alumno__apellidoPaterno',
+            'alumno__apellidoMaterno',
+            'alumno__nombre_pila',
+            'alumno_id',
         )
     )
     
@@ -4471,6 +5022,34 @@ def teacher_competition_results(request, pk):
                 'palabras_incorrectas',
                 'puntos_obtenidos',
             ])
+            
+            participaciones_calificadas = (
+                Competencia_Alumno.objects
+                .filter(
+                    competencia=competition,
+                    palabras_correctas__isnull=False,
+                )
+                .select_related('alumno')
+                .order_by(
+                    '-palabras_correctas',
+                    'alumno__apellidoPaterno',
+                    'alumno__apellidoMaterno',
+                    'alumno__nombre_pila',
+                    'alumno_id',
+                )
+            )
+            
+            for posicion, participante in enumerate(
+                participaciones_calificadas,
+                start=1
+            ):
+                participante.posicion = posicion
+                participante.save(update_fields=['posicion'])
+                
+            Competencia_Alumno.objects.filter(
+                competencia=competition,
+                palabras_correctas__isnull=True,
+            ).update(posicion=None)
             
             notificacion = (
                 Notificacion.objects
@@ -4745,8 +5324,74 @@ def student_competition_results(request, codigo):
         'palabras_correctas': palabras_correctas,
         'palabras_incorrectas': palabras_incorrectas,
         'total_puntos': total_puntos,
-        'posicion': None,
+        'posicion': (
+            participacion.posicion
+            if participacion
+            else None
+        ),
     }
+    
+    posicion = context['posicion']
+    
+    if not request.session.get("mascot_msg"):
+        resultados_registrados = (
+            participacion is not None
+            and participacion.palabras_correctas is not None
+            and participacion.palabras_incorrectas is not None
+        )
+        
+        if not resultados_registrados:
+            say(
+                request,
+                "No Results to Show Yet!",
+                "Your competition results are not available yet. Keep practicing and get ready for your next spelling challenge!"
+            )
+            
+        else:
+            accuracy = (
+                (palabras_correctas / total_palabras) * 100
+                if total_palabras > 0
+                else 0
+            )
+            
+            if posicion == 1:
+                if accuracy >= 80:
+                    say(
+                        request,
+                        "You're the Bee-st of the Best!",
+                        "Amazing work! You earned 1st place with outstanding accuracy. Keep shining and showing off your spelling skills!!"
+                    )
+                else:
+                    say(
+                        request,
+                        "A Bee-autiful Victory!",
+                        "You earned 1st place! That's an amazing achievement. Keep practicing to make even more of your words count!"
+                    )
+            elif posicion in (2, 3):
+                if accuracy >= 80:
+                    say(
+                        request,
+                        "What a Bee-autiful Achievement!",
+                        "Congratulations! You earned a place among the top three with great accuracy. Your hard work is paying off. Keep buzzing like that!"
+                    )
+                else:
+                    say(
+                        request,
+                        "You Made the Podium!",
+                        "Congratulations on reaching the top three! Keep practicing and improving your spelling accuracy. You can do even better!"
+                    )
+            elif accuracy >= 80:
+                say(
+                    request,
+                    "You're Buzzing with Progress!",
+                    "You spelled at least a 80 percentage of the words correctly! That's something to be proud of. Keep up the excellent work!"
+                )
+            else:
+                say(
+                    request,
+                    "Every Bee-ginning Counts!",
+                    "Every competition is a chance to learn and improve. Be proud of your effort, learn from your mistakes and keep practicing!"
+                )
     
     return render(request, 'student/student_competition_results.html', context)
 

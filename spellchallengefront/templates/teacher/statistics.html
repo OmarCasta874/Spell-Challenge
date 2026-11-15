@@ -113,6 +113,99 @@
       </div>
     </div>
     <!-- ==========================================
+        STUDENT XP OVERVIEW
+        ========================================== -->
+    <div class="stat-card-box mb-4">
+
+      <h3 class="card-section-title">
+        Student XP Overview
+      </h3>
+
+      <p class="text-muted">
+        Accumulated experience points across your selected students.
+      </p>
+
+      <div class="summary-stats-grid">
+
+        <div class="mini-stat-card">
+          <span class="mini-stat-label">Total XP:</span>
+          <span class="mini-stat-value">{{ total_xp }}</span>
+        </div>
+
+        <div class="mini-stat-card">
+          <span class="mini-stat-label">Average XP:</span>
+          <span class="mini-stat-value">{{ average_xp }}</span>
+        </div>
+
+        <div class="mini-stat-card">
+          <span class="mini-stat-label">Students:</span>
+          <span class="mini-stat-value">{{ total_students }}</span>
+        </div>
+
+      </div>
+
+      <hr>
+
+      <h5 class="card-section-title">
+        Top Students
+      </h5>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Student</th>
+              <th>Level</th>
+              <th>Experience Points</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {% for student in top_students %}
+
+              <tr>
+                <td>{{ forloop.counter }}</td>
+
+                <td>
+                  <strong>
+                    {{ student.apellidoPaterno }}
+                    {% if student.apellidoMaterno %}
+                      {{ student.apellidoMaterno }}
+                    {% endif %}
+                  </strong>
+                  <br>
+                  <small class="text-muted">
+                    {{ student.nombre_pila }}
+                  </small>
+                </td>
+
+                <td>{{ student.nivel.codigo }}</td>
+
+                <td>
+                  <strong>{{ student.puntos_experiencia }} XP</strong>
+                </td>
+              </tr>
+
+            {% empty %}
+
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">
+                  No student XP data available yet.
+                </td>
+              </tr>
+
+            {% endfor %}
+
+          </tbody>
+
+        </table>
+      </div>
+
+    </div>
+    <!-- ==========================================
         STUDENT OVERVIEW + WORD LIST OVERVIEW
         ========================================== -->
     <div class="row g-4 mb-4">
@@ -130,6 +223,7 @@
                   <th>Group</th>
                   <th>Level</th>
                   <th>Career</th>
+                  <th>XP</th>
                 </tr>
               </thead>
               <tbody>
@@ -146,23 +240,19 @@
                       <small class="text-muted">{{ student.nombre_pila }}</small>
                     </td>
                     <td>
-                      {% for relation in student.grupo_alumnos.all %}
-                        {% if relation.grupo.profesor.clave == request.user.profesor.clave %}
-                          {{ relation.grupo.nombre }}
-                          {% if not forloop.last %}
-                            ,
-                          {% endif %}
-                        {% endif %}
+                      {% for group_name in student.teacher_groups %}
+                        {{ group_name }}{% if not forloop.last %}, {% endif %}
                       {% empty %}
                         <span class="text-muted">No group</span>
                       {% endfor %}
                     </td>
                     <td>{{ student.nivel.codigo }}</td>
                     <td>{{ student.carrera.nombre }}</td>
+                    <td><strong>{{ student.puntos_experiencia }}</strong></td>
                   </tr>
                 {% empty %}
                   <tr>
-                    <td colspan="4" class="text-center text-muted py-4">
+                    <td colspan="5" class="text-center text-muted py-4">
                       No students found.
                     </td>
                   </tr>

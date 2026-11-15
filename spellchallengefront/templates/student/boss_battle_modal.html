@@ -1,0 +1,148 @@
+{% load static %}
+<!-- BOSS BATTLE MODAL -->
+<div id="bossBattleModal" class="boss-battle-overlay" data-start-url="{% url 'boss_battle_start' %}" data-answer-url="{% url 'boss_battle_answer' %}">
+    <div class="boss-battle-container">
+        <!-- HEADER -->
+        <div class="boss-battle-header">
+            <h2>BOSS BATTLE</h2>
+            <button
+                type="button"
+                class="boss-battle-close"
+                onclick="closeBossBattle()"
+                aria-label="Close Boss Battle"
+            >
+                &times;
+            </button>
+        </div>
+        <!-- KING BEE INTRODUCTION -->
+        <div id="bossBattleIntro" class="boss-battle-intro">
+            <div class="king-bee-intro-character">
+                <img
+                    id="kingBeeIntroImage"
+                    src="{% static 'img/king-bee-left.png' %}"
+                    alt="King Bee, the royal challenger"
+                >
+            </div>
+            <div class="king-bee-dialogue">
+                <h3>KING BEE</h3>
+                <span class="king-bee-title">THE ROYAL CHALLENGER</span>
+                <div class="king-bee-dialogue-text">
+                    <p>
+                        Well, well, well! My name is King Bee,
+                        and I'll be your opponent today!
+                    </p>
+                    <p>
+                        I'll give you some clues, and you'll have
+                        to choose the correct words. Be careful,
+                        though! Every mistake will cost you a life!
+                    </p>
+                    <p>
+                        Do you have what it takes to defeat the king?
+                    </p>
+                    <p>
+                        Come on, then... Let's see if you can
+                        <strong>BEE-AT THIS AMAZING KING!</strong>
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    id="bossBattleBegin"
+                    class="boss-battle-begin"
+                >
+                    LET'S BEE-GIN!
+                </button>
+            </div>
+        </div>
+        <div id="bossBattleGameplay" hidden>
+            <!-- GAME INFORMATION -->
+            <div class="boss-battle-info">
+                <span id="bossBattleRound">ROUND 1 / 10</span>
+                <p>Defeat King Bee by guessing the words!</p>
+            </div>
+            <!-- BATTLE ARENA -->
+            <div class="boss-battle-arena">
+                <!-- KING BEE -->
+                <div class="boss-character king-bee">
+                    <h3>KING BEE</h3>
+                    <img
+                        id="kingBeeImage"
+                        src="{% static 'img/king-bee-left.png' %}"
+                        alt="King Bee"
+                    >
+                    <div class="boss-health-container">
+                        <div class="boss-health-label">
+                            <span>HP</span>
+                            <span id="kingBeeLives">10 / 10</span>
+                        </div>
+
+                        <div class="boss-health-bar">
+                            <div
+                                id="kingBeeHealth"
+                                class="boss-health-fill"
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- BATTLE VS -->
+                <div class="boss-battle-vs">
+                    <span>VS</span>
+                </div>
+                <!-- BEENARY -->
+                <div class="boss-character beenary">
+                    <h3>BEENARY</h3>
+                    <div class="beenary-placeholder">
+                        <img id="beenaryImage" src="{% static 'img/beenary-right.png'%}" alt="Beenary">
+                    </div>
+                    <div class="boss-health-container">
+                        <div class="boss-health-label">
+                            <span>HP</span>
+                            <span id="beenaryLives">10 / 10</span>
+                        </div>
+                        <div class="boss-health-bar">
+                            <div
+                                id="beenaryHealth"
+                                class="boss-health-fill"
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- WORD CHALLENGE -->
+            <div class="boss-battle-challenge">
+                <h3>GUESS THE WORD!</h3>
+                <div
+                    id="bossBattleClue"
+                    class="boss-battle-clue"
+                    aria-live="polite"
+                >
+                    The word clue will appear here.
+                </div>
+                <form id="bossBattleForm" novalidate>
+                    {% csrf_token %}
+                    <div
+                        id="bossBattleOptions"
+                        class="boss-battle-options"
+                        role="group"
+                        aria-label="Choose the correct answer"
+                    >
+                        <!-- ANSWER OPTIONS WILL BE GENERATED HERE -->
+                    </div>
+                </form>
+                <p
+                    id="bossBattleFeedback"
+                    class="boss-battle-feedback"
+                    aria-live="polite"
+                ></p>
+            </div>
+            <!-- EXIT BUTTON -->
+            <div class="boss-battle-footer">
+                <button
+                    type="button"
+                    onclick="closeBossBattle()"
+                >
+                    EXIT BATTLE
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

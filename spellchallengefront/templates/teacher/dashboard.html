@@ -16,7 +16,7 @@
   </div>
   <div class="stat-card">
     <div class="stat-icon"><i data-lucide="clipboard-list"></i></div>
-    <p class="stat-label">Lists:</p>
+    <p class="stat-label">Word Lists:</p>
     <h3 class="stat-value">{{ total_word_lists }}</h3>
   </div>
   <div class="stat-card">
@@ -40,12 +40,12 @@
   </div>
 
   <div class="level-bar">
-    <div class="level-segment level-a1" style="width: {{ level.percentages.A1 }}%;"></div>
-    <div class="level-segment level-a2" style="width: {{ level.percentages.A2 }}%;"></div>
-    <div class="level-segment level-b1" style="width: {{ level.percentages.B1 }}%;"></div>
-    <div class="level-segment level-b2" style="width: {{ level.percentages.B2 }}%;"></div>
-    <div class="level-segment level-c1" style="width: {{ level.percentages.C1 }}%;"></div>
-    <div class="level-segment level-c2" style="width: {{ level.percentages.C2 }}%;"></div>
+    <div class="level-segment level-a1" style="width: {{ level_percentages.A1 }}%;"></div>
+    <div class="level-segment level-a2" style="width: {{ level_percentages.A2 }}%;"></div>
+    <div class="level-segment level-b1" style="width: {{ level_percentages.B1 }}%;"></div>
+    <div class="level-segment level-b2" style="width: {{ level_percentages.B2 }}%;"></div>
+    <div class="level-segment level-c1" style="width: {{ level_percentages.C1 }}%;"></div>
+    <div class="level-segment level-c2" style="width: {{ level_percentages.C2 }}%;"></div>
   </div>
 
   <ul class="level-legend">
@@ -61,46 +61,38 @@
 <div class="dashboard-overview-row">
 
   <div class="overview-card">
-    <h5 class="overview-title">Student Performance</h5>
-    <p class="overview-subtitle">Average score by group</p>
+    <h5 class="overview-title">Student XP Overview</h5>
+    <p class="overview-subtitle">
+      Experience points earned by students across your groups
+    </p>
 
-    {% for group in group_performance %}
-    <div class="bar-row">
-      <span class="bar-label">{{ group.nombre }}</span>
-
-      <div class="bar-track">
-        <div class="bar-fill"
-            style="width: {{ group.average }}%;"></div>
-      </div>
-
-      <span class="bar-value">{{ group.average }}%</span>
-    </div>
-
-    {% empty %}
-
-    <p>No groups available.</p>
-    {% endfor %}
-
-    <div class="average-score-badge">
-      <i data-lucide="star"></i> AVERAGE SCORE: {{ average_score }}%
+    <div class="xp-overview-total">
+      <p class="xp-overview-label">TOTAL EXPERIENCE POINTS</p>
+      <h3 class="xp-overview-value">{{ total_xp }} XP</h3>
     </div>
 
     <hr class="overview-divider">
 
-    <h5 class="overview-title">Most Challenging Words</h5>
-    <p class="overview-subtitle">Highest miss rate across your groups</p>
-
-    {% for word in challenging_words %}
+    <h5 class="overview-title">Top Students</h5>
+    <p class="overview-subtitle">
+      Students with the highest experience points
+    </p>
+    {% for student in top_students %}
       <div class="bar-row">
-        <span class="bar-label">{{ word.word }}</span>
+        <span class="bar-label">
+          {{ student.nombre_pila }} {{ student.apellidoPaterno }}
+        </span>
         <div class="bar-track">
           <div class="bar-fill"
-              style="width: {{ word.miss_rate }}%;"></div>
+              style="width: {% if top_students.0.puntos_experiencia > 0 %}{% widthratio student.puntos_experiencia top_students.0.puntos_experiencia 100 %}{% else %}0{% endif %}%;">
+          </div>
         </div>
-        <span class="bar-value">{{ word.miss_rate }}%</span>
+        <span class="bar-value">
+          {{ student.puntos_experiencia }} XP
+        </span>
       </div>
-      {% empty %}
-      <p>No practice data available yet.</p>
+    {% empty %}
+      <p>No student XP data available yet.</p>
     {% endfor %}
   </div>
 

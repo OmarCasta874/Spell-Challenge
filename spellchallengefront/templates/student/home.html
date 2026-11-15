@@ -11,46 +11,51 @@
 
 <div class="home-row">
   <div class="home-col-left">
-    <div class="practice-progress-card">
-      <p class="welcome-text">Welcome back {{ alumno.nombre_pila }}!</p>
+    <!-- WELCOME CARD -->
+    <div class="practice-progress-card dashboard-welcome-card">
+      <p class="welcome-text">
+        Welcome back {{ alumno.nombre_pila }}!
+      </p>
       <h3 class="current-unit-title">
-        {{ proceso_actual.lista.nombre }}
+        Your Practice Arena
       </h3>
-      <p class="current-unit-subtitle">Practice 4 of 15 &middot; Exercise 2 of 4</p>
-
-      <p class="practice-progress-label">PRACTICE PROGRESS - {{ proceso_actual.porcentaje_aciertos }}</p>
-      <div class="practice-progress-track">
-        <div class="practice-progress-fill" style="width: {{ proceso_actual.porcentaje_aciertos }}%;"></div>
-      </div>
-      <a href="{% url 'student_practices' %}" class="continue-link">CONTINUE <i data-lucide="arrow-right"></i></a>
+      <p class="current-unit-subtitle">
+        Keep practicing, earn XP, and climb the leaderboards!
+      </p>
     </div>
-
-    <div class="unit-stats-row">
-      <div class="unit-stat-card">
-        <p class="unit-stat-label">UNIT</p>
-        <h3 class="unit-stat-value">{{ alumno.nivel.codigo }}</h3>
+    <!-- STUDENT STATISTICS -->
+    <div class="unit-stats-row dashboard-stats-row">
+      <div class="unit-stat-card dashboard-stat-card">
+        <p class="unit-stat-label">LEVEL</p>
+        <h3 class="unit-stat-value">
+          {{ alumno.nivel.codigo|default:"-" }}
+        </h3>
       </div>
-      <div class="unit-stat-card">
-        <p class="unit-stat-label">PRACTICES</p>
-        <h3 class="unit-stat-value">3/15</h3>
+      <div class="unit-stat-card dashboard-stat-card">
+        <p class="unit-stat-label">TOTAL XP</p>
+        <h3 class="unit-stat-value">
+          {{ alumno.puntos_experiencia|default:0 }}
+        </h3>
       </div>
-      <div class="unit-stat-card">
-        <p class="unit-stat-label">EXERCISES</p>
-        <h3 class="unit-stat-value">12/60</h3>
+      <div class="unit-stat-card dashboard-stat-card">
+        <p class="unit-stat-label">GROUP RANKING</p>
+        <h3 class="unit-stat-value">
+          {% if alumno.posicion_ranking %}
+            #{{ alumno.posicion_ranking }}
+          {% else %}
+            -
+          {% endif %}
+        </h3>
       </div>
-    </div>
-
-    <div class="unit2-progress-card">
-      <h5 class="unit2-title">Progress in Unit 2</h5>
-      <p class="unit2-subtitle">Keep going to unlock Unit 2 (A2)</p>
-
-      <div class="level-progress-labels">
-        <span>A2</span>
-        <span class="level-progress-mid">22%</span>
-        <span>B1</span>
-      </div>
-      <div class="level-progress-track">
-        <div class="level-progress-fill" style="width: 22%;"></div>
+      <div class="unit-stat-card dashboard-stat-card">
+        <p class="unit-stat-label">GLOBAL RANKING</p>
+        <h3 class="unit-stat-value">
+          {% if alumno.posicion_global_ranking %}
+            #{{ alumno.posicion_global_ranking }}
+          {% else %}
+            -
+          {% endif %}
+        </h3>
       </div>
     </div>
   </div>
@@ -76,11 +81,13 @@
         <a href="{% url 'student_mini_games' %}?game={{ game.nombre|slugify }}" class="play-link">PLAY <i data-lucide="arrow-right"></i></a>
       </div>
       {% endfor %}
-      <div class="mini-game-card mini-game-card-view-all">
-        <a href="{% url 'student_mini_games' %}" class="nav-link">
-          VIEW ALL GAMES
-        </a>
-      </div>
+    </div>
+    <div class="practice-hall-prompt">
+      <p class="practice-hall-title">Want more challenges?</p>
+      <p class="practice-hall-description">
+        Explore all our mini-games in 
+        <a href="{% url 'student_practices' %}">Practice Hall!</a>
+      </p>
     </div>
 
     <div class="leaderboard-card">

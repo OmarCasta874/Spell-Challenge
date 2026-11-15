@@ -355,7 +355,28 @@ class Palabra(models.Model):
 
     def __str__(self):
         return self.significado
+        
+#MODELO PISTA BOSS BATTLE
+class Pista_Boss_Battle(models.Model):
+    codigo = models.CharField(max_length=10, primary_key=True)
     
+    palabra = models.OneToOneField(
+        Palabra,
+        on_delete=models.CASCADE,
+        related_name='pistas_boss_battle',
+        db_column='palabra',
+        to_field='codigo'
+    )
+    
+    pista_facil = models.CharField(max_length=255)
+    pista_intermedia = models.CharField(max_length=255)
+    pista_dificil = models.CharField(max_length=255)
+    
+    class Meta:
+        db_table = 'pista_boss_battle'
+        
+    def __str__(self):
+        return f'Boss Battle - {self.palabra.significado}'
 
 #MODELO LISTA
 class Lista(models.Model):
@@ -1037,6 +1058,12 @@ class Competencia_Alumno(models.Model):
         null=True,
         blank=True,
         db_column='puntos_obtenidos'
+    )
+    
+    posicion = models.IntegerField(
+        null=True,
+        blank=True,
+        db_column='posicion'
     )
     
     palabras_correctas = models.IntegerField(

@@ -143,7 +143,28 @@
   margin: 1.5rem 0 1.25rem;
 }
 
-/* BARS (reused for group performance and challenging words) */
+.xp-overview-total {
+  background: #fbe4e3;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.xp-overview-label {
+  color: #7a1f2b;
+  font-size: 0.8rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.xp-overview-value {
+  color: #7a1f2b;
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0.25rem 0 0;
+}
+
+/* TOP STUDENTS XP BARS */
 .bar-row {
   display: flex;
   align-items: center;
@@ -152,11 +173,12 @@
 }
 
 .bar-label {
-  width: 100px;
+  width: 130px;
   font-weight: 700;
   font-size: 0.8rem;
   color: #111;
-  text-transform: uppercase;
+  text-transform: none;
+  overflow-wrap: anywhere;
 }
 
 .bar-track {
@@ -174,30 +196,11 @@
 }
 
 .bar-value {
-  width: 40px;
+  min-width: 65px;
   font-weight: 700;
   font-size: 0.8rem;
   color: #111;
   text-align: right;
-}
-
-.average-score-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: #fbe4e3;
-  color: #7a1f2b;
-  font-weight: 800;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  margin-top: 0.5rem;
-}
-
-.average-score-badge i {
-  width: 16px;
-  height: 16px;
 }
 
 /* RECENT LEARNING ACTIVITY */
@@ -238,4 +241,28 @@
 @media (max-width: 992px) {
   .stat-cards-row { grid-template-columns: repeat(2, 1fr); }
   .dashboard-overview-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 576px) {
+  .stat-cards-row {
+    grid-template-columns: 1fr;
+  }
+
+  .level-distribution-header {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .bar-row {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .bar-label {
+    width: 100%;
+  }
+
+  .bar-track {
+    min-width: 0;
+  }
 }
