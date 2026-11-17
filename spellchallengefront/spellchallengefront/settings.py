@@ -18,6 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Environment variables
 import os
 from dotenv import load_dotenv
+import shutil
 
 load_dotenv(BASE_DIR / '.env')
 
@@ -141,8 +142,36 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+LOGS_DIR = BASE_DIR / 'logs'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# MySQL tools used by the backups module
+def _find_mysql_tool(env_var, default_xampp, *names):
+    # 1) .env / environment variable, 2) default XAMPP path, 3) system PATH
+    custom = os.getenv(env_var)
+    if custom:
+        return custom
+    if os.path.isfile(default_xampp):
+        return default_xampp
+    for name in names:
+        found = shutil.which(name)
+        if found:
+            return found
+    return default_xampp
+
+MYSQLDUMP_PATH = _find_mysql_tool(
+    'MYSQLDUMP_PATH',
+    r'C:\xampp\mysql\bin\mysqldump.exe',
+    'mysqldump', 'mariadb-dump'
+)
+MYSQL_PATH = _find_mysql_tool(
+    'MYSQL_PATH',
+    r'C:\xampp\mysql\bin\mysql.exe',
+    'mysql', 'mariadb'
+)
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

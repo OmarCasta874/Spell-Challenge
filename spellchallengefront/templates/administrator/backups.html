@@ -19,7 +19,7 @@
         <button type="button" class="btn btn-secondary" onclick="openModal('submitBackupModal')">
             Submit Backup
         </button>
-        <button class="btn btn-primary" onclick="openModal('createBackupModal')">
+        <button type="button" class="btn btn-primary" onclick="openModal('createBackupModal')">
             + Create Backup
         </button>
     </div>
@@ -47,7 +47,7 @@
     <div class="panel-header-title">
         <h3>Available Backup Snapshots</h3>
     </div>
-    
+
     <table class="data-table">
         <thead>
             <tr>
@@ -65,13 +65,9 @@
                 <td><strong class="text-primary">{{ b.nombre }}</strong></td>
                 <td>{{ b.fecha|date:"M d, Y" }}</td>
                 <td>{{ b.hora|time:"h:i A" }}</td>
-                <td>{{ b.size_display }}</td>  
+                <td>{{ b.size_display }}</td>
                 <td>
-                    {% if "Type: Uploaded" in b.datos %}
-                        <span class="type-tag type-manual">Uploaded</span>
-                    {% else %}
-                        <span class="type-tag type-manual">Manual</span>
-                    {% endif %}
+                    <span class="type-tag type-{{ b.type_display|lower }}">{{ b.type_display }}</span>
                 </td>
                 <td class="actions-cell text-right">
                     <a href="{% url 'admin_backup_download' b.codigo %}" class="btn-pill-outline" title="Download File">
@@ -105,29 +101,29 @@
     </table>
 </div>
 
-<!-- ========================================== -->
-<!-- MODAL: GENERAR BACKUP MANUAL              -->
-<!-- ========================================== -->
+<!-- MODAL: GENERAR BACKUP MANUAL -->
 <div id="createBackupModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
             <h3>Generate New System Backup</h3>
-            <button class="modal-close" onclick="closeModal('createBackupModal')">&times;</button>
+            <button type="button" class="modal-close" onclick="closeModal('createBackupModal')">&times;</button>
         </div>
         <form method="POST">
             {% csrf_token %}
+            <input type="hidden" name="action" value="create_backup">
             <div class="modal-body">
-                <p class="modal-description">Select what components you want to include in this backup snapshot:</p>
-                
+                <p class="modal-description">
+                    Select what components you want to include in this backup snapshot:
+                </p>
+
                 <div class="checkbox-group">
                     <label class="checkbox-item">
-                        <input type="checkbox" name="include_db" checked disabled>
+                        <input type="checkbox" checked disabled>
                         <span><strong>Database Schema & Records</strong> (Required)</span>
                     </label>
-
                     <label class="checkbox-item">
-                        <input type="checkbox" name="include_media" checked>
-                        <span>Include Uploaded Audio & Media files</span>
+                        <input type="checkbox" name="include_media">
+                        <span>Include Uploaded Audio &amp; Media files</span>
                     </label>
 
                     <label class="checkbox-item">
@@ -137,8 +133,15 @@
                 </div>
 
                 <div class="form-field mt-1">
-                    <label>Snapshot Description / Note</label>
-                    <input type="text" name="description" class="form-input" placeholder="e.g. Manual backup before system maintenance">
+                    <label for="createDescription">Snapshot Description / Note</label>
+                    <input
+                        type="text"
+                        id="createDescription"
+                        name="description"
+                        class="form-input"
+                        maxlength="200"
+                        placeholder="e.g. Manual backup before system maintenance"
+                    >
                 </div>
             </div>
             <div class="modal-footer">
@@ -210,7 +213,7 @@
     <div class="modal-content modal-small">
         <div class="modal-header">
             <h3>Restore System Backup</h3>
-            <button class="modal-close" onclick="closeModal('restoreModal')">&times;</button>
+            <button type="button" class="modal-close" onclick="closeModal('restoreModal')">&times;</button>
         </div>
         <div class="modal-body">
             <p>You are about to restore the database from: <br><strong id="restoreFileName" class="text-primary"></strong></p>
@@ -228,9 +231,7 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- MODAL: CONFIRMAR ELIMINACIÓN               -->
-<!-- ========================================== -->
+<!-- MODAL: CONFIRMAR ELIMINACIÓN -->
 <div id="deleteBackupModal" class="modal-overlay">
     <div class="modal-content modal-small">
         <div class="modal-header">
@@ -283,10 +284,6 @@
         document.getElementById('deleteBackupForm').action = `/admin_backups/delete/${codigo}/`;
 
         openModal('deleteBackupModal');
-    }
-
-    function submitBackup() {
-        console.log('Submit Backup: funcionalidad aún no definida');
     }
 
     window.onclick = function(e) {

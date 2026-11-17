@@ -28,6 +28,48 @@ from home.services.achievement_service import unlock_achievement
 
 # Create your views here.
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+SQL_MARKERS = ('MySQL dump', 'MariaDB dump', 'CREATE TABLE', 'INSERT INTO', 'DROP TABLE')
+
+import zipfile
+import shutil
+
+def add_folder_to_zip(zf, folder, arc_prefix):
+    folder = str(folder)
+    if not os.path.isdir(folder):
+        return
+    for root, _, files in os.walk(folder):
+        for name in files:
+            full = os.path.join(root, name)
+            rel = os.path.relpath(full, folder)
+            zf.write(full, os.path.join(arc_prefix, rel))
+            
+def format_size(n):
+    if n >= 1024 * 1024:
+        return f'{n / (1024 * 1024):.2f} MB'
+    if n >= 1024:
+        return f'{n / 1024:.2f} KB'
+    return f'{n} B'
+
+def looks_like_sql(head_bytes):
+    text = head_bytes.decode('utf-8', errors='ignore')
+    return any(marker in text for marker in SQL_MARKERS)
+
+def parse_backup_datos(datos):
+    """Reads Size/Type/Description from the datos text. First occurrence wins."""
+    info = {'size': '-', 'type': 'Manual', 'description': ''}
+    keys = {'Size': 'size', 'Type': 'type', 'Description': 'description'}
+    seen = set()
+    for line in datos.splitlines():
+        key, sep, value = line.partition(':')
+        if sep and key in keys and key not in seen:
+            info[keys[key]] = value.strip()
+            seen.add(key)
+    return info
+
 def _update_numero_letras(lista):
     significados = Palabra.objects.filter(
         lista_palabras__lista=lista
@@ -3897,90 +3939,74 @@ def admin_academy(request):
 @role_required('administrator')
 def admin_backups(request):
     administrador = request.user.administrador
-    
+
     if request.method == 'POST':
-        action = request.POST.get('action', 'create_backup')
-        description = request.POST.get('description', '').strip()
-        
+        action = request.POST.get('action')
+        description = ' '.join(request.POST.get('description', '').split())[:200]
+
+        # ---------- UPLOAD EXISTING BACKUP ----------
         if action == 'submit_backup':
             uploaded_file = request.FILES.get('backup_file')
-            
+
             if not uploaded_file:
-                messages.error(
-                    request,
-                    'Please select an SQL backup file.'
-                )
+                messages.error(request, 'Please select an SQL backup file.')
                 return redirect('admin_backups')
-            
+
             if not uploaded_file.name.lower().endswith('.sql'):
-                messages.error(
-                    request,
-                    'Only SQL backup files are allowed.'
-                )
+                messages.error(request, 'Only SQL backup files are allowed.')
                 return redirect('admin_backups')
-            
+
             max_size = 50 * 1024 * 1024
-            
+
             if uploaded_file.size > max_size:
+                messages.error(request, 'The backup file cannot exceed 50 MB.')
+                return redirect('admin_backups')
+
+            head = uploaded_file.read(8192)
+            uploaded_file.seek(0)
+
+            if not looks_like_sql(head):
                 messages.error(
                     request,
-                    'The backup file cannot exceed 50 MB.'
+                    'The file does not look like a valid SQL dump '
+                    '(empty, wrong encoding or not SQL).'
                 )
                 return redirect('admin_backups')
-            
-            backup_dir = os.path.join(
-                settings.BASE_DIR,
-                'backups'
-            )
-            
-            os.makedirs(
-                backup_dir,
-                exist_ok=True
-            )
-            
+
+            backup_dir = os.path.join(settings.BASE_DIR, 'backups')
+            os.makedirs(backup_dir, exist_ok=True)
+
             now = timezone.localtime()
-            
+
             number = 1
-            
             while Copia_Seguridad.objects.filter(
                 codigo=f'COP{number:02d}'
             ).exists():
                 number += 1
-                
+
             codigo = f'COP{number:02d}'
-            
             filename = f'{codigo}_uploaded.sql'
-            
-            backup_path = os.path.join(
-                backup_dir,
-                filename
-            )
-            
+            backup_path = os.path.join(backup_dir, filename)
+
             file_created = False
-            
+
             try:
                 with open(backup_path, 'xb') as backup_file:
                     file_created = True
-                    
+
                     for chunk in uploaded_file.chunks():
                         backup_file.write(chunk)
-                        
+
                 file_size = os.path.getsize(backup_path)
-                
-                if file_size >= 1024 * 1024:
-                    size_text = f'{file_size / (1024 * 1024):.2f} MB'
-                elif file_size >= 1024:
-                    size_text = f'{file_size / 1024:.2f} KB'
-                else:
-                    size_text = f'{file_size} B'
-                    
+                size_text = format_size(file_size)
+
                 datos = (
                     f'Filename: {filename}\n'
                     f'Size: {size_text}\n'
                     f'Type: Uploaded\n'
                     f'Description: {description or "No description"}'
                 )
-                
+
                 Copia_Seguridad.objects.create(
                     codigo=codigo,
                     nombre=filename,
@@ -3989,109 +4015,117 @@ def admin_backups(request):
                     datos=datos,
                     administrador=administrador
                 )
-                
-                messages.success(
-                    request,
-                    'Backup file uploaded successfully.'
-                )
-                
+
+                messages.success(request, 'Backup file uploaded successfully.')
+
             except Exception:
+                logger.exception('Backup upload failed')
                 if file_created and os.path.exists(backup_path):
                     os.remove(backup_path)
-                    
+
                 messages.error(
                     request,
                     'An error occurred while uploading the backup file.'
                 )
-                
+
             return redirect('admin_backups')
-        
-        else:
-            backup_type = request.POST.get('backup_type', 'Manual')
-        
-        backup_dir = os.path.join(
-            settings.BASE_DIR,
-            'backups'
-        )
-        
-        os.makedirs(
-            backup_dir,
-            exist_ok=True
-        )
-        
+
+        # ---------- CREATE BACKUP ----------
+        if action != 'create_backup':
+            messages.error(request, 'Invalid action.')
+            return redirect('admin_backups')
+
+        backup_type = 'Manual'
+        include_media = request.POST.get('include_media') == 'on'
+        include_logs = request.POST.get('include_logs') == 'on'
+        use_zip = include_media or include_logs
+
+        backup_dir = os.path.join(settings.BASE_DIR, 'backups')
+        os.makedirs(backup_dir, exist_ok=True)
+
         now = timezone.localtime()
-        
-        filename = (
-            f'backup_{now.strftime("%Y-%m-%d_%H-%M-%S")}.sql'
-        )
-        
-        backup_path = os.path.join(
-            backup_dir,
-            filename
-        )
-        
-        mysqldump_path = r'C:\xampp\mysql\bin\mysqldump.exe'
-        
+        stamp = now.strftime("%Y-%m-%d_%H-%M-%S")
+
+        dump_path = os.path.join(backup_dir, f'backup_{stamp}.sql')
+        filename = f'backup_{stamp}.zip' if use_zip else f'backup_{stamp}.sql'
+        backup_path = os.path.join(backup_dir, filename)
+
+        mysqldump_path = settings.MYSQLDUMP_PATH
+
+        if not os.path.isfile(mysqldump_path):
+            messages.error(
+                request,
+                'mysqldump was not found. Set the MYSQLDUMP_PATH variable in your .env file.'
+            )
+            return redirect('admin_backups')
+
+        db_name = settings.DATABASES['default']['NAME']
+
         command = [
             mysqldump_path,
             '--host=localhost',
             '--port=3306',
             '--user=root',
+            '--default-character-set=utf8mb4',
+            '--single-transaction',
             '--routines',
-            '--events',
             '--triggers',
-            'spell_challenge'
+            f'--ignore-table={db_name}.copia_seguridad',
+            db_name
         ]
-        
+
         try:
-            with open(
-                backup_path,
-                'w',
-                encoding='utf-8'
-            ) as backup_file:
+            with open(dump_path, 'wb') as dump_file:
                 result = subprocess.run(
                     command,
-                    stdout=backup_file,
+                    stdout=dump_file,
                     stderr=subprocess.PIPE,
-                    text=True
+                    timeout=300
                 )
+
             if result.returncode != 0:
-                if os.path.exists(backup_path):
-                    os.remove(backup_path)
-                    
+                error_text = result.stderr.decode('utf-8', errors='replace').strip()
+                logger.error('mysqldump failed: %s', error_text)
+                last_line = error_text.splitlines()[-1][:200] if error_text else 'Unknown error'
                 messages.error(
                     request,
-                    'The database backup could not be created.'
+                    f'The database backup could not be created. MySQL reported: {last_line}'
                 )
+                if os.path.exists(dump_path):
+                    os.remove(dump_path)
                 return redirect('admin_backups')
-            
-            file_size = os.path.getsize(
-                backup_path
-            )
-            
-            if file_size >= 1024 * 1024:
-                size_text = f'{file_size / (1024 * 1024):.2f} MB'
-            elif file_size >= 1024:
-                size_text = f'{file_size / 1024:.2f} KB'
-            else:
-                size_text = f'{file_size} B'
-            
+
+            includes = ['Database']
+
+            if use_zip:
+                with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+                    zf.write(dump_path, 'database.sql')
+                    if include_media:
+                        add_folder_to_zip(zf, settings.MEDIA_ROOT, 'media')
+                        includes.append('Media')
+                    if include_logs:
+                        add_folder_to_zip(zf, settings.LOGS_DIR, 'logs')
+                        includes.append('Logs')
+                os.remove(dump_path)
+
+            size_text = format_size(os.path.getsize(backup_path))
+
             number = 1
-            
             while Copia_Seguridad.objects.filter(
                 codigo=f'COP{number:02d}'
             ).exists():
                 number += 1
-                
+
             codigo = f'COP{number:02d}'
-            
+
             datos = (
                 f'Filename: {filename}\n'
                 f'Size: {size_text}\n'
                 f'Type: {backup_type}\n'
+                f'Includes: {", ".join(includes)}\n'
                 f'Description: {description or "No description"}'
             )
-            
+
             Copia_Seguridad.objects.create(
                 codigo=codigo,
                 nombre=filename,
@@ -4100,31 +4134,30 @@ def admin_backups(request):
                 datos=datos,
                 administrador=administrador
             )
-            messages.success(
-                request,
-                'Database backup created successfully.'
-            )
-        
-        except Exception as e:
-            if os.path.exists(backup_path):
-                os.remove(backup_path)
-                
+            messages.success(request, 'Database backup created successfully.')
+
+        except Exception:
+            logger.exception('Backup creation failed')
+            for path in (dump_path, backup_path):
+                if os.path.exists(path):
+                    os.remove(path)
+
             messages.error(
                 request,
                 'An error occurred while creating the database backup.'
             )
-            
+
         return redirect('admin_backups')
-    
+
+
+    # ---------- LIST (GET) ----------
     backups = Copia_Seguridad.objects.filter(
         administrador=administrador
-    ).order_by(
-        '-fecha',
-        '-hora'
-    )
+    ).order_by('-fecha', '-hora')
+
     total_backups = backups.count()
     last_backup = backups.first()
-    
+
     if last_backup:
         last_backup_date = (
             f'{last_backup.fecha.strftime("%b %d, %Y")} '
@@ -4132,27 +4165,20 @@ def admin_backups(request):
         )
     else:
         last_backup_date = 'No backups'
-        
+
     for backup in backups:
-        backup.size_display = '-'
-        
-        for line in backup.datos.splitlines():
-            if line.startswith('Size:'):
-                backup.size_display = line.replace('Size: ', '', 1).strip()
-                break
-        
+        info = parse_backup_datos(backup.datos)
+        backup.size_display = info['size']
+        backup.type_display = info['type']
+
     context = {
         'backups': backups,
         'total_backups': total_backups,
         'last_backup_date': last_backup_date,
         'frequency': 'Manual',
     }
-    
-    return render(
-        request, 
-        'administrator/backups.html',
-        context
-    )
+
+    return render(request, 'administrator/backups.html', context)
     
 @never_cache
 @role_required('administrator')
@@ -4215,82 +4241,115 @@ def admin_backup_delete(request, codigo):
 @role_required('administrator')
 def admin_backup_restore(request, codigo):
     administrador = request.user.administrador
-    
+
     if request.method != 'POST':
         return redirect('admin_backups')
-    
+
     backup = get_object_or_404(
         Copia_Seguridad,
         codigo=codigo,
         administrador=administrador
     )
-    backup_dir = os.path.join(
-        settings.BASE_DIR,
-        'backups'
-    )
-    backup_path = os.path.join(
-        backup_dir,
-        backup.nombre
-    )
-    
+    backup_dir = os.path.join(settings.BASE_DIR, 'backups')
+    backup_path = os.path.join(backup_dir, backup.nombre)
+
     if not os.path.isfile(backup_path):
+        messages.error(request, 'The selected backup file could not be found.')
+        return redirect('admin_backups')
+
+    mysql_path = settings.MYSQL_PATH
+
+    if not os.path.isfile(mysql_path):
         messages.error(
             request,
-            'The selected backup file could not be found.'
+            'mysql was not found. Set the MYSQL_PATH variable in your .env file.'
         )
         return redirect('admin_backups')
-    
-    mysql_path = r'C:\xampp\mysql\bin\mysql.exe'
-    
-    command = [
-        mysql_path,
-        '--host=localhost',
-        '--port=3306',
-        '--user=root',
-        'spell_challenge'
-    ]
-    
+
+    is_zip = backup.nombre.lower().endswith('.zip')
+    temp_sql = None
+    sql_path = backup_path
+
     try:
-        with open(
-            backup_path, 
-            'rb'
-        ) as backup_file:
-            result = subprocess.run(
-                command,
-                stdin=backup_file,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-        if result.returncode != 0:
-            error_message = result.stderr.decode(
-                'utf-8',
-                errors='replace'
-            )
+        if is_zip:
+            if not zipfile.is_zipfile(backup_path):
+                messages.error(request, 'The backup file is not a valid ZIP archive.')
+                return redirect('admin_backups')
+
+            with zipfile.ZipFile(backup_path) as zf:
+                if 'database.sql' not in zf.namelist():
+                    messages.error(request, 'The ZIP backup does not contain database.sql.')
+                    return redirect('admin_backups')
+
+                temp_sql = os.path.join(backup_dir, f'_restore_{codigo}.sql')
+                with zf.open('database.sql') as src, open(temp_sql, 'wb') as dst:
+                    shutil.copyfileobj(src, dst)
+
+            sql_path = temp_sql
+
+        with open(sql_path, 'rb') as f:
+            head = f.read(8192)
+
+        if not looks_like_sql(head):
             messages.error(
                 request,
-                'The database could not be restored.'
-            )
-            print(
-                'RESTORE ERROR: ',
-                error_message
+                'The backup file is empty or is not a valid SQL dump. Restore cancelled.'
             )
             return redirect('admin_backups')
-        
-        messages.success(
-            request,
-            'Database restored successfully.'
-        )
-        
-    except Exception as e:
-        print(
-            'RESTORE EXCEPTION:',
-            str(e)
-        )
-        messages.error(
-            request,
-            'An error occurred while restoring the database.'
-        )
-        
+
+        command = [
+            mysql_path,
+            '--host=localhost',
+            '--port=3306',
+            '--user=root',
+            '--default-character-set=utf8mb4',
+            settings.DATABASES['default']['NAME']
+        ]
+
+        with open(sql_path, 'rb') as sql_file:
+            result = subprocess.run(
+                command,
+                stdin=sql_file,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=600
+            )
+
+        if result.returncode != 0:
+            error_text = result.stderr.decode('utf-8', errors='replace').strip()
+            logger.error('Restore failed: %s', error_text)
+            last_line = error_text.splitlines()[-1][:200] if error_text else 'Unknown error'
+            messages.error(
+                request,
+                f'The database could not be restored. MySQL reported: {last_line}'
+            )
+            return redirect('admin_backups')
+
+        # Restore media files only when the ZIP includes them
+        if is_zip:
+            media_root = os.path.abspath(str(settings.MEDIA_ROOT))
+            with zipfile.ZipFile(backup_path) as zf:
+                for member in zf.namelist():
+                    if not member.startswith('media/') or member.endswith('/'):
+                        continue
+                    target = os.path.abspath(os.path.join(media_root, member[len('media/'):]))
+                    if not target.startswith(media_root + os.sep):
+                        continue  # ignores unsafe paths
+                    os.makedirs(os.path.dirname(target), exist_ok=True)
+                    with zf.open(member) as src, open(target, 'wb') as dst:
+                        shutil.copyfileobj(src, dst)
+
+        messages.success(request, 'Database restored successfully.')
+
+    except subprocess.TimeoutExpired:
+        messages.error(request, 'The restore took too long and was cancelled.')
+    except Exception:
+        logger.exception('Restore exception')
+        messages.error(request, 'An error occurred while restoring the database.')
+    finally:
+        if temp_sql and os.path.exists(temp_sql):
+            os.remove(temp_sql)
+
     return redirect('admin_backups')
 
 @never_cache

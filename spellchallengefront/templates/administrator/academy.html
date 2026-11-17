@@ -22,7 +22,7 @@
         <button class="tab-btn {% if active_tab == 'groups' %}active{% endif %}" onclick="switchTab('groups', this)">Groups</button>
         <button class="tab-btn {% if active_tab == 'levels' %}active{% endif %}" onclick="switchTab('levels', this)">Levels</button>
     </div>
-    <button class="btn btn-primary" id="addAcademyBtn" onclick="openAddModal()">+ Add Level</button>
+    <button class="btn btn-primary" id="addAcademyBtn" data-modal="careerModal" onclick="openAddModal()">+ Add Program</button>
 </div>
 
 <!-- ========================================== -->
@@ -261,5 +261,21 @@
             e.target.classList.remove('active');
         }
     }
+    // Inicializar el botón con la pestaña activa al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        const activeTab = document.querySelector('.tab-btn.active');
+        if (activeTab) {
+            // Obtener el nombre de la pestaña activa
+            const tabName = activeTab.textContent.trim().toLowerCase();
+            
+            // Buscar la configuración correspondiente
+            const config = addBtnConfig[tabName];
+            if (config) {
+                const addBtn = document.getElementById('addAcademyBtn');
+                addBtn.textContent = config.label;
+                addBtn.setAttribute('data-modal', config.modal);
+            }
+        }
+    });
 </script>
 {% endblock %}

@@ -186,7 +186,8 @@
 }
 
 .type-automatic { background-color: #EBF3FA; color: #2B6CB0; }
-.type-manual { background-color: #FEF3C7; color: #92400E; }
+.type-manual    { background-color: #FEF3C7; color: #92400E; }
+.type-uploaded  { background-color: #E6F4EA; color: #276749; }
 
 .btn-action-link {
     background: none;
