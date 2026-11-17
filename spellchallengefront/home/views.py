@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
 from functools import wraps
 from django.db import transaction
-from django.db.models import Count, Avg, Q, ProtectedError, Prefetch, F, Sum
+from django.db.models import Count, Avg, Q, ProtectedError, Prefetch, F, Sum, Max
 from home.models import Usuario, TipoUsuario, Profesor, Alumno, Administrador, Grupo, Palabra, Notificacion, Pista_Boss_Battle
 from home.models import Carrera, Categoria, Alumno_Insignia, Alumno_Practica, Lista_Grupo, Grupo_Alumno
 from home.models import Nivel, Dificultad, Dificultad_Juego, Insignia, Intento_Palabra, Lista, Lista_Palabra, Competencia_Profesor
@@ -2126,6 +2126,28 @@ def practices(request):
             fields=['puntos_experiencia']
         )
         
+        game_achievements = {
+            'hangman': 'INS01',
+            'missing_letters': 'INS02',
+            'memory_game': 'INS03',
+            'word_search': 'INS04',
+        }
+        
+        if completed:
+            achievement = game_achievements.get(game)
+            
+            if achievement:
+                unlock_achievement(alumno, achievement)
+                
+            if errors == 0:
+                unlock_achievement(alumno, 'INS09')
+                
+        if alumno.puntos_experiencia >= 100:
+            unlock_achievement(alumno, 'INS14')
+            
+        if alumno.puntos_experiencia >= 500:
+            unlock_achievement(alumno, 'INS16')
+        
         new_round_token = secrets.token_urlsafe(32)
         request.session[session_key] = new_round_token
         
@@ -2678,6 +2700,24 @@ def boss_battle_answer(request):
             )
             
             total_xp = alumno.puntos_experiencia
+            
+    #REGISTER BOSS BATTLE ACHIEVEMENTS
+    
+    if battle_finished:
+        
+        if result == 'victory':
+            unlock_achievement(alumno, 'INS05')
+            
+            if battle['incorrect_answers'] == 0:
+                unlock_achievement(alumno, 'INS09')
+                
+                unlock_achievement(alumno, 'INS11')
+                
+        if alumno.puntos_experiencia >= 100:
+            unlock_achievement(alumno, 'INS14')
+            
+        if alumno.puntos_experiencia >= 500:
+            unlock_achievement(alumno, 'INS16')
     
     #PREPARE RESPONSE 
     
@@ -2738,31 +2778,11 @@ def progress(request):
     recent_competitions = all_competitions[:3]
     competitions_count = all_competitions.count()
     
-    practicas_alumno = Alumno_Practica.objects.filter(alumno=alumno)
-    practicas = Practica_Sesion.objects.filter(
-        clave__in=practicas_alumno.values('practica_sesion')
-    ).order_by('-fecha')
+    total_xp = alumno.puntos_experiencia
     
-    week_accuracy = [0, 0, 0, 0]
-    week_labels = ['W1', 'W2', 'W3', 'W4']
-    
-    if practicas.exists():
-        fecha_mas_reciente = practicas.first().fecha
-        for i in range(4):
-            fecha_inicio = fecha_mas_reciente - timedelta(days=(i + 1) * 7)
-            fecha_fin = fecha_mas_reciente - timedelta(days=i * 7)
-            practicas_semana = practicas.filter(fecha__gt=fecha_inicio, fecha__lte=fecha_fin)
-            if practicas_semana.exists():
-                promedio = practicas_semana.aggregate(promedio=Avg('porcentaje_aciertos'))['promedio']
-                week_accuracy[i] = round(promedio)
-    
-    intentos = Intento_Palabra.objects.filter(
-        practica_sesion__in=practicas_alumno.values('practica_sesion')
-    )
-    total_intentos = intentos.count()
-    total_aciertos = intentos.filter(acertado=1).count()
-    overall_accuracy = round((total_aciertos / total_intentos) * 100) if total_intentos > 0 else 0
-    words_practiced = intentos.values('palabra').distinct().count()
+    best_competition_score = all_competitions.aggregate(
+        best_score=Max('puntos_obtenidos')
+    )['best_score'] or 0
     
     insignias = Insignia.objects.all().order_by('clave')
     insignias_obtenidas = set(Alumno_Insignia.objects.filter(alumno=alumno).values_list('insignia_id', flat=True))
@@ -2781,11 +2801,9 @@ def progress(request):
         'achievements_preview': achievements_preview,
         'achievements_earned': len(insignias_obtenidas),
         'achievements_total': insignias.count(),
-        'overall_accuracy': overall_accuracy,
-        'words_practiced': words_practiced,
+        'total_xp': total_xp,
+        'best_competition_score': best_competition_score,
         'competitions_count': competitions_count,
-        'week_labels': week_labels,
-        'week_accuracy': week_accuracy,
         'recent_competitions': recent_competitions,
         'all_competitions': all_competitions,
     }
@@ -4666,6 +4684,17 @@ def practice_spelling(request):
             fields=['puntos_experiencia']
         )
         
+        unlock_achievement(alumno, 'INS06')
+        
+        if errors == 0:
+            unlock_achievement(alumno, 'INS10')
+            
+        if alumno.puntos_experiencia >= 100:
+            unlock_achievement(alumno, 'INS14')
+            
+        if alumno.puntos_experiencia >= 500:
+            unlock_achievement(alumno, 'INS16')
+        
         return JsonResponse(
             {
                 'success': True,
@@ -4725,6 +4754,11 @@ def student_match_words(request):
         alumno.refresh_from_db(
             fields=['puntos_experiencia']
         )
+        
+        unlock_achievement(alumno, 'INS07')
+        
+        if errors == 0:
+            unlock_achievement(alumno, 'INS10')
         
         if alumno.puntos_experiencia >= 100:
             unlock_achievement(alumno, 'INS14')
@@ -4821,6 +4855,17 @@ def practice_speaking(request):
         alumno.refresh_from_db(
             fields=['puntos_experiencia']
         )
+        
+        unlock_achievement(alumno, 'INS08')
+        
+        if errors == 0:
+            unlock_achievement(alumno, 'INS10')
+            
+        if alumno.puntos_experiencia >= 100:
+            unlock_achievement(alumno, 'INS14')
+            
+        if alumno.puntos_experiencia >= 500:
+            unlock_achievement(alumno, 'INS16')
         
         return JsonResponse(
             {
