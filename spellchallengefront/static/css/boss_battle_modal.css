@@ -563,3 +563,34 @@
 #bossBattleGameplay[hidden] {
     display: none !important;
 }
+
+.boss-battle-status-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.boss-battle-timer {
+    display: inline-block;
+    background: #5c1414;
+    color: #fffaf3;
+    font-weight: 900;
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    border: 2px solid #f2c94c;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.boss-battle-timer.warning {
+    background: #dc3545;
+    border-color: #fff;
+    animation: timerPulse 0.6s infinite alternate;
+}
+
+@keyframes timerPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.08); }
+}

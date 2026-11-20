@@ -218,9 +218,9 @@
     background: var(--ws-cell-hover);
 }
 
-.ws-cell-selected {
-    background: var(--ws-selected);
-    color: #5c1414;
+.ws-cell.selected {
+    background: var(--ws-selected) !important;
+    color: #5c1414 !important;
     transform: scale(0.95);
 }
 

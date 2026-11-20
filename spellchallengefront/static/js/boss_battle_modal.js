@@ -15,6 +15,11 @@
     let isProcessing = false;
     let roundToken = null;
 
+    // TIMER VARIABLES
+    const QUESTION_TIME_LIMIT = 10;
+    let questionTimerInterval = null;
+    let timeLeft = QUESTION_TIME_LIMIT;
+
     // GET CSRF TOKEN
 
     function getCsrfToken() {
@@ -24,6 +29,44 @@
         );
 
         return csrfInput ? csrfInput.value : '';
+    }
+
+    // TIMER FUNCTIONS
+
+    function stopQuestionTimer() {
+        if (questionTimerInterval) {
+            clearInterval(questionTimerInterval);
+            questionTimerInterval = null;
+        }
+    }
+
+    function updateTimerDisplay() {
+        const timerEl = document.getElementById('bossBattleTimer');
+        if (!timerEl) return;
+
+        timerEl.textContent = `⏱️ ${timeLeft}s`;
+
+        if (timeLeft <= 3 && timeLeft > 0) {
+            timerEl.classList.add('warning');
+        } else {
+            timerEl.classList.remove('warning');
+        }
+    }
+
+    function startQuestionTimer() {
+        stopQuestionTimer();
+        timeLeft = QUESTION_TIME_LIMIT;
+        updateTimerDisplay();
+
+        questionTimerInterval = setInterval(function () {
+            timeLeft -= 1;
+            updateTimerDisplay();
+
+            if (timeLeft <= 0) {
+                stopQuestionTimer();
+                submitAnswer('__TIMEOUT__', true);
+            }
+        }, 1000);
     }
 
     // UPDATE HEALTH BARS
@@ -132,7 +175,7 @@
             function () {
                 character.classList.remove('damage-animation');
             },
-            { once: true}
+            { once: true }
         );
     }
 
@@ -162,7 +205,7 @@
             button.textContent = option;
 
             button.addEventListener('click', function () {
-                submitAnswer(option);
+                submitAnswer(option, false);
             });
 
             optionsContainer.appendChild(button);
@@ -172,6 +215,10 @@
     // RESET BATTLE DISPLAY
 
     function resetBattleDisplay() {
+        stopQuestionTimer();
+        timeLeft = QUESTION_TIME_LIMIT;
+        updateTimerDisplay();
+
         const round = document.getElementById('bossBattleRound');
         const clue = document.getElementById('bossBattleClue');
         const feedback = document.getElementById('bossBattleFeedback');
@@ -242,14 +289,19 @@
 
             updateRound(data.round);
 
-            updateHealthBars(data.king_bee_lives,data.beenary_lives);
+            updateHealthBars(data.king_bee_lives, data.beenary_lives);
 
             document.getElementById('bossBattleClue').textContent = data.clue;
 
             // DISPLAY ANSWER OPTIONS
             renderAnswerOptions(data.options);
 
+            // START 10s TIMER
+            startQuestionTimer();
+
         } catch (error) {
+
+            stopQuestionTimer();
 
             showFeedback(
                 error.message || 'An error occurred while starting the battle.'
@@ -283,13 +335,15 @@
 
     // SUBMIT STUDENT ANSWER
 
-    async function submitAnswer(selectedAnswer) {
+    async function submitAnswer(selectedAnswer, isTimeout = false) {
 
         if (isProcessing || !battleToken) return;
 
+        stopQuestionTimer();
+
         const answer = selectedAnswer;
 
-        if (!answer) {
+        if (!answer && !isTimeout) {
 
             showFeedback('Please select an answer.');
             return;
@@ -315,6 +369,7 @@
         formData.append('battle_token', battleToken);
         formData.append('round_token', roundToken);
         formData.append('answer', answer);
+        formData.append('timeout', isTimeout ? 'true' : 'false');
 
         try {
 
@@ -344,17 +399,23 @@
 
             // UPDATE FEEDBACK
 
-            showFeedback(data.feedback, data.correct);
+            const feedbackMessage = isTimeout
+                ? "Time's up! You took damage!"
+                : data.feedback;
 
-            optionButtons.forEach(function (button) {
-                if (button.textContent === answer) {
-                    if (data.correct) {
-                        button.classList.add('correct');
-                    } else {
-                        button.classList.add('incorrect');
+            showFeedback(feedbackMessage, data.correct);
+
+            if (!isTimeout) {
+                optionButtons.forEach(function (button) {
+                    if (button.textContent === answer) {
+                        if (data.correct) {
+                            button.classList.add('correct');
+                        } else {
+                            button.classList.add('incorrect');
+                        }
                     }
-                }
-            });
+                });
+            }
 
             if (data.correct) {
                 animateDamage('kingBeeImage');
@@ -371,6 +432,8 @@
             // CHECK BATTLE RESULT
 
             if (data.finished) {
+
+                stopQuestionTimer();
 
                 optionButtons.forEach(function (button) {
                     button.disabled = true;
@@ -416,7 +479,12 @@
             // DISPLAY NEXT ANSWER OPTIONS
             renderAnswerOptions(data.options);
 
+            // RESTART 10s TIMER FOR NEXT QUESTION
+            startQuestionTimer();
+
         } catch (error) {
+
+            stopQuestionTimer();
 
             // DISABLE ALL ANSWER OPTIONS
             optionButtons.forEach(function (button) {
@@ -468,6 +536,8 @@
     function closeBossBattle() {
 
         if (!modal || isProcessing) return;
+
+        stopQuestionTimer();
 
         modal.classList.remove('active');
 

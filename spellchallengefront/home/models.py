@@ -390,6 +390,8 @@ class Lista(models.Model):
     )
     numero_letras = models.IntegerField()
     
+    es_spelling_bee = models.BooleanField(default=False)
+    
     profesor = models.ForeignKey(
         Profesor,
         on_delete=models.PROTECT,
@@ -1052,6 +1054,15 @@ class Competencia_Alumno(models.Model):
         on_delete=models.CASCADE,
         db_column='alumno',
         to_field='matricula'
+    )
+    
+    grupo = models.ForeignKey(
+        Grupo,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        db_column='grupo',
+        to_field='codigo'
     )
     
     puntos_obtenidos = models.IntegerField(

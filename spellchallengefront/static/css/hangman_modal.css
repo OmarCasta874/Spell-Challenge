@@ -175,3 +175,40 @@
     max-width: 90%;
     text-align: center;
 }
+
+/* BEENARY DAMAGE ANIMATION */
+#hangmanBeeImage.damage-animation {
+    animation: hangmanBeeDamage 0.5s ease-in-out;
+}
+
+@keyframes hangmanBeeDamage {
+    0% {
+        translate: 0 0;
+        filter: none;
+    }
+
+    20% {
+        translate: -7px 0;
+        filter: drop-shadow(0 0 10px rgba(220, 53, 69, 0.9));
+    }
+
+    40% {
+        translate: 7px 0;
+        filter: drop-shadow(0 0 12px rgba(220, 53, 69, 1));
+    }
+
+    60% {
+        translate: -5px 0;
+        filter: drop-shadow(0 0 8px rgba(220, 53, 69, 0.8));
+    }
+
+    80% {
+        translate: 5px 0;
+        filter: none;
+    }
+
+    100% {
+        translate: 0 0;
+        filter: none;
+    }
+}

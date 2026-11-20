@@ -112,6 +112,11 @@
 
         document.getElementById('hangmanHint').innerText = item.meaning;
 
+        const beeImage = document.getElementById('hangmanBeeImage');
+        if (beeImage) {
+            beeImage.classList.remove('damage-animation');
+        }
+
         const imageElement = document.getElementById('hangmanImage');
 
         if (item.image) {
@@ -184,7 +189,23 @@
         });
     }
 
-        
+    function hangman_animateDamage() {
+        const bee = document.getElementById('hangmanBeeImage');
+        if (!bee) return;
+
+        bee.classList.remove('damage-animation');
+        void bee.offsetWidth;
+        bee.classList.add('damage-animation');
+
+        bee.addEventListener(
+            'animationend',
+            function () {
+                bee.classList.remove('damage-animation');
+            },
+            { once: true }
+        );
+    }
+
     function hangman_handleGuess(letter, btnElement) {
 
         if (hangman_finished) return;
@@ -201,6 +222,7 @@
             hangman_attemptsLeft--;
             hangman_errors++;
 
+            hangman_animateDamage();
             hangman_renderHearts();
 
             if (hangman_attemptsLeft === 0) {

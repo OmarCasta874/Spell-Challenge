@@ -238,13 +238,17 @@
 <div class="modal fade res-modal" id="addParticipantsModal" tabindex="-1" aria-labelledby="addParticipantsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
     <div class="modal-content">
-      <form method="post">
+      <form method="post" id="addParticipantsForm">
         {% csrf_token %}
         <input type="hidden" name="action" value="add_participants">
         <div class="modal-header res-modal-header">
           <div>
-            <h5 class="res-modal-title" id="addParticipantsModalLabel">Add Competition Participants</h5>
-            <p class="mb-0">Select only the students who participated in person.</p>
+            <h5 class="res-modal-title" id="addParticipantsModalLabel">
+              Add Competition Participants
+            </h5>
+            <p class="mb-0">
+              Select only the students who participated in person.
+            </p>
           </div>
           <button type="button" class="res-modal-close" data-bs-dismiss="modal" aria-label="Close">
             &times;
@@ -252,23 +256,74 @@
         </div>
         <div class="modal-body res-modal-body">
           {% if alumnos_candidatos %}
-            <div class="res-participants-list">
+            <!-- GROUP FILTER -->
+            <div class="mb-3">
+              <label for="participantGroup" class="form-label">
+                Select Group
+              </label>
+              <select
+                id="participantGroup"
+                name="grupo"
+                class="form-select"
+                required
+              >
+                <option value="">Choose a group...</option>
+                {% for grupo in grupos_disponibles %}
+                  <option value="{{ grupo.codigo }}">
+                    {{ grupo.nombre }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            <!-- STUDENT SEARCH -->
+            <div class="mb-3">
+              <label for="participantSearch" class="form-label">
+                Search Student
+              </label>
+              <input
+                type="text"
+                id="participantSearch"
+                class="form-control"
+                placeholder="Search by name, surname or enrollment..."
+                autocomplete="off"
+              >
+            </div>
+            <!-- STUDENT LIST -->
+            <div class="res-participants-list" id="participantsList">
               {% for alumno in alumnos_candidatos %}
-                <label class="res-participant-option">
+                <label
+                  class="res-participant-option"
+                  data-group="{{ alumno.group_code }}"
+                  data-name="{{ alumno.first_name|lower }} {{ alumno.last_name|lower }}"
+                  data-enrollment="{{ alumno.enrollment|lower }}"
+                >
                   {% if alumno.enrollment in participantes_ids %}
                     <input type="checkbox" disabled checked>
                   {% else %}
-                    <input type="checkbox" name="participantes" value="{{ alumno.enrollment }}">
+                    <input
+                      type="checkbox"
+                      name="participantes"
+                      value="{{ alumno.enrollment }}"
+                    >
                   {% endif %}
                   <span class="res-participant-details">
-                    <strong>{{ alumno.first_name }} {{ alumno.last_name }}</strong>
-                    <small>{{ alumno.enrollment }} · {{ alumno.group }}</small>
+                    <strong>
+                      {{ alumno.first_name }} {{ alumno.last_name }}
+                    </strong>
+                    <small>
+                      {{ alumno.enrollment }} · {{ alumno.group }}
+                    </small>
                   </span>
                   {% if alumno.enrollment in participantes_ids %}
-                    <span class="res-participant-added">Already added</span>
+                    <span class="res-participant-added">
+                      Already added
+                    </span>
                   {% endif %}
                 </label>
               {% endfor %}
+              <div id="participantsEmpty" class="notifications-empty" hidden>
+                <p>No students match your search.</p>
+              </div>
             </div>
           {% else %}
             <div class="notifications-empty">
@@ -281,7 +336,7 @@
             CANCEL
           </button>
           {% if alumnos_candidatos %}
-            <button type="submit" class="res-btn-search">
+            <button type="submit" class="res-btn-search" id="addParticipantsBtn" disabled>
               Add Selected Students
             </button>
           {% endif %}
@@ -332,6 +387,75 @@
     search.addEventListener('keydown', function (e) { if (e.key === 'Enter') render(); });
     sort.addEventListener('change', render);
     btn.addEventListener('click', render);
+  })();
+
+  (function () {
+    const groupSelect = document.getElementById('participantGroup');
+    const searchInput = document.getElementById('participantSearch');
+    const participantsList = document.getElementById('participantsList');
+    const emptyMessage = document.getElementById('participantsEmpty');
+    const addButton = document.getElementById('addParticipantsBtn');
+
+    if (!groupSelect || !searchInput || !participantsList || !addButton) {
+      return;
+    }
+
+    const studentOptions = Array.from(
+      participantsList.querySelectorAll('.res-participant-option')
+    );
+
+    function renderParticipants() {
+      const selectedGroup = groupSelect.value;
+      const query = searchInput.value.trim().toLowerCase();
+
+      let visible = 0;
+      let selected = 0;
+
+      studentOptions.forEach(function (option) {
+        const matchesGroup =
+            selectedGroup !== '' &&
+            option.dataset.group === selectedGroup;
+
+        const matchesSearch =
+            option.dataset.name.includes(query) ||
+            option.dataset.enrollment.includes(query);
+
+        const isVisible = matchesGroup && matchesSearch;
+
+        option.hidden = !isVisible;
+
+        if (isVisible) {
+          visible++;
+        }
+
+        const checkbox = option.querySelector('input[type="checkbox"]');
+
+        if (checkbox && !checkbox.disabled && checkbox.checked) {
+          selected++;
+        }
+      });
+
+      emptyMessage.hidden = visible !== 0;
+
+      if (!selectedGroup) {
+        emptyMessage.querySelector('p').textContent = 'Please select a group to display its students.';
+      } else {
+        emptyMessage.querySelector('p').textContent = 'No students match your search.';
+      }
+
+      addButton.disabled = selected === 0;
+    }
+
+    groupSelect.addEventListener('change', renderParticipants);
+    searchInput.addEventListener('input', renderParticipants);
+
+    participantsList.addEventListener('change', function (event) {
+      if (event.target.matches('input[type="checkbox"]')) {
+        renderParticipants();
+      }
+    });
+
+    renderParticipants();
   })();
 </script>
 {% endblock %}

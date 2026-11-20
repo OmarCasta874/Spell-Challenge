@@ -539,12 +539,12 @@
         wordSearch_selectedCells = [];
     }
 
-    // ---------- Eventos de selección ----------
+// ---------- Eventos de selección ----------
 
     board.addEventListener('pointerdown', function (event) {
         const cell = event.target.closest('.ws-cell');
 
-        if (!cell || cell.classList.contains('found')) return;
+        if (!cell) return;
 
         event.preventDefault();
 
@@ -560,10 +560,17 @@
         wordSearch_updateSelection(cell);
     });
 
-    board.addEventListener('pointerover', function (event) {
+    board.addEventListener('pointermove', function (event) {
         if (!wordSearch_isSelecting) return;
 
-        const cell = event.target.closest('.ws-cell');
+        const targetElement = document.elementFromPoint(
+            event.clientX,
+            event.clientY
+        );
+
+        if (!targetElement) return;
+
+        const cell = targetElement.closest('.ws-cell');
 
         if (!cell) return;
 
@@ -575,7 +582,14 @@
 
         wordSearch_isSelecting = false;
 
-        wordSearch_checkSelection();
+        if (wordSearch_selectedCells.length < 2) {
+            wordSearch_selectedCells.forEach(cell => {
+                cell.element.classList.remove('selected');
+            });
+            wordSearch_selectedCells = [];
+        } else {
+            wordSearch_checkSelection();
+        }
 
         wordSearch_startCell = null;
     });

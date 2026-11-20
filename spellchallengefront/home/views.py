@@ -618,9 +618,46 @@ def view_word_list(request, codigo):
         .all()
     )
     
+    grupos_palabras = []
+    
+    if lista.es_spelling_bee:
+        palabras_por_longitud = {
+            cantidad: []
+            for cantidad in range(6, 14)
+        }
+        
+        for relacion in lista_palabras:
+            cantidad_letras = sum(
+                1 for char in relacion.palabra.significado
+                if char.isalpha()
+            )
+            
+            if cantidad_letras in palabras_por_longitud:
+                palabras_por_longitud[cantidad_letras].append(
+                    relacion
+                )
+                
+        grupos_palabras = [
+            {
+                'cantidad': cantidad,
+                'palabras': palabras
+            }
+            for cantidad, palabras in palabras_por_longitud.items()
+            if palabras
+        ]
+        
+    else:
+        grupos_palabras = [
+            {
+                'cantidad': None,
+                'palabras': lista_palabras
+            }
+        ]
+    
     return render(request, 'teacher/word_list_details.html', {
         'lista': lista,
         'lista_palabras': lista_palabras,
+        'grupos_palabras': grupos_palabras,
     })
     
 @never_cache
@@ -643,6 +680,18 @@ def add_word_to_list(request, codigo):
             messages.error(
                 request,
                 'The word must contain between 1 and 50 characters.'
+            )
+            return redirect('add_word_to_list', codigo=lista.codigo)
+        
+        cantidad_letras = sum(
+            1 for char in significado
+            if char.isalpha()
+        )
+        
+        if lista.es_spelling_bee and not 6 <= cantidad_letras <= 13:
+            messages.error(
+                request,
+                'Spelling Bee words must contain between 6 and 13 letters.'
             )
             return redirect('add_word_to_list', codigo=lista.codigo)
         
@@ -946,6 +995,8 @@ def create_word_list(request):
     if request.method == 'POST':
         list_name = request.POST.get('name', '').strip()
         
+        es_spelling_bee = request.POST.get('es_spelling_bee') == 'on'
+        
         if not list_name:
             messages.error(
                 request,
@@ -1009,6 +1060,7 @@ def create_word_list(request):
                     fecha_asignacion=timezone.localdate(),
                     fecha_limite=None,
                     numero_letras=0,
+                    es_spelling_bee=es_spelling_bee,
                     profesor=profesor,
                 )
             
@@ -2457,6 +2509,7 @@ def boss_battle_start(request):
     request.session['boss_battle'] = {
         'battle_token': battle_token,
         'round_token': secrets.token_urlsafe(16),
+        'round_started_at': timezone.now().timestamp(),
         'words': selected_words,
         'current_index': 0,
         'king_bee_lives': 10,
@@ -2478,6 +2531,7 @@ def boss_battle_start(request):
         'round_token': request.session['boss_battle']['round_token'],
         'round': 1,
         'total_rounds': 10,
+        'time_limit': 10,
         'king_bee_lives': 10,
         'beenary_lives': 10,
         'clue': selected_words[0]['clue_easy'],
@@ -2561,12 +2615,19 @@ def boss_battle_answer(request):
         
     current_word = words[current_index]
     
+    #CHECK SERVER-SIDE TIMEOUT (10s + 2s network grace)
+    is_timeout = request.POST.get('timeout') == 'true'
+    started_at = battle.get('round_started_at')
+
+    if started_at and (timezone.now().timestamp() - started_at) > 12:
+        is_timeout = True
+    
     #VALIDATE STUDENT ANSWER
     student_answer = normalize_boss_word(
         request.POST.get('answer', '')
     )
     
-    if not student_answer:
+    if not is_timeout and not student_answer:
         return JsonResponse({
             'success': False,
             'message': 'Please enter an answer.'
@@ -2574,7 +2635,7 @@ def boss_battle_answer(request):
         
     correct_answer = current_word['answer']
     
-    is_correct = student_answer == correct_answer
+    is_correct = (not is_timeout) and (student_answer == correct_answer)
     
     #APPLY DAMAGE
     
@@ -2588,7 +2649,10 @@ def boss_battle_answer(request):
         battle['beenary_lives'] -= 1
         battle['incorrect_answers'] += 1
         
-        feedback = 'Incorrect! King Bee has attacked Beenary!'
+        if is_timeout:
+            feedback = "Time's up! King Bee attacked Beenary!"
+        else:
+            feedback = 'Incorrect! King Bee has attacked Beenary!'
         
     #CHECK BATTLE RESULT
     king_bee_lives = battle['king_bee_lives']
@@ -2766,6 +2830,7 @@ def boss_battle_answer(request):
     response_data = {
         'success': True,
         'correct': is_correct,
+        'timeout': is_timeout,
         'feedback': feedback,
         'king_bee_lives': king_bee_lives,
         'beenary_lives': beenary_lives,
@@ -2789,13 +2854,14 @@ def boss_battle_answer(request):
         
         response_data['options'] = next_word['options']
         
-    # GENERATE NEXT ROUND TOKEN
+    # GENERATE NEXT ROUND TOKEN AND RESET TIMER
     
     next_round_token = None
     
     if not battle_finished:
         next_round_token = secrets.token_urlsafe(16)
         response_data['round_token'] = next_round_token
+        battle['round_started_at'] = timezone.now().timestamp()
         
     #SAVE PROCESSED ROUND
     battle['last_round_token'] = round_token
@@ -4572,6 +4638,8 @@ def student_competitions_view(request, competition_code):
     
     beehives = list(range(1, 61))
     
+    es_spelling_bee = False
+    
     if competencia.tipo == 'GENERAL':
         palabras_qs = (
             Palabra.objects.all()
@@ -4584,6 +4652,7 @@ def student_competitions_view(request, competition_code):
         ).select_related('lista').first()
         
         if relacion and relacion.lista:
+            es_spelling_bee = relacion.lista.es_spelling_bee
             palabras_qs = (
                 Palabra.objects.filter(
                     lista_palabras__lista=relacion.lista
@@ -4603,6 +4672,7 @@ def student_competitions_view(request, competition_code):
         'CAT15': [], 
         'CAT16': [], 
         'CAT17': [], 
+        'SUDDEN_DEATH': [],
     }
     
     length_to_cat = {
@@ -4619,6 +4689,9 @@ def student_competitions_view(request, competition_code):
         if palabra.significado:
             num_letras = len([char for char in palabra.significado if char.isalpha()])
             cat_key = length_to_cat.get(num_letras)
+            
+            if num_letras == 13 and es_spelling_bee:
+                cat_key = 'SUDDEN_DEATH'
             
             if cat_key and cat_key in words_by_category:
                 words_by_category[cat_key].append({
@@ -4977,6 +5050,7 @@ def teacher_competition_results(request, pk):
         .select_related(
             'alumno',
             'alumno__usuario',
+            'grupo',
         )
         .order_by(
             '-palabras_correctas',
@@ -4985,6 +5059,12 @@ def teacher_competition_results(request, pk):
             'alumno__nombre_pila',
             'alumno_id',
         )
+    )
+    
+    grupos_disponibles = (
+        Grupo.objects
+        .filter(profesor=competition.profesor)
+        .order_by('nombre')
     )
     
     alumnos_grupos = (
@@ -4996,27 +5076,29 @@ def teacher_competition_results(request, pk):
             'grupo',
         )
         .order_by(
+            'grupo__nombre',
             'alumno__apellidoPaterno',
+            'alumno__apellidoMaterno',
             'alumno__nombre_pila',
         )
     )
     
-    alumnos_candidatos = {}
+    alumnos_candidatos = []
     
     for relacion in alumnos_grupos:
         alumno = relacion.alumno
         
-        if alumno.matricula not in alumnos_candidatos:
-            alumnos_candidatos[alumno.matricula] = {
-                'enrollment': alumno.matricula,
-                'first_name': alumno.nombre_pila,
-                'last_name': (
-                    f"{alumno.apellidoPaterno} "
-                    f"{alumno.apellidoMaterno or ''}"
-                ).strip(),
-                'email': alumno.usuario.correo,
-                'group': relacion.grupo.nombre,
-            }
+        alumnos_candidatos.append({
+            'enrollment': alumno.matricula,
+            'first_name': alumno.nombre_pila,
+            'last_name': (
+                f"{alumno.apellidoPaterno} "
+                f"{alumno.apellidoMaterno or ''}"
+            ).strip(),
+            'email': alumno.usuario.correo,
+            'group': relacion.grupo.nombre,
+            'group_code': relacion.grupo.codigo,
+        })
             
     participantes_ids = set(
         Competencia_Alumno.objects
@@ -5028,11 +5110,27 @@ def teacher_competition_results(request, pk):
         action = request.POST.get('action')
         
         if action == 'add_participants':
+            grupo_codigo = request.POST.get('grupo', '').strip()
+            
+            grupo_seleccionado = get_object_or_404(
+                Grupo,
+                codigo=grupo_codigo,
+                profesor=competition.profesor,
+            )
+            
             matriculas_seleccionadas = set(
                 request.POST.getlist('participantes')
             )
             
-            matriculas_validas = set(alumnos_candidatos.keys())
+            matriculas_validas = set(
+                Grupo_Alumno.objects
+                .filter(
+                    grupo=grupo_seleccionado,
+                    grupo__profesor=competition.profesor,
+                )
+                .values_list('alumno_id', flat=True)
+            )
+            
             matriculas_seleccionadas &= matriculas_validas
             
             agregados = 0
@@ -5041,6 +5139,9 @@ def teacher_competition_results(request, pk):
                 _, creado = Competencia_Alumno.objects.get_or_create(
                     competencia=competition,
                     alumno_id=matricula,
+                    defaults={
+                        'grupo': grupo_seleccionado,
+                    },
                 )
                 
                 if creado:
@@ -5208,16 +5309,9 @@ def teacher_competition_results(request, pk):
     for participacion in participaciones:
         alumno = participacion.alumno
         
-        grupo_alumno = (
-            Grupo_Alumno.objects
-            .filter(alumno=alumno)
-            .select_related('grupo')
-            .first()
-        )
-        
         group_name = (
-            grupo_alumno.grupo.nombre
-            if grupo_alumno
+            participacion.grupo.nombre
+            if participacion.grupo
             else '-'
         )
         
@@ -5251,8 +5345,9 @@ def teacher_competition_results(request, pk):
             'competition': competition,
             'results': results,
             'total_words': total_words,
-            'alumnos_candidatos': list(alumnos_candidatos.values()),
+            'alumnos_candidatos': alumnos_candidatos,
             'participantes_ids': participantes_ids,
+            'grupos_disponibles': grupos_disponibles,
         }
     )
 

@@ -126,6 +126,8 @@
 
       btn.classList.add('mw-item-matched');
 
+      mwMoveMatchedItems();
+
       mwSelectedWordBtn = null;
 
       mwMatchedCount++;
@@ -160,6 +162,76 @@
 
       mwSelectedWordBtn = null;
     }
+  }
+
+  function mwMoveMatchedItems() {
+
+    var columns = document.querySelectorAll('.mw-column');
+
+    columns.forEach(function (column) {
+
+      var items = Array.from(
+        column.querySelectorAll('.mw-item')
+      );
+
+      // FIRST: guardar posiciones originales.
+      var firstPositions = new Map();
+
+      items.forEach(function (item) {
+        firstPositions.set(
+          item,
+          item.getBoundingClientRect().top
+        );
+      });
+
+      var matchedItems = items.filter(function (item) {
+        return item.classList.contains('mw-item-matched');
+      });
+
+      var unmatchedItems = items.filter(function (item) {
+        return !item.classList.contains('mw-item-matched');
+      });
+
+      // LAST: reorganizar elementos.
+      matchedItems.concat(unmatchedItems).forEach(function (item) {
+        column.appendChild(item);
+      });
+
+      // INVERT + PLAY: animar hacia las nuevas posiciones.
+      var reduceMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
+
+      if (reduceMotion) return;
+
+      items.forEach(function (item) {
+
+        var firstTop = firstPositions.get(item);
+        var lastTop = item.getBoundingClientRect().top;
+
+        var distance = firstTop - lastTop;
+
+        if (distance === 0) return;
+
+        item.animate(
+          [
+            {
+              transform: 'translateY(' + distance + 'px)'
+            },
+            {
+              transform: 'translateY(0)'
+            }
+          ],
+          {
+            duration: 350,
+            easing: 'ease'
+          }
+        );
+
+      });
+
+    });
+
   }
 
   function mwCompleteGame() {

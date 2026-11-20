@@ -61,6 +61,28 @@
                     <span>Maximum 30 characters</span>
                 </div>
             </div>
+            <div class="mb-3">
+                <div class="form-check">
+                    <input
+                        type="checkbox"
+                        name="es_spelling_bee"
+                        id="es_spelling_bee"
+                        class="form-check-input"
+                    >
+                    <label
+                        for="es_spelling_bee"
+                        class="form-check-label"
+                    >
+                        Word List for Spelling Bee
+                    </label>
+                </div>
+                <div class="create-word-list-help">
+                    <span>
+                        Enable this option to automatically organize
+                        words by their number of letters for Spelling Bee competitions.
+                    </span>
+                </div>
+            </div>
             <div class="create-word-list-actions">
                 <a href="{% url 'teacher_word_lists' %}" class="create-word-list-cancel">
                     Cancel
