@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import never_cache
 from functools import wraps
 from django.db import transaction
@@ -22,7 +22,11 @@ from django.conf import settings
 from django.http import FileResponse, Http404, JsonResponse
 from django.urls import reverse
 from home.services.gemini_service import generate_word_content
-from home.services.transcription_service import transcribe_audio
+from home.services.transcription_service import (
+    transcribe_audio,
+    get_transcription_status,
+    TranscriptionUnavailable,
+)
 from django.core.mail import send_mail
 from home.services.achievement_service import unlock_achievement
 
@@ -1792,6 +1796,18 @@ def transcribe_speaking(request):
         )
 
         counted_key = 'pk_counted_words'
+        
+    #PRACTICE SPELLING
+    elif activity_type == 'spelling':
+        
+        round_token = request.POST.get('round_token')
+        session_token = request.session.get('ps_round_token')
+        
+        if not round_token or round_token != session_token:
+            return JsonResponse(
+                {'error': 'Invalid or expired spelling session.'},
+                status=400
+            )
 
     # LESSON SPEAKING
     elif activity_type == 'lesson':
@@ -1885,6 +1901,13 @@ def transcribe_speaking(request):
                 {'error': 'No speech could be transcribed.'},
                 status=400
             )
+            
+        #PRACTICE SPELLING RESPONSE
+        if activity_type == 'spelling':
+            return JsonResponse({
+                'success': True,
+                'transcription': transcription,
+            })
 
         import re
         
@@ -2057,6 +2080,25 @@ def transcribe_speaking(request):
             'is_correct': is_correct,
             'words_counted': len(counted_items)
         })
+        
+    except TranscriptionUnavailable as error:
+        
+        return JsonResponse(
+            {
+                'success': False,
+                'error_type': error.error_type,
+                'error': (
+                    'The transcription service is temporarily unavailable. '
+                    'Please wait before trying again.'
+                ),
+                'retry_after': error.retry_after,
+            },
+            status=(
+                error.status_code
+                if error.status_code in (429, 503)
+                else 503
+            )
+        )
 
     except Exception as error:
         print("TRANSCRIPTION ERROR TYPE: ", type(error).__name__)
@@ -2078,6 +2120,13 @@ def transcribe_speaking(request):
             gemini_status = getattr(error, 'status_code', None)
             
         error_details = str(error).lower()
+        
+        transcription_status = get_transcription_status()
+        
+        retry_after = transcription_status.get(
+            'retry_after',
+            0
+        )
 
         if gemini_status == 429:
             
@@ -2093,7 +2142,8 @@ def transcribe_speaking(request):
                         'error': (
                             'The daily transcription quota has been reached. '
                             'Please try again after the quota resets.'
-                        )
+                        ),
+                        'retry_after': retry_after,
                     }, 
                     status=429
                 )
@@ -2104,7 +2154,8 @@ def transcribe_speaking(request):
                     'error': (
                         'The transcription request limit has been reached. '
                         'Please wait before trying again.'
-                    )
+                    ),
+                    'retry_after': retry_after,
                 },
                 status=429
             )
@@ -2116,7 +2167,8 @@ def transcribe_speaking(request):
                     'error': (
                         'The transcription service is temporarily busy. '
                         'Please try again in a few moments.'
-                    )
+                    ),
+                    'retry_after': retry_after,
                 },
                 status=503
             )
@@ -2130,6 +2182,19 @@ def transcribe_speaking(request):
             },
             status=502
         )
+        
+@never_cache
+@require_GET
+@role_required('student')
+def transcription_status(request):
+    
+    status = get_transcription_status()
+    
+    return JsonResponse({
+        'available': status['available'],
+        'reason': status['reason'],
+        'retry_after': status['retry_after'],
+    })
         
 def normalize_boss_word(word):
     normalized = unicodedata.normalize(

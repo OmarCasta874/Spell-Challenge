@@ -148,3 +148,84 @@
         font-size: 1.4rem;
     }
 }
+
+/* PRACTICE SPEAKING - DAILY QUOTA */
+.pye-service-unavailable {
+    margin-top: 15px;
+    padding: 15px 12px;
+    border: 1px solid rgba(232, 185, 63, 0.45);
+    border-radius: 14px;
+    background: #fff8e7;
+    text-align: center;
+}
+
+.pye-service-message {
+    margin: 0 0 12px;
+    color: #7a1c1c;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.pye-service-label {
+    display: block;
+    color: #947022;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.pye-service-countdown {
+    margin: 5px 0;
+    color: #7a1c1c;
+    font-size: 1.8rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 2px;
+}
+
+.pye-service-footer {
+    margin: 10px 0 0;
+    color: #9a7770;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.pye-service-divider {
+    border: 0;
+    border-top: 1px solid rgba(122, 28, 28, 0.18);
+    margin: 16px 0;
+}
+
+.pye-service-timer-heading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+    margin-top: 14px;
+    color: #7a1c1c;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.pye-service-timer-heading i {
+    width: 15px;
+    height: 15px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+    .pye-service-unavailable {
+        padding: 12px 8px;
+    }
+
+    .pye-service-countdown {
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+    }
+
+    .pye-service-message {
+        font-size: 0.8rem;
+    }
+}

@@ -162,6 +162,197 @@
   var psErrorCount = 0;
   var psRewardSent = false;
 
+  var psServiceAvailable = true;
+  var psServiceChecking = false;
+  var psServiceRetryAfter = 0;
+  var psServiceRetryInterval = null;
+  var psServiceExercise = null;
+
+  function psFormatServiceTime(seconds) {
+    var hours = Math.floor(seconds / 3600);
+    var minutes = Math.floor((seconds % 3600) / 60);
+    var remainingSeconds = seconds % 60;
+
+    return [
+      String(hours).padStart(2, '0'),
+      String(minutes).padStart(2, '0'),
+      String(remainingSeconds).padStart(2, '0')
+    ].join(':');
+  }
+
+  function psShowServiceUnavailable(reason, retryAfter, exerciseNumber) {
+
+    psServiceAvailable = false;
+
+    var waitSeconds = Number(retryAfter);
+
+    if (!Number.isFinite(waitSeconds) || waitSeconds <= 0) {
+      waitSeconds = 10;
+    }
+
+    psServiceRetryAfter = Date.now() + (
+      waitSeconds * 1000
+    );
+
+    if (exerciseNumber) {
+      psServiceExercise = exerciseNumber;
+    }
+
+    if (psServiceRetryInterval) {
+      clearInterval(psServiceRetryInterval);
+    }
+
+    psStartServiceCountdown();
+  }
+
+
+  function psDisplayServiceUnavailable(exerciseNumber) {
+
+    psServiceExercise = exerciseNumber;
+
+    var speechResult = document.getElementById(
+      'psSpeechResult' + exerciseNumber
+    );
+
+    var remaining = Math.max(
+      0,
+      Math.ceil((psServiceRetryAfter - Date.now()) / 1000)
+    );
+
+    speechResult.textContent =
+      'The transcription service will be available in ' +
+      psFormatServiceTime(remaining) + '.';
+
+    speechResult.style.color = '#dc3545';
+  }
+
+
+  function psStartServiceCountdown() {
+
+    function updateCountdown() {
+
+      var remaining = Math.max(
+        0,
+        Math.ceil((psServiceRetryAfter - Date.now()) / 1000)
+      );
+
+      if (psServiceExercise) {
+        psDisplayServiceUnavailable(psServiceExercise);
+      }
+
+      if (remaining <= 0) {
+
+        clearInterval(psServiceRetryInterval);
+        psServiceRetryInterval = null;
+
+        if (psServiceExercise) {
+          var speechResult = document.getElementById(
+            'psSpeechResult' + psServiceExercise
+          );
+
+          speechResult.textContent =
+            'Checking transcription service availability...';
+
+          speechResult.style.color = '#6c757d';
+        }
+
+        psCheckServiceAvailability();
+
+        return;
+      }
+    }
+
+    updateCountdown();
+
+    psServiceRetryInterval = setInterval(
+      updateCountdown,
+      1000
+    );
+  }
+
+
+  function psRestoreService() {
+
+    psServiceAvailable = true;
+
+    if (psServiceRetryInterval) {
+      clearInterval(psServiceRetryInterval);
+      psServiceRetryInterval = null;
+    }
+
+    if (psServiceExercise) {
+
+      var speechResult = document.getElementById(
+        'psSpeechResult' + psServiceExercise
+      );
+
+      speechResult.textContent =
+        'The transcription service is available again. You can use Speak.';
+
+      speechResult.style.color = '#198754';
+    }
+
+    psServiceExercise = null;
+
+    console.log('Gemini transcription service available.');
+  }
+
+
+  async function psCheckServiceAvailability() {
+
+    if (psServiceChecking) {
+      return;
+    }
+
+    psServiceChecking = true;
+
+    try {
+
+      var response = await fetch(
+        "{% url 'transcription_status' %}",
+        {
+          method: 'GET',
+          cache: 'no-store',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          'Could not verify transcription availability.'
+        );
+      }
+
+      var data = await response.json();
+
+      if (data.available) {
+
+        psRestoreService();
+
+      } else {
+
+        psShowServiceUnavailable(
+          data.reason,
+          data.retry_after,
+          psServiceExercise
+        );
+      }
+
+    } catch (error) {
+
+      console.error(
+        'Transcription status error:',
+        error
+      );
+
+    } finally {
+
+      psServiceChecking = false;
+    }
+  }
+
   function psUpdateSkipButton(exerciseNumber) {
     var skipButton = document.getElementById('psSkip' + exerciseNumber);
 
@@ -300,6 +491,17 @@
       return;
     }
 
+    if (psServiceChecking) {
+      speechResult.textContent = 'Checking transcription service availability...';
+      speechResult.style.color = '#6c757d';
+      return;
+    }
+
+    if (!psServiceAvailable) {
+      psDisplayServiceUnavailable(exerciseNumber);
+      return;
+    }
+
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       speechResult.textContent = 'Microphone access is not supported in this browser.';
       speechResult.style.color = '#dc3545';
@@ -361,6 +563,18 @@
             'practice-spelling-recording.webm'
           );
 
+          formData.append(
+            'activity_type',
+            'spelling'
+          );
+
+          formData.append(
+            'round_token',
+            document.querySelector(
+              '#psRewardForm input[name="round_token"]'
+            ).value
+          );
+
           var response = await fetch(
             "{% url 'transcribe_speaking' %}",
             {
@@ -375,7 +589,14 @@
           var data = await response.json();
 
           if (!response.ok) {
-            throw new Error(data.error || 'Transcription failed.');
+            var transcriptionError = new Error(
+              data.error || 'Transcription failed.'
+            );
+
+            transcriptionError.errorType = data.error_type;
+            transcriptionError.retryAfter = data.retry_after || 0;
+
+            throw transcriptionError;
           }
 
           if (
@@ -401,19 +622,42 @@
         } catch (error) {
           console.error('Spelling transcription error:', error);
 
-          psTranscriptionFailures[exerciseNumber] = 
-              (psTranscriptionFailures[exerciseNumber] || 0) + 1;
+          var globalErrors = [
+            'daily_quota',
+            'rate_limit',
+            'service_busy',
+            'service_unavailable'
+          ];
 
-          var failures = psTranscriptionFailures[exerciseNumber];
+          if (globalErrors.includes(error.errorType)) {
+            psShowServiceUnavailable(
+              error.errorType,
+              error.retryAfter,
+              exerciseNumber
+            );
 
-          psUpdateSkipButton(exerciseNumber);
+            psDisplayServiceUnavailable(exerciseNumber);
 
-          if (failures >= 3) {
-            speechResult.textContent = 'Transcription service unavailable after 3 attempts. You can retry or skip this exercise.';
+            console.log(
+              'Global transcription block: ',
+              error.errorType,
+              error.retryAfter
+            );
           } else {
-            speechResult.textContent = error.message + ' Attempt ' + failures + ' of 3.';
+            psTranscriptionFailures[exerciseNumber] = (psTranscriptionFailures[exerciseNumber] || 0) + 1;
+
+            var failures = psTranscriptionFailures[exerciseNumber];
+
+            psUpdateSkipButton(exerciseNumber);
+
+            if (failures >= 3) {
+              speechResult.textContent = 'Transcription service unavailable after 3 attempts. You can retry or skip this exercise.';
+            } else {
+              speechResult.textContent = error.message = ' Attempt ' + failures + ' of 3.';
+            }
+
+            speechResult.style.color = '#dc3545';
           }
-          speechResult.style.color = '#dc3545';
         } finally {
           psIsProcessing = false;
           psMediaRecorder = null;
@@ -630,5 +874,7 @@
 
     window.location.reload();
   }
+
+  psCheckServiceAvailability();
 </script>
 {% endblock %}

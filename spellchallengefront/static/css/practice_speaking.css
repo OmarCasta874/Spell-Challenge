@@ -238,3 +238,160 @@
   .pk-results-box { flex-direction: column; gap: 1rem; padding: 1.5rem; }
   .pk-bee-decoration { position: static; transform: none; width: 48px; height: 48px; }
 }
+
+/* TRANSCRIPTION SERVICE UNAVAILABLE */
+.pk-service-card {
+  width: 100%;
+  max-width: 850px;
+  margin: 30px auto;
+  padding: 30px 25px;
+  border: 1px solid rgba(122, 28, 28, 0.12);
+  border-radius: 22px;
+  background: linear-gradient(
+    135deg,
+    #fffaf5 0%,
+    #ffffff 55%,
+    #fff7f3 100%
+  );
+  box-shadow: 0 8px 25px rgba(92, 20, 20, 0.08);
+}
+
+.pk-service-mascots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.pk-service-bee {
+  width: 105px;
+  height: 125px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.pk-service-content {
+  flex: 1;
+  max-width: 460px;
+  text-align: center;
+}
+
+.pk-service-eyebrow {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #b47b21;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.pk-service-title {
+  margin: 0 0 12px;
+  color: #7a1c1c;
+  font-size: 1.65rem;
+  font-weight: 800;
+}
+
+.pk-service-message {
+  margin: 0 auto 20px;
+  max-width: 390px;
+  color: #6c5b57;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.pk-service-timer {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 190px;
+  padding: 13px 25px;
+  border: 1px solid rgba(232, 185, 63, 0.45);
+  border-radius: 15px;
+  background: #fff8e7;
+}
+
+.pk-service-timer-label {
+  color: #947022;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.pk-service-countdown {
+  margin: 5px 0 0;
+  color: #7a1c1c;
+  font-size: 2rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
+}
+
+.pk-service-footer {
+  margin: 18px 0 0;
+  color: #9a7770;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* RESPONSIVE */
+@media (max-width: 650px) {
+  .pk-service-card {
+    padding: 25px 15px;
+    margin: 20px auto;
+  }
+
+  .pk-service-mascots {
+    gap: 5px;
+  }
+
+  .pk-service-bee {
+    width: 65px;
+    height: 85px;
+  }
+
+  .pk-service-title {
+    font-size: 1.25rem;
+  }
+
+  .pk-service-message {
+    font-size: 0.85rem;
+  }
+
+  .pk-service-countdown {
+    font-size: 1.65rem;
+  }
+
+  .pk-service-timer {
+    min-width: 155px;
+    padding: 11px 15px;
+  }
+
+  .pk-service-footer {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .pk-service-mascots {
+    flex-wrap: wrap;
+  }
+
+  .pk-service-bee {
+    width: 55px;
+    height: 65px;
+  }
+
+  .pk-service-content {
+    flex-basis: 100%;
+    order: 1;
+  }
+
+  .pk-service-bee-left {
+    order: 0;
+  }
+
+  .pk-service-bee-right {
+    order: 2;
+  }
+}

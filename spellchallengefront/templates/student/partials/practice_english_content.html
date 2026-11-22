@@ -39,7 +39,11 @@
         </a>
     </div>
     <!-- SPEAKING -->
-    <div class="pye-card">
+    <div
+        class="pye-card"
+        id="pyeSpeakingCard"
+        data-status-url="{% url 'transcription_status' %}"
+    >
         <i data-lucide="mic" class="pye-card-icon"></i>
         <h3 class="pye-card-title">SPEAKING</h3>
         <p class="pye-card-description">
@@ -50,9 +54,180 @@
             <li>Mountain</li>
             <li>Loyalty</li>
         </ul>
-        <a href="{% url 'practice_speaking' %}" class="pye-practice-btn">
+        <!-- NORMAL ACCESS -->
+        <a
+            href="{% url 'practice_speaking' %}"
+            class="pye-practice-btn"
+            id="pyeSpeakingButton"
+        >
             <i data-lucide="play"></i>
             START PRACTICE
         </a>
+        <!-- DAILY TRANSCRIPTION LIMIT -->
+        <div id="pyeSpeakingUnavailable"
+            class="pye-service-unavailable d-none"
+            aria-live="polite">
+            <hr class="pye-service-divider">
+            <p class="pye-service-message">
+                The daily transcription limit has been reached.
+            </p>
+            <div class="pye-service-timer-heading">
+                <i data-lucide="clock"></i>
+                <span>TIME REMAINING</span>
+            </div>
+            <p id="pyeSpeakingCountdown"
+            class="pye-service-countdown">00:00:00</p>
+            <p class="pye-service-footer">
+                Your speaking practice will be available again automatically!
+            </p>
+        </div>
     </div>
 </div>
+
+<script>
+(function () {
+
+    const speakingCard = document.getElementById('pyeSpeakingCard');
+
+    if (!speakingCard) return;
+
+    const statusUrl = speakingCard.dataset.statusUrl;
+    const speakingButton = document.getElementById('pyeSpeakingButton');
+    const unavailablePanel = document.getElementById('pyeSpeakingUnavailable');
+    const countdownElement = document.getElementById('pyeSpeakingCountdown');
+
+    let countdownInterval = null;
+    let statusInterval = null;
+    let retryAt = 0;
+    let checkingStatus = false;
+
+
+    // FORMAT TIME AS HH:MM:SS
+    function formatRemainingTime(seconds) {
+
+        seconds = Math.max(0, Math.ceil(seconds));
+
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const remainingSeconds = seconds % 60;
+
+        return [
+            String(hours).padStart(2, '0'),
+            String(minutes).padStart(2, '0'),
+            String(remainingSeconds).padStart(2, '0')
+        ].join(':');
+    }
+
+
+    // RESTORE NORMAL SPEAKING ACCESS
+    function restoreSpeakingAccess() {
+
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+
+        retryAt = 0;
+
+        speakingButton.classList.remove('d-none');
+        unavailablePanel.classList.add('d-none');
+
+        countdownElement.textContent = '00:00:00';
+    }
+
+
+    // DISPLAY DAILY QUOTA COUNTDOWN
+    function showDailyQuota(retryAfter) {
+
+        clearInterval(countdownInterval);
+
+        speakingButton.classList.add('d-none');
+        unavailablePanel.classList.remove('d-none');
+
+        retryAt = Date.now() + (Math.max(1, Number(retryAfter) || 1) * 1000);
+
+        updateCountdown();
+
+        countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
+    // UPDATE COUNTDOWN
+    function updateCountdown() {
+
+        const remaining = Math.max(
+            0,
+            Math.ceil((retryAt - Date.now()) / 1000)
+        );
+
+        countdownElement.textContent = formatRemainingTime(remaining);
+
+        if (remaining <= 0) {
+
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+
+            countdownElement.textContent = 'Checking...';
+
+            checkTranscriptionStatus();
+        }
+    }
+
+    // CHECK GLOBAL TRANSCRIPTION STATUS
+    async function checkTranscriptionStatus() {
+
+        if (checkingStatus) return;
+
+        checkingStatus = true;
+
+        try {
+
+            const response = await fetch(statusUrl, {
+                method: 'GET',
+                cache: 'no-store',
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Unable to retrieve transcription status.');
+            }
+
+            const status = await response.json();
+
+            if (
+                status.available === false &&
+                status.reason === 'daily_quota'
+            ) {
+
+                showDailyQuota(status.retry_after);
+
+            } else {
+
+                restoreSpeakingAccess();
+            }
+
+        } catch (error) {
+
+            console.error('Transcription status error:', error);
+
+        } finally {
+
+            checkingStatus = false;
+        }
+    }
+
+    // INITIAL CHECK
+    checkTranscriptionStatus();
+
+
+    // PERIODIC CHECK WHILE PRACTICE HALL IS OPEN
+    statusInterval = setInterval(function () {
+
+        if (!countdownInterval) {
+            checkTranscriptionStatus();
+        }
+
+    }, 30000);
+
+})();
+</script>

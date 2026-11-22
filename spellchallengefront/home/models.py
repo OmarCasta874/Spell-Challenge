@@ -1340,3 +1340,47 @@ class Leccion_Palabra(models.Model):
     class Meta:
         db_table = 'leccion_palabra'
         managed = False
+        
+#MODELO ESTADO_TRANSCRIPCION
+class Estado_Transcripcion(models.Model):
+    
+    id = models.PositiveSmallIntegerField(
+        primary_key=True,
+        default=1
+    )
+    
+    daily_window_started_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+    
+    daily_request_count = models.PositiveSmallIntegerField(
+        default=0
+    )
+    
+    next_request_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+    
+    blocked_until = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+    
+    block_reason = models.CharField(
+        max_length=30,
+        null=True,
+        blank=True
+    )
+    
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+    
+    class Meta:
+        db_table = 'estado_transcripcion'
+        managed = False
+        
+    def __str__(self):
+        return f"Estado Gemini Transcribe - {self.id}"

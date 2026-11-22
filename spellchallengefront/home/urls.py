@@ -54,6 +54,7 @@ urlpatterns = [
     path('student/practice_spelling/', views.practice_spelling, name='practice_spelling'),
     path('student/match_words/', views.student_match_words, name='match_words'),
     path('student/practice_speaking/', views.practice_speaking, name='practice_speaking'),
+    path('student/transcription_status/', views.transcription_status, name='transcription_status'),
     path("teacher/competitions_results/<str:pk>/", views.teacher_competition_results, name="teacher_competition_results"),
     path('teacher/competitions/edit/<str:codigo>/', views.teacher_edit_competition, name='teacher_edit_competition'),
     path('teacher/competitions/start/<str:codigo>/', views.teacher_start_competition, name='teacher_start_competition'),

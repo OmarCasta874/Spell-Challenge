@@ -16,6 +16,41 @@
 <div class="pk-body">
 
   <div id="pkExercises">
+    <!-- TRANSCRIPTION SERVICE UNAVAILABLE -->
+    <div id="pkServiceUnavailable" class="pk-exercise-card pk-service-card d-none">
+      <div class="pk-service-mascots">
+        <img
+          src="{% static 'img/beenary-left.png' %}"
+          class="pk-service-bee pk-service-bee-left"
+          alt="Beenary"
+        >
+        <div class="pk-service-content">
+          <span class="pk-service-eyebrow">JUST A MOMENT!</span>
+          <h3 class="pk-service-title">
+            Let's Take a Little Break!
+          </h3>
+          <p id="pkServiceMessage" class="pk-service-message">
+            The transcription service is temporarily unavailable.
+          </p>
+          <div class="pk-service-timer">
+            <span class="pk-service-timer-label">
+              TIME REMAINING
+            </span>
+            <p id="pkServiceCountdown" class="pk-service-countdown">
+              00:00:00
+            </p>
+          </div>
+          <p class="pk-service-footer">
+            Beenary will be ready to practice with you soon!
+          </p>
+        </div>
+        <img
+          src="{% static 'img/beenary-right.png' %}"
+          class="pk-service-bee pk-service-bee-right"
+          alt="Beenary"
+        >
+      </div>
+    </div>
     <!-- FORMULARIO PARA ENVIAR LA RECOMPENSA -->
     <form id="pkRewardForm" class="d-none">
       {% csrf_token %}
@@ -97,12 +132,184 @@
   var pkRecognizedText = null;
   var pkRecognizedCorrect = null;
   var pkIsProcessing = false;
-  var pkRetryAfter = 0;
-  var pkRetryInterval = null;
-  var pkDailyQuotaReached = false;
+  var pkServiceAvailable = true;
+  var pkServiceRetryAfter = 0;
+  var pkServiceRetryInterval = null;
+  var pkServiceChecking = false;
 
   var pkTranscriptionFailures = {};
   var pkSkippedWords = {};
+
+  function pkShowServiceUnavailable(reason, retryAfter) {
+    pkServiceAvailable = false;
+
+    var waitSeconds = Number(retryAfter);
+
+    if (!Number.isFinite(waitSeconds) || waitSeconds <= 0) {
+      waitSeconds = 1;
+    }
+
+    pkServiceRetryAfter = Date.now() + (waitSeconds * 1000);
+
+    var serviceScreen = document.getElementById(
+      'pkServiceUnavailable'
+    );
+
+    var progressWrap = document.getElementById(
+      'pkProgressWrap'
+    );
+
+    var exerciseCard = document.querySelector(
+      '#pkExercises .pk-exercise-card:not(#pkServiceUnavailable)'
+    );
+
+    var serviceMessage = document.getElementById(
+      'pkServiceMessage'
+    );
+
+    serviceScreen.classList.remove('d-none');
+    progressWrap.classList.add('d-none');
+    exerciseCard.classList.add('d-none');
+
+    var messages = {
+      daily_quota:
+        'The daily transcription quota has been reached.',
+      rate_limit:
+        'The transcription request limit has been reached.',
+      service_busy:
+        'The transcription service is temporarily busy.',
+      service_unavailable:
+        'The transcription service is currently unavailable.'
+    };
+
+    serviceMessage.textContent =
+      messages[reason] ||
+      'The transcription service is temporarily unavailable.';
+
+    pkStartServiceCountdown();
+  }
+
+  function pkRestoreService() {
+    pkServiceAvailable = true;
+
+    if (pkServiceRetryInterval) {
+      clearInterval(pkServiceRetryInterval);
+      pkServiceRetryInterval = null;
+    }
+
+    document.getElementById(
+      'pkServiceUnavailable'
+    ).classList.add('d-none');
+
+    document.getElementById(
+      'pkProgressWrap'
+    ).classList.remove('d-none');
+
+    document.querySelector(
+      '#pkExercises .pk-exercise-card:not(#pkServiceUnavailable)'
+    ).classList.remove('d-none');
+
+    document.getElementById(
+      'pkSpeechResult'
+    ).textContent = '';
+
+    console.log('Gemini transcription service available.');
+  }
+
+  function pkFormatServiceTime(seconds) {
+    var hours = Math.floor(seconds / 3600);
+    var minutes = Math.floor((seconds % 3600) / 60);
+    var remainingSeconds = seconds % 60;
+
+    return [
+      String(hours).padStart(2, '0'),
+      String(minutes).padStart(2, '0'),
+      String(remainingSeconds).padStart(2, '0')
+    ].join(':');
+  }
+
+  function pkStartServiceCountdown() {
+    if (pkServiceRetryInterval) {
+      clearInterval(pkServiceRetryInterval);
+    }
+
+    var countdown = document.getElementById(
+      'pkServiceCountdown'
+    );
+
+    function updateCountdown() {
+      var remaining = Math.max(
+        0,
+        Math.ceil((pkServiceRetryAfter - Date.now()) / 1000)
+      );
+
+      if (remaining <= 0) {
+        clearInterval(pkServiceRetryInterval);
+        pkServiceRetryInterval = null;
+
+        countdown.textContent = 'Checking...';
+
+        pkCheckServiceAvailability();
+        return;
+      }
+
+      countdown.textContent = pkFormatServiceTime(remaining);
+    }
+
+    updateCountdown();
+
+    pkServiceRetryInterval = setInterval(
+      updateCountdown,
+      1000
+    );
+  }
+
+  async function pkCheckServiceAvailability() {
+    if (pkServiceChecking) {
+      return;
+    }
+
+    pkServiceChecking = true;
+
+    try {
+      var response = await fetch(
+        "{% url 'transcription_status' %}",
+        {
+          method: 'GET',
+          cache: 'no-store',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Could not verify transcription availability.');
+      }
+
+      var data = await response.json();
+
+      if (data.available) {
+        pkRestoreService();
+      } else {
+        pkShowServiceUnavailable(
+          data.reason,
+          data.retry_after
+        );
+      }
+
+    } catch (error) {
+      console.error('Transcription status error:', error);
+
+      pkShowServiceUnavailable(
+        'service_unavailable',
+        10
+      );
+
+    } finally {
+      pkServiceChecking = false;
+    }
+  }
 
   function pkUpdateSkipButton() {
     var skipButton = document.getElementById('pkSkipBtn');
@@ -168,35 +375,6 @@
     return cookieValue;
   }
 
-  function pkStartRetryCountdown() {
-    if (pkRetryInterval) {
-      clearInterval(pkRetryInterval);
-    }
-
-    function updateCountdown() {
-      var remainingSeconds = Math.ceil(
-        (pkRetryAfter - Date.now()) / 1000
-      );
-
-      if (remainingSeconds <= 0) {
-        clearInterval(pkRetryInterval);
-        pkRetryInterval = null;
-
-        document.getElementById('pkSpeechResult').textContent = 'You can try again now!';
-        document.getElementById('pkSpeechResult').style.color = '#198754';
-
-        return;
-      }
-
-      document.getElementById('pkSpeechResult').textContent = 'Please wait ' + remainingSeconds + ' seconds before trying again.';
-      document.getElementById('pkSpeechResult').style.color = '#dc3545';
-    }
-
-    updateCountdown();
-
-    pkRetryInterval = setInterval(updateCountdown, 1000);
-  }
-
   async function pkSpeak() {
     var btn = document.getElementById('pkSpeakBtn');
     var speechResult = document.getElementById('pkSpeechResult');
@@ -206,23 +384,13 @@
       return;
     }
 
-    if (pkDailyQuotaReached) {
-      pkTranscriptionFailures[pkCurrentIndex] = 3;
-      pkUpdateSkipButton();
-
-      speechResult.textContent = 'The daily transcription quota has been reached. Please skip this exercise and continue.';
-
-      speechResult.style.color = '#dc3545';
+    if (pkServiceChecking) {
+      speechResult.textContent = 'Checking transcription service availability...';
+      speechResult.style.color = '#6c757d';
       return;
     }
 
-    if (Date.now() < pkRetryAfter) {
-      var remainingSeconds = Math.ceil(
-        (pkRetryAfter - Date.now()) / 1000
-      );
-
-      speechResult.textContent = 'Please wait ' + remainingSeconds + ' seconds before trying again.';
-      speechResult.style.color = '#dc3545';
+    if (!pkServiceAvailable) {
       return;
     }
 
@@ -319,19 +487,12 @@
 
           if (!response.ok) {
 
-            if (
-              response.status === 429 &&
-              data.error_type !== 'daily_quota'
-            ) {
-              pkRetryAfter = Date.now() + 22000;
-              pkStartRetryCountdown();
-            }
-
             var transcriptionError = new Error(
               data.error || 'Transcription failed.'
             );
 
             transcriptionError.errorType = data.error_type;
+            transcriptionError.retryAfter = data.retry_after || 0;
 
             throw transcriptionError;
           }
@@ -361,38 +522,34 @@
         } catch (error) {
           console.error('Transcription error: ',error);
           
-          if (error.errorType === 'daily_quota') {
+          var globalErrors = [
+            'daily_quota',
+            'rate_limit',
+            'service_busy'
+          ];
 
-            pkDailyQuotaReached = true;
+          if (globalErrors.includes(error.errorType)) {
+            pkShowServiceUnavailable(
+              error.errorType,
+              error.retryAfter
+            );
 
-            pkTranscriptionFailures[pkCurrentIndex] = 3;
-
-            pkUpdateSkipButton();
-
-            speechResult.textContent =
-              'The daily transcription quota has been reached. You can skip this exercise and continue.';
-
-            speechResult.style.color = '#dc3545';
-
-            console.log('Gemini daily quota exhausted.');
-
+            console.log(
+              'Global transcription block: ',
+              error.errorType,
+              error.retryAfter
+            );
           } else {
-
-            pkTranscriptionFailures[pkCurrentIndex] =
-              (pkTranscriptionFailures[pkCurrentIndex] || 0) + 1;
+            pkTranscriptionFailures[pkCurrentIndex] = (pkTranscriptionFailures[pkCurrentIndex] || 0) + 1;
 
             var failures = pkTranscriptionFailures[pkCurrentIndex];
 
             pkUpdateSkipButton();
 
             if (failures >= 3) {
-              speechResult.textContent =
-                'Transcription service unavailable after 3 attempts. You can retry or skip this exercise.';
-            } else if (Date.now() < pkRetryAfter) {
-              console.log('Waiting before retrying transcription.');
+              speechResult.textContent = 'Transcription service unavailable after 3 attempts. You can retry or skip this exercise.';
             } else {
-              speechResult.textContent =
-                error.message + ' Attempt ' + failures + ' of 3.';
+              speechResult.textContent = error.message + ' Attempt ' + failures + ' of 3.';
             }
 
             speechResult.style.color = '#dc3545';
@@ -458,6 +615,11 @@
   }
  
   function pkNextWord() {
+
+    if (!pkServiceAvailable || pkServiceChecking) {
+      return;
+    }
+
     pkCurrentIndex++;
 
     var pct = (pkCurrentIndex / pkTotal) * 100;
@@ -481,10 +643,6 @@
 
     pkRecognizedText = null;
     pkRecognizedCorrect = null;
-
-    if (pkDailyQuotaReached) {
-      pkTranscriptionFailures[pkCurrentIndex] = 3;
-    }
 
     pkUpdateSkipButton();
   }
@@ -553,5 +711,7 @@
   function pkRepeatLesson() {
     window.location.reload();
   }
+
+  pkCheckServiceAvailability();
 </script>
 {% endblock %}
