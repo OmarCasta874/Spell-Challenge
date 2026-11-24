@@ -1096,6 +1096,74 @@ class Competencia_Alumno(models.Model):
         db_table = 'competencia_alumno'
         unique_together = ('competencia', 'alumno')
         
+#MODELO COMPETENCIA_EVALUACION
+class Competencia_Evaluacion(models.Model):
+    
+    RESULT_CHOICES = [
+        ('Correct', 'Correct'),
+        ('Incorrect', 'Incorrect'),
+    ]
+    
+    id = models.BigAutoField(primary_key=True)
+    
+    competencia = models.ForeignKey(
+        Competencia,
+        on_delete=models.CASCADE,
+        related_name='evaluaciones',
+        db_column='competencia',
+        to_field='codigo'
+    )
+    
+    alumno = models.ForeignKey(
+        Alumno,
+        on_delete=models.CASCADE,
+        related_name='evaluaciones_competencia',
+        db_column='alumno',
+        to_field='matricula'
+    )
+    
+    palabra = models.ForeignKey(
+        Palabra,
+        on_delete=models.PROTECT,
+        related_name='evaluaciones_competencia',
+        db_column='palabra',
+        to_field='codigo'
+    )
+    
+    beehive = models.PositiveSmallIntegerField()
+    
+    categoria_beehive = models.CharField(max_length=15)
+    
+    spelling_result = models.CharField(
+        max_length=9,
+        choices=RESULT_CHOICES
+    )
+    
+    pronunciation_result = models.CharField(
+        max_length=9,
+        choices=RESULT_CHOICES
+    )
+    
+    evaluado_por = models.ForeignKey(
+        Profesor,
+        on_delete=models.PROTECT,
+        related_name='evaluaciones_competencia',
+        db_column='evaluado_por',
+        to_field='clave'
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        managed = False
+        db_table = 'competencia_evaluacion'
+        
+    def __str__(self):
+        return f"{self.competencia.nombre} - {self.alumno.matricula} - Beehive {self.beehive}"
+        
+
 #MODELO COMPETENCIA_PROFESOR
 class Competencia_Profesor(models.Model):
     competencia = models.ForeignKey(

@@ -65,6 +65,10 @@
 </main>
 {% endblock %}
 
+{% block extra_modals %}
+  {% block teacher_extra_modals %} {% endblock %}
+{% endblock %}
+
 {% block extra_js %}
 {% include 'base/logout_modal.html' %}
 {% include 'base/pet_messages.html' with mascot="crowing" mascot_img="crowing-left.png" %}

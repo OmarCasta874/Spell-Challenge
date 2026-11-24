@@ -1,0 +1,157 @@
+/* TEACHER COMPETITION MANAGEMENT */
+
+.competition-management-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+}
+
+.management-competition-name {
+    color: #700000;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.management-competition-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+}
+
+.management-section {
+    width: 100%;
+    margin: 1.5rem auto;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+}
+
+.management-section h4 {
+    color: #700000;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.management-control {
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.management-control label {
+    color: #5A3E1B;
+    font-weight: 700;
+}
+
+.management-control select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #8B5EAB;
+    border-radius: 12px;
+    background: #fff;
+    color: #5A3E1B;
+    font-weight: 600;
+}
+
+.management-hint {
+    text-align: center;
+    color: #777;
+    margin-top: 1rem;
+}
+
+.management-section .honeycomb-grid {
+    min-height: 100px;
+}
+
+.teacher-evaluation {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 2px dashed #8a5a00;
+}
+
+.teacher-evaluation h4 {
+    font-size: 1rem;
+    color: #700000;
+    margin: 1rem 0 0.75rem;
+}
+
+.evaluation-options {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.evaluation-btn {
+    min-width: 120px;
+    padding: 0.65rem 1.4rem;
+    border: 2px solid #8a5a00;
+    border-radius: 22px;
+    background: #fff;
+    color: #700000;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.evaluation-btn:hover {
+    background: #f4c9c9;
+}
+
+.evaluation-btn.selected {
+    background: #700000;
+    border-color: #700000;
+    color: #fff;
+}
+
+.evaluation-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.management-participants-action {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 1.25rem auto 0;
+}
+
+@media (max-width: 576px) {
+    .management-section {
+        padding: 1rem 0.5rem;
+    }
+
+    .management-competition-info {
+        flex-wrap: wrap;
+    }
+
+    .evaluation-options {
+        gap: 0.5rem;
+    }
+
+    .evaluation-btn {
+        min-width: 105px;
+        padding: 0.6rem 1rem;
+    }
+}
+
+/* FIX: Center Add Participants modal content */
+#addParticipantsModal .modal-dialog {
+    width: 100%;
+    max-width: 800px;
+}
+
+#addParticipantsModal .modal-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto;
+    box-sizing: border-box;
+}

@@ -407,6 +407,22 @@
   white-space: nowrap;
 }
 
+/* FIX: Keep Add Participants modal centered during transitions */
+#addParticipantsModal.show,
+#addParticipantsModal[style*="display: block"] {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+#addParticipantsModal .modal-dialog {
+    position: relative;
+    width: calc(100% - 2rem);
+    max-width: 800px;
+    margin: 0 !important;
+    transform: none !important;
+}
+
 @media (max-width: 576px) {
   .res-add-participants-bar {
     align-items: stretch;

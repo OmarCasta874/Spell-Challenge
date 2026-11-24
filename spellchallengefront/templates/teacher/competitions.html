@@ -93,6 +93,11 @@
           </button>
 
           {% if competition.estado == 'Active' %}
+            <a href="{% url 'teacher_competition_management' competition.codigo %}"
+            class="btn-comp-outline">
+              Manage Competition
+            </a>
+
             <form method="POST"
                   action="{% url 'teacher_finish_competition' competition.codigo %}">
               {% csrf_token %}
@@ -108,6 +113,11 @@
             </a>
 
           {% else %}
+            <a href="{% url 'teacher_competition_management' competition.codigo %}"
+              class="btn-comp-outline">
+              Manage Participants
+            </a>
+            
             <button type="button" class="btn-comp-outline"
                     data-bs-toggle="modal"
                     data-bs-target="#editModal{{ forloop.counter }}">

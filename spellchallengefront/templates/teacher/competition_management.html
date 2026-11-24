@@ -1,0 +1,374 @@
+{% extends 'teacher/teacher_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/competitions_select.css' %}">
+<link rel="stylesheet" href="{% static 'css/teacher_competition_management.css' %}">
+<link rel="stylesheet" href="{% static 'css/teacher_competitions_results.css' %}">
+{% endblock %}
+
+{% block title %}Manage Competition{% endblock %}
+
+{% block teacher_content %}
+<div class="competition-management-container">
+    <!-- COMPETITION HEADER -->
+    <div class="competition-header text-center">
+        <div class="competition-logo-wrap">
+            <img
+                src="{% static 'img/spell-challenge_black-grey.png' %}"
+                alt="Spell Challenge Logo"
+                class="competition-logo"
+            >
+        </div>
+        <h2 class="competition-title">COMPETITION MANAGEMENT</h2>
+        <h4 class="management-competition-name">
+            {{ competition.nombre }}
+        </h4>
+        <div class="management-competition-info">
+            <span>CODE: {{ competition.codigo }}</span>
+            <span class="badge-status badge-{{ competition.estado|lower }}">
+                {{ competition.estado }}
+            </span>
+        </div>
+    </div>
+    <!-- PARTICIPANT SELECTION -->
+    <section class="management-section">
+        <h4>1. SELECT PARTICIPANT</h4>
+        <div class="management-control">
+            <label for="participantSelect">
+                Competition Participant
+            </label>
+            <select id="participantSelect">
+                <option value="">Select a participant</option>
+                {% for participacion in participaciones %}
+                    <option
+                        value="{{ participacion.alumno.matricula }}"
+                        data-name="{{ participacion.alumno.nombre_pila }}"
+                    >
+                        {{ participacion.alumno.nombre_pila }}
+                        {{ participacion.alumno.apellidoPaterno }}
+                        {{ participacion.alumno.apellidoMaterno }}
+                        ({{ participacion.alumno.matricula }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if competition.estado == 'Upcoming' %}
+            <div class="management-participants-action">
+                <button
+                    type="button"
+                    class="res-btn-search"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addParticipantsModal"
+                >
+                    <i data-lucide="user-plus"></i>
+                    Add Participants
+                </button>
+            </div>
+        {% endif %}
+        {% if competition.estado == 'Upcoming' %}
+            <p class="management-hint">
+                Register your participants before starting the competition.
+            </p>
+        {% endif %}
+    </section>
+    <!-- WORD CATEGORY -->
+    <section class="management-section">
+        <h4>2. SELECT WORD CATEGORY</h4>
+        <div class="word-length-selector">
+            <label for="wordLengthSelect">
+                SELECT WORD LENGTH
+            </label>
+            <select id="wordLengthSelect">
+                <option value="CAT11">6 Letters</option>
+                <option value="CAT12">7 Letters</option>
+                <option value="CAT13">8 Letters</option>
+                <option value="CAT14">9 Letters</option>
+                <option value="CAT15">10 Letters</option>
+                <option value="CAT16">11 Letters</option>
+                <option value="CAT17">12 Letters</option>
+                {% if es_spelling_bee %}
+                    <option value="SUDDEN_DEATH">
+                        13 Letters (Sudden Death)
+                    </option>
+                {% endif %}
+            </select>
+        </div>
+    </section>
+    <!-- BEEHIVE GRID -->
+    <section class="management-section">
+        <h4>3. SELECT A BEEHIVE</h4>
+        <div class="honeycomb-grid">
+        </div>
+        <div class="beehive-pagination">
+            <button
+                type="button"
+                id="previousPageBtn"
+                disabled
+            >
+                Previous
+            </button>
+            <span id="pageIndicator">Page 1 of 1</span>
+            <button
+                type="button"
+                id="nextPageBtn"
+                disabled
+            >
+                Next
+            </button>
+        </div>
+    </section>
+</div>
+{% block teacher_extra_modals %}
+    <!-- MODAL: ADD COMPETITION PARTICIPANTS -->
+    {% if competition.estado == 'Upcoming' %}
+        <div class="modal fade res-modal" id="addParticipantsModal" tabindex="-1" aria-labelledby="addParticipantsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <form method="post" id="addParticipantsForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_participants">
+
+                        <div class="modal-header res-modal-header">
+                            <div>
+                                <h5 class="res-modal-title" id="addParticipantsModalLabel">
+                                    Add Competition Participants
+                                </h5>
+                                <p class="mb-0">
+                                    Select the students who participated in person.
+                                </p>
+                            </div>
+                            <button type="button" class="res-modal-close" data-bs-dismiss="modal" aria-label="Close">
+                                &times;
+                            </button>
+                        </div>
+
+                        <div class="modal-body res-modal-body">
+                            {% if alumnos_candidatos %}
+                                <div class="mb-3">
+                                    <label for="participantGroup" class="form-label">
+                                        Select Group
+                                    </label>
+                                    <select
+                                        id="participantGroup"
+                                        name="grupo"
+                                        class="form-select"
+                                        required
+                                    >
+                                        <option value="">Choose a group...</option>
+                                        {% for grupo in grupos_disponibles %}
+                                            <option value="{{ grupo.codigo }}">
+                                                {{ grupo.nombre }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="participantSearch" class="form-label">
+                                        Search Student
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="participantSearch"
+                                        class="form-control"
+                                        placeholder="Search by name, surname or enrollment..."
+                                        autocomplete="off"
+                                    >
+                                </div>
+
+                                <div class="res-participants-list" id="participantsList">
+                                    {% for alumno in alumnos_candidatos %}
+                                        <label
+                                            class="res-participant-option"
+                                            data-group="{{ alumno.group_code }}"
+                                            data-name="{{ alumno.first_name|lower }} {{ alumno.last_name|lower }}"
+                                            data-enrollment="{{ alumno.enrollment|lower }}"
+                                        >
+                                            {% if alumno.enrollment in participantes_ids %}
+                                                <input type="checkbox" disabled checked>
+                                            {% else %}
+                                                <input
+                                                    type="checkbox"
+                                                    name="participantes"
+                                                    value="{{ alumno.enrollment }}"
+                                                >
+                                            {% endif %}
+
+                                            <span class="res-participant-details">
+                                                <strong>
+                                                    {{ alumno.first_name }} {{ alumno.last_name }}
+                                                </strong>
+                                                <small>
+                                                    {{ alumno.enrollment }} · {{ alumno.group }}
+                                                </small>
+                                            </span>
+
+                                            {% if alumno.enrollment in participantes_ids %}
+                                                <span class="res-participant-added">
+                                                    Already added
+                                                </span>
+                                            {% endif %}
+                                        </label>
+                                    {% endfor %}
+
+                                    <div id="participantsEmpty" class="notifications-empty" hidden>
+                                        <p>No students match your search.</p>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="notifications-empty">
+                                    <p>No students were found in your groups.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="modal-footer res-modal-footer">
+                            <button type="button" class="res-btn-accept" data-bs-dismiss="modal">
+                                CANCEL
+                            </button>
+
+                            {% if alumnos_candidatos %}
+                                <button type="submit" class="res-btn-search" id="addParticipantsBtn" disabled>
+                                    Add Selected Students
+                                </button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+<!-- BEEHIVE CONFIRMATION MODAL -->
+<div id="confirmBeehiveModal" class="modal-overlay">
+    <div class="modal-content modal-small text-center beehive-modal-theme">
+        <div class="modal-header">
+            <h3 class="beehive-modal-title">
+                Beehive Confirmation
+            </h3>
+            <button
+                type="button"
+                class="btn-close-custom"
+                onclick="closeModal('confirmBeehiveModal')"
+            >
+                &times;
+            </button>
+        </div>
+        <div class="modal-body">
+            <p class="beehive-modal-text">
+                You selected
+                <strong>
+                    Beehive #<span id="selectedHiveNum"></span>
+                </strong>
+            </p>
+            <p class="beehive-modal-subtext">
+                Do you want to assign this Beehive to the selected participant?
+            </p>
+        </div>
+        <div class="modal-footer beehive-modal-footer">
+            <button
+                type="button"
+                class="btn-pill-light"
+                onclick="closeModal('confirmBeehiveModal')"
+            >
+                Cancel
+            </button>
+            <button
+                type="button"
+                class="btn-pill-solid"
+                id="confirmBeehiveBtn"
+            >
+                Continue
+            </button>
+        </div>
+    </div>
+</div>
+<!-- WORD AND EVALUATION MODAL -->
+<div id="wordModal" class="modal-overlay">
+    <div class="word-modal-wrapper">
+        <img
+            src="{% static 'img/beenary-left.png' %}"
+            alt=""
+            class="word-modal-bee word-modal-bee-left"
+        >
+        <div class="modal-content modal-small text-center word-modal-theme">
+            <div class="word-modal-inner">
+                <h2 class="word-modal-word" id="currentWordText">
+                    WORD
+                </h2>
+            </div>
+            <p class="word-modal-def" id="currentWordDef">
+                Definition
+            </p>
+            <hr class="word-modal-divider">
+            <p class="word-modal-example" id="currentWordExample">
+                Example
+            </p>
+            <div class="teacher-evaluation">
+                <h4>Spelling Evaluation</h4>
+                <div class="evaluation-options">
+                    <button
+                        type="button"
+                        class="evaluation-btn"
+                        data-type="spelling"
+                        data-result="Correct"
+                    >
+                        Correct
+                    </button>
+                    <button
+                        type="button"
+                        class="evaluation-btn"
+                        data-type="spelling"
+                        data-result="Incorrect"
+                    >
+                        Incorrect
+                    </button>
+                </div>
+                <h4>Pronunciation Evaluation</h4>
+                <div class="evaluation-options">
+                    <button
+                        type="button"
+                        class="evaluation-btn"
+                        data-type="pronunciation"
+                        data-result="Correct"
+                    >
+                        Correct
+                    </button>
+                    <button
+                        type="button"
+                        class="evaluation-btn"
+                        data-type="pronunciation"
+                        data-result="Incorrect"
+                    >
+                        Incorrect
+                    </button>
+                </div>
+            </div>
+            <button
+                type="button"
+                class="btn-word-next"
+                id="saveEvaluationBtn"
+                disabled
+            >
+                SAVE EVALUATION
+            </button>
+        </div>
+        <img
+            src="{% static 'img/beenary-right.png' %}"
+            alt=""
+            class="word-modal-bee word-modal-bee-right"
+        >
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    const wordsByCategory = {{ words_by_category|safe }};
+    const evaluationsData = {{ evaluaciones_data|safe }};
+</script>
+<script src="{% static 'js/teacher_competition_management.js' %}"></script>
+{% endblock %}

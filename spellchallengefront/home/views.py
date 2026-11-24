@@ -5,10 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import never_cache
 from functools import wraps
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.db.models import Count, Avg, Q, ProtectedError, Prefetch, F, Sum, Max
 from home.models import Usuario, TipoUsuario, Profesor, Alumno, Administrador, Grupo, Palabra, Notificacion, Pista_Boss_Battle
-from home.models import Carrera, Categoria, Alumno_Insignia, Alumno_Practica, Lista_Grupo, Grupo_Alumno
+from home.models import Carrera, Categoria, Alumno_Insignia, Alumno_Practica, Lista_Grupo, Grupo_Alumno, Competencia_Evaluacion
 from home.models import Nivel, Dificultad, Dificultad_Juego, Insignia, Intento_Palabra, Lista, Lista_Palabra, Competencia_Profesor
 from home.models import Proceso_Lista, Rango, Ranking, Reporte, TipoRanking, UsuarioManager, Juego, Practica_Sesion, Competencia_Alumno
 from home.models import Leccion, Lista_Leccion, Competencia, Lista_Competencia, Alumno_Leccion, Grupo_Carrera, Bitacora_Administrador
@@ -5477,13 +5477,479 @@ def teacher_start_competition(request, codigo):
             request,
             f'{competition.nombre} is already Active.'
         )
-        return redirect('teacher_competitions')
+        return redirect('teacher_competition_management', codigo=competition.codigo)
     
     competition.estado = 'Active'
     competition.save(update_fields=['estado'])
     
     messages.success(request, f"Competition {competition.nombre} is now Active!")
-    return redirect('teacher_competitions')
+    
+    return redirect('teacher_competition_management', codigo=competition.codigo)
+
+@never_cache
+@role_required('teacher')
+def teacher_competition_management(request, codigo):
+    
+    competition = get_object_or_404(
+        Competencia,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+    
+    if competition.estado not in ['Upcoming', 'Active']:
+        messages.error(
+            request,
+            'This competition can no longer be managed.'
+        )
+        return redirect('teacher_competitions')
+    
+    #ADD PARTICIPANTS 
+    if request.method == 'POST' and request.POST.get('action') == 'add_participants':
+        grupo_codigo = request.POST.get('grupo', '').strip()
+        
+        grupo_seleccionado = get_object_or_404(
+            Grupo,
+            codigo=grupo_codigo,
+            profesor=competition.profesor
+        )
+        
+        matriculas_validas = set(
+            Grupo_Alumno.objects.filter(
+                grupo=grupo_seleccionado,
+                grupo__profesor=competition.profesor
+            ).values_list('alumno_id', flat=True)
+        )
+        
+        matriculas_seleccionadas = (
+            set(request.POST.getlist('participantes'))
+            & matriculas_validas
+        )
+        
+        if not matriculas_seleccionadas:
+            messages.warning(
+                request,
+                'Select at least one valid student.'
+            )
+        else:
+            for matricula in matriculas_seleccionadas:
+                Competencia_Alumno.objects.get_or_create(
+                    competencia=competition,
+                    alumno_id=matricula,
+                    defaults={
+                        'grupo': grupo_seleccionado
+                    }
+                )
+                
+            messages.success(
+                request,
+                'Participants have been added successfully.'
+            )
+            
+        return redirect('teacher_competition_management', codigo=competition.codigo)
+    
+    #PARTICIPANTS
+    participaciones = (
+        Competencia_Alumno.objects
+        .filter(competencia=competition)
+        .select_related('alumno', 'alumno__usuario')
+        .order_by('alumno__nombre_pila', 'alumno__apellidoPaterno')
+    )
+    
+    #AVAILABLE GROUPS
+    grupos_disponibles = (
+        Grupo.objects
+        .filter(profesor=competition.profesor)
+        .order_by('nombre')
+    )
+    
+    #AVAILABLE STUDENTS
+    relaciones_alumnos = (
+        Grupo_Alumno.objects
+        .filter(grupo__profesor=competition.profesor)
+        .select_related(
+            'alumno',
+            'alumno__usuario',
+            'grupo'
+        )
+    )
+    
+    alumnos_candidatos = {}
+    
+    for relacion in relaciones_alumnos:
+        alumno = relacion.alumno
+        
+        alumnos_candidatos[alumno.matricula] = {
+            'enrollment': alumno.matricula,
+            'first_name': alumno.nombre_pila,
+            'last_name': (
+                f'{alumno.apellidoPaterno} '
+                f'{alumno.apellidoMaterno}'
+            ).strip(),
+            'email': alumno.usuario.correo,
+            'group': relacion.grupo.nombre,
+            'group_code': relacion.grupo.codigo,
+        }
+        
+    #REGISTERED PARTICIPANTS
+    participantes_ids = set(
+        Competencia_Alumno.objects
+        .filter(competencia=competition)
+        .values_list('alumno_id', flat=True)
+    )
+    
+    #WORD SOURCE
+    es_spelling_bee = False
+    
+    if competition.tipo == 'GENERAL':
+        palabras_qs = (
+            Palabra.objects
+            .all()
+            .select_related('categoria', 'nivel')
+            .order_by('codigo')
+        )
+        
+    else:
+        relacion = (
+            Lista_Competencia.objects
+            .filter(competencia=competition)
+            .select_related('lista')
+            .first()
+        )
+        
+        if relacion and relacion.lista:
+            es_spelling_bee = relacion.lista.es_spelling_bee
+            
+            palabras_qs = (
+                Palabra.objects
+                .filter(
+                    lista_palabras__lista=relacion.lista
+                )
+                .select_related('categoria', 'nivel')
+                .distinct()
+                .order_by('codigo')
+            )
+            
+        else:
+            palabras_qs = Palabra.objects.none()
+            
+    #WORD CLASSIFICATION
+    words_by_category = {
+        'CAT11': [],
+        'CAT12': [],
+        'CAT13': [],
+        'CAT14': [],
+        'CAT15': [],
+        'CAT16': [],
+        'CAT17': [],
+        'SUDDEN_DEATH': [],
+    }
+    
+    length_to_cat = {
+        6: 'CAT11',
+        7: 'CAT12',
+        8: 'CAT13',
+        9: 'CAT14',
+        10: 'CAT15',
+        11: 'CAT16',
+        12: 'CAT17',
+    }
+    
+    for palabra in palabras_qs:
+        if palabra.significado:
+            
+            num_letras = len([
+                char for char in palabra.significado
+                if char.isalpha()
+            ])
+            
+            cat_key = length_to_cat.get(num_letras)
+            
+            if num_letras == 13 and es_spelling_bee:
+                cat_key = 'SUDDEN_DEATH'
+                
+            if cat_key and cat_key in words_by_category:
+                
+                words_by_category[cat_key].append({
+                    'codigo': palabra.codigo,
+                    'texto': palabra.significado,
+                    'definicion': palabra.definicion,
+                    'ejemplo': palabra.ejemplo,
+                    'pronunciacion': palabra.pronunciacion,
+                    'categoria': cat_key,
+                    'letras': f'{num_letras} Letters',
+                    'nivel': (
+                        palabra.nivel.codigo
+                        if palabra.nivel else ''
+                    ),
+                })
+                
+    #PREVIOUS EVALUATIONS
+    evaluaciones = (
+        Competencia_Evaluacion.objects
+        .filter(competencia=competition)
+        .select_related('alumno', 'palabra')
+        .order_by('categoria_beehive', 'beehive')
+    )
+    
+    #EVALUATIONS DATA FOR JAVASCRIPT
+    evaluaciones_data = list(
+        evaluaciones.values(
+            'id',
+            'alumno_id',
+            'palabra_id',
+            'categoria_beehive',
+            'beehive',
+            'spelling_result',
+            'pronunciation_result',
+        )
+    )
+    
+    context = {
+        'competition': competition,
+        'participaciones': participaciones,
+        'evaluaciones': evaluaciones,
+        'evaluaciones_data': json.dumps(evaluaciones_data),
+        'beehives': list(range(1, 61)),
+        'words_by_category': json.dumps(words_by_category),
+        'es_spelling_bee': es_spelling_bee,
+        'grupos_disponibles': grupos_disponibles,
+        'alumnos_candidatos': list(alumnos_candidatos.values()),
+        'participantes_ids': participantes_ids,
+    }
+    
+    return render(
+        request,
+        'teacher/competition_management.html',
+        context
+    )
+    
+@never_cache
+@role_required('teacher')
+@require_POST
+def save_competition_evaluation(request, codigo):
+    competition = get_object_or_404(
+        Competencia,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+    
+    if competition.estado not in ['Upcoming', 'Active']:
+        return JsonResponse({
+            'success': False,
+            'message': 'This competition can no longer be evaluated.'
+        }, status=400)
+        
+    matricula = request.POST.get('matricula')
+    palabra_codigo = request.POST.get('palabra_codigo')
+    categoria = request.POST.get('categoria_beehive')
+    spelling_result = request.POST.get('spelling_result')
+    pronunciation_result = request.POST.get('pronunciation_result')
+    beehive = request.POST.get('beehive')
+    
+    if not all([
+        matricula,
+        palabra_codigo,
+        categoria,
+        spelling_result,
+        pronunciation_result,
+        beehive
+    ]):
+        return JsonResponse({
+            'success': False,
+            'message': 'All evaluation fields are required.'
+        }, status=400)
+        
+    if spelling_result not in ['Correct', 'Incorrect'] or \
+        pronunciation_result not in ['Correct', 'Incorrect']:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid evaluation result.'
+            }, status=400)
+            
+    try:
+        beehive = int(beehive)
+        
+        if beehive < 1:
+            raise ValueError
+        
+    except (ValueError, TypeError):
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid Beehive number.'
+        }, status=400)
+        
+    alumno = get_object_or_404(
+        Alumno,
+        matricula=matricula
+    )
+    
+    palabra = get_object_or_404(
+        Palabra,
+        codigo=palabra_codigo
+    )
+    
+    if not Competencia_Alumno.objects.filter(
+        competencia=competition,
+        alumno=alumno
+    ).exists():
+        return JsonResponse({
+            'success': False,
+            'message': 'This student is not registered in the competition.'
+        }, status=400)
+        
+    es_spelling_bee = False
+    
+    if competition.tipo == 'GENERAL':
+        palabras_disponibles = Palabra.objects.all()
+        
+    elif competition.tipo == 'LIST':
+        lista_competencia = Lista_Competencia.objects.filter(
+            competencia=competition
+        ).select_related('lista').first()
+        
+        if not lista_competencia:
+            return JsonResponse({
+                'success': False,
+                'message': 'No word list is associated with this competition.'
+            }, status=400)
+            
+        lista = lista_competencia.lista
+        es_spelling_bee = lista.es_spelling_bee
+        
+        if not Lista_Palabra.objects.filter(
+            lista=lista,
+            palabra=palabra
+        ).exists():
+            return JsonResponse({
+                'success': False,
+                'message': 'This word does not belong to the competition list.'
+            }, status=400)
+            
+        palabras_disponibles = Palabra.objects.filter(
+            lista_palabras__lista=lista
+        ).distinct()
+        
+    else:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid competition type.'
+        }, status=400)
+        
+    word_length = sum(
+        character.isalpha()
+        for character in palabra.significado
+    )
+    
+    length_categories = {
+        6: 'CAT11',
+        7: 'CAT12',
+        8: 'CAT13',
+        9: 'CAT14',
+        10: 'CAT15',
+        11: 'CAT16',
+        12: 'CAT17',
+    }
+    
+    expected_category = length_categories.get(word_length)
+    
+    if word_length == 13 and es_spelling_bee:
+        expected_category = 'SUDDEN_DEATH'
+
+    if expected_category != categoria:
+        return JsonResponse({
+            'success': False,
+            'message': 'The selected word does not belong to this category.'
+        }, status=400)
+
+    # Validate the dynamic Beehive range.
+    total_beehives = sum(
+        sum(character.isalpha() for character in significado) == word_length
+        for significado in palabras_disponibles.values_list('significado', flat=True)
+    )
+
+    if beehive > total_beehives:
+        return JsonResponse({
+            'success': False,
+            'message': 'The selected Beehive does not exist in this category.'
+        }, status=400)
+
+    try:
+        with transaction.atomic():
+
+            # Find the student's existing evaluation, if any.
+            evaluation = Competencia_Evaluacion.objects.select_for_update().filter(
+                competencia=competition,
+                alumno=alumno
+            ).first()
+
+            # A student's existing evaluation must remain in its assigned Beehive.
+            if evaluation and (
+                evaluation.beehive != beehive or
+                evaluation.categoria_beehive != categoria
+            ):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'This student already has an evaluation in another Beehive.'
+                }, status=409)
+
+            # Prevent assigning a Beehive already occupied by another student.
+            occupied_beehive = Competencia_Evaluacion.objects.select_for_update().filter(
+                competencia=competition,
+                categoria_beehive=categoria,
+                beehive=beehive
+            ).exclude(alumno=alumno).exists()
+
+            if occupied_beehive:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'This Beehive is already assigned to another student.'
+                }, status=409)
+
+            # Prevent reusing a word within the same competition and category.
+            repeated_word = Competencia_Evaluacion.objects.filter(
+                competencia=competition,
+                categoria_beehive=categoria,
+                palabra=palabra
+            ).exclude(alumno=alumno).exists()
+
+            if repeated_word:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'This word has already been assigned in this competition.'
+                }, status=409)
+
+            if evaluation is None:
+                evaluation = Competencia_Evaluacion(
+                    competencia=competition,
+                    alumno=alumno,
+                    beehive=beehive,
+                    categoria_beehive=categoria
+                )
+
+            evaluation.palabra = palabra
+            evaluation.spelling_result = spelling_result
+            evaluation.pronunciation_result = pronunciation_result
+            evaluation.evaluado_por = request.user.profesor
+            evaluation.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Evaluation saved successfully.',
+            'evaluation_id': evaluation.id,
+            'matricula': alumno.matricula,
+            'palabra_codigo': palabra.codigo,
+            'beehive': evaluation.beehive,
+            'categoria_beehive': evaluation.categoria_beehive,
+            'spelling_result': evaluation.spelling_result,
+            'pronunciation_result': evaluation.pronunciation_result
+        })
+
+    except IntegrityError:
+        return JsonResponse({
+            'success': False,
+            'message': 'The evaluation conflicts with an existing assignment. Please refresh and try again.'
+        }, status=409)
+
 
 @never_cache
 @role_required('teacher')
