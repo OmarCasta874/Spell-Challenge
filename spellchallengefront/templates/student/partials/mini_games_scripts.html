@@ -101,6 +101,28 @@
     let hangman_errors = 0;
     let hangman_finished = false;
 
+    function hangman_playSound(type) {
+        const modal = document.getElementById('hangmanModal');
+        if (!modal) return;
+
+        const soundMap = {
+            correct: modal.dataset.correctSound,
+            damage: modal.dataset.damageSound,
+            win: modal.dataset.winSound,
+            gameover: modal.dataset.gameoverSound
+        };
+
+        const soundUrl = soundMap[type];
+        if (!soundUrl) return;
+
+        const sound = new Audio(soundUrl);
+        sound.volume = 0.65;
+        sound.currentTime = 0;
+        sound.play().catch(function (err) {
+            console.warn('No se pudo reproducir el sonido:', err);
+        });
+    }
+
     function hangman_initGame() {
         hangman_currentWordIndex = Math.floor(
             Math.random() * hangman_vocabularyList.length
@@ -215,6 +237,7 @@
 
         if (hangman_selectedWord.includes(letter)) {
             btnElement.classList.add('correct');
+            hangman_playSound('correct');
             hangman_renderWordDisplay();
             hangman_checkWin();
         } else {
@@ -222,6 +245,7 @@
             hangman_attemptsLeft--;
             hangman_errors++;
 
+            hangman_playSound('damage');
             hangman_animateDamage();
             hangman_renderHearts();
 
@@ -247,6 +271,8 @@
         if (hangman_finished) return;
 
         hangman_finished = true;
+
+        hangman_playSound(isWin ? 'win' : 'gameover');
 
         document.getElementById('hangmanResTitle').innerText =
             isWin ? '🎉 Excellent!' : '❌ Game Over';
@@ -313,6 +339,28 @@
     let missing_timerInterval = null;
     let missing_errors = 0;
     let missing_finished = false;
+
+    function missing_playSound(type) {
+        const modal = document.getElementById('missingModal');
+        if (!modal) return;
+
+        const soundMap = {
+            click: modal.dataset.clickSound,
+            correct: modal.dataset.correctSound,
+            incorrect: modal.dataset.incorrectSound,
+            win: modal.dataset.winSound
+        };
+
+        const soundUrl = soundMap[type];
+        if (!soundUrl) return;
+
+        const sound = new Audio(soundUrl);
+        sound.volume = type === 'click' ? 0.5 : 0.65;
+        sound.currentTime = 0;
+        sound.play().catch(function (err) {
+            console.warn('No se pudo reproducir el sonido en Missing Letters:', err);
+        });
+    }
 
     function missing_initGame() {
         // CORRECCIÓN: Limpiar cualquier temporizador activo previamente
@@ -429,6 +477,8 @@
         const nextBlank = document.querySelector('.blank-letter:not(.filled)');
         if (!nextBlank) return;
 
+        missing_playSound('click');
+
         const index = parseInt(nextBlank.dataset.index);
         nextBlank.innerText = letter;
         nextBlank.classList.add('filled');
@@ -449,6 +499,7 @@
 
         if (isCorrect) {
 
+            missing_playSound('correct');
             missing_completedWords++;
 
             document.getElementById('missingCompletedCount').innerText =
@@ -458,6 +509,7 @@
 
         } else {
 
+            missing_playSound('incorrect');
             missing_errors++;
 
             document.querySelectorAll('.blank-letter').forEach(
@@ -484,6 +536,8 @@
         missing_finished = true;
 
         clearInterval(missing_timerInterval);
+
+        missing_playSound('win');
 
         document.getElementById('missingFinalScore').innerText =
             missing_completedWords + ' words';

@@ -1,6 +1,11 @@
 {% load static %}
-<div id="missingModal" class="modal-overlay">
-    <div class="modal-content missing-theme">
+<div id="missingModal" 
+     class="modal-overlay"
+     data-click-sound="{% static 'sounds/click.mp3' %}"
+     data-correct-sound="{% static 'sounds/correct.mp3' %}"
+     data-incorrect-sound="{% static 'sounds/incorrect.mp3' %}"
+     data-win-sound="{% static 'sounds/win.mp3' %}">    
+     <div class="modal-content missing-theme">
 
         <div class="missing-header">
             <button type="button" class="btn-back-modal" onclick="missing_exitGame()">

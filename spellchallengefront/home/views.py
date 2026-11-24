@@ -40,6 +40,9 @@ SQL_MARKERS = ('MySQL dump', 'MariaDB dump', 'CREATE TABLE', 'INSERT INTO', 'DRO
 
 import zipfile
 import shutil
+STUDENT_EMAIL_REGEX = re.compile(r'^[a-z0-9]+@ut-tijuana\.edu\.mx$', re.IGNORECASE)
+STAFF_EMAIL_REGEX = re.compile(r'^[a-z0-9]+\.[a-z0-9]+@uttijuana\.edu\.mx$', re.IGNORECASE)
+PHONE_REGEX = re.compile(r'^\d{1,15}$')
 
 def add_folder_to_zip(zf, folder, arc_prefix):
     folder = str(folder)
@@ -105,22 +108,34 @@ def role_required(role):
 def landing(request):
     return render(request, 'base/landing.html')
 
+def about_us(request):
+    return render(request, 'base/about_us.html')
+
 def login(request):
     if request.method == 'POST':
-        correo = request.POST.get('email')
-        password = request.POST.get('password')
-        
+        correo = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+
+        if not (STUDENT_EMAIL_REGEX.match(correo) or STAFF_EMAIL_REGEX.match(correo)):
+            return render(
+                request,
+                'users/login.html',
+                {
+                    'error': 'Use a valid institutional email (@ut-tijuana.edu.mx for students or nombre.apellido@uttijuana.edu.mx for teachers/admin).'
+                }
+            )
+
         usuario = authenticate(
             request,
             correo=correo,
             password=password
         )
-        
+
         if usuario is not None:
             auth_login(request, usuario)
-            
+
             tipo_usuario = usuario.tipo_usuario.nombre.strip().lower()
-            
+
             if tipo_usuario == 'teacher':
                 say(
                     request,
@@ -128,7 +143,7 @@ def login(request):
                     "My name is Crowing, and I will be here to guide you along the way!"
                 )
                 return redirect('teacher_dashboard')
-            
+
             elif tipo_usuario == 'student':
                 say(
                     request,
@@ -136,10 +151,10 @@ def login(request):
                     "Every mistake helps you learn. Keep buzzing!"
                 )
                 return redirect('student_home')
-            
+
             elif tipo_usuario == 'administrator':
                 return redirect('admin_gen_panel')
-            
+
         return render(
             request,
             'users/login.html',
@@ -156,59 +171,75 @@ def choose_role(request):
 def signup_student(request):
     niveles = Nivel.objects.all().order_by('codigo')
     carreras = Carrera.objects.all().order_by('nombre')
-    
+
     if request.method == 'POST':
         nombre = request.POST.get('first_name', '').strip()
         apellido_paterno = request.POST.get('paternal_last_name', '').strip()
         apellido_materno = request.POST.get('maternal_last_name', '').strip()
         matricula = request.POST.get('student_id', '').strip()
-        correo = request.POST.get('email', '').strip()
+        correo = request.POST.get('email', '').strip().lower()
         telefono = request.POST.get('phone', '').strip()
         nivel_codigo = request.POST.get('level', '').strip()
         carrera_clave = request.POST.get('career', '').strip()
         password = request.POST.get('password', '')
         confirm_password = request.POST.get('confirm_password', '')
-        
+
+        if not all([nombre, apellido_paterno, apellido_materno, matricula, correo, telefono, nivel_codigo, carrera_clave, password, confirm_password]):
+            messages.error(request, 'Please fill out all required fields.')
+            return render(request, 'users/signup_student.html', {
+                'niveles': niveles,
+                'carreras': carreras,
+            })
+
+        if not STUDENT_EMAIL_REGEX.match(correo) or correo.split('@')[0] != matricula.lower():
+            messages.error(request, f'Student email must follow the format: {matricula.lower()}@ut-tijuana.edu.mx')
+            return render(request, 'users/signup_student.html', {
+                'niveles': niveles,
+                'carreras': carreras,
+            })
+            
+        if not PHONE_REGEX.match(telefono):
+            messages.error(request, 'Phone number must contain only digits (maximum 15 digits).')
+            return render(request, 'users/signup_student.html', {
+                'niveles': niveles,
+                'carreras': carreras,
+            })
+
         if password != confirm_password:
             messages.error(request, 'Passwords do not match.')
-            return render(request, 'users/singup_student.html', {
+            return render(request, 'users/signup_student.html', {
                 'niveles': niveles,
                 'carreras': carreras,
             })
-            
-        if Usuario.objects.filter(correo=correo).exists():
+
+        if Usuario.objects.filter(correo__iexact=correo).exists():
             messages.error(request, 'This email is already registered.')
-            return render(request, 'users/singup_student.html', {
+            return render(request, 'users/signup_student.html', {
                 'niveles': niveles,
                 'carreras': carreras,
             })
-            
-        if Alumno.objects.filter(matricula=matricula).exists():
+
+        if Alumno.objects.filter(matricula__iexact=matricula).exists():
             messages.error(request, 'This Student ID is already registered.')
-            return render(request, 'users/singup_student.html', {
+            return render(request, 'users/signup_student.html', {
                 'niveles': niveles,
                 'carreras': carreras,
             })
-            
+
         tipo_usuario = TipoUsuario.objects.get(clave='TUSR01')
-        
         nivel = Nivel.objects.get(codigo=nivel_codigo)
         carrera = Carrera.objects.get(clave=carrera_clave)
-        
+
         numeros = []
-        
-        for codigo in Usuario.objects.filter(
-            codigo__startswith='USR'
-        ).values_list('codigo', flat=True):
-            
+        for codigo in Usuario.objects.filter(codigo__startswith='USR').values_list('codigo', flat=True):
             try:
                 numeros.append(int(codigo[3:]))
             except ValueError:
                 pass
-            
+
         siguiente = max(numeros, default=0) + 1
         codigo_usuario = f'USR{siguiente:04d}'
-        
+
         usuario = Usuario.objects.create_user(
             correo=correo,
             password=password,
@@ -219,7 +250,7 @@ def signup_student(request):
             numero_telefono=telefono,
             tipo_usuario=tipo_usuario,
         )
-        
+
         Alumno.objects.create(
             matricula=matricula,
             nombre_pila=nombre,
@@ -229,59 +260,68 @@ def signup_student(request):
             nivel=nivel,
             carrera=carrera,
         )
-        
+
         messages.success(
             request,
             'Student account created successfully. You can now log in.'
         )
-        
+
         return redirect('login')
-    
-    return render(request, 'users/singup_student.html', {
+
+    return render(request, 'users/signup_student.html', {
         'niveles': niveles,
         'carreras': carreras,
     })
 
 def signup_teacher(request):
-    """Registro público para profesores"""
+    """Registro público exclusivo para profesores (TUSR02)"""
     if request.method == 'POST':
         first_name = request.POST.get('first_name', '').strip()
         paternal_last_name = request.POST.get('paternal_last_name', '').strip()
         maternal_last_name = request.POST.get('maternal_last_name', '').strip()
-        teacher_id = request.POST.get('teacher_id', '').strip()
-        email = request.POST.get('email', '').strip()
+        email = request.POST.get('email', '').strip().lower()
         phone = request.POST.get('phone', '').strip()
         password = request.POST.get('password', '').strip()
         confirm_password = request.POST.get('confirm_password', '').strip()
 
-        # Validaciones de campos obligatorios
-        if not all([first_name, paternal_last_name, teacher_id, email, password, confirm_password]):
+        if not all([first_name, paternal_last_name, email, phone, password, confirm_password]):
             messages.error(request, 'Please fill out all required fields.')
+            return render(request, 'users/signup_teacher.html')
+
+        if not STAFF_EMAIL_REGEX.match(email):
+            messages.error(request, 'Teacher email must follow the format: nombre.apellido@uttijuana.edu.mx')
+            return render(request, 'users/signup_teacher.html')
+        
+        if not PHONE_REGEX.match(phone):
+            messages.error(request, 'Phone number must contain only digits (maximum 15 digits).')
             return render(request, 'users/signup_teacher.html')
 
         if password != confirm_password:
             messages.error(request, 'Passwords do not match.')
             return render(request, 'users/signup_teacher.html')
 
-        # Verificar unicidad de Código y Correo
-        if Usuario.objects.filter(codigo=teacher_id).exists():
-            messages.error(request, 'A user with this Teacher Code already exists.')
-            return render(request, 'users/signup_teacher.html')
-
-        if Usuario.objects.filter(correo=email).exists():
+        if Usuario.objects.filter(correo__iexact=email).exists():
             messages.error(request, 'An account with this email address already exists.')
             return render(request, 'users/signup_teacher.html')
 
         try:
             with transaction.atomic():
-                # Obtener Tipo de Usuario Profesor (TUSR02)
                 tipo_teacher = TipoUsuario.objects.get(clave='TUSR02')
 
-                # Crear Usuario Django
+                numeros = []
+                for codigo in Usuario.objects.filter(codigo__startswith='USR').values_list('codigo', flat=True):
+                    try:
+                        numeros.append(int(codigo[3:]))
+                    except ValueError:
+                        pass
+
+                siguiente = max(numeros, default=0) + 1
+                codigo_usuario = f'USR{siguiente:04d}'
+
                 usuario = Usuario.objects.create_user(
                     correo=email,
                     password=password,
-                    codigo=teacher_id,
+                    codigo=codigo_usuario,
                     nombre_pila=first_name,
                     apellidoPaterno=paternal_last_name,
                     apellidoMaterno=maternal_last_name,
@@ -291,9 +331,8 @@ def signup_teacher(request):
                     is_staff=False,
                 )
 
-                # Crear Perfil Profesor
                 Profesor.objects.create(
-                    clave=teacher_id,
+                    clave=codigo_usuario,
                     nombre_pila=first_name,
                     apellidoPaterno=paternal_last_name,
                     apellidoMaterno=maternal_last_name,
@@ -306,7 +345,7 @@ def signup_teacher(request):
         except Exception as e:
             messages.error(request, f'An error occurred during registration: {str(e)}')
 
-    return render(request, 'users/singup_teacher.html')
+    return render(request, 'users/signup_teacher.html')
 
 @never_cache
 @role_required('teacher')

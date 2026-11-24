@@ -1,5 +1,10 @@
 {% load static %}
-<div id="hangmanModal" class="modal-overlay">
+<div id="hangmanModal" 
+     class="modal-overlay"
+     data-correct-sound="{% static 'sounds/correct.mp3' %}"
+     data-damage-sound="{% static 'sounds/damage.mp3' %}"
+     data-win-sound="{% static 'sounds/win.mp3' %}"
+     data-gameover-sound="{% static 'sounds/game_over.mp3' %}">
     <div class="modal-content hangman-theme">
 
         <div class="hangman-header">

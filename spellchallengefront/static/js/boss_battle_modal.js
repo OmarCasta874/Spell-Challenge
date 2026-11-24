@@ -31,6 +31,29 @@
         return csrfInput ? csrfInput.value : '';
     }
 
+    // PLAY BATTLE SOUND
+
+    function playBattleSound(type) {
+        if (!modal) return;
+
+        const soundMap = {
+            boss: modal.dataset.bossDamageSound,
+            player: modal.dataset.damageSound,
+            win: modal.dataset.winSound,
+            gameover: modal.dataset.gameoverSound
+        };
+
+        const soundUrl = soundMap[type];
+        if (!soundUrl) return;
+
+        const sound = new Audio(soundUrl);
+        sound.volume = 0.65;
+        sound.currentTime = 0;
+        sound.play().catch(function (err) {
+            console.warn('Unable to play battle sound:', err);
+        });
+    }
+
     // TIMER FUNCTIONS
 
     function stopQuestionTimer() {
@@ -418,8 +441,10 @@
             }
 
             if (data.correct) {
+                playBattleSound('boss');
                 animateDamage('kingBeeImage');
             } else {
+                playBattleSound('player');
                 animateDamage('beenaryImage');
             }
 
@@ -441,6 +466,8 @@
 
                 if (data.result === 'victory') {
 
+                    playBattleSound('win');
+
                     showFeedback(
                         `VICTORY! Beenary defeated King Bee! 👑 +${data.xp_earned} XP`,
                         true
@@ -448,12 +475,16 @@
 
                 } else if (data.result === 'defeat') {
 
+                    playBattleSound('gameover');
+
                     showFeedback(
                         'DEFEAT! King Bee has won the battle! +0 XP',
                         false
                     );
 
                 } else {
+
+                    playBattleSound('gameover');
 
                     showFeedback(
                         'The battle ended without a winner. +0 XP',

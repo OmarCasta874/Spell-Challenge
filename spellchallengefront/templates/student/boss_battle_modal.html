@@ -1,7 +1,14 @@
 {% load static %}
 <!-- BOSS BATTLE MODAL -->
-<div id="bossBattleModal" class="boss-battle-overlay" data-start-url="{% url 'boss_battle_start' %}" data-answer-url="{% url 'boss_battle_answer' %}">
-    <div class="boss-battle-container">
+<div id="bossBattleModal" 
+     class="boss-battle-overlay" 
+     data-start-url="{% url 'boss_battle_start' %}" 
+     data-answer-url="{% url 'boss_battle_answer' %}"
+     data-damage-sound="{% static 'sounds/damage.mp3' %}"
+     data-boss-damage-sound="{% static 'sounds/boss_damage.mp3' %}"
+     data-win-sound="{% static 'sounds/win.mp3' %}"
+     data-gameover-sound="{% static 'sounds/game_over.mp3' %}">   
+     <div class="boss-battle-container">
         <!-- HEADER -->
         <div class="boss-battle-header">
             <h2>BOSS BATTLE</h2>

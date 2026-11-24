@@ -1,4 +1,13 @@
-<div class="ws-overlay" id="wordSearchModal" role="dialog" aria-modal="true" aria-labelledby="wsTitle">
+{% load static %}
+<div class="ws-overlay" 
+     id="wordSearchModal" 
+     role="dialog" 
+     aria-modal="true" 
+     aria-labelledby="wsTitle"
+     data-click-sound="{% static 'sounds/click.mp3' %}"
+     data-correct-sound="{% static 'sounds/correct.mp3' %}"
+     data-incorrect-sound="{% static 'sounds/incorrect.mp3' %}"
+     data-win-sound="{% static 'sounds/win.mp3' %}">
     <div class="ws-content">
         <button type="button" class="ws-back" id="wsBackBtn">
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -79,6 +88,27 @@
     );
 
     const WS_GRID_SIZE = 15;
+
+    function wordSearch_playSound(type) {
+        if (!overlay) return;
+
+        const soundMap = {
+            click: overlay.dataset.clickSound,
+            correct: overlay.dataset.correctSound,
+            incorrect: overlay.dataset.incorrectSound,
+            win: overlay.dataset.winSound
+        };
+
+        const soundUrl = soundMap[type];
+        if (!soundUrl) return;
+
+        const sound = new Audio(soundUrl);
+        sound.volume = type === 'click' ? 0.5 : 0.65;
+        sound.currentTime = 0;
+        sound.play().catch(function (err) {
+            console.warn('No se pudo reproducir el sonido en Word Search:', err);
+        });
+    }
 
     function wordSearch_getRandomWords() {
         let availableWords = [];
@@ -214,6 +244,7 @@
                 'You found all the hidden words and earned ' +
                 response.xp_earned + ' XP!';
 
+            wordSearch_playSound('win');
             result.classList.add('active');
         })
         .catch(function (error) {
@@ -225,6 +256,7 @@
             document.getElementById('wsResultText').textContent =
                 'Your puzzle was completed, but your XP could not be registered.';
 
+            wordSearch_playSound('win');
             result.classList.add('active');
         });
     }
@@ -501,6 +533,7 @@
         );
 
         if (matchedWord) {
+            wordSearch_playSound('correct');
             wordSearch_foundWords.add(matchedWord.word);
 
             wordSearch_selectedCells.forEach(cell => {
@@ -528,6 +561,7 @@
             }
 
         } else {
+            wordSearch_playSound('incorrect');
             wordSearch_selectedCells.forEach(cell => {
                 cell.element.classList.remove('selected');
             });
@@ -547,6 +581,8 @@
         if (!cell) return;
 
         event.preventDefault();
+
+        wordSearch_playSound('click');
 
         wordSearch_isSelecting = true;
 

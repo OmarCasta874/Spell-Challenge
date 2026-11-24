@@ -1,5 +1,14 @@
 {% load static %}
-<div class="mg-overlay" id="memoryGameModal" role="dialog" aria-modal="true" aria-labelledby="mgTitle">
+<div class="mg-overlay" 
+     id="memoryGameModal" 
+     role="dialog" 
+     aria-modal="true" 
+     aria-labelledby="mgTitle"
+     data-click-sound="{% static 'sounds/click.mp3' %}"
+     data-correct-sound="{% static 'sounds/correct.mp3' %}"
+     data-incorrect-sound="{% static 'sounds/incorrect.mp3' %}"
+     data-win-sound="{% static 'sounds/win.mp3' %}"
+     data-gameover-sound="{% static 'sounds/game_over.mp3' %}">
   <div class="mg-content">
     <button type="button" class="mg-back" id="mgBackBtn">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -80,6 +89,28 @@
   var state = null;
   var preloaded = false;
   var mgFinished = false;
+
+  function playMemorySound(type) {
+    if (!overlay) return;
+
+    var soundMap = {
+      click: overlay.dataset.clickSound,
+      correct: overlay.dataset.correctSound,
+      incorrect: overlay.dataset.incorrectSound,
+      win: overlay.dataset.winSound,
+      gameover: overlay.dataset.gameoverSound
+    };
+
+    var soundUrl = soundMap[type];
+    if (!soundUrl) return;
+
+    var sound = new Audio(soundUrl);
+    sound.volume = type === 'click' ? 0.5 : 0.65;
+    sound.currentTime = 0;
+    sound.play().catch(function (err) {
+      console.warn('No se pudo reproducir el sonido en Memory Game:', err);
+    });
+  }
 
   var MG_DIFFICULTIES = {};
 
@@ -294,6 +325,7 @@
 
       mgFinished = true;
       state.lock = true;
+      playMemorySound('gameover');
       console.log('Memory Game: timeOutGame ejecutada');
 
       var resultText = 'You ran out of time. Try again!';
@@ -402,6 +434,7 @@
     if (!btn || !state || state.lock || mgFinished) return;
     if (btn.classList.contains('flipped') || btn.classList.contains('matched')) return;
 
+    playMemorySound('click');
     btn.classList.add('flipped');
 
     if (!state.first) {
@@ -419,6 +452,7 @@
 
     if (cardA.pairId === cardB.pairId && cardA.type !== cardB.type) {
       // Par: verde + animación, ya no se pueden seleccionar
+      playMemorySound('correct');
       [a, b].forEach(function (c) {
         c.classList.remove('flipped');
         c.classList.add('matched', 'pop');
@@ -444,6 +478,7 @@
     }
 
     // No es par: se muestran un momento y se regresan
+    playMemorySound('incorrect');
     state.lock = true;
     state.errors++;
     console.log('Memory Game: error registrado', state.errors);
@@ -476,6 +511,7 @@
 
       mgFinished = true;
       state.lock = true;
+      playMemorySound('win');
 
       console.log('Memory Game: finishGame ejecutada');
 

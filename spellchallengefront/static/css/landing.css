@@ -103,3 +103,26 @@
         max-width: 200px;
     }
 }
+
+/* FOOTER / ABOUT US LINK */
+
+.landing__footer {
+    text-align: center;
+    padding-top: 16px;
+}
+
+.landing__about-link {
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #7a1f2b;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    opacity: 0.85;
+    transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.landing__about-link:hover {
+    opacity: 1;
+    color: #5e1721;
+}

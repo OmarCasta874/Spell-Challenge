@@ -1,8 +1,8 @@
 {% extends 'base/base.html' %}
 {% load static %}
-{% block title %}Create Student Account — Spell-Challenge{% endblock %}
+{% block title %}Create Teacher Account — Spell-Challenge{% endblock %}
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/signup_student.css' %}">
+  <link rel="stylesheet" href="{% static 'css/signup_teacher.css' %}">
 {% endblock %}
 {% block body_class %}auth-page{% endblock %}
 
@@ -10,9 +10,16 @@
 <div class="auth-card">
   <a href="{% url 'choose_role' %}" class="back-link">&larr; Back</a>
 
-  <h1>Create Your Student Account</h1>
+  <h1>Create Your Teacher Account</h1>
 
-  <form method="post" action="{% url 'signup_student' %}" novalidate>
+  {% if messages %}
+    {% for message in messages %}
+      <div class="form-error">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+  <div class="form-error" id="teacherErrorBox" style="display: none;"></div>
+
+  <form method="post" action="{% url 'signup_teacher' %}" id="teacherSignupForm" novalidate>
     {% csrf_token %} 
 
     <div class="field">
@@ -32,52 +39,21 @@
     <div class="field">
       <label for="id_maternal_last_name">Maternal Last Name:</label>
       <div class="field-input">
-        <input type="text" id="id_maternal_last_name" name="maternal_last_name" required>
-      </div>
-    </div>
-
-    <div class="field">
-      <label for="id_student_id">Student ID:</label>
-      <div class="field-input">
-        <input type="text" id="id_student_id" name="student_id" required>
+        <input type="text" id="id_maternal_last_name" name="maternal_last_name">
       </div>
     </div>
 
     <div class="field">
       <label for="id_email">Email Address:</label>
       <div class="field-input">
-        <input type="email" id="id_email" name="email" required>
+        <input type="email" id="id_email" name="email" placeholder="nombre.apellido@uttijuana.edu.mx" required>
       </div>
     </div>
 
     <div class="field">
       <label for="id_phone">Phone:</label>
       <div class="field-input">
-        <input type="tel" id="id_phone" name="phone" required>
-      </div>
-    </div>
-
-    <div class="field">
-      <label for="id_level">Level:</label>
-      <div class="field-input">
-        <select id="id_level" name="level" required>
-          <option value="">Select your level</option>
-          {% for nivel in niveles %}
-            <option value="{{ nivel.codigo }}">{{ nivel.codigo }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-
-    <div class="field">
-      <label for="id_career">Career:</label>
-      <div class="field-input">
-        <select id="id_career" name="career" required>
-          <option value="">Select your career</option>
-          {% for carrera in carreras %}
-            <option value="{{ carrera.clave }}">{{ carrera.nombre }}</option>
-          {% endfor %}
-        </select>
+        <input type="tel" id="id_phone" name="phone" maxlength="15" inputmode="numeric" required>
       </div>
     </div>
 
@@ -138,6 +114,40 @@
                <circle cx="12" cy="12" r="3"/>
              </svg>`;
       });
+    });
+
+    const form = document.getElementById('teacherSignupForm');
+    const emailInput = document.getElementById('id_email');
+    const errorBox = document.getElementById('teacherErrorBox');
+
+    const teacherEmailRegex = /^[a-z0-9]+\.[a-z0-9]+@uttijuana\.edu\.mx$/i;
+    const phoneInput = document.getElementById('id_phone');
+    const phoneRegex = /^\d{1,15}$/;
+
+    // Elimina cualquier carácter que no sea número y limita a 15 dígitos
+    phoneInput.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '').slice(0, 15);
+    });
+
+    form.addEventListener('submit', function(e) {
+
+      const phone = phoneInput.value.trim();
+      if (!phoneRegex.test(phone)) {
+        e.preventDefault();
+        errorBox.textContent = 'Phone number must contain only digits (maximum 15 digits).';
+        errorBox.style.display = 'block';
+        phoneInput.focus();
+        return;
+      }
+
+      const email = emailInput.value.trim();
+
+      if (!teacherEmailRegex.test(email)) {
+        e.preventDefault();
+        errorBox.textContent = 'Teacher email must follow the format: nombre.apellido@uttijuana.edu.mx';
+        errorBox.style.display = 'block';
+        emailInput.focus();
+      }
     });
   });
 </script>
