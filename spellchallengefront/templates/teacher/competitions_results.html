@@ -179,47 +179,21 @@
           </button>
         </div>
         <div class="modal-body res-modal-body">
-          <p><strong>{{ r.first_name }} {{ r.last_name }}</strong></p>
-          <p>Enrollment: {{ r.enrollment }}</p>
-          <div class="mb-3">
-            <label for="correct_{{ r.enrollment }}">Correct Words</label>
-            <input
-              type="number"
-              class="form-control"
-              id="correct_{{ r.enrollment }}"
-              name="correct_{{ r.enrollment }}"
-              min="0"
-              step="1"
-              value="{{ r.correct|default_if_none:'' }}"
-              required
-            >
-          </div>
-          <div class="mb-3">
-            <label for="incorrect_{{ r.enrollment }}">Incorrect Words</label>
-            <input
-              type="number"
-              class="form-control"
-              id="incorrect_{{ r.enrollment }}"
-              name="incorrect_{{ r.enrollment }}"
-              min="0"
-              step="1"
-              value="{{ r.incorrect|default_if_none:'' }}"
-              required
-            >
-          </div>
-          <div class="mb-3">
-            <label for="points_{{ r.enrollment }}">Points</label>
-            <input
-              type="number"
-              class="form-control"
-              id="points_{{ r.enrollment }}"
-              name="points_{{ r.enrollment }}"
-              min="0"
-              step="1"
-              value="{{ r.points|default_if_none:'' }}"
-              required
-            >
-          </div>
+            <p><strong>{{ r.first_name }} {{ r.last_name }}</strong></p>
+            <p>Enrollment: {{ r.enrollment }}</p>
+            <div class="mb-3">
+                <label for="points_{{ r.enrollment }}">Points</label>
+                <input
+                    type="number"
+                    class="form-control"
+                    id="points_{{ r.enrollment }}"
+                    name="points_{{ r.enrollment }}"
+                    min="0"
+                    step="1"
+                    value="{{ r.points|default_if_none:'' }}"
+                    required
+                >
+            </div>
         </div>
         <div class="modal-footer res-modal-footer">
           <button type="button" class="res-btn-accept" data-bs-dismiss="modal">

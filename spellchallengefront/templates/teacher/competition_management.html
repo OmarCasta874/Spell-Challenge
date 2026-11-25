@@ -11,7 +11,9 @@
 {% block title %}Manage Competition{% endblock %}
 
 {% block teacher_content %}
-<div class="competition-management-container">
+<div class="competition-management-container"
+    id="competitionManagement" data-save-url="{% url 'save_competition_evaluation' competition.codigo %}">
+    {% csrf_token %}
     <!-- COMPETITION HEADER -->
     <div class="competition-header text-center">
         <div class="competition-logo-wrap">
@@ -285,7 +287,8 @@
         </div>
     </div>
 </div>
-<!-- WORD AND EVALUATION MODAL -->
+
+<!-- WORD INFORMATION MODAL -->
 <div id="wordModal" class="modal-overlay">
     <div class="word-modal-wrapper">
         <img
@@ -293,73 +296,125 @@
             alt=""
             class="word-modal-bee word-modal-bee-left"
         >
+
         <div class="modal-content modal-small text-center word-modal-theme">
+            <button
+                type="button"
+                class="btn-close-custom word-modal-close"
+                onclick="closeModal('wordModal')"
+                aria-label="Close"
+            >
+                &times;
+            </button>
+
             <div class="word-modal-inner">
                 <h2 class="word-modal-word" id="currentWordText">
                     WORD
                 </h2>
             </div>
+
             <p class="word-modal-def" id="currentWordDef">
                 Definition
             </p>
+
             <hr class="word-modal-divider">
+
             <p class="word-modal-example" id="currentWordExample">
                 Example
             </p>
-            <div class="teacher-evaluation">
-                <h4>Spelling Evaluation</h4>
-                <div class="evaluation-options">
-                    <button
-                        type="button"
-                        class="evaluation-btn"
-                        data-type="spelling"
-                        data-result="Correct"
-                    >
-                        Correct
-                    </button>
-                    <button
-                        type="button"
-                        class="evaluation-btn"
-                        data-type="spelling"
-                        data-result="Incorrect"
-                    >
-                        Incorrect
-                    </button>
-                </div>
-                <h4>Pronunciation Evaluation</h4>
-                <div class="evaluation-options">
-                    <button
-                        type="button"
-                        class="evaluation-btn"
-                        data-type="pronunciation"
-                        data-result="Correct"
-                    >
-                        Correct
-                    </button>
-                    <button
-                        type="button"
-                        class="evaluation-btn"
-                        data-type="pronunciation"
-                        data-result="Incorrect"
-                    >
-                        Incorrect
-                    </button>
-                </div>
-            </div>
+
             <button
                 type="button"
-                class="btn-word-next"
-                id="saveEvaluationBtn"
-                disabled
+                id="openEvaluationBtn"
+                class="word-modal-evaluation-btn"
+                title="Evaluate participant"
+                aria-label="Open evaluation"
             >
-                SAVE EVALUATION
+                🖋️
             </button>
         </div>
+
         <img
             src="{% static 'img/beenary-right.png' %}"
             alt=""
             class="word-modal-bee word-modal-bee-right"
         >
+    </div>
+</div>
+
+<!-- EVALUATION RESULTS MODAL -->
+<div id="evaluationModal" class="modal-overlay">
+    <div class="modal-content modal-small text-center word-modal-theme evaluation-modal-theme">
+
+        <div class="evaluation-modal-header">
+            <h3 class="beehive-modal-title">
+                SAVE EVALUATION RESULTS
+            </h3>
+
+            <button
+                type="button"
+                class="btn-close-custom"
+                onclick="closeModal('evaluationModal')"
+                aria-label="Close"
+            >
+                &times;
+            </button>
+        </div>
+
+        <div class="teacher-evaluation">
+            <h4>Spelling Evaluation</h4>
+
+            <div class="evaluation-options">
+                <button
+                    type="button"
+                    class="evaluation-btn"
+                    data-type="spelling"
+                    data-result="Correct"
+                >
+                    Correct
+                </button>
+
+                <button
+                    type="button"
+                    class="evaluation-btn"
+                    data-type="spelling"
+                    data-result="Incorrect"
+                >
+                    Incorrect
+                </button>
+            </div>
+
+            <h4>Pronunciation Evaluation</h4>
+
+            <div class="evaluation-options">
+                <button
+                    type="button"
+                    class="evaluation-btn"
+                    data-type="pronunciation"
+                    data-result="Correct"
+                >
+                    Correct
+                </button>
+
+                <button
+                    type="button"
+                    class="evaluation-btn"
+                    data-type="pronunciation"
+                    data-result="Incorrect"
+                >
+                    Incorrect
+                </button>
+            </div>
+        </div>
+
+        <button
+            type="button"
+            class="btn-word-next"
+            id="saveEvaluationBtn"
+            disabled
+        >
+            SAVE EVALUATION
+        </button>
     </div>
 </div>
 {% endblock %}

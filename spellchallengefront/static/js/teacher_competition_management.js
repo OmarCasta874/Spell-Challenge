@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentHive = null;
     let currentBeehivePage = 1;
     let currentWord = null;
+    let currentWordHive = null;
     let currentEvaluation = null;
 
     const participantSelect = document.getElementById('participantSelect');
@@ -18,8 +19,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const confirmModal = document.getElementById('confirmBeehiveModal');
     const wordModal = document.getElementById('wordModal');
+    const evaluationModal = document.getElementById('evaluationModal');
 
     const saveEvaluationBtn = document.getElementById('saveEvaluationBtn');
+    const openEvaluationBtn = document.getElementById('openEvaluationBtn');
+
+    const managementContainer = document.getElementById('competitionManagement');
+
+    const saveEvaluationUrl = managementContainer.dataset.saveUrl;
+
+    const csrfToken = managementContainer.querySelector(
+        'input[name="csrfmiddlewaretoken"]'
+    ).value;
+
+    let selectedSpellingResult = null;
+    let selectedPronunciationResult = null;
+    let isSavingEvaluation = false;
 
     if (!participantSelect || !categorySelect || !grid) {
         return;
@@ -212,6 +227,18 @@ document.addEventListener('DOMContentLoaded', function () {
                         String(evaluation.alumno_id) ===
                         String(selectedParticipant);
 
+                    console.log('[BEEHIVE DEBUG]', {
+                        category: currentCategory,
+                        hive: hiveNumber,
+                        selectedParticipant: selectedParticipant,
+                        evaluation: evaluation,
+                        isOccupied: isOccupied,
+                        belongsToParticipant: belongsToParticipant
+                    });
+
+                    const beehiveItem = document.createElement('div');
+                    beehiveItem.className = 'beehive-item';
+
                     const button = document.createElement('button');
 
                     button.type = 'button';
@@ -265,7 +292,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     });
 
-                    row.appendChild(button);
+                    beehiveItem.appendChild(button);
+
+                    row.appendChild(beehiveItem);
 
                     localNumber++;
                 }
@@ -332,6 +361,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         currentHive = Number(hiveNumber);
+        currentWordHive = null;
 
         const selectedHiveElement =
             document.getElementById('selectedHiveNum');
@@ -398,16 +428,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     }
 
+    function updateSaveButtonState() {
+
+        saveEvaluationBtn.disabled = (
+            !selectedSpellingResult ||
+            !selectedPronunciationResult ||
+            !currentWord ||
+            !currentHive ||
+            !getSelectedParticipant() ||
+            isSavingEvaluation
+        );
+
+    }
+
     function resetEvaluationButtons() {
 
-        document.querySelectorAll('.evaluation-btn').forEach(button => {
+        selectedSpellingResult = null;
+        selectedPronunciationResult = null;
 
+        evaluationModal.querySelectorAll('.evaluation-btn').forEach(button => {
             button.classList.remove('selected');
-
         });
 
-        // Saving will be connected after the backend action is implemented.
-        saveEvaluationBtn.disabled = true;
+        updateSaveButtonState();
 
     }
 
@@ -419,26 +462,24 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        document.querySelectorAll('.evaluation-btn').forEach(button => {
+        selectedSpellingResult = evaluation.spelling_result;
+        selectedPronunciationResult = evaluation.pronunciation_result;
+
+        evaluationModal.querySelectorAll('.evaluation-btn').forEach(button => {
 
             const type = button.dataset.type;
             const result = button.dataset.result;
 
             if (
-                type === 'spelling' &&
-                result === evaluation.spelling_result
-            ) {
-                button.classList.add('selected');
-            }
-
-            if (
-                type === 'pronunciation' &&
-                result === evaluation.pronunciation_result
+                (type === 'spelling' && result === selectedSpellingResult) ||
+                (type === 'pronunciation' && result === selectedPronunciationResult)
             ) {
                 button.classList.add('selected');
             }
 
         });
+
+        updateSaveButtonState();
 
     }
 
@@ -500,6 +541,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         currentWord = word;
+        currentWordHive = currentHive;
 
         document.getElementById('currentWordText').textContent =
             word.texto;
@@ -517,10 +559,25 @@ document.addEventListener('DOMContentLoaded', function () {
         fitWordToModal();
 
     }
+    
+    // OPEN EVALUATION MODAL
+
+    openEvaluationBtn.addEventListener('click', function () {
+
+        if (!currentWord || !currentHive || !getSelectedParticipant()) {
+            alert('Please open a Beehive first.');
+            return;
+        }
+
+        setEvaluationButtons(currentEvaluation);
+
+        evaluationModal.classList.add('active');
+
+    });
 
     // EVALUATION BUTTONS
 
-    document.querySelectorAll('.evaluation-btn').forEach(button => {
+    evaluationModal.querySelectorAll('.evaluation-btn').forEach(button => {
 
         button.addEventListener('click', function () {
 
@@ -537,11 +594,134 @@ document.addEventListener('DOMContentLoaded', function () {
 
             this.classList.add('selected');
 
-            // The save action will be connected in the next backend step.
-            // Keep the button disabled until that action is available.
-            saveEvaluationBtn.disabled = true;
+            if (type === 'spelling') {
+                selectedSpellingResult = result;
+            }
+
+            if (type === 'pronunciation') {
+                selectedPronunciationResult = result;
+            }
+
+            updateSaveButtonState();
 
         });
+
+    });
+
+    // SAVE COMPETITION EVALUATION
+
+    saveEvaluationBtn.addEventListener('click', async function () {
+
+        const matricula = getSelectedParticipant();
+
+        if (
+            !matricula ||
+            !currentHive ||
+            !currentWord ||
+            currentWordHive !== currentHive ||
+            !selectedSpellingResult ||
+            !selectedPronunciationResult
+        ) {
+            alert('Please complete all evaluation fields.');
+            return;
+        }
+
+        if (isSavingEvaluation) {
+            return;
+        }
+
+        isSavingEvaluation = true;
+        updateSaveButtonState();
+
+        const formData = new URLSearchParams({
+
+            matricula: matricula,
+            palabra_codigo: currentWord.codigo,
+            categoria_beehive: currentCategory,
+            spelling_result: selectedSpellingResult,
+            pronunciation_result: selectedPronunciationResult,
+            beehive: currentHive
+
+        });
+
+        try {
+
+            const response = await fetch(saveEvaluationUrl, {
+
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+
+                body: formData.toString()
+
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+
+                throw new Error(
+                    data.message || 'Unable to save the evaluation.'
+                );
+
+            }
+
+            const savedEvaluation = {
+
+                id: data.evaluation_id,
+                alumno_id: data.matricula,
+                palabra_id: data.palabra_codigo,
+                categoria_beehive: data.categoria_beehive,
+                beehive: data.beehive,
+                spelling_result: data.spelling_result,
+                pronunciation_result: data.pronunciation_result
+
+            };
+
+            const existingIndex = evaluations.findIndex(
+                evaluation =>
+                    String(evaluation.alumno_id) === String(data.matricula)
+            );
+
+            if (existingIndex !== -1) {
+
+                Object.assign(
+                    evaluations[existingIndex],
+                    savedEvaluation
+                );
+
+            } else {
+
+                evaluations.push(savedEvaluation);
+
+            }
+
+            currentEvaluation = existingIndex !== -1
+                ? evaluations[existingIndex]
+                : savedEvaluation;
+
+            closeModal('evaluationModal');
+
+            renderBeehives();
+
+            alert('Evaluation saved successfully.');
+
+        } catch (error) {
+
+            console.error('Evaluation save error:', error);
+
+            alert(error.message || 'An error occurred while saving the evaluation.');
+
+        } finally {
+
+            isSavingEvaluation = false;
+            updateSaveButtonState();
+
+        }
 
     });
 

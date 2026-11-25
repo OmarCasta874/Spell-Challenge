@@ -155,3 +155,113 @@
     margin: 0 auto;
     box-sizing: border-box;
 }
+
+/* BEEHIVE EVALUATION BUTTON */
+.competition-management-container .beehive-item {
+    position: relative;
+    display: flex;
+    flex: 0 0 auto;
+}
+
+.competition-management-container .beehive-edit-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 3;
+
+    width: 27px;
+    height: 27px;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid #8a5a00;
+    border-radius: 50%;
+
+    background: #ffffff;
+    color: #7a1c1c;
+
+    font-size: 19px;
+    font-weight: bold;
+    line-height: 1;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.competition-management-container .beehive-edit-btn:hover {
+    background: #7a1c1c;
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+.competition-management-container .beehive-edit-btn:focus-visible {
+    outline: 3px solid #f2908a;
+    outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+    .competition-management-container .beehive-edit-btn {
+        width: 23px;
+        height: 23px;
+        top: 3px;
+        right: 3px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .competition-management-container .beehive-edit-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 14px;
+    }
+}
+
+
+/* WORD MODAL - EVALUATION BUTTON */
+
+#openEvaluationBtn {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 1rem auto 0;
+
+    background-color: #7a1c1c;
+    color: #ffffff;
+
+    border: 3px solid #8a5a00;
+    border-radius: 50%;
+
+    font-size: 25px;
+    line-height: 1;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#openEvaluationBtn:hover {
+    background-color: #a52a2a;
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+#openEvaluationBtn:focus-visible {
+    outline: 3px solid #f2908a;
+    outline-offset: 3px;
+}
+
+@media (max-width: 576px) {
+    #openEvaluationBtn {
+        width: 44px;
+        height: 44px;
+        font-size: 23px;
+    }
+}

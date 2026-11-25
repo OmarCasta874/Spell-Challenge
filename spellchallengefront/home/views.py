@@ -5276,71 +5276,70 @@ def teacher_competition_results(request, pk):
                 alumno_id=matricula,
             )
 
-            correctas_raw = request.POST.get(
-                f'correct_{matricula}', ''
-            ).strip()
-
-            incorrectas_raw = request.POST.get(
-                f'incorrect_{matricula}', ''
-            ).strip()
-
             puntos_raw = request.POST.get(
                 f'points_{matricula}', ''
             ).strip()
-
-            if not correctas_raw or not incorrectas_raw or not puntos_raw:
+            
+            if not puntos_raw:
                 messages.error(
                     request,
-                    'Please complete all result fields.'
+                    'Please enter the points for your students.'
                 )
                 return redirect(
                     'teacher_competition_results',
                     pk=competition.pk,
                 )
-
+                
             try:
-                correctas = int(correctas_raw)
-                incorrectas = int(incorrectas_raw)
                 puntos = int(puntos_raw)
             except ValueError:
                 messages.error(
                     request,
-                    'Results must be whole numbers.'
+                    'Points must be a whole number.'
                 )
                 return redirect(
                     'teacher_competition_results',
                     pk=competition.pk,
                 )
-
-            if correctas < 0 or incorrectas < 0 or puntos < 0:
+                
+            if puntos < 0:
                 messages.error(
                     request,
-                    'Results cannot be negative.'
+                    'Points cannot be negative.'
                 )
                 return redirect(
                     'teacher_competition_results',
                     pk=competition.pk,
                 )
-
-            participacion.palabras_correctas = correctas
-            participacion.palabras_incorrectas = incorrectas
+                
+            if participacion.palabras_correctas is None:
+                messages.error(
+                    request,
+                    'This student does not have a completed evaluation.'
+                )
+                return redirect(
+                    'teacher_competition_results',
+                    pk=competition.pk,
+                )
+                
             participacion.puntos_obtenidos = puntos
-
+            
             participacion.save(update_fields=[
-                'palabras_correctas',
-                'palabras_incorrectas',
                 'puntos_obtenidos',
             ])
             
+            #UPDATE PARTICIPANT POSITIONS
             participaciones_calificadas = (
                 Competencia_Alumno.objects
                 .filter(
                     competencia=competition,
                     palabras_correctas__isnull=False,
+                    puntos_obtenidos__isnull=False,
                 )
                 .select_related('alumno')
                 .order_by(
                     '-palabras_correctas',
+                    '-puntos_obtenidos',
                     'alumno__apellidoPaterno',
                     'alumno__apellidoMaterno',
                     'alumno__nombre_pila',
@@ -5355,11 +5354,13 @@ def teacher_competition_results(request, pk):
                 participante.posicion = posicion
                 participante.save(update_fields=['posicion'])
                 
+            #KEEP UNQUALIFIED PARTICIPANTS WITHOUT POSITION
             Competencia_Alumno.objects.filter(
                 competencia=competition,
-                palabras_correctas__isnull=True,
+                puntos_obtenidos__isnull=True,
             ).update(posicion=None)
             
+            #CREATE OR UPDATE RESULT NOTIFICATION
             notificacion = (
                 Notificacion.objects
                 .filter(
@@ -5375,7 +5376,8 @@ def teacher_competition_results(request, pk):
             
             mensaje = (
                 f"Your results for {competition.nombre} are available. "
-                f"Correct: {correctas}, Incorrect: {incorrectas}, "
+                f"Correct: {participacion.palabras_correctas}, "
+                f"Incorrect: {participacion.palabras_incorrectas}, "
                 f"Points: {puntos}."
             )
             
@@ -5397,12 +5399,12 @@ def teacher_competition_results(request, pk):
                     competencia=competition,
                     leida=False,
                 )
-
+                
             messages.success(
                 request,
-                'Student results saved successfully.'
+                'Student points saved successfully.'
             )
-
+            
             return redirect(
                 'teacher_competition_results',
                 pk=competition.pk,
@@ -5950,7 +5952,6 @@ def save_competition_evaluation(request, codigo):
             'message': 'The evaluation conflicts with an existing assignment. Please refresh and try again.'
         }, status=409)
 
-
 @never_cache
 @role_required('teacher')
 @require_POST
@@ -5968,13 +5969,84 @@ def teacher_finish_competition(request, codigo):
         )
         return redirect('teacher_competitions')
     
-    competition.estado = 'Finished'
-    competition.save(update_fields=['estado'])
-    
-    messages.success(
-        request,
-        f'Competition {competition.nombre} has been finished.'
-    )
+    try:
+        with transaction.atomic():
+            
+            #PARTICIPANTS
+            participaciones = {
+                participacion.alumno_id: participacion
+                for participacion in
+                Competencia_Alumno.objects.filter(
+                    competencia=competition
+                )
+            }
+            
+            #EVALUATIONS
+            evaluaciones = (
+                Competencia_Evaluacion.objects
+                .filter(competencia=competition)
+                .values(
+                    'alumno_id',
+                    'spelling_result',
+                    'pronunciation_result',
+                )
+            )
+            
+            #AUTOMATIC RESULT COUNTERS
+            resultados = {}
+            
+            for evaluacion in evaluaciones:
+                matricula = evaluacion['alumno_id']
+                
+                if matricula not in resultados:
+                    resultados[matricula] = {
+                        'correctas': 0,
+                        'incorrectas': 0,
+                    }
+                    
+                if (
+                    evaluacion['spelling_result'] == 'Correct'
+                    and
+                    evaluacion['pronunciation_result'] == 'Correct'
+                ):
+                    resultados[matricula]['correctas'] += 1
+                    
+                else:
+                    resultados[matricula]['incorrectas'] += 1
+                    
+            #SAVE COUNTERS IN COMPETENCIA_ALUMNO
+            for matricula, resultado in resultados.items():
+                participacion = participaciones.get(matricula)
+                
+                if not participacion:
+                    continue
+                
+                participacion.palabras_correctas = (resultado['correctas'])
+                
+                participacion.palabras_incorrectas = (resultado['incorrectas'])
+                
+                participacion.save(update_fields=[
+                    'palabras_correctas',
+                    'palabras_incorrectas',
+                ])
+                
+            competition.estado = 'Finished'
+            competition.save(update_fields=['estado'])
+            
+        messages.success(
+            request,
+            f'Competition {competition.nombre} has been finished.'
+        )
+        
+    except Exception:
+        messages.error(
+            request,
+            'An error occurred while calculating competition results.'
+        )
+        return redirect(
+            'teacher_competition_management',
+            codigo=competition.codigo
+        )
     
     return redirect('teacher_competitions')
 
@@ -6067,55 +6139,51 @@ def student_competition_results(request, codigo):
         competencia=competition
     ).first()
     
-    total_puntos = (
-        participacion.puntos_obtenidos
-        if participacion and participacion.puntos_obtenidos is not None
-        else 0
+    #CHECK IF RESULTS ARE READY TO BE PUBLISHED
+    resultados_disponibles = (
+        competition.estado == 'Finished'
+        and participacion is not None
+        and participacion.palabras_correctas is not None
+        and participacion.palabras_incorrectas is not None
+        and participacion.puntos_obtenidos is not None
     )
     
-    palabras_correctas = (
-        participacion.palabras_correctas
-        if participacion and participacion.palabras_correctas is not None
-        else 0
-    )
-    
-    palabras_incorrectas = (
-        participacion.palabras_incorrectas
-        if participacion and participacion.palabras_incorrectas is not None
-        else 0
-    )
-    
-    total_palabras = palabras_correctas + palabras_incorrectas
-    
+    if resultados_disponibles:
+        total_puntos = participacion.puntos_obtenidos
+        palabras_correctas = participacion.palabras_correctas
+        palabras_incorrectas = participacion.palabras_incorrectas
+        total_palabras = (
+            palabras_correctas + palabras_incorrectas
+        )
+        
+        posicion = participacion.posicion
+        
+    else:
+        total_puntos = None
+        palabras_correctas = None
+        palabras_incorrectas = None
+        total_palabras = None
+        posicion = None
+        
     context = {
         'competition': competition,
+        'resultados_disponibles': resultados_disponibles,
         'total_palabras': total_palabras,
         'palabras_correctas': palabras_correctas,
         'palabras_incorrectas': palabras_incorrectas,
         'total_puntos': total_puntos,
-        'posicion': (
-            participacion.posicion
-            if participacion
-            else None
-        ),
+        'posicion': posicion,
     }
     
-    posicion = context['posicion']
-    
     if not request.session.get("mascot_msg"):
-        resultados_registrados = (
-            participacion is not None
-            and participacion.palabras_correctas is not None
-            and participacion.palabras_incorrectas is not None
-        )
-        
-        if not resultados_registrados:
+        if not resultados_disponibles:
+            
             say(
                 request,
                 "No Results to Show Yet!",
-                "Your competition results are not available yet. Keep practicing and get ready for your next spelling challenge!"
+                "Your competition results are not available yet. Keep practicing and get ready for your next spelling competition."
             )
-            
+        
         else:
             accuracy = (
                 (palabras_correctas / total_palabras) * 100
@@ -6153,7 +6221,7 @@ def student_competition_results(request, codigo):
                 say(
                     request,
                     "You're Buzzing with Progress!",
-                    "You spelled at least a 80 percentage of the words correctly! That's something to be proud of. Keep up the excellent work!"
+                    "You spelled at least 80 percent of the words correctly! That's something to be proud of. Keep up the excellent work!"
                 )
             else:
                 say(

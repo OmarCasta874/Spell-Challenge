@@ -18,47 +18,59 @@
       <p class="text-muted mb-0">{{ competition.nombre }}</p>
     </div>
   </div>
-
+  {% if resultados_disponibles %}
   <div class="card border-0 rounded-4 shadow-sm p-4 mb-4" style="background-color: #faf8f6; border: 2px solid #f2908a !important;">
-    
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h4 class="fw-bold mb-0" style="color: #7a1f2b;">{{ competition.nombre }}</h4>
-      <span class="status-badge status-badge-finished">Finished</span>
-    </div>
-
-    <div class="row g-4 align-items-center my-2">
-      <div class="col-12 col-md-4 text-center text-md-start">
-        <span class="text-muted small fw-bold text-uppercase">Total Score</span>
-        <div class="display-5 fw-bold" style="color: #7a1f2b;">
-          {{ total_puntos|default:0 }} <span class="fs-5 text-muted">pts</span>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0" style="color: #7a1f2b;">{{ competition.nombre }}</h4>
+        <span class="status-badge status-badge-finished">Finished</span>
+      </div>
+      <div class="row g-4 align-items-center my-2">
+        <div class="col-12 col-md-4 text-center text-md-start">
+          <span class="text-muted small fw-bold text-uppercase">Total Score</span>
+          <div class="display-5 fw-bold" style="color: #7a1f2b;">
+            {{ total_puntos }} <span class="fs-5 text-muted">pts</span>
+          </div>
+        </div>
+        <div class="col-12 col-md-4 text-center">
+          <span class="text-muted small fw-bold text-uppercase">Your Ranking</span>
+          <div class="fs-2 fw-bold" style="color: #d9585c;">
+            {% if posicion == 1 %}
+              1st Place 🏆
+            {% elif posicion == 2 %}
+              2nd Place 🥈
+            {% elif posicion == 3 %}
+              3rd Place 🥉
+            {% elif posicion %}
+              #{{ posicion }} Place
+            {% else %}
+              Participated
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-12 col-md-4 text-center text-md-end">
+          <span class="text-muted small fw-bold text-uppercase">Accuracy</span>
+          <div class="fs-3 fw-bold text-success">
+            {{ palabras_correctas }} / {{ total_palabras }}
+          </div>
+          <small class="text-muted">
+            correct words · {{ palabras_incorrectas }} incorrect
+          </small>
         </div>
       </div>
-
-      <div class="col-12 col-md-4 text-center">
-        <span class="text-muted small fw-bold text-uppercase">Your Ranking</span>
-        <div class="fs-2 fw-bold" style="color: #d9585c;">
-          {% if posicion == 1 %}
-            1st Place 🏆
-          {% elif posicion == 2 %}
-            2nd Place 🥈
-          {% elif posicion == 3 %}
-            3rd Place 🥉
-          {% elif posicion %}
-            #{{ posicion }} Place
-          {% else %}
-            Participated
-          {% endif %}
-        </div>
-      </div>
-      <div class="col-12 col-md-4 text-center text-md-end">
-        <span class="text-muted small fw-bold text-uppercase">Accuracy</span>
-        <div class="fs-3 fw-bold text-success">
-          {{ palabras_correctas }} / {{ total_palabras }}
-        </div>
-        <small class="text-muted">correct words · {{ palabras_incorrectas }} incorrect </small>
-      </div>
-    </div>
   </div>
+  {% else %}
+  <div class="card border-0 rounded-4 shadow-sm p-5 mb-4 text-center" style="background-color: #faf8f6; border: 2px solid #f2908a !important;">
+      <div class="mb-3">
+          <i data-lucide="hourglass" style="width: 48px; height: 48px; color: #7a1f2b;"></i>
+      </div>
+      <h4 class="fw-bold mb-2" style="color: #7a1f2b;">
+          Results Not Available Yet
+      </h4>
+      <p class="text-muted mb-0">
+          Your competition results are being processed or are waiting for the teacher to register your final points. Please check again later!
+      </p>
+  </div>
+  {% endif %}
 
   <div class="text-center mt-4">
     <a href="{% url 'student_competitions' %}" class="btn text-white px-5 py-2 rounded-pill fw-bold" style="background-color: #7a1f2b;">

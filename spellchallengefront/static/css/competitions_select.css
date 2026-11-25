@@ -496,3 +496,88 @@
 .honeycomb-page.active .beehive-cell {
     animation-delay: calc(var(--hive-index) * 0.03s);
 }
+
+/* RESPONSIVE BEEHIVES */
+.competition-management-container .honeycomb-grid {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 10px 0;
+    box-sizing: border-box;
+}
+
+.competition-management-container .honeycomb-page {
+    width: 100%;
+    max-width: 100%;
+}
+
+.competition-management-container .honeycomb-row {
+    gap: 7px;
+    max-width: 100%;
+}
+
+.competition-management-container .beehive-cell {
+    width: 88px;
+    height: 102px;
+    flex: 0 0 88px;
+}
+
+.competition-management-container .beehive-number {
+    font-size: 2.1rem;
+}
+
+@media (max-width: 1100px) {
+    .competition-management-container .beehive-cell {
+        width: 76px;
+        height: 88px;
+        flex-basis: 76px;
+    }
+
+    .competition-management-container .beehive-number {
+        font-size: 1.9rem;
+    }
+
+    .competition-management-container .honeycomb-row {
+        gap: 5px;
+    }
+}
+
+@media (max-width: 768px) {
+    .competition-management-container .beehive-cell {
+        width: 62px;
+        height: 72px;
+        flex-basis: 62px;
+    }
+
+    .competition-management-container .beehive-number {
+        font-size: 1.6rem;
+    }
+
+    .competition-management-container .honeycomb-row {
+        gap: 3px
+    }
+
+    .competition-management-container .honeycomb-row + .honeycomb-row {
+        margin-top: -16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .competition-management-container .beehive-cell {
+        width: 48px;
+        height: 56px;
+        flex-basis: 48px;
+    }
+
+    .competition-management-container .beehive-number {
+        font-size: 1.3rem;
+    }
+
+    .competition-management-container .honeycomb-row {
+        gap: 2px;
+    }
+
+    .competition-management-container .honeycomb-row + .honeycomb-row {
+        margin-top: -12px;
+    }
+}
