@@ -14,7 +14,7 @@
     <i data-lucide="arrow-left"></i>
     BACK TO WORD LISTS
   </a>
-  <header class="word-details-header">
+<header class="word-details-header align-items-start">
     <div>
       <h2 class="word-details-heading">{{ lista.nombre }}</h2>
       <p class="word-details-subtitle">Review the vocabulary and learning resources in this list.</p>
@@ -31,24 +31,89 @@
           <i data-lucide="calendar"></i>
           {{ lista.fecha_asignacion|date:"M j, Y" }}
         </span>
+        {% if lista.es_spelling_bee %}
+        <span class="badge bg-warning text-dark align-self-center">Spelling Bee</span>
+        {% endif %}
       </div>
     </div>
+
+    <div class="word-details-action-column">
+      <div class="dropdown">
+        <button type="button"
+                class="list-header-menu-btn"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                aria-label="List options"
+                title="List options">
+          <i data-lucide="ellipsis-vertical"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end word-menu-list">
+          <li>
+            <a class="dropdown-item" href="{% url 'edit_word_list' lista.codigo %}">
+              <i data-lucide="pencil"></i>
+              Edit List
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'complete_list_media' lista.codigo %}">
+              <i data-lucide="images"></i>
+              Complete Media (Images &amp; Audio)
+            </a>
+          </li>
+          <li>
+            {% if can_delete %}
+            <button type="button"
+                    class="dropdown-item word-menu-delete"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteListDetailModal">
+              <i data-lucide="trash-2"></i>
+              Delete List
+            </button>
+            {% else %}
+            <span class="dropdown-item text-muted small" style="cursor: not-allowed;">
+              <i data-lucide="lock"></i>
+              Delete (In use)
+            </span>
+            {% endif %}
+          </li>
+        </ul>
+      </div>
+
+      <button type="button"
+              class="btn btn-import-excel"
+              data-bs-toggle="modal"
+              data-bs-target="#importExcelModal">
+        <i data-lucide="file-spreadsheet"></i>
+        Import Excel
+      </button>
+
+      <a href="{% url 'add_word_to_list' lista.codigo %}" class="btn btn-create-list">
+        <i data-lucide="plus"></i>
+        Add Word
+      </a>
+    </div>
   </header>
+  {% if show_media_prompt %}
+  <div class="media-prompt-banner">
+    <div>
+      <strong>Next step (optional):</strong>
+      Your Excel words are saved! You can now generate their MP3 audio and choose Pixabay images in batches.
+    </div>
+    <a href="{% url 'complete_list_media' lista.codigo %}" class="btn btn-create-list">
+      <i data-lucide="images"></i>
+      Complete Images &amp; Audio Now
+    </a>
+  </div>
+  {% endif %}
   <section class="word-details-section">
     <div>
       <h4>Vocabulary Collection</h4>
       <p>Explore each word's definition, example and available resources.</p>
     </div>
-    <div class="word-details-actions">
-        <a href="{% url 'edit_word_list' lista.codigo %}" class="btn btn-edit-list">
-            <i data-lucide="pencil"></i>
-            Edit List
-        </a>
-        <a href="{% url 'add_word_to_list' lista.codigo %}" class="btn btn-create-list">
-            <i data-lucide="plus"></i>
-            Add Word
-        </a>
-    </div>
+    <a href="{% url 'complete_list_media' lista.codigo %}" class="btn-complete-media">
+      <i data-lucide="images"></i>
+      Complete Images &amp; Audio
+    </a>
   </section>
   {% for grupo in grupos_palabras %}
       {% if lista.es_spelling_bee %}
@@ -149,16 +214,27 @@
                               </div>
                           </div>
                       {% endif %}
-                      {% if palabra.audio %}
-                          <div class="word-details-field">
-                              <span class="word-details-label">
-                                  Audio
-                              </span>
-                              <audio class="word-details-audio" controls>
+                      <div class="word-details-field">
+                          <span class="word-details-label">
+                              Audio
+                          </span>
+                          {% if palabra.audio %}
+                              <audio class="d-none word-mp3-player" preload="none">
                                   <source src="{{ palabra.audio.url }}">
                               </audio>
-                          </div>
-                      {% endif %}
+                              <button type="button" class="btn-speak-word btn-play-mp3">
+                                  <i data-lucide="volume-2"></i>
+                                  Play Audio
+                              </button>
+                          {% else %}
+                              <button type="button"
+                                      class="btn-speak-word"
+                                      data-word="{{ palabra.significado }}">
+                                  <i data-lucide="volume-2"></i>
+                                  Listen
+                              </button>
+                          {% endif %}
+                      </div>
                   </article>
               {% endwith %}
           {% endfor %}
@@ -198,5 +274,227 @@
     document.getElementById('deleteWordName').textContent = btn.dataset.word;
     document.getElementById('deleteWordForm').action = btn.dataset.url;
   });
+</script>
+
+<div class="modal fade" id="importExcelModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content import-excel-modal">
+      <div class="modal-header border-0 pb-0">
+        <div class="w-100 text-center ps-4">
+          <h4 class="modal-title import-modal-title">IMPORT EXCEL</h4>
+          <p class="import-modal-subtitle">
+            Upload your <strong>.xlsx</strong> file to add words to <strong>{{ lista.nombre }}</strong>.
+          </p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form method="POST"
+            action="{% url 'import_words_preview' lista.codigo %}"
+            enctype="multipart/form-data"
+            id="importExcelForm">
+        {% csrf_token %}
+        <div class="modal-body pt-2">
+          <div class="text-center mb-3">
+            <a href="{% url 'download_word_import_template' lista.codigo %}" class="import-template-link">
+              <i data-lucide="download"></i>
+              Download Excel Template (.xlsx)
+            </a>
+          </div>
+
+          <div id="excelDropzone" class="import-dropzone">
+            <i data-lucide="file-text" class="import-dropzone-icon"></i>
+            <p class="import-dropzone-title">Drag &amp; Drop your Excel File</p>
+            <span class="import-dropzone-or">or</span>
+            <label for="excel_file_input" class="import-choose-btn">
+              + CHOOSE EXCEL FILE
+            </label>
+            <input type="file"
+                   name="excel_file"
+                   id="excel_file_input"
+                   accept=".xlsx"
+                   class="d-none"
+                   required>
+            <div id="selectedFileBadge" class="import-file-badge d-none">
+              <i data-lucide="check-circle-2"></i>
+              <span id="selectedFileName"></span>
+            </div>
+          </div>
+
+          <div class="import-notice-box">
+            <strong>Important:</strong> You can upload words with or without pronunciation,
+            definition, and example. Missing fields can be completed in batches with AI
+            in the preview step before saving. Images and audio can be added later by editing each word.
+          </div>
+
+          <div class="mt-3">
+            <label for="default_level" class="form-label fw-bold import-level-label">
+              Default English Level <span class="text-danger">*</span>
+            </label>
+            <select name="default_level" id="default_level" class="form-select import-level-select" required>
+              <option value="">Select a default level</option>
+              {% for nivel in niveles %}
+              <option value="{{ nivel.codigo }}">{{ nivel }} {% if nivel.descripcion %}- {{ nivel.descripcion }}{% endif %}</option>
+              {% endfor %}
+            </select>
+            <small class="text-muted">Applied to any row where the "level" column is left empty.</small>
+          </div>
+        </div>
+
+        <div class="modal-footer border-0 justify-content-center gap-2 pb-4">
+          <button type="button" class="btn import-cancel-btn" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn import-submit-btn" id="importContinueBtn" disabled>
+            Upload &amp; Preview
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const dropzone = document.getElementById('excelDropzone');
+  const fileInput = document.getElementById('excel_file_input');
+  const fileBadge = document.getElementById('selectedFileBadge');
+  const fileNameSpan = document.getElementById('selectedFileName');
+  const continueBtn = document.getElementById('importContinueBtn');
+  const levelSelect = document.getElementById('default_level');
+
+  function updateSubmitState() {
+    const hasFile = fileInput.files && fileInput.files.length > 0;
+    const hasLevel = levelSelect.value !== '';
+    continueBtn.disabled = !(hasFile && hasLevel);
+  }
+
+  function showSelectedFile(file) {
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      alert('Please select a valid .xlsx Excel file.');
+      fileInput.value = '';
+      fileBadge.classList.add('d-none');
+      updateSubmitState();
+      return;
+    }
+    fileNameSpan.textContent = file.name;
+    fileBadge.classList.remove('d-none');
+    updateSubmitState();
+  }
+
+  fileInput.addEventListener('change', function () {
+    showSelectedFile(this.files[0]);
+  });
+
+  levelSelect.addEventListener('change', updateSubmitState);
+
+  ['dragenter', 'dragover'].forEach(evt => {
+    dropzone.addEventListener(evt, function (e) {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach(evt => {
+    dropzone.addEventListener(evt, function (e) {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+    });
+  });
+
+  dropzone.addEventListener('drop', function (e) {
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      fileInput.files = files;
+      showSelectedFile(files[0]);
+    }
+  });
+});
+</script>
+
+{% if can_delete %}
+<div class="modal fade" id="deleteListDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Word List</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete "<strong>{{ lista.nombre }}</strong>"?
+        This action cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="POST" action="{% url 'delete_word_list' lista.codigo %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // 1) Botones que reproducen archivo MP3 guardado en media/
+  const mp3Players = document.querySelectorAll('.word-mp3-player');
+  document.querySelectorAll('.btn-play-mp3').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const audioEl = this.previousElementSibling;
+      if (!audioEl) return;
+
+      // Detener otros audios que estén sonando
+      mp3Players.forEach(player => {
+        if (player !== audioEl) {
+          player.pause();
+          player.currentTime = 0;
+        }
+      });
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      audioEl.currentTime = 0;
+      audioEl.play().catch(() => {});
+    });
+  });
+
+  // 2) Botones Listen (respaldo Web Speech cuando no hay MP3)
+  const speakButtons = document.querySelectorAll('.btn-speak-word:not(.btn-play-mp3)');
+  if (!('speechSynthesis' in window)) {
+    speakButtons.forEach(btn => {
+      btn.disabled = true;
+      btn.title = 'Audio pronunciation is not supported in this browser.';
+    });
+    return;
+  }
+
+  speakButtons.forEach(btn => {
+    btn.addEventListener('click', function () {
+      const word = this.dataset.word;
+      if (!word) return;
+
+      mp3Players.forEach(player => {
+        player.pause();
+        player.currentTime = 0;
+      });
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(word);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.9;
+
+      const voices = window.speechSynthesis.getVoices();
+      const usVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en-us'))
+                   || voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+      if (usVoice) {
+        utterance.voice = usVoice;
+      }
+
+      window.speechSynthesis.speak(utterance);
+    });
+  });
+});
 </script>
 {% endblock %}

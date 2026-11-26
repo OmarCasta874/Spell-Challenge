@@ -242,54 +242,82 @@
    Tarjetas de "Word Lists" en la página
    ========================================================= */
 .wordlist-card {
-  background: var(--sc-white);
-  border-radius: 14px;
-  color: var(--sc-maroon-dark);
-  border: none;
-  border-top: 6px solid var(--sc-maroon);
+  background: #FFFFFF;
+  border-radius: 16px;
+  color: #3D3030;
+  border: 1.5px solid #E4CECE;
+  border-left: 6px solid #7A1C1C;
+  box-shadow: 0 6px 20px rgba(92, 20, 20, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.wordlist-card h5 { color: var(--sc-maroon); font-weight: 800; }
+.wordlist-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(92, 20, 20, 0.13);
+}
+.wordlist-card h5 { color: #7A1C1C; font-weight: 800; }
 
-.wordlist-date { color: #8a8a8a; }
+.wordlist-date { color: #817474; }
 
 .badge-pill {
   display: inline-block;
-  background: rgba(242, 144, 138, .35);
-  color: var(--sc-maroon);
+  background: #F8EEEE;
+  color: #7A1C1C;
   font-weight: 700;
   font-size: .8rem;
-  padding: 4px 14px;
+  padding: 5px 12px;
   border-radius: 999px;
+}
+
+.btn-pill-outline {
+  border: 1.5px solid #7A1C1C;
+  color: #7A1C1C;
+  background: #FFFFFF;
+  border-radius: 10px;
+  font-weight: 700;
+  padding: 6px 16px;
+  transition: all 0.2s ease;
 }
 
 .btn-pill-delete {
-  border: 2px solid var(--sc-salmon);
-  background: var(--sc-salmon);
-  color: var(--sc-white);
-  border-radius: 999px;
+  border: 1.5px solid #DFB3B7;
+  background: #FFFFFF;
+  color: #B02A37;
+  border-radius: 10px;
   font-weight: 700;
-  padding: 6px 20px;
+  padding: 6px 16px;
+  transition: all 0.2s ease;
 }
 
-.wordlist-card .btn-pill-outline:hover,
+.wordlist-card .btn-pill-outline:hover {
+  background: #7A1C1C;
+  border-color: #7A1C1C;
+  color: #FFFFFF;
+}
+
 .btn-pill-delete:hover {
-  background: var(--sc-maroon-dark);
-  border-color: var(--sc-maroon-dark);
-  color: var(--sc-white);
+  background: #B02A37;
+  border-color: #B02A37;
+  color: #FFFFFF;
 }
 
 .btn-create-list {
-  border: 2px solid var(--sc-maroon);
-  background: var(--sc-maroon);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #7A1C1C;
+  background: #7A1C1C;
   color: var(--sc-white);
-  border-radius: 999px;
+  border-radius: 10px;
   font-weight: 700;
-  padding: 8px 24px;
+  padding: 10px 20px;
+  box-shadow: 0 4px 10px rgba(122, 28, 28, 0.15);
+  transition: all 0.2s ease;
 }
 .btn-create-list:hover {
-  background: var(--sc-salmon);
-  border-color: var(--sc-salmon);
+  background: #5C1414;
+  border-color: #5C1414;
   color: var(--sc-white);
+  transform: translateY(-2px);
 }
 
 /* =========================================================

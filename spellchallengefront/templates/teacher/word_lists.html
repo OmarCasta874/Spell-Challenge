@@ -7,21 +7,26 @@
 {% endblock %}
 
 {% block teacher_content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
+<header class="teacher-page-header">
   <div>
-    <h2>WORD LISTS</h2>
-    <p class="text-muted">Manage your vocabulary lists.</p>
+    <h2 class="teacher-page-title">WORD LISTS</h2>
+    <p class="teacher-page-subtitle">Manage your vocabulary lists.</p>
   </div>
   <a href="{% url 'create_word_list' %}" class="btn btn-create-list">
     + Create Word List
   </a>
-</div>
+</header>
 
 <div class="row g-3">
   {% for lista in listas %}
     <div class="col-md-4">
       <div class="card wordlist-card p-3">
-        <h5>{{ lista.nombre }}</h5>
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+          <h5 class="mb-0">{{ lista.nombre }}</h5>
+          {% if lista.es_spelling_bee %}
+            <span class="badge bg-warning text-dark">Spelling Bee</span>
+          {% endif %}
+        </div>
         <div class="d-flex gap-2 mb-2">
           <span class="badge-pill">{{ lista.total_palabras }} words</span>
           <span class="badge-pill">{{ lista.numero_letras }} letters</span>
@@ -36,14 +41,14 @@
           <a href="{% url 'edit_word_list' lista.codigo %}" class="btn btn-sm btn-pill-outline">
             EDIT
           </a>
-          
-          <form method="POST" action="{% url 'delete_word_list' lista.codigo %}"
-                onsubmit="return confirm('Are you sure you want to delete this word list? This action cannot be undone.');">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-sm btn-pill-delete">
-                  DELETE
-                </button>
-              </form>
+          <button type="button"
+                  class="btn btn-sm btn-pill-delete"
+                  data-bs-toggle="modal"
+                  data-bs-target="#deleteListModal"
+                  data-list-name="{{ lista.nombre }}"
+                  data-url="{% url 'delete_word_list' lista.codigo %}">
+            DELETE
+          </button>
         </div>
       </div>
     </div>
@@ -57,4 +62,38 @@
   {% endfor %}
 </div>
 
+<div class="modal fade" id="deleteListModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Word List</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete "<strong id="deleteListName"></strong>"?
+        This action cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="POST" id="deleteListForm">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const deleteListModal = document.getElementById('deleteListModal');
+  if (deleteListModal) {
+    deleteListModal.addEventListener('show.bs.modal', function (e) {
+      const btn = e.relatedTarget;
+      document.getElementById('deleteListName').textContent = btn.dataset.listName;
+      document.getElementById('deleteListForm').action = btn.dataset.url;
+    });
+  }
+});
+</script>
 {% endblock %}

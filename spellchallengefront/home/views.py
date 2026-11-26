@@ -27,8 +27,16 @@ from home.services.transcription_service import (
     get_transcription_status,
     TranscriptionUnavailable,
 )
+from home.services.pixabay_service import search_pixabay_images, download_pixabay_image
 from django.core.mail import send_mail
 from home.services.achievement_service import unlock_achievement
+from django.http import FileResponse, Http404, JsonResponse, HttpResponse
+from home.services.gemini_service import generate_word_content, generate_words_content_batch
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment
+from home.services.audio_service import generate_word_audio_mp3
+from io import BytesIO
+from PIL import Image
 
 # Create your views here.
 
@@ -663,6 +671,7 @@ def word_lists(request):
         'niveles': niveles,
     })
     
+    
 @never_cache
 @role_required('teacher')
 def view_word_list(request, codigo):
@@ -713,13 +722,30 @@ def view_word_list(request, codigo):
                 'palabras': lista_palabras
             }
         ]
+
+    niveles = Nivel.objects.all().order_by('codigo')
+
+    can_delete = not (
+        lista.lista_grupos.exists()
+        or lista.procesos.exists()
+        or lista.practicas.exists()
+        or lista.lista_competencias.exists()
+        or lista.lista_lecciones.exists()
+    )
+    
+    show_media_prompt = (
+        request.session.pop('show_media_prompt_for', None) == lista.codigo
+    )
     
     return render(request, 'teacher/word_list_details.html', {
         'lista': lista,
         'lista_palabras': lista_palabras,
         'grupos_palabras': grupos_palabras,
+        'niveles': niveles,
+        'can_delete': can_delete,
+        'show_media_prompt': show_media_prompt,
     })
-    
+ 
 @never_cache
 @role_required('teacher')
 def add_word_to_list(request, codigo):
@@ -728,82 +754,112 @@ def add_word_to_list(request, codigo):
         codigo=codigo,
         profesor=request.user.profesor
     )
-    
+    niveles = Nivel.objects.all().order_by('codigo')
+
+    def _render_with_form_data():
+        return render(
+            request,
+            'teacher/add_word_to_list.html',
+            {
+                'lista': lista,
+                'niveles': niveles,
+                'form_data': request.POST if request.method == 'POST' else {},
+            }
+        )
+
     if request.method == 'POST':
         significado = request.POST.get('significado', '').strip()
         definicion = request.POST.get('definicion', '').strip()
         ejemplo = request.POST.get('ejemplo', '').strip()
         pronunciacion = request.POST.get('pronunciacion', '').strip()
         nivel_codigo = request.POST.get('nivel', '').strip()
-        
+
         if not significado or len(significado) > 50:
             messages.error(
                 request,
                 'The word must contain between 1 and 50 characters.'
             )
-            return redirect('add_word_to_list', codigo=lista.codigo)
-        
+            return _render_with_form_data()
+
+        if Lista_Palabra.objects.filter(lista=lista, palabra__significado__iexact=significado).exists():
+            messages.error(
+                request,
+                f'"{significado}" already exists in this word list.'
+            )
+            return _render_with_form_data()
+
         cantidad_letras = sum(
             1 for char in significado
             if char.isalpha()
         )
-        
+
         if lista.es_spelling_bee and not 6 <= cantidad_letras <= 13:
             messages.error(
                 request,
                 'Spelling Bee words must contain between 6 and 13 letters.'
             )
-            return redirect('add_word_to_list', codigo=lista.codigo)
-        
+            return _render_with_form_data()
+
         if not pronunciacion or len(pronunciacion) > 100:
             messages.error(
                 request,
                 'Please enter a valid pronunciation.'
             )
-            return redirect('add_word_to_list', codigo=lista.codigo)
-        
+            return _render_with_form_data()
+
         if len(definicion) > 255 or len(ejemplo) > 255:
             messages.error(
                 request,
                 'The definition and example cannot exceed 255 characters.'
             )
-            return redirect('add_word_to_list', codigo=lista.codigo)
-        
-        categoria = Categoria.objects.filter(
-            nombre=lista.nombre
-        ).first()
-        
-        nivel = Nivel.objects.filter(
-            codigo=nivel_codigo
-        ).first()
-        
+            return _render_with_form_data()
+
+        categoria = Categoria.objects.filter(nombre=lista.nombre).first()
+        nivel = Nivel.objects.filter(codigo=nivel_codigo).first()
+
         if categoria is None:
             messages.error(
                 request,
                 'The category associated with this word list could not be found.'
             )
-            return redirect('add_word_to_list', codigo=lista.codigo)
-        
+            return _render_with_form_data()
+
         if nivel is None:
             messages.error(request, 'Please select a valid level.')
-            return redirect('add_word_to_list', codigo=lista.codigo)
-        
+            return _render_with_form_data()
+
+        imagen_archivo = request.FILES.get('imagen')
+        pixabay_image_url = request.POST.get('pixabay_image_url', '').strip()
+
+        if not imagen_archivo and pixabay_image_url:
+            try:
+                _, imagen_archivo = download_pixabay_image(pixabay_image_url, significado)
+            except Exception as error:
+                messages.error(request, str(error))
+                return _render_with_form_data()
+            
+        audio_archivo = request.FILES.get('audio')
+        if not audio_archivo and request.POST.get('auto_generate_audio') == 'on':
+            try:
+                _, audio_archivo = generate_word_audio_mp3(significado)
+            except Exception:
+                audio_archivo = None
+                messages.warning(
+                    request,
+                    f'"{significado}" was saved, but automatic MP3 audio could not be generated right now.'
+                )
+
         try:
             with transaction.atomic():
-                existing_codes = Palabra.objects.values_list(
-                    'codigo', flat=True
-                )
-                
+                existing_codes = Palabra.objects.values_list('codigo', flat=True)
                 numbers = [
                     int(code[3:])
                     for code in existing_codes
-                    if code.startswith('PAL')
-                    and code[3:].isdigit()
+                    if code.startswith('PAL') and code[3:].isdigit()
                 ]
-                
                 next_number = max(numbers, default=0) + 1
                 palabra_codigo = f'PAL{next_number:04d}'
-                
+
                 palabra = Palabra.objects.create(
                     codigo=palabra_codigo,
                     significado=significado,
@@ -812,55 +868,31 @@ def add_word_to_list(request, codigo):
                     pronunciacion=pronunciacion,
                     categoria=categoria,
                     nivel=nivel,
-                    imagen=request.FILES.get('imagen'),
+                    imagen=imagen_archivo,
                     audio=request.FILES.get('audio'),
                 )
-                
+
                 Lista_Palabra.objects.create(
                     lista=lista,
                     palabra=palabra
                 )
-                
-                palabras_lista = Palabra.objects.filter(
-                    lista_palabras__lista=lista
-                )
-                
-                max_letras = max(
-                    (
-                        sum(1 for char in palabra.significado
-                            if char.isalpha())
-                        for palabra in palabras_lista
-                    ),
-                    default=0
-                )
-                
-                lista.numero_letras = max_letras
-                lista.save(update_fields=['numero_letras'])
-                
+                _update_numero_letras(lista)
+
             messages.success(
                 request,
                 f'"{significado}" was added to "{lista.nombre}"'
             )
             return redirect('view_word_list', codigo=lista.codigo)
-        
+
         except Exception:
             messages.error(
                 request,
                 'The word could not be saved. Please check the information and try again.'
             )
-            return redirect('add_word_to_list', codigo=lista.codigo)
-        
-    niveles = Nivel.objects.all().order_by('codigo')
-    
-    return render(
-        request,
-        'teacher/add_word_to_list.html',
-        {
-            'lista': lista,
-            'niveles': niveles,
-        }
-    )
-    
+            return _render_with_form_data()
+
+    return _render_with_form_data()
+ 
 @never_cache
 @role_required('teacher')
 def edit_word_in_list(request, codigo, codigo_palabra):
@@ -875,43 +907,86 @@ def edit_word_in_list(request, codigo, codigo_palabra):
         palabra__codigo=codigo_palabra
     )
     palabra = relacion.palabra
-    
+
     if request.method == 'POST':
         significado = request.POST.get('significado', '').strip()
         definicion = request.POST.get('definicion', '').strip()
         ejemplo = request.POST.get('ejemplo', '').strip()
         pronunciacion = request.POST.get('pronunciacion', '').strip()
         nivel_codigo = request.POST.get('nivel', '').strip()
-        
+
         redirect_error = redirect(
             'edit_word_in_list',
             codigo=lista.codigo,
             codigo_palabra=palabra.codigo
         )
-        
+
         if not significado or len(significado) > 50:
             messages.error(
                 request,
                 'The word must contain between 1 and 50 characters.'
             )
             return redirect_error
-        
+
+        if (
+            Lista_Palabra.objects
+            .filter(lista=lista, palabra__significado__iexact=significado)
+            .exclude(palabra=palabra)
+            .exists()
+        ):
+            messages.error(
+                request,
+                f'"{significado}" already exists in this word list.'
+            )
+            return redirect_error
+
+        cantidad_letras = sum(1 for char in significado if char.isalpha())
+        if lista.es_spelling_bee and not 6 <= cantidad_letras <= 13:
+            messages.error(
+                request,
+                'Spelling Bee words must contain between 6 and 13 letters.'
+            )
+            return redirect_error
+
         if not pronunciacion or len(pronunciacion) > 100:
             messages.error(request, 'Please enter a valid pronunciation.')
             return redirect_error
-        
+
         if len(definicion) > 255 or len(ejemplo) > 255:
             messages.error(
                 request,
                 'The definition and example cannot exceed 255 characters.'
             )
             return redirect_error
-        
+
         nivel = Nivel.objects.filter(codigo=nivel_codigo).first()
         if nivel is None:
             messages.error(request, 'Please select a valid level.')
             return redirect_error
-        
+
+        nueva_imagen = request.FILES.get('imagen')
+        pixabay_image_url = request.POST.get('pixabay_image_url', '').strip()
+        pixabay_file = None
+
+        if not nueva_imagen and pixabay_image_url:
+            try:
+                _, pixabay_file = download_pixabay_image(pixabay_image_url, significado)
+            except Exception as error:
+                messages.error(request, str(error))
+                return redirect_error
+
+        nuevo_audio = request.FILES.get('audio')
+        auto_audio_file = None
+        if not nuevo_audio and request.POST.get('auto_generate_audio') == 'on':
+            try:
+                _, auto_audio_file = generate_word_audio_mp3(significado)
+            except Exception:
+                auto_audio_file = None
+                messages.warning(
+                    request,
+                    f'"{significado}" was updated, but automatic MP3 audio could not be generated right now.'
+                )
+
         try:
             with transaction.atomic():
                 palabra.significado = significado
@@ -919,38 +994,46 @@ def edit_word_in_list(request, codigo, codigo_palabra):
                 palabra.ejemplo = ejemplo
                 palabra.pronunciacion = pronunciacion
                 palabra.nivel = nivel
-                
-                nueva_imagen = request.FILES.get('imagen')
+
                 if nueva_imagen:
                     if palabra.imagen:
                         palabra.imagen.delete(save=False)
                     palabra.imagen = nueva_imagen
+                elif pixabay_file is not None:
+                    if palabra.imagen:
+                        palabra.imagen.delete(save=False)
+                    palabra.imagen = pixabay_file
                 elif request.POST.get('remove_imagen') and palabra.imagen:
                     palabra.imagen.delete(save=False)
-                    
-                nuevo_audio = request.FILES.get('audio')
+                    palabra.imagen = None
+
                 if nuevo_audio:
                     if palabra.audio:
                         palabra.audio.delete(save=False)
                     palabra.audio = nuevo_audio
+                elif auto_audio_file is not None:
+                    if palabra.audio:
+                        palabra.audio.delete(save=False)
+                    palabra.audio = auto_audio_file
                 elif request.POST.get('remove_audio') and palabra.audio:
                     palabra.audio.delete(save=False)
-                    
+                    palabra.audio = None
+
                 palabra.save()
                 _update_numero_letras(lista)
-                
+
             messages.success(request, f'"{significado}" was updated.')
             return redirect('view_word_list', codigo=lista.codigo)
-        
+
         except Exception:
             messages.error(
                 request,
                 'The word could not be updated. Please check the information and try again.'
             )
             return redirect_error
-        
+
     niveles = Nivel.objects.all().order_by('codigo')
-    
+
     return render(
         request,
         'teacher/edit_word_in_list.html',
@@ -1022,7 +1105,7 @@ def generate_word_suggestions(request, codigo):
         )
         
     try:
-        suggestions = generate_word_content(significado)
+        suggestions = generate_word_content(significado, list_name=lista.nombre)
         
         return JsonResponse({
             'success': True,
@@ -1154,88 +1237,127 @@ def edit_word_list(request, codigo):
         codigo=codigo,
         profesor=request.user.profesor
     )
-    
+
+    palabras_lista = Palabra.objects.filter(lista_palabras__lista=lista)
+    total_palabras = palabras_lista.count()
+    grupos_count = lista.lista_grupos.count()
+    competencias_count = lista.lista_competencias.count()
+
+    tiene_relaciones = (
+        grupos_count > 0
+        or competencias_count > 0
+        or lista.procesos.exists()
+        or lista.practicas.exists()
+        or lista.lista_lecciones.exists()
+    )
+
+    palabras_fuera_rango = [
+        p.significado
+        for p in palabras_lista
+        if not (6 <= sum(1 for c in p.significado if c.isalpha()) <= 13)
+    ]
+
+    can_toggle_spelling_bee = True
+    spelling_bee_lock_reason = ''
+
+    if competencias_count > 0:
+        can_toggle_spelling_bee = False
+        spelling_bee_lock_reason = (
+            'This setting is locked because this list is already associated with a competition.'
+        )
+    elif not lista.es_spelling_bee and palabras_fuera_rango:
+        can_toggle_spelling_bee = False
+        spelling_bee_lock_reason = (
+            f'Cannot enable Spelling Bee because {len(palabras_fuera_rango)} word(s) '
+            'in this list do not have between 6 and 13 letters.'
+        )
+
     if request.method == 'POST':
         list_name = request.POST.get('name', '').strip()
-        
+        if can_toggle_spelling_bee:
+            new_es_spelling_bee = request.POST.get('es_spelling_bee') == 'on'
+        else:
+            new_es_spelling_bee = lista.es_spelling_bee
+
         if not list_name:
-            messages.error(
-                request,
-                'Please enter a name for the word list.'
-            )
+            messages.error(request, 'Please enter a name for the word list.')
             return redirect('edit_word_list', codigo=lista.codigo)
-        
+
         if len(list_name) > 30:
-            messages.error(
-                request,
-                'The word list name cannot exceed 30 characters.'
-            )
+            messages.error(request, 'The word list name cannot exceed 30 characters.')
             return redirect('edit_word_list', codigo=lista.codigo)
-        
-        if list_name == lista.nombre:
-            messages.info(
-                request,
-                'No changes were made to the word list.'
-            )
+
+        if list_name == lista.nombre and new_es_spelling_bee == lista.es_spelling_bee:
+            messages.info(request, 'No changes were made to the word list.')
             return redirect('view_word_list', codigo=lista.codigo)
-        
+
         try:
             with transaction.atomic():
-                
-                categoria = Categoria.objects.filter(
-                    nombre=list_name
-                ).first()
-                
-                if categoria is None:
-                    category_codes = Categoria.objects.values_list(
-                        'codigo',
-                        flat=True
+                old_name = lista.nombre
+
+                if list_name != old_name:
+                    old_categoria = Categoria.objects.filter(nombre=old_name).first()
+                    target_categoria = Categoria.objects.filter(nombre=list_name).first()
+                    other_lists_using_old_name = (
+                        Lista.objects.filter(nombre=old_name)
+                        .exclude(codigo=lista.codigo)
+                        .exists()
                     )
-                    
-                    category_numbers = [
-                        int(code[3:])
-                        for code in category_codes
-                        if code.startswith('CAT')
-                        and code[3:].isdigit()
-                    ]
-                    
-                    next_category_number = max(
-                        category_numbers,
-                        default=0
-                    ) + 1
-                    
-                    category_code = f'CAT{next_category_number:02d}'
-                    
-                    categoria = Categoria.objects.create(
-                        codigo=category_code,
-                        nombre=list_name
-                    )
-                    
+
+                    if target_categoria is None and old_categoria is not None and not other_lists_using_old_name:
+                        old_categoria.nombre = list_name
+                        old_categoria.save(update_fields=['nombre'])
+                    else:
+                        if target_categoria is None:
+                            category_codes = Categoria.objects.values_list('codigo', flat=True)
+                            category_numbers = [
+                                int(code[3:])
+                                for code in category_codes
+                                if code.startswith('CAT') and code[3:].isdigit()
+                            ]
+                            next_category_number = max(category_numbers, default=0) + 1
+                            target_categoria = Categoria.objects.create(
+                                codigo=f'CAT{next_category_number:02d}',
+                                nombre=list_name,
+                            )
+
+                        if old_categoria is not None:
+                            Palabra.objects.filter(
+                                lista_palabras__lista=lista,
+                                categoria=old_categoria,
+                            ).update(categoria=target_categoria)
+
                 lista.nombre = list_name
-                lista.save(update_fields=['nombre'])
-                
+                lista.es_spelling_bee = new_es_spelling_bee
+                lista.save(update_fields=['nombre', 'es_spelling_bee'])
+
             messages.success(
                 request,
                 f'Word list "{lista.nombre}" was updated successfully.'
             )
-            
             return redirect('view_word_list', codigo=lista.codigo)
-        
+
         except Exception:
             messages.error(
                 request,
                 'The word list could not be updated. Please try again.'
             )
             return redirect('edit_word_list', codigo=lista.codigo)
-        
+
     return render(
         request,
         'teacher/edit_word_list.html',
         {
             'lista': lista,
+            'total_palabras': total_palabras,
+            'grupos_count': grupos_count,
+            'competencias_count': competencias_count,
+            'can_delete': not tiene_relaciones,
+            'can_toggle_spelling_bee': can_toggle_spelling_bee,
+            'spelling_bee_lock_reason': spelling_bee_lock_reason,
         }
     )
-    
+   
 @never_cache
 @role_required('teacher')
 def delete_word_list(request, codigo):
@@ -1286,6 +1408,669 @@ def delete_word_list(request, codigo):
         )
         
     return redirect('teacher_word_lists')
+
+def _validate_import_rows(raw_rows, lista, niveles_dict):
+    """
+    Normalizes and validates rows for Excel import preview and final confirmation.
+    """
+    existing_words = set(
+        Palabra.objects.filter(lista_palabras__lista=lista)
+        .values_list('significado', flat=True)
+    )
+    existing_lower = {w.strip().lower() for w in existing_words if w}
+    seen_in_batch = set()
+
+    validated = []
+    for idx, row in enumerate(raw_rows, start=1):
+        word = (row.get('word') or '').strip()
+        pronunciation = (row.get('pronunciation') or '').strip()
+        definition = (row.get('definition') or '').strip()
+        example = (row.get('example') or '').strip()
+        level_code = (row.get('level') or '').strip().upper()
+
+        errors = []
+        warnings = []
+
+        if not word:
+            errors.append('Word is required.')
+        elif len(word) > 50:
+            errors.append('Word cannot exceed 50 characters.')
+        else:
+            word_lower = word.lower()
+            if word_lower in existing_lower:
+                errors.append('Already exists in this list.')
+            elif word_lower in seen_in_batch:
+                errors.append('Duplicate word in file.')
+            else:
+                seen_in_batch.add(word_lower)
+
+            if lista.es_spelling_bee:
+                letters_count = sum(1 for c in word if c.isalpha())
+                if not (6 <= letters_count <= 13):
+                    errors.append('Spelling Bee words must have 6 to 13 letters.')
+
+        if len(pronunciation) > 100:
+            errors.append('Pronunciation cannot exceed 100 characters.')
+        if len(definition) > 255:
+            errors.append('Definition cannot exceed 255 characters.')
+        if len(example) > 255:
+            errors.append('Example cannot exceed 255 characters.')
+
+        if level_code not in niveles_dict:
+            errors.append('Please select a valid level.')
+
+        if not pronunciation:
+            warnings.append('Pronunciation is required before saving.')
+        if not definition:
+            warnings.append('Missing definition.')
+        if not example:
+            warnings.append('Missing example.')
+
+        validated.append({
+            'row_number': row.get('row_number', idx),
+            'word': word,
+            'pronunciation': pronunciation,
+            'definition': definition,
+            'example': example,
+            'level': level_code if level_code in niveles_dict else '',
+            'errors': errors,
+            'warnings': warnings,
+            'selected': row.get('selected', len(errors) == 0),
+        })
+
+    return validated
+
+
+@never_cache
+@role_required('teacher')
+def download_word_import_template(request, codigo):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Words"
+
+    headers = ["word", "pronunciation", "definition", "example", "level"]
+    ws.append(headers)
+
+    header_fill = PatternFill(start_color="7A1C1C", end_color="7A1C1C", fill_type="solid")
+    header_font = Font(color="FFFFFF", bold=True)
+    for col_idx in range(1, len(headers) + 1):
+        cell = ws.cell(row=1, column=col_idx)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    # Example row (9 letters so it also works as example for Spelling Bee)
+    ws.append([
+        "breakfast",
+        "ˈbrekfəst",
+        "The first meal of the day, usually eaten in the morning.",
+        "I usually eat breakfast before going to university.",
+        "A1",
+    ])
+
+    ws.column_dimensions["A"].width = 22
+    ws.column_dimensions["B"].width = 22
+    ws.column_dimensions["C"].width = 45
+    ws.column_dimensions["D"].width = 48
+    ws.column_dimensions["E"].width = 12
+
+    ws_info = wb.create_sheet(title="Instructions")
+    instructions = [
+        ["Column", "Required?", "Rules / Notes"],
+        ["word", "Yes", "English vocabulary word (max 50 characters). Spelling Bee lists require 6 to 13 letters."],
+        ["pronunciation", "Recommended / Required to save", "IPA or written pronunciation (max 100 characters). Leave empty to auto-fill with AI in preview."],
+        ["definition", "Optional in Excel", "English definition (max 255 characters). Leave empty to auto-fill with AI in preview."],
+        ["example", "Optional in Excel", "Example sentence (max 255 characters). Leave empty to auto-fill with AI in preview."],
+        ["level", "Optional in Excel", "CEFR level code: A1, A2, B1, B2, C1, or C2. If blank, the default level chosen on upload is used."],
+        ["Images & Audio", "Not in Excel", "Images and audio files can be added later by editing individual words."],
+    ]
+    for r in instructions:
+        ws_info.append(r)
+
+    ws_info.column_dimensions["A"].width = 18
+    ws_info.column_dimensions["B"].width = 28
+    ws_info.column_dimensions["C"].width = 75
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="spell_challenge_words_template.xlsx"'
+    wb.save(response)
+    return response
+
+@never_cache
+@role_required('teacher')
+def import_words_preview(request, codigo):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+
+    if request.method != 'POST':
+        return redirect('view_word_list', codigo=lista.codigo)
+
+    excel_file = request.FILES.get('excel_file')
+    default_level = request.POST.get('default_level', '').strip().upper()
+
+    niveles = list(Nivel.objects.all().order_by('codigo'))
+    niveles_dict = {n.codigo.upper(): n for n in niveles}
+
+    if not excel_file:
+        messages.error(request, 'Please select an Excel (.xlsx) file to upload.')
+        return redirect('view_word_list', codigo=lista.codigo)
+
+    if not excel_file.name.lower().endswith('.xlsx'):
+        messages.error(request, 'Only .xlsx Excel files are supported.')
+        return redirect('view_word_list', codigo=lista.codigo)
+
+    if excel_file.size > 2 * 1024 * 1024:
+        messages.error(request, 'The Excel file cannot exceed 2 MB.')
+        return redirect('view_word_list', codigo=lista.codigo)
+
+    if default_level not in niveles_dict:
+        messages.error(request, 'Please select a valid default English level.')
+        return redirect('view_word_list', codigo=lista.codigo)
+
+    try:
+        wb = openpyxl.load_workbook(excel_file, data_only=True)
+        ws = wb["Words"] if "Words" in wb.sheetnames else wb.active
+    except Exception:
+        messages.error(request, 'The Excel file could not be read. Please use the official .xlsx template.')
+        return redirect('view_word_list', codigo=lista.codigo)
+
+    aliases = {
+        'word': 'word',
+        'palabra': 'word',
+        'pronunciation': 'pronunciation',
+        'pronunciacion': 'pronunciation',
+        'pronunciación': 'pronunciation',
+        'definition': 'definition',
+        'definicion': 'definition',
+        'definición': 'definition',
+        'example': 'example',
+        'example sentence': 'example',
+        'ejemplo': 'example',
+        'level': 'level',
+        'nivel': 'level',
+    }
+
+    col_map = None
+    non_empty_checked = 0
+    raw_rows = []
+    max_rows = 100
+
+    for row_values in ws.iter_rows(values_only=True):
+        if row_values is None or all(v is None or str(v).strip() == '' for v in row_values):
+            continue
+
+        # 1) Buscar la fila de encabezados dentro de las primeras 10 filas no vacías
+        if col_map is None:
+            non_empty_checked += 1
+            candidate_map = {}
+            for col_idx, cell_val in enumerate(row_values):
+                if cell_val is None:
+                    continue
+                norm = str(cell_val).strip().lower()
+                if norm in aliases and aliases[norm] not in candidate_map:
+                    candidate_map[aliases[norm]] = col_idx
+
+            if 'word' in candidate_map:
+                col_map = candidate_map
+                continue
+
+            if non_empty_checked >= 10:
+                break
+            continue
+
+        # 2) Leer las filas de datos ya teniendo col_map
+        def _get_cell(field_name):
+            idx = col_map.get(field_name)
+            if idx is None or idx >= len(row_values):
+                return ''
+            val = row_values[idx]
+            return '' if val is None else str(val).strip()
+
+        word_val = _get_cell('word')
+        pron_val = _get_cell('pronunciation')
+        def_val = _get_cell('definition')
+        ex_val = _get_cell('example')
+
+        # Saltar si es una fila repetida de subtítulos/encabezados
+        if word_val.lower() in ('word', 'palabra') and (
+            pron_val.lower() in ('pronunciation', 'pronunciacion', 'pronunciación')
+            or def_val.lower() in ('definition', 'definicion', 'definición')
+            or ex_val.lower() in ('example', 'example sentence', 'ejemplo')
+        ):
+            continue
+
+        if len(raw_rows) >= max_rows:
+            messages.warning(
+                request,
+                f'Only the first {max_rows} rows were loaded for preview.'
+            )
+            break
+
+        row_level = _get_cell('level').upper()
+        if not row_level or row_level not in niveles_dict:
+            row_level = default_level
+
+        raw_rows.append({
+            'row_number': len(raw_rows) + 1,
+            'word': word_val,
+            'pronunciation': pron_val,
+            'definition': def_val,
+            'example': ex_val,
+            'level': row_level,
+        })
+
+    if col_map is None:
+        messages.error(
+            request,
+            'The Excel file must contain a "word" column. Please download and use the template.'
+        )
+        return redirect('view_word_list', codigo=lista.codigo)
+
+    if not raw_rows:
+        messages.error(request, 'No word rows were found in the Excel file.')
+        return redirect('view_word_list', codigo=lista.codigo)
+
+    preview_rows = _validate_import_rows(raw_rows, lista, niveles_dict)
+
+    return render(request, 'teacher/import_words_preview.html', {
+        'lista': lista,
+        'niveles': niveles,
+        'default_level': default_level,
+        'rows_json': json.dumps(preview_rows),
+        'total_rows': len(preview_rows),
+    })
+
+@never_cache
+@require_POST
+@role_required('teacher')
+def generate_words_suggestions_batch(request, codigo):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+        words = payload.get('words', [])
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'error': 'Invalid JSON request.'}, status=400)
+
+    if not isinstance(words, list) or not words:
+        return JsonResponse({'error': 'Please provide words to process.'}, status=400)
+
+    if len(words) > 15:
+        return JsonResponse({'error': 'Maximum 15 words per AI batch.'}, status=400)
+
+    try:
+        results = generate_words_content_batch(words, list_name=lista.nombre)
+        return JsonResponse({
+            'success': True,
+            'results': results,
+        })
+    except ValueError as error:
+        return JsonResponse({'error': str(error)}, status=400)
+    except Exception as error:
+        err_text = str(error).lower()
+        if any(token in err_text for token in ('429', 'quota', 'rate', 'resource_exhausted')):
+            return JsonResponse(
+                {
+                    'error': (
+                        'Gemini free-tier quota or rate limit was reached. '
+                        'Please wait a moment or complete the remaining fields manually.'
+                    )
+                },
+                status=429
+            )
+        return JsonResponse(
+            {
+                'error': (
+                    'The AI service is currently unavailable. '
+                    'You can complete the missing fields manually and still save your words.'
+                )
+            },
+            status=502
+        )
+
+@never_cache
+@require_POST
+@role_required('teacher')
+def confirm_import_words(request, codigo):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+
+    niveles = list(Nivel.objects.all().order_by('codigo'))
+    niveles_dict = {n.codigo.upper(): n for n in niveles}
+
+    words_json_raw = request.POST.get('words_json', '[]')
+    try:
+        submitted_rows = json.loads(words_json_raw)
+    except json.JSONDecodeError:
+        messages.error(request, 'Invalid import payload. Please try uploading again.')
+        return redirect('view_word_list', codigo=lista.codigo)
+
+    if not isinstance(submitted_rows, list):
+        messages.error(request, 'Invalid import payload.')
+        return redirect('view_word_list', codigo=lista.codigo)
+
+    selected_rows = [r for r in submitted_rows if isinstance(r, dict) and r.get('selected')]
+
+    if not selected_rows:
+        messages.error(request, 'Please select at least one valid word to import.')
+        revalidated = _validate_import_rows(submitted_rows, lista, niveles_dict)
+        return render(request, 'teacher/import_words_preview.html', {
+            'lista': lista,
+            'niveles': niveles,
+            'default_level': request.POST.get('default_level', ''),
+            'rows_json': json.dumps(revalidated),
+            'total_rows': len(revalidated),
+        })
+
+    validated_selected = _validate_import_rows(selected_rows, lista, niveles_dict)
+    has_blocking_errors = any(
+        r['errors'] or not r['pronunciation']
+        for r in validated_selected
+    )
+
+    if has_blocking_errors:
+        messages.error(
+            request,
+            'Some selected rows still have errors or are missing pronunciation. '
+            'Please fix or uncheck them before saving.'
+        )
+        revalidated = _validate_import_rows(submitted_rows, lista, niveles_dict)
+        return render(request, 'teacher/import_words_preview.html', {
+            'lista': lista,
+            'niveles': niveles,
+            'default_level': request.POST.get('default_level', ''),
+            'rows_json': json.dumps(revalidated),
+            'total_rows': len(revalidated),
+        })
+
+    try:
+        with transaction.atomic():
+            categoria = Categoria.objects.filter(nombre=lista.nombre).first()
+            if categoria is None:
+                category_codes = Categoria.objects.values_list('codigo', flat=True)
+                category_numbers = [
+                    int(code[3:])
+                    for code in category_codes
+                    if code.startswith('CAT') and code[3:].isdigit()
+                ]
+                next_category_number = max(category_numbers, default=0) + 1
+                categoria = Categoria.objects.create(
+                    codigo=f'CAT{next_category_number:02d}',
+                    nombre=lista.nombre,
+                )
+
+            existing_codes = Palabra.objects.values_list('codigo', flat=True)
+            numbers = [
+                int(code[3:])
+                for code in existing_codes
+                if code.startswith('PAL') and code[3:].isdigit()
+            ]
+            next_number = max(numbers, default=0) + 1
+
+            for row in validated_selected:
+                palabra_codigo = f'PAL{next_number:04d}'
+                next_number += 1
+
+                palabra = Palabra.objects.create(
+                    codigo=palabra_codigo,
+                    significado=row['word'],
+                    definicion=row['definition'],
+                    ejemplo=row['example'],
+                    pronunciacion=row['pronunciation'],
+                    categoria=categoria,
+                    nivel=niveles_dict[row['level']],
+                )
+
+                Lista_Palabra.objects.create(
+                    lista=lista,
+                    palabra=palabra
+                )
+
+            _update_numero_letras(lista)
+            
+        request.session['show_media_prompt_for'] = lista.codigo
+        messages.success(
+            request,
+            f'{len(validated_selected)} word(s) were imported to "{lista.nombre}".'
+        )
+        return redirect('view_word_list', codigo=lista.codigo)
+
+    except Exception:
+        messages.error(
+            request,
+            'The words could not be imported. No changes were saved. Please try again.'
+        )
+        revalidated = _validate_import_rows(submitted_rows, lista, niveles_dict)
+        return render(request, 'teacher/import_words_preview.html', {
+            'lista': lista,
+            'niveles': niveles,
+            'default_level': request.POST.get('default_level', ''),
+            'rows_json': json.dumps(revalidated),
+            'total_rows': len(revalidated),
+        })
+
+@never_cache
+@require_GET
+@role_required('teacher')
+def search_word_images(request, codigo):
+    get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return JsonResponse({'error': 'Please enter a word first.'}, status=400)
+
+    try:
+        images = search_pixabay_images(query, per_page=6)
+        return JsonResponse({'success': True, 'images': images})
+    except ValueError as error:
+        return JsonResponse({'error': str(error)}, status=400)
+    except Exception as error:
+        return JsonResponse({'error': str(error)}, status=502)
+
+@never_cache
+@role_required('teacher')
+def complete_list_media(request, codigo):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+
+    relaciones = (
+        lista.lista_palabras
+        .select_related('palabra', 'palabra__nivel')
+        .order_by('palabra__codigo')
+    )
+
+    words_data = []
+    for rel in relaciones:
+        p = rel.palabra
+        words_data.append({
+            'codigo': p.codigo,
+            'word': p.significado,
+            'level': str(p.nivel),
+            'has_image': bool(p.imagen),
+            'image_url': p.imagen.url if p.imagen else '',
+            'has_audio': bool(p.audio),
+            'audio_url': p.audio.url if p.audio else '',
+        })
+
+    return render(request, 'teacher/complete_list_media.html', {
+        'lista': lista,
+        'words_json': json.dumps(words_data),
+        'total_words': len(words_data),
+    })
+
+
+@never_cache
+@require_POST
+@role_required('teacher')
+def generate_words_audio_batch(request, codigo):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+        word_codes = payload.get('word_codes', [])
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'error': 'Invalid JSON request.'}, status=400)
+
+    if not isinstance(word_codes, list) or not word_codes:
+        return JsonResponse({'error': 'No words were provided.'}, status=400)
+
+    if len(word_codes) > 10:
+        return JsonResponse({'error': 'Maximum 10 words per audio batch.'}, status=400)
+
+    relaciones = (
+        Lista_Palabra.objects
+        .select_related('palabra')
+        .filter(lista=lista, palabra__codigo__in=word_codes)
+    )
+
+    results = {}
+    failed = []
+
+    for rel in relaciones:
+        palabra = rel.palabra
+        if palabra.audio:
+            results[palabra.codigo] = palabra.audio.url
+            continue
+
+        try:
+            _, audio_file = generate_word_audio_mp3(palabra.significado)
+            palabra.audio = audio_file
+            palabra.save(update_fields=['audio'])
+            results[palabra.codigo] = palabra.audio.url
+        except Exception:
+            failed.append(palabra.significado)
+
+    if not results and failed:
+        return JsonResponse(
+            {'error': 'Could not generate MP3 audio right now. Please check your connection and try again.'},
+            status=502
+        )
+
+    return JsonResponse({
+        'success': True,
+        'results': results,
+        'failed': failed,
+    })
+
+
+@never_cache
+@require_POST
+@role_required('teacher')
+def save_word_pixabay_image(request, codigo):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+        palabra_codigo = (payload.get('palabra_codigo') or '').strip()
+        image_url = (payload.get('image_url') or '').strip()
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'error': 'Invalid JSON request.'}, status=400)
+
+    if not palabra_codigo or not image_url:
+        return JsonResponse({'error': 'Missing word or image URL.'}, status=400)
+
+    relacion = get_object_or_404(
+        Lista_Palabra.objects.select_related('palabra'),
+        lista=lista,
+        palabra__codigo=palabra_codigo
+    )
+    palabra = relacion.palabra
+
+    try:
+        _, imagen_archivo = download_pixabay_image(image_url, palabra.significado)
+        if palabra.imagen:
+            palabra.imagen.delete(save=False)
+        palabra.imagen = imagen_archivo
+        palabra.save(update_fields=['imagen'])
+
+        return JsonResponse({
+            'success': True,
+            'image_url': palabra.imagen.url,
+        })
+    except ValueError as error:
+        return JsonResponse({'error': str(error)}, status=400)
+    except Exception as error:
+        return JsonResponse({'error': str(error) or 'Could not save the image.'}, status=502)
+
+@never_cache
+@require_POST
+@role_required('teacher')
+def upload_word_local_image(request, codigo):
+    lista = get_object_or_404(
+        Lista,
+        codigo=codigo,
+        profesor=request.user.profesor
+    )
+
+    palabra_codigo = (request.POST.get('palabra_codigo') or '').strip()
+    imagen = request.FILES.get('imagen')
+
+    if not palabra_codigo or not imagen:
+        return JsonResponse({'error': 'Please select an image file.'}, status=400)
+
+    if imagen.size > 3 * 1024 * 1024:
+        return JsonResponse({'error': 'The image cannot exceed 3 MB.'}, status=400)
+
+    try:
+        raw_bytes = imagen.read()
+        with Image.open(BytesIO(raw_bytes)) as img:
+            img.verify()
+        imagen.seek(0)
+    except Exception:
+        return JsonResponse({'error': 'The selected file is not a valid image.'}, status=400)
+
+    relacion = get_object_or_404(
+        Lista_Palabra.objects.select_related('palabra'),
+        lista=lista,
+        palabra__codigo=palabra_codigo
+    )
+    palabra = relacion.palabra
+
+    try:
+        if palabra.imagen:
+            palabra.imagen.delete(save=False)
+        palabra.imagen = imagen
+        palabra.save(update_fields=['imagen'])
+
+        return JsonResponse({
+            'success': True,
+            'image_url': palabra.imagen.url,
+        })
+    except Exception:
+        return JsonResponse({'error': 'Could not save the image.'}, status=500)
 
 @never_cache
 @role_required('student')

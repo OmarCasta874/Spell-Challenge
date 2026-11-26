@@ -1,0 +1,415 @@
+{% extends 'teacher/teacher_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/add_word_to_list.css' %}">
+<link rel="stylesheet" href="{% static 'css/complete_list_media.css' %}">
+{% endblock %}
+
+{% block teacher_content %}
+<div class="container-fluid add-word-page">
+  <a href="{% url 'view_word_list' lista.codigo %}" class="add-word-back">
+    <i data-lucide="arrow-left"></i>
+    Back to {{ lista.nombre }}
+  </a>
+
+  <header class="add-word-header">
+    <h2 class="add-word-title">COMPLETE MEDIA (IMAGES &amp; AUDIO)</h2>
+    <p class="add-word-subtitle">
+      Generate MP3 pronunciations and pick Pixabay images in safe batches for <strong>{{ lista.nombre }}</strong>.
+    </p>
+  </header>
+
+  {% csrf_token %}
+
+  <div class="media-toolbar">
+    <div class="media-badges">
+      <span class="media-badge" id="badgeTotal">{{ total_words }} words</span>
+      <span class="media-badge warn" id="badgeMissingImg">0 missing images</span>
+      <span class="media-badge warn" id="badgeMissingAudio">0 missing MP3</span>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+      <button type="button" id="generateAudioBatchBtn" class="add-word-ai-button mt-0">
+        <i data-lucide="volume-2"></i>
+        Generate Missing MP3 (Batches of 8)
+      </button>
+      <button type="button" id="loadImagesBatchBtn" class="media-load-btn">
+      <i data-lucide="images"></i>
+        Load Pixabay Suggestions (Next 5)
+      </button>
+    </div>
+  </div>
+
+  <div id="batchStatus" class="add-word-ai-status mb-3" role="status" aria-live="polite"></div>
+
+  <div id="mediaGrid" class="media-grid"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  let wordsData = JSON.parse('{{ words_json|escapejs }}');
+
+  const mediaGrid = document.getElementById('mediaGrid');
+  const badgeTotal = document.getElementById('badgeTotal');
+  const badgeMissingImg = document.getElementById('badgeMissingImg');
+  const badgeMissingAudio = document.getElementById('badgeMissingAudio');
+  const generateAudioBatchBtn = document.getElementById('generateAudioBatchBtn');
+  const loadImagesBatchBtn = document.getElementById('loadImagesBatchBtn');
+  const batchStatus = document.getElementById('batchStatus');
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  const suggestionsCache = {}; // codigo -> { loading, images, error, query }
+  const replaceOpenMap = {};   // codigo -> boolean (for words that already have image)
+  let isBusy = false;
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function updateBadges() {
+    const missingImg = wordsData.filter(w => !w.has_image).length;
+    const missingAudio = wordsData.filter(w => !w.has_audio).length;
+    const unrequestedImg = wordsData.filter(w => !w.has_image && !suggestionsCache[w.codigo]).length;
+
+    badgeTotal.textContent = `${wordsData.length} words`;
+    badgeMissingImg.textContent = `${missingImg} missing images`;
+    badgeMissingImg.className = `media-badge ${missingImg === 0 ? 'ok' : 'warn'}`;
+
+    badgeMissingAudio.textContent = `${missingAudio} missing MP3`;
+    badgeMissingAudio.className = `media-badge ${missingAudio === 0 ? 'ok' : 'warn'}`;
+
+    generateAudioBatchBtn.disabled = isBusy || missingAudio === 0;
+    loadImagesBatchBtn.disabled = isBusy || unrequestedImg === 0;
+  }
+
+  async function savePixabayImage(wordItem, imageUrl, cardStatusEl) {
+    cardStatusEl.className = 'add-word-ai-status loading mt-2';
+    cardStatusEl.textContent = 'Saving image to media folder...';
+
+    try {
+      const response = await fetch("{% url 'save_word_pixabay_image' lista.codigo %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify({
+          palabra_codigo: wordItem.codigo,
+          image_url: imageUrl,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Could not save image.');
+      }
+
+      wordItem.has_image = true;
+      wordItem.image_url = data.image_url;
+      delete suggestionsCache[wordItem.codigo];
+      replaceOpenMap[wordItem.codigo] = false;
+      renderGrid();
+    } catch (error) {
+      cardStatusEl.className = 'add-word-ai-status error mt-2';
+      cardStatusEl.textContent = error.message || 'Could not save image.';
+    }
+  }
+
+  async function uploadLocalImage(wordItem, file, cardStatusEl) {
+    if (!file) return;
+    cardStatusEl.className = 'add-word-ai-status loading mt-2';
+    cardStatusEl.textContent = 'Uploading image...';
+
+    const formData = new FormData();
+    formData.append('palabra_codigo', wordItem.codigo);
+    formData.append('imagen', file);
+
+    try {
+      const response = await fetch("{% url 'upload_word_local_image' lista.codigo %}", {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+        },
+        body: formData,
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Could not upload image.');
+      }
+
+      wordItem.has_image = true;
+      wordItem.image_url = data.image_url;
+      delete suggestionsCache[wordItem.codigo];
+      replaceOpenMap[wordItem.codigo] = false;
+      renderGrid();
+    } catch (error) {
+      cardStatusEl.className = 'add-word-ai-status error mt-2';
+      cardStatusEl.textContent = error.message || 'Could not upload image.';
+    }
+  }
+
+  async function fetchImagesForWord(wordItem, customQuery) {
+    const q = (customQuery || wordItem.word).trim();
+    suggestionsCache[wordItem.codigo] = { loading: true, images: [], error: '', query: q };
+    renderGrid();
+
+    try {
+      const url = "{% url 'search_word_images' lista.codigo %}?q=" + encodeURIComponent(q);
+      const response = await fetch(url);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Search failed.');
+      }
+      suggestionsCache[wordItem.codigo] = {
+        loading: false,
+        images: (data.images || []).slice(0, 6),
+        error: (data.images && data.images.length === 0) ? 'No images found. Try another search word.' : '',
+        query: q,
+      };
+    } catch (error) {
+      suggestionsCache[wordItem.codigo] = {
+        loading: false,
+        images: [],
+        error: error.message || 'Image search failed.',
+        query: q,
+      };
+    }
+    renderGrid();
+  }
+
+  function renderGrid() {
+    mediaGrid.innerHTML = '';
+
+    if (wordsData.length === 0) {
+      mediaGrid.innerHTML = '<p class="text-muted">This word list has no words yet.</p>';
+      updateBadges();
+      return;
+    }
+
+    wordsData.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'media-card';
+
+      const cache = suggestionsCache[item.codigo];
+      const showReplaceSearch = !item.has_image || !!replaceOpenMap[item.codigo];
+
+      let imageSection = '';
+      if (item.has_image) {
+        imageSection = `
+          <div class="mb-3">
+            <span class="word-details-label d-block mb-1">Image</span>
+            <img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.word)}" class="media-current-img">
+            <div class="media-card-actions">
+              <button type="button" class="media-mini-btn btn-toggle-replace">
+                ${showReplaceSearch ? 'Hide Pixabay search' : 'Replace (Pixabay)'}
+              </button>
+              <label class="media-mini-btn mb-0">
+                Upload from device
+                <input type="file" accept="image/*" class="d-none local-file-input">
+              </label>
+            </div>
+            ${showReplaceSearch ? `
+              <div class="input-group input-group-sm mt-2">
+                <input type="text" class="form-control custom-q-input" value="${escapeHtml(cache ? cache.query : item.word)}" placeholder="Search term">
+                <button type="button" class="btn btn-outline-secondary btn-search-one">Search</button>
+              </div>
+              <div class="thumbs-container"></div>
+            ` : ''}
+            <div class="card-img-status"></div>
+          </div>
+        `;
+      } else {
+        imageSection = `
+          <div class="mb-3">
+            <span class="word-details-label d-block mb-1">Image (Missing)</span>
+            <div class="input-group input-group-sm mb-2">
+              <input type="text" class="form-control custom-q-input" value="${escapeHtml(cache ? cache.query : item.word)}" placeholder="Search term">
+              <button type="button" class="btn btn-outline-secondary btn-search-one">Search</button>
+            </div>
+            <div class="media-card-actions mb-1">
+              <label class="media-mini-btn mb-0">
+                Upload from device
+                <input type="file" accept="image/*" class="d-none local-file-input">
+              </label>
+            </div>
+            <div class="thumbs-container"></div>
+            <div class="card-img-status"></div>
+          </div>
+        `;
+      }
+
+      let audioSection = '';
+      if (item.has_audio) {
+        audioSection = `
+          <div>
+            <span class="word-details-label d-block mb-1">Audio (MP3 Saved)</span>
+            <audio controls class="w-100" style="height:36px;">
+              <source src="${escapeHtml(item.audio_url)}">
+            </audio>
+          </div>
+        `;
+      } else {
+        audioSection = `
+          <div>
+            <span class="word-details-label d-block mb-1">Audio</span>
+            <span class="badge bg-light text-dark border">No MP3 file yet</span>
+          </div>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="media-card-header">
+          <h5 class="media-word-title">${escapeHtml(item.word)}</h5>
+          <span class="media-level-pill">${escapeHtml(item.level)}</span>
+        </div>
+        ${imageSection}
+        ${audioSection}
+      `;
+
+      const cardStatusEl = card.querySelector('.card-img-status');
+      const localFileInput = card.querySelector('.local-file-input');
+      if (localFileInput) {
+        localFileInput.addEventListener('change', function () {
+          if (this.files && this.files[0]) {
+            uploadLocalImage(item, this.files[0], cardStatusEl);
+          }
+        });
+      }
+
+      const toggleReplaceBtn = card.querySelector('.btn-toggle-replace');
+      if (toggleReplaceBtn) {
+        toggleReplaceBtn.addEventListener('click', () => {
+          replaceOpenMap[item.codigo] = !replaceOpenMap[item.codigo];
+          if (replaceOpenMap[item.codigo] && !suggestionsCache[item.codigo]) {
+            fetchImagesForWord(item, item.word);
+          } else {
+            renderGrid();
+          }
+        });
+      }
+
+      if (showReplaceSearch) {
+        const searchBtn = card.querySelector('.btn-search-one');
+        const queryInput = card.querySelector('.custom-q-input');
+        const thumbsContainer = card.querySelector('.thumbs-container');
+
+        if (searchBtn) {
+          searchBtn.addEventListener('click', () => {
+            fetchImagesForWord(item, queryInput.value);
+          });
+        }
+
+        if (cache && thumbsContainer) {
+          if (cache.loading) {
+            cardStatusEl.className = 'add-word-ai-status loading mt-1';
+            cardStatusEl.textContent = 'Searching Pixabay...';
+          } else if (cache.error) {
+            cardStatusEl.className = 'add-word-ai-status error mt-1';
+            cardStatusEl.textContent = cache.error;
+          } else if (cache.images.length > 0) {
+            const grid = document.createElement('div');
+            grid.className = 'media-thumbs-grid';
+            cache.images.forEach(img => {
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'media-thumb-btn';
+              btn.title = 'Click to save this image';
+              btn.innerHTML = `<img src="${escapeHtml(img.preview_url)}" alt="${escapeHtml(item.word)}">`;
+              btn.addEventListener('click', () => savePixabayImage(item, img.web_url, cardStatusEl));
+              grid.appendChild(btn);
+            });
+            thumbsContainer.appendChild(grid);
+          }
+        }
+      }
+
+      mediaGrid.appendChild(card);
+    });
+
+    updateBadges();
+  }
+
+  loadImagesBatchBtn.addEventListener('click', async function () {
+    const nextFive = wordsData.filter(w => !w.has_image && !suggestionsCache[w.codigo]).slice(0, 5);
+    if (nextFive.length === 0) return;
+
+    isBusy = true;
+    updateBadges();
+    batchStatus.className = 'add-word-ai-status loading mb-3';
+
+    for (let i = 0; i < nextFive.length; i++) {
+      batchStatus.textContent = `Loading Pixabay suggestions (${i + 1} of ${nextFive.length}): "${nextFive[i].word}"...`;
+      await fetchImagesForWord(nextFive[i], nextFive[i].word);
+    }
+
+    batchStatus.className = 'add-word-ai-status success mb-3';
+    batchStatus.textContent = `Loaded image suggestions for ${nextFive.length} word(s). Click any thumbnail to save it.`;
+    isBusy = false;
+    updateBadges();
+  });
+
+  generateAudioBatchBtn.addEventListener('click', async function () {
+    const missing = wordsData.filter(w => !w.has_audio);
+    if (missing.length === 0) return;
+
+    const BATCH_SIZE = 8;
+    const totalBatches = Math.ceil(missing.length / BATCH_SIZE);
+    let generatedTotal = 0;
+
+    isBusy = true;
+    updateBadges();
+    batchStatus.className = 'add-word-ai-status loading mb-3';
+
+    try {
+      for (let b = 0; b < totalBatches; b++) {
+        const chunk = missing.slice(b * BATCH_SIZE, (b + 1) * BATCH_SIZE);
+        const codes = chunk.map(w => w.codigo);
+
+        batchStatus.textContent = `Generating MP3 files (batch ${b + 1} of ${totalBatches})...`;
+
+        const response = await fetch("{% url 'generate_words_audio_batch' lista.codigo %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          },
+          body: JSON.stringify({ word_codes: codes }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Could not generate MP3 batch.');
+        }
+
+        const results = data.results || {};
+        chunk.forEach(item => {
+          if (results[item.codigo]) {
+            item.has_audio = true;
+            item.audio_url = results[item.codigo];
+            generatedTotal++;
+          }
+        });
+
+        renderGrid();
+      }
+
+      batchStatus.className = 'add-word-ai-status success mb-3';
+      batchStatus.textContent = `Generated and saved ${generatedTotal} MP3 audio file(s) in media/palabras/audios/.`;
+    } catch (error) {
+      batchStatus.className = 'add-word-ai-status error mb-3';
+      batchStatus.textContent = error.message || 'Audio generation stopped. Already generated files were saved.';
+    } finally {
+      isBusy = false;
+      updateBadges();
+    }
+  });
+
+  renderGrid();
+});
+</script>
+{% endblock %}

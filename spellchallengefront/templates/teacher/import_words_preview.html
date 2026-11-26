@@ -1,0 +1,569 @@
+{% extends 'teacher/teacher_base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/add_word_to_list.css' %}">
+<style>
+  .preview-summary-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 22px;
+    background: #FFF;
+    border: 1px solid #EEE5E5;
+    border-radius: 16px;
+    margin-bottom: 18px;
+    box-shadow: 0 5px 18px rgba(92, 20, 20, 0.05);
+  }
+  .preview-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .preview-badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+  .preview-badge-total { background: #F8EEEE; color: #7A1C1C; }
+  .preview-badge-ready { background: #E8F6EE; color: #157347; }
+  .preview-badge-incomplete { background: #FFF4DB; color: #8A6100; }
+  .preview-badge-error { background: #FDECEC; color: #B02A37; }
+
+  .preview-table-card {
+    background: #FFF;
+    border: 1px solid #EEE5E5;
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 8px 28px rgba(74, 20, 20, 0.06);
+  }
+  .preview-table th {
+    color: #7A1C1C;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    border-bottom: 2px solid #F1E8E8;
+  }
+  .preview-table td {
+    vertical-align: top;
+    min-width: 140px;
+  }
+  .preview-table td.col-check,
+  .preview-table td.col-status {
+    min-width: auto;
+  }
+  .preview-input,
+  .preview-textarea,
+  .preview-select {
+    font-size: 0.85rem;
+    border-radius: 8px;
+    border: 1px solid #E4D8D8;
+  }
+  .preview-textarea {
+    min-height: 62px;
+    resize: vertical;
+  }
+  .row-status-pill {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .status-ready { background: #E8F6EE; color: #157347; }
+  .status-incomplete { background: #FFF4DB; color: #8A6100; }
+  .status-error { background: #FDECEC; color: #B02A37; }
+  .row-msg-list {
+    margin: 5px 0 0;
+    padding-left: 14px;
+    font-size: 0.75rem;
+    color: #B02A37;
+  }
+  .row-warn-list {
+    margin: 5px 0 0;
+    padding-left: 14px;
+    font-size: 0.75rem;
+    color: #8A6100;
+  }
+</style>
+{% endblock %}
+
+{% block teacher_content %}
+<div class="container-fluid add-word-page">
+  <a href="{% url 'view_word_list' lista.codigo %}" class="add-word-back">
+    <i data-lucide="arrow-left"></i>
+    Back to {{ lista.nombre }}
+  </a>
+
+  <header class="add-word-header">
+    <h2 class="add-word-title">IMPORT PREVIEW</h2>
+    <p class="add-word-subtitle">
+      Review and edit your words before saving them to <strong>{{ lista.nombre }}</strong>
+      {% if lista.es_spelling_bee %}
+        <span class="badge bg-warning text-dark ms-1">Spelling Bee (6–13 letters)</span>
+      {% endif %}.
+    </p>
+  </header>
+
+  <div class="preview-summary-bar">
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <div class="preview-badges">
+        <span class="preview-badge preview-badge-total" id="badgeTotal">0 total</span>
+        <span class="preview-badge preview-badge-ready" id="badgeReady">0 ready</span>
+        <span class="preview-badge preview-badge-incomplete" id="badgeIncomplete">0 incomplete</span>
+        <span class="preview-badge preview-badge-error" id="badgeError">0 errors</span>
+      </div>
+      <div class="d-flex gap-2 ms-sm-2">
+        <button type="button" id="selectAllValidBtn" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px; font-weight: 700;">
+          Select all valid
+        </button>
+        <button type="button" id="deselectAllBtn" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px; font-weight: 700;">
+          Deselect all
+        </button>
+      </div>
+    </div>
+
+    <div class="d-flex flex-column align-items-end">
+      <button type="button" id="aiBatchBtn" class="add-word-ai-button mt-0">
+        <i data-lucide="sparkles"></i>
+        Complete Missing with AI
+      </button>
+      <div id="aiBatchStatus" class="add-word-ai-status mt-1 text-end" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <form method="POST" action="{% url 'confirm_import_words' lista.codigo %}" id="confirmImportForm">
+    {% csrf_token %}
+    <input type="hidden" name="default_level" value="{{ default_level }}">
+    <input type="hidden" name="words_json" id="wordsJsonInput">
+
+    <div class="preview-table-card">
+      <div class="table-responsive">
+        <table class="table align-middle preview-table">
+          <thead>
+            <tr>
+              <th>
+                <input type="checkbox" id="toggleAllCheckbox" title="Select / deselect all valid rows" checked>
+              </th>
+              <th>#</th>
+              <th>Word *</th>
+              <th>Pronunciation *</th>
+              <th>Definition</th>
+              <th>Example Sentence</th>
+              <th>Level *</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="previewTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="add-word-actions">
+        <a href="{% url 'view_word_list' lista.codigo %}" class="add-word-cancel">Cancel</a>
+        <button type="submit" class="add-word-submit" id="saveImportBtn">
+          <i data-lucide="save"></i>
+          Save Selected Words
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const IS_SPELLING_BEE = {{ lista.es_spelling_bee|yesno:"true,false" }};
+  const NIVELES = [
+    {% for n in niveles %}
+      { codigo: "{{ n.codigo|escapejs }}", label: "{{ n|escapejs }}" },
+    {% endfor %}
+  ];
+
+  let rowsData = JSON.parse('{{ rows_json|escapejs }}');
+  let isAiRunning = false;
+
+  const tbody = document.getElementById('previewTableBody');
+  const wordsJsonInput = document.getElementById('wordsJsonInput');
+  const confirmForm = document.getElementById('confirmImportForm');
+  const saveBtn = document.getElementById('saveImportBtn');
+  const toggleAllCheckbox = document.getElementById('toggleAllCheckbox');
+  const selectAllValidBtn = document.getElementById('selectAllValidBtn');
+  const deselectAllBtn = document.getElementById('deselectAllBtn');
+
+  const aiBatchBtn = document.getElementById('aiBatchBtn');
+  const aiBatchStatus = document.getElementById('aiBatchStatus');
+
+  const badgeTotal = document.getElementById('badgeTotal');
+  const badgeReady = document.getElementById('badgeReady');
+  const badgeIncomplete = document.getElementById('badgeIncomplete');
+  const badgeError = document.getElementById('badgeError');
+
+  function countLetters(text) {
+    return (text.match(/[a-zA-Z]/g) || []).length;
+  }
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function evaluateRow(row, index) {
+    const errors = [];
+    const warnings = [];
+
+    const word = (row.word || '').trim();
+    const pron = (row.pronunciation || '').trim();
+    const def = (row.definition || '').trim();
+    const ex = (row.example || '').trim();
+    const lvl = (row.level || '').trim().toUpperCase();
+
+    if (Array.isArray(row.errors)) {
+      row.errors.forEach(err => {
+        if (err === 'Already exists in this list.' && !row._wordEdited) {
+          errors.push(err);
+        }
+      });
+    }
+
+    if (!word) {
+      errors.push('Word is required.');
+    } else if (word.length > 50) {
+      errors.push('Max 50 chars.');
+    } else {
+      const lower = word.toLowerCase();
+      const dup = rowsData.some(
+        (other, i) => i !== index && (other.word || '').trim().toLowerCase() === lower
+      );
+      if (dup) errors.push('Duplicate in table.');
+
+      if (IS_SPELLING_BEE) {
+        const len = countLetters(word);
+        if (len < 6 || len > 13) {
+          errors.push('Spelling Bee requires 6–13 letters.');
+        }
+      }
+    }
+
+    if (pron.length > 100) errors.push('Pronunciation max 100 chars.');
+    if (def.length > 255) errors.push('Definition max 255 chars.');
+    if (ex.length > 255) errors.push('Example max 255 chars.');
+    if (!lvl) errors.push('Level is required.');
+
+    if (!pron) warnings.push('Pronunciation required to save.');
+    if (!def) warnings.push('Missing definition.');
+    if (!ex) warnings.push('Missing example.');
+
+    return { errors, warnings };
+  }
+
+  function updateSummaryAndStatus() {
+    let readyCount = 0;
+    let incompleteCount = 0;
+    let errorCount = 0;
+    let missingAiCount = 0;
+    let selectedValidCount = 0;
+
+    rowsData.forEach((row, idx) => {
+      const { errors, warnings } = evaluateRow(row, idx);
+      row._errors = errors;
+      row._warnings = warnings;
+
+      const statusCell = tbody.querySelector(`tr[data-index="${idx}"] .col-status`);
+      const checkbox = tbody.querySelector(`tr[data-index="${idx}"] .row-select-cb`);
+
+      const missingPron = !(row.pronunciation || '').trim();
+      const missingDef = !(row.definition || '').trim();
+      const missingEx = !(row.example || '').trim();
+
+      if (errors.length === 0 && (missingPron || missingDef || missingEx)) {
+        missingAiCount++;
+      }
+
+      if (errors.length > 0) {
+        errorCount++;
+      } else if (missingPron || warnings.length > 0) {
+        incompleteCount++;
+      } else {
+        readyCount++;
+      }
+
+      if (row.selected && errors.length === 0 && !missingPron) {
+        selectedValidCount++;
+      }
+
+      if (checkbox) {
+        if (errors.length > 0) {
+          row.selected = false;
+          checkbox.checked = false;
+          checkbox.disabled = true;
+        } else {
+          checkbox.disabled = false;
+          checkbox.checked = !!row.selected;
+        }
+      }
+
+      if (statusCell) {
+        let html = '';
+        if (errors.length > 0) {
+          html += `<span class="row-status-pill status-error">Error</span>`;
+        } else if (warnings.length > 0) {
+          html += `<span class="row-status-pill status-incomplete">Incomplete</span>`;
+        } else {
+          html += `<span class="row-status-pill status-ready">Ready</span>`;
+        }
+
+        if (errors.length > 0) {
+          html += `<ul class="row-msg-list">${errors.map(e => `<li>${escapeHtml(e)}</li>`).join('')}</ul>`;
+        }
+        if (warnings.length > 0) {
+          html += `<ul class="row-warn-list">${warnings.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>`;
+        }
+        statusCell.innerHTML = html;
+      }
+    });
+
+    badgeTotal.textContent = `${rowsData.length} total`;
+    badgeReady.textContent = `${readyCount} ready`;
+    badgeIncomplete.textContent = `${incompleteCount} incomplete`;
+    badgeError.textContent = `${errorCount} errors`;
+
+    saveBtn.textContent = `Save Selected Words (${selectedValidCount})`;
+    saveBtn.disabled = isAiRunning || selectedValidCount === 0;
+    aiBatchBtn.disabled = isAiRunning || missingAiCount === 0;
+
+    const validRows = rowsData.filter(r => !r._errors || r._errors.length === 0);
+    const checkedValidCount = validRows.filter(r => r.selected).length;
+    if (validRows.length === 0) {
+      toggleAllCheckbox.checked = false;
+      toggleAllCheckbox.indeterminate = false;
+      toggleAllCheckbox.disabled = true;
+    } else {
+      toggleAllCheckbox.disabled = false;
+      toggleAllCheckbox.checked = checkedValidCount === validRows.length;
+      toggleAllCheckbox.indeterminate = checkedValidCount > 0 && checkedValidCount < validRows.length;
+    }
+  }
+
+  function renderTable() {
+    tbody.innerHTML = '';
+
+    rowsData.forEach((row, idx) => {
+      const tr = document.createElement('tr');
+      tr.dataset.index = idx;
+
+      const levelOptions = NIVELES.map(n =>
+        `<option value="${escapeHtml(n.codigo)}" ${row.level === n.codigo ? 'selected' : ''}>${escapeHtml(n.label)}</option>`
+      ).join('');
+
+      tr.innerHTML = `
+        <td class="col-check pt-3">
+          <input type="checkbox" class="form-check-input row-select-cb" ${row.selected ? 'checked' : ''}>
+        </td>
+        <td class="pt-3 text-muted fw-bold">${row.row_number || idx + 1}</td>
+        <td>
+          <input type="text" class="form-control preview-input field-word" maxlength="50" value="${escapeHtml(row.word)}">
+        </td>
+        <td>
+          <input type="text" class="form-control preview-input field-pron" maxlength="100" value="${escapeHtml(row.pronunciation)}" placeholder="e.g. ˈbrekfəst">
+        </td>
+        <td>
+          <textarea class="form-control preview-textarea field-def" maxlength="255" placeholder="Definition">${escapeHtml(row.definition)}</textarea>
+        </td>
+        <td>
+          <textarea class="form-control preview-textarea field-ex" maxlength="255" placeholder="Example sentence">${escapeHtml(row.example)}</textarea>
+        </td>
+        <td>
+          <select class="form-select preview-select field-level">
+            <option value="">Select</option>
+            ${levelOptions}
+          </select>
+        </td>
+        <td class="col-status pt-2"></td>
+      `;
+
+      tr.querySelector('.row-select-cb').addEventListener('change', (e) => {
+        rowsData[idx].selected = e.target.checked;
+        updateSummaryAndStatus();
+      });
+
+      tr.querySelector('.field-word').addEventListener('input', (e) => {
+        rowsData[idx].word = e.target.value;
+        rowsData[idx]._wordEdited = true;
+        updateSummaryAndStatus();
+      });
+
+      tr.querySelector('.field-pron').addEventListener('input', (e) => {
+        rowsData[idx].pronunciation = e.target.value;
+        updateSummaryAndStatus();
+      });
+
+      tr.querySelector('.field-def').addEventListener('input', (e) => {
+        rowsData[idx].definition = e.target.value;
+        updateSummaryAndStatus();
+      });
+
+      tr.querySelector('.field-ex').addEventListener('input', (e) => {
+        rowsData[idx].example = e.target.value;
+        updateSummaryAndStatus();
+      });
+
+      tr.querySelector('.field-level').addEventListener('change', (e) => {
+        rowsData[idx].level = e.target.value;
+        updateSummaryAndStatus();
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    updateSummaryAndStatus();
+  }
+
+  toggleAllCheckbox.addEventListener('change', function () {
+    const checked = this.checked;
+    rowsData.forEach((row, idx) => {
+      const { errors } = evaluateRow(row, idx);
+      row.selected = checked && errors.length === 0;
+    });
+    updateSummaryAndStatus();
+  });
+
+  if (selectAllValidBtn) {
+    selectAllValidBtn.addEventListener('click', function () {
+      rowsData.forEach((row, idx) => {
+        const { errors } = evaluateRow(row, idx);
+        row.selected = errors.length === 0;
+      });
+      updateSummaryAndStatus();
+    });
+  }
+
+  if (deselectAllBtn) {
+    deselectAllBtn.addEventListener('click', function () {
+      rowsData.forEach(row => {
+        row.selected = false;
+      });
+      updateSummaryAndStatus();
+    });
+  }
+
+  aiBatchBtn.addEventListener('click', async function () {
+    const targetIndices = [];
+    rowsData.forEach((row, idx) => {
+      const { errors } = evaluateRow(row, idx);
+      const needsAi = !(row.pronunciation || '').trim()
+                   || !(row.definition || '').trim()
+                   || !(row.example || '').trim();
+      if (errors.length === 0 && needsAi) {
+        targetIndices.push(idx);
+      }
+    });
+
+    if (targetIndices.length === 0) return;
+
+    const BATCH_SIZE = 12;
+    const totalBatches = Math.ceil(targetIndices.length / BATCH_SIZE);
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    isAiRunning = true;
+    updateSummaryAndStatus();
+    aiBatchStatus.className = 'add-word-ai-status loading';
+
+    let filledWords = 0;
+
+    try {
+      for (let b = 0; b < totalBatches; b++) {
+        const sliceIndices = targetIndices.slice(b * BATCH_SIZE, (b + 1) * BATCH_SIZE);
+        const batchWords = sliceIndices.map(i => rowsData[i].word.trim());
+
+        aiBatchStatus.textContent =
+          `Generating AI suggestions (batch ${b + 1} of ${totalBatches}, ${batchWords.length} words)...`;
+
+        const response = await fetch("{% url 'generate_words_suggestions_batch' lista.codigo %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          },
+          body: JSON.stringify({ words: batchWords }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'AI suggestions could not be generated.');
+        }
+
+        const results = data.results || {};
+        sliceIndices.forEach(idx => {
+          const key = rowsData[idx].word.trim().toLowerCase();
+          const suggestion = results[key];
+          if (!suggestion) return;
+
+          if (!rowsData[idx].pronunciation.trim() && suggestion.pronunciation) {
+            rowsData[idx].pronunciation = suggestion.pronunciation;
+          }
+          if (!rowsData[idx].definition.trim() && suggestion.definition) {
+            rowsData[idx].definition = suggestion.definition;
+          }
+          if (!rowsData[idx].example.trim() && suggestion.example) {
+            rowsData[idx].example = suggestion.example;
+          }
+          filledWords++;
+        });
+
+        renderTable();
+      }
+
+      aiBatchStatus.className = 'add-word-ai-status success';
+      aiBatchStatus.textContent =
+        `AI completed suggestions for ${filledWords} word(s). Please review before saving.`;
+    } catch (error) {
+      aiBatchStatus.className = 'add-word-ai-status error';
+      aiBatchStatus.textContent = error.message ||
+        'AI stopped due to rate limits or connection issues. Already filled fields were kept.';
+    } finally {
+      isAiRunning = false;
+      updateSummaryAndStatus();
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+  });
+
+  confirmForm.addEventListener('submit', function (e) {
+    const cleanRows = rowsData.map(r => ({
+      row_number: r.row_number,
+      word: (r.word || '').trim(),
+      pronunciation: (r.pronunciation || '').trim(),
+      definition: (r.definition || '').trim(),
+      example: (r.example || '').trim(),
+      level: (r.level || '').trim(),
+      selected: !!r.selected,
+    }));
+
+    const selectedInvalid = cleanRows.some((r, idx) => {
+      if (!r.selected) return false;
+      const { errors } = evaluateRow(r, idx);
+      return errors.length > 0 || !r.pronunciation;
+    });
+
+    if (selectedInvalid) {
+      e.preventDefault();
+      alert('Some selected rows still have errors or are missing pronunciation. Fix them or uncheck them before saving.');
+      return;
+    }
+
+    wordsJsonInput.value = JSON.stringify(cleanRows);
+  });
+
+  renderTable();
+});
+</script>
+{% endblock %}

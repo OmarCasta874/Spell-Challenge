@@ -346,3 +346,361 @@
         gap: 14px;
     }
 }
+
+/* IMPORT EXCEL BUTTON & MODAL */
+.word-details-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-import-excel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 18px;
+    background-color: #FFFFFF;
+    color: #7A1C1C;
+    border: 1.5px solid #7A1C1C;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.btn-import-excel i,
+.btn-import-excel svg {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-import-excel:hover {
+    background-color: #F8EEEE;
+    color: #5C1414;
+    border-color: #5C1414;
+    transform: translateY(-2px);
+}
+
+.import-excel-modal {
+    border-radius: 20px;
+    border: 1px solid #F0E5E5;
+    box-shadow: 0 16px 40px rgba(92, 20, 20, 0.18);
+}
+
+.import-modal-title {
+    color: #7A1C1C;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.import-modal-subtitle {
+    margin: 4px 0 0;
+    color: #776969;
+    font-size: 0.9rem;
+}
+
+.import-template-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #7A1C1C;
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.import-template-link svg {
+    width: 16px;
+    height: 16px;
+}
+
+.import-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    border: 2px dashed #C97E82;
+    border-radius: 16px;
+    background: #FDECEC;
+    text-align: center;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.import-dropzone.dragover {
+    background: #FADADA;
+    border-color: #7A1C1C;
+}
+
+.import-dropzone-icon {
+    width: 36px;
+    height: 36px;
+    color: #7A1C1C;
+    margin-bottom: 8px;
+}
+
+.import-dropzone-title {
+    margin: 0;
+    color: #7A1C1C;
+    font-weight: 800;
+    font-size: 1rem;
+}
+
+.import-dropzone-or {
+    color: #7A1C1C;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 4px 0 10px;
+}
+
+.import-choose-btn {
+    padding: 7px 18px;
+    border: 1.5px solid #7A1C1C;
+    border-radius: 999px;
+    background: #FFF;
+    color: #7A1C1C;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.import-choose-btn:hover {
+    background: #7A1C1C;
+    color: #FFF;
+}
+
+.import-file-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #FFFFFF;
+    color: #198754;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: 1px solid #CFE8D8;
+}
+
+.import-notice-box {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-left: 4px solid #7A1C1C;
+    border-radius: 10px;
+    background: #FDF1F1;
+    color: #4A3737;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.import-level-label {
+    color: #493333;
+    font-size: 0.88rem;
+}
+
+.import-level-select {
+    border-radius: 10px;
+    border-color: #E4D8D8;
+}
+
+.import-cancel-btn {
+    padding: 9px 22px;
+    border-radius: 12px;
+    background: #FDECEC;
+    color: #7A1C1C;
+    font-weight: 700;
+    border: 1px solid #F2D3D3;
+}
+
+.import-submit-btn {
+    padding: 9px 22px;
+    border-radius: 12px;
+    background: #7A1C1C;
+    color: #FFF;
+    font-weight: 700;
+    border: 1px solid #7A1C1C;
+}
+
+.import-submit-btn:hover:not(:disabled) {
+    background: #5C1414;
+    color: #FFF;
+}
+
+.import-submit-btn:disabled {
+    opacity: 0.55;
+}
+
+.btn-speak-word {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border: 1px solid #DFC5C7;
+    border-radius: 999px;
+    background: #FDF4F4;
+    color: #7A1C1C;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-speak-word svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-speak-word:hover:not(:disabled) {
+    background: #7A1C1C;
+    border-color: #7A1C1C;
+    color: #FFFFFF;
+}
+
+.btn-speak-word:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.btn-speak-word {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border: 1px solid #DFC5C7;
+    border-radius: 999px;
+    background: #FDF4F4;
+    color: #7A1C1C;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-speak-word svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-speak-word:hover:not(:disabled) {
+    background: #7A1C1C;
+    border-color: #7A1C1C;
+    color: #FFFFFF;
+}
+
+.btn-speak-word:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+/* HEADER ACTION COLUMN (3-DOT MENU + IMPORT + ADD WORD) */
+.word-details-action-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.word-details-action-column .btn-import-excel,
+.word-details-action-column .btn-create-list {
+    width: 175px;
+    justify-content: center;
+}
+
+.list-header-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 1.5px solid #EAD6D8;
+    border-radius: 12px;
+    background: #FFFFFF;
+    color: #7A1C1C;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(92, 20, 20, 0.06);
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.list-header-menu-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.list-header-menu-btn:hover,
+.list-header-menu-btn[aria-expanded="true"] {
+    background: #F8EEEE;
+    border-color: #7A1C1C;
+    color: #5C1414;
+}
+
+@media (max-width: 576px) {
+    .word-details-action-column {
+        width: 100%;
+        align-items: stretch;
+    }
+
+    .word-details-action-column .dropdown {
+        align-self: flex-end;
+    }
+
+    .word-details-action-column .btn-import-excel,
+    .word-details-action-column .btn-create-list {
+        width: 100%;
+    }
+}
+
+/* RESPONSIVE AUDIO PLAYER INSIDE WORD CARDS */
+.word-details-audio {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 40px;
+}
+
+/* COMPLETE MEDIA BUTTON & POST-IMPORT BANNER */
+.btn-complete-media {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border: 1.5px solid #7A1C1C;
+    border-radius: 10px;
+    background: #FFFFFF;
+    color: #7A1C1C;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-complete-media svg {
+    width: 17px;
+    height: 17px;
+}
+
+.btn-complete-media:hover {
+    background: #F8EEEE;
+    color: #5C1414;
+}
+
+.media-prompt-banner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    background: #FDF4F4;
+    border: 1.5px solid #DFC5C7;
+    border-left: 5px solid #7A1C1C;
+    border-radius: 14px;
+}
+
+.media-prompt-banner strong {
+    color: #7A1C1C;
+}

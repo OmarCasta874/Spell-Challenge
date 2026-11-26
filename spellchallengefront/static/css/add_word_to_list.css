@@ -363,3 +363,57 @@
         width: 100%;
     }
 }
+
+/* 2-COLUMN DESKTOP LAYOUT & AI STATUS ENHANCEMENTS */
+.add-word-card {
+    max-width: 1220px;
+}
+
+@media (min-width: 992px) {
+    .add-word-form {
+        display: grid;
+        grid-template-columns: 1.35fr 1fr;
+        gap: 28px;
+        align-items: start;
+    }
+
+    .add-word-section + .add-word-section {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+        border-left: 1px solid #F0E8E8;
+        padding-left: 28px;
+    }
+
+    .add-word-section:nth-of-type(2) .add-word-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .add-word-actions {
+        grid-column: 1 / -1;
+        margin-top: 8px;
+    }
+}
+
+.add-word-ai-status.loading,
+.add-word-ai-status.success,
+.add-word-ai-status.error {
+    padding: 9px 12px;
+    border-radius: 9px;
+    font-weight: 600;
+}
+
+.add-word-ai-status.loading {
+    background: #FDF2F2;
+    border: 1px solid #EAD6D8;
+}
+
+.add-word-ai-status.success {
+    background: #E8F6EE;
+    border: 1px solid #C6E6D4;
+}
+
+.add-word-ai-status.error {
+    background: #FDECEC;
+    border: 1px solid #F3C6C6;
+}

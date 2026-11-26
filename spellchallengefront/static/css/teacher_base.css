@@ -137,3 +137,28 @@ body {
     gap: 16px;
   }
 }
+
+
+/* REUSABLE PAGE HEADER (TEACHER) */
+.teacher-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.teacher-page-title {
+  margin: 0 0 6px;
+  color: #7A1C1C;
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.teacher-page-subtitle {
+  margin: 0;
+  color: #817474;
+  font-size: 0.95rem;
+}
