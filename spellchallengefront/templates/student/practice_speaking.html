@@ -127,6 +127,39 @@
   var pkErrorCount = 0;
   var pkRewardSent = false;
 
+  var pkWinUrl = "{% static 'sounds/win.mp3' %}";
+  var pkWinAudio = new Audio(pkWinUrl);
+  var pkWinUnlocked = false;
+
+  pkWinAudio.preload = 'auto';
+
+  function pkUnlockWinAudio() {
+    if (pkWinUnlocked) return;
+    pkWinUnlocked = true;
+    pkWinAudio.muted = true;
+    var p = pkWinAudio.play();
+    if (p !== undefined) {
+      p.then(function () {
+        pkWinAudio.pause();
+        pkWinAudio.muted = false;
+      }).catch(function () {
+        pkWinAudio.muted = false;
+        pkWinUnlocked = false;
+      });
+    }
+  }
+
+  function pkPlayWinSound() {
+    try {
+      var sound = pkWinAudio.cloneNode();
+      sound.volume = 1.0;
+      var playPromise = sound.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(function () {});
+      }
+    } catch (e) {}
+  }
+
   var pkMediaRecorder = null;
   var pkAudioChunks = [];
   var pkRecognizedText = null;
@@ -328,6 +361,7 @@
   }
 
   function pkSkipWord() {
+    pkUnlockWinAudio();
     var failures = pkTranscriptionFailures[pkCurrentIndex] || 0;
 
     if (failures < 3 || pkIsProcessing) {
@@ -376,6 +410,7 @@
   }
 
   async function pkSpeak() {
+    pkUnlockWinAudio();
     var btn = document.getElementById('pkSpeakBtn');
     var speechResult = document.getElementById('pkSpeechResult');
     var feedback = document.getElementById('pkFeedback');
@@ -691,6 +726,7 @@
       // Mostrar pantalla de finalización.
       document.getElementById('pkExercises').classList.add('d-none');
       document.getElementById('pkCompleted').classList.remove('d-none');
+      pkPlayWinSound();
 
       console.log('Speaking errors:', data.errors);
       console.log('Skipped exercises: ', skippedCount);

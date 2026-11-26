@@ -97,7 +97,26 @@
 {{ block.super }}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-      initAvatarCropper('avatar-upload');
+    initAvatarCropper('avatar-upload');
+
+    document.querySelectorAll('.toggle-password').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const targetId = this.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        if (!input) return;
+
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+
+        const iconName = isHidden ? 'eye-off' : 'eye';
+        this.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+        this.innerHTML = `<i data-lucide="${iconName}"></i>`;
+
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
+      });
+    });
   });
 </script>
 {% endblock %}

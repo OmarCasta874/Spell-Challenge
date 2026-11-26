@@ -150,6 +150,32 @@
     document.getElementById('ps-words-data').textContent
   );
 
+  var psClickAudio = new Audio("{% static 'sounds/click.mp3' %}");
+  var psWinAudio = new Audio("{% static 'sounds/win.mp3' %}");
+
+  psClickAudio.preload = 'auto';
+  psWinAudio.preload = 'auto';
+
+  function psPlayClickSound() {
+    try {
+      psClickAudio.currentTime = 0;
+      var playPromise = psClickAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(function () {});
+      }
+    } catch (e) {}
+  }
+
+  function psPlayWinSound() {
+    try {
+      psWinAudio.currentTime = 0;
+      var playPromise = psWinAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(function () {});
+      }
+    } catch (e) {}
+  }
+
   var psMediaRecorder = null;
   var psAudioChunks = [];
   var psIsProcessing = false;
@@ -434,6 +460,16 @@
         });
 
         input.addEventListener('keydown', function (event) {
+          if (
+            !event.repeat &&
+            !event.ctrlKey &&
+            !event.metaKey &&
+            !event.altKey &&
+            (/^[a-zA-Z]$/.test(event.key) || event.key === 'Backspace')
+          ) {
+            psPlayClickSound();
+          }
+
           if (event.key === 'Backspace' && this.value === '') {
             var previousInput = this.previousElementSibling;
 
@@ -826,6 +862,10 @@
       // Mostrar la pantalla de finalización.
       document.getElementById('psProgressWrap').style.display = 'none';
       document.getElementById('psCompleted').classList.remove('d-none');
+      // Mostrar la pantalla de finalización.
+      document.getElementById('psProgressWrap').style.display = 'none';
+      document.getElementById('psCompleted').classList.remove('d-none');
+      psPlayWinSound();
 
       console.log('Errors:', data.errors);
       console.log('XP earned:', data.xp_earned);

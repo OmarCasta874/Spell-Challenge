@@ -128,15 +128,20 @@
   transform: translateY(-50%);
   background: none;
   border: none;
+  padding: 0;
+  z-index: 5;
   cursor: pointer;
   color: #7a1f2b;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
-.toggle-password i {
+.toggle-password i,
+.toggle-password svg {
   width: 18px;
   height: 18px;
+  pointer-events: none;
 }
 
 /* Acciones */

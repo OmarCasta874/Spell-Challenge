@@ -98,8 +98,54 @@
   var mwTotalPairs = {{ words|length }};
   var mwRewardSent = false;
 
+  var mwClickUrl = "{% static 'sounds/click.mp3' %}";
+  var mwCorrectUrl = "{% static 'sounds/correct.mp3' %}";
+  var mwIncorrectUrl = "{% static 'sounds/incorrect.mp3' %}";
+  var mwWinUrl = "{% static 'sounds/win.mp3' %}";
+
+  var mwClickAudio = new Audio(mwClickUrl);
+  var mwCorrectAudio = new Audio(mwCorrectUrl);
+  var mwIncorrectAudio = new Audio(mwIncorrectUrl);
+  var mwWinAudio = new Audio(mwWinUrl);
+  var mwWinUnlocked = false;
+
+  mwClickAudio.preload = 'auto';
+  mwCorrectAudio.preload = 'auto';
+  mwIncorrectAudio.preload = 'auto';
+  mwWinAudio.preload = 'auto';
+
+  function mwUnlockWinAudio() {
+    if (mwWinUnlocked) return;
+    mwWinUnlocked = true;
+    mwWinAudio.muted = true;
+    var p = mwWinAudio.play();
+    if (p !== undefined) {
+      p.then(function () {
+        mwWinAudio.pause();
+        mwWinAudio.muted = false;
+      }).catch(function () {
+        mwWinAudio.muted = false;
+        mwWinUnlocked = false;
+      });
+    }
+  }
+
+  function mwPlaySound(audioObj, volume) {
+    mwUnlockWinAudio();
+    try {
+      var sound = audioObj.cloneNode();
+      sound.volume = volume;
+      var playPromise = sound.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(function () {});
+      }
+    } catch (e) {}
+  }
+
   function mwSelectWord(btn) {
     if (btn.classList.contains('mw-item-matched')) return;
+
+    mwPlaySound(mwClickAudio, 0.8);
 
     if (mwSelectedWordBtn) {
       mwSelectedWordBtn.classList.remove('mw-item-selected');
@@ -112,7 +158,10 @@
   function mwSelectCategory(btn) {
     if (btn.classList.contains('mw-item-matched')) return;
 
-    if (!mwSelectedWordBtn) return;
+    if (!mwSelectedWordBtn) {
+      mwPlaySound(mwClickAudio, 0.8);
+      return;
+    }
 
     var selectedCategory = mwSelectedWordBtn.dataset.category;
     var clickedCategory = btn.dataset.category;
@@ -120,6 +169,7 @@
     var isCorrect = selectedCategory === clickedCategory;
 
     if (isCorrect) {
+      mwPlaySound(mwCorrectAudio, 0.85);
 
       mwSelectedWordBtn.classList.remove('mw-item-selected');
       mwSelectedWordBtn.classList.add('mw-item-matched');
@@ -144,6 +194,7 @@
       }
 
     } else {
+      mwPlaySound(mwIncorrectAudio, 0.85);
 
       // Guardar la referencia antes de limpiar la selección.
       var incorrectWordBtn = mwSelectedWordBtn;
@@ -275,6 +326,7 @@
       // Mostrar pantalla de finalización.
       document.getElementById('mwGame').classList.add('d-none');
       document.getElementById('mwCompleted').classList.remove('d-none');
+      mwPlaySound(mwWinAudio, 1.0);
 
     })
     .catch(function (error) {

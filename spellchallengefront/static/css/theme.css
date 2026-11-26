@@ -1,0 +1,2332 @@
+/* theme.css */
+
+:root {
+  --bg-page: #fafafa;
+  --bg-card: #ffffff;
+  --bg-subtle: #f3f4f6;
+  --bg-input: #ffffff;
+  --bg-hover: rgba(122, 31, 43, 0.08);
+  --bg-error: #fdf2f2;
+
+  --text-main: #333333;
+  --text-muted: #555555;
+  --text-inverse: #ffffff;
+
+  --brand-primary: #7a1f2b;
+  --brand-hover: #5e1721;
+  --brand-border: #7a1f2b;
+  --brand-focus: rgba(122, 31, 43, 0.2);
+
+  --border-subtle: #e5e7eb;
+  --shadow-card: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] {
+  --bg-page: #121216;
+  --bg-card: #1c1c22;
+  --bg-subtle: #25252d;
+  --bg-input: #25252d;
+  --bg-hover: rgba(224, 90, 109, 0.16);
+  --bg-error: rgba(224, 90, 109, 0.14);
+
+  --text-main: #f1f1f4;
+  --text-muted: #b0b0bc;
+  --text-inverse: #ffffff;
+
+  --brand-primary: #e05a6d;
+  --brand-hover: #f07183;
+  --brand-border: #a83242;
+  --brand-focus: rgba(224, 90, 109, 0.28);
+
+  --border-subtle: #2e2e38;
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* =========================================================
+   FONDOS GENERALES
+   ========================================================= */
+
+[data-theme="dark"] body,
+[data-theme="dark"] .auth-page,
+[data-theme="dark"] .landing,
+[data-theme="dark"] .about-page,
+[data-theme="dark"] main,
+[data-theme="dark"] .main-content,
+[data-theme="dark"] .content-wrapper,
+[data-theme="dark"] .page-container,
+[data-theme="dark"] .dashboard-container {
+  background-color: var(--bg-page) !important;
+  color: var(--text-main) !important;
+}
+
+/* =========================================================
+   TARJETAS, BANNERS, CAJAS Y PANELES
+   (Excluye cartas de volteo / Memory Game para conservar su diseño original)
+   ========================================================= */
+
+[data-theme="dark"] .auth-card,
+[data-theme="dark"] .card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .dashboard-card,
+[data-theme="dark"] .leaderboard-card,
+[data-theme="dark"] .competition-card,
+[data-theme="dark"] .group-card,
+[data-theme="dark"] .panel-card,
+[data-theme="dark"] [class*="-card"]:not(.creator-card):not([class*="memory"]):not([class*="flip"]):not([class*="front"]):not([class*="back"]):not([class*="inner"]):not([class*="mg-"]):not([class*="match"]):not([class*="card-header"]):not([class*="card-body"]):not([class*="card-footer"]):not([class*="card-title"]):not([class*="card-text"]):not([class*="card-info"]):not([class*="card-meta"]),
+[data-theme="dark"] [class*="banner"],
+[data-theme="dark"] [class*="widget"],
+[data-theme="dark"] [class*="arena"],
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .dropdown-menu,
+[data-theme="dark"] .table {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-subtle) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+/* Limpia fondos y sombras de sub-elementos internos dentro de tarjetas normales */
+[data-theme="dark"] .card > div,
+[data-theme="dark"] [class*="-card"]:not([class*="memory"]):not([class*="flip"]):not([class*="mg-"]):not([class*="match"]) > div:not([class*="front"]):not([class*="back"]):not([class*="inner"]),
+[data-theme="dark"] [class*="-card"]:not([class*="memory"]):not([class*="flip"]) header,
+[data-theme="dark"] [class*="-card"]:not([class*="memory"]):not([class*="flip"]) footer,
+[data-theme="dark"] [class*="card-header"],
+[data-theme="dark"] [class*="card-body"],
+[data-theme="dark"] [class*="card-footer"],
+[data-theme="dark"] [class*="card-meta"],
+[data-theme="dark"] [class*="card-info"],
+[data-theme="dark"] [class*="card-dates"],
+[data-theme="dark"] [class*="card-status"] {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] [class*="game-card"]:not([class*="memory"]):not([class*="flip"]):not(:has([class*="front"])),
+[data-theme="dark"] [class*="mini-game"] {
+  background-color: var(--bg-subtle) !important;
+  border: 1px solid var(--brand-border) !important;
+}
+
+/* Limpia cualquier fondo residual en elementos anidados dentro de tarjetas normales */
+[data-theme="dark"] .card *:not(a):not(button):not([class*="badge"]):not([class*="status"]):not([class*="pill"]),
+[data-theme="dark"] [class*="-card"]:not(.creator-card):not([class*="memory"]):not([class*="flip"]):not([class*="mg-"]):not([class*="match"]):not(:has([class*="front"])):not(:has([class*="back"])) *:not(a):not(button):not([class*="badge"]):not([class*="status"]):not([class*="pill"]) {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   GLOBO DE MENSAJES DE BEENARY (MASCOTA)
+   ========================================================= */
+
+[data-theme="dark"] .pet-message,
+[data-theme="dark"] .pet-bubble,
+[data-theme="dark"] .pet-box,
+[data-theme="dark"] .pet-card,
+[data-theme="dark"] .mascot-message,
+[data-theme="dark"] .mascot-bubble,
+[data-theme="dark"] #pet-message,
+[data-theme="dark"] #petMessage,
+[data-theme="dark"] #petBubble {
+  background: linear-gradient(145deg, #25221c 0%, #1c1b18 100%) !important;
+  border: 1.5px solid rgba(243, 198, 79, 0.45) !important;
+  border-radius: 14px !important;
+  color: #f1f1f4 !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55) !important;
+}
+
+[data-theme="dark"] [class*="pet-"] div,
+[data-theme="dark"] [class*="pet-"] header,
+[data-theme="dark"] [class*="pet-"] span,
+[data-theme="dark"] [class*="pet-"] p,
+[data-theme="dark"] [id*="pet"] div,
+[data-theme="dark"] [id*="pet"] header,
+[data-theme="dark"] [id*="pet"] span,
+[data-theme="dark"] [id*="pet"] p {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] [class*="pet-header"],
+[data-theme="dark"] [class*="pet-top"] {
+  border-bottom: 1px solid rgba(243, 198, 79, 0.16) !important;
+  padding-bottom: 6px !important;
+  margin-bottom: 8px !important;
+}
+
+[data-theme="dark"] [class*="pet-"] h3,
+[data-theme="dark"] [class*="pet-"] h4,
+[data-theme="dark"] [class*="pet-title"],
+[data-theme="dark"] [id*="pet"] h4 {
+  color: #f3c64f !important;
+}
+
+[data-theme="dark"] [class*="pet-"] strong,
+[data-theme="dark"] [class*="pet-"] b,
+[data-theme="dark"] [id*="pet"] strong {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] [class*="pet-"] p,
+[data-theme="dark"] [id*="pet"] p {
+  color: #d6d6dc !important;
+}
+
+[data-theme="dark"] [class*="pet-"] button,
+[data-theme="dark"] [id*="pet"] button {
+  background: transparent !important;
+  border: none !important;
+  color: #f3c64f !important;
+  opacity: 0.8;
+}
+
+[data-theme="dark"] [class*="pet-"] button:hover,
+[data-theme="dark"] [id*="pet"] button:hover {
+  opacity: 1;
+}
+
+/* =========================================================
+   TEXTOS Y ENCABEZADOS
+   ========================================================= */
+
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] p,
+[data-theme="dark"] span:not([class*="front"] *):not([class*="back"] *):not([class*="memory"] *),
+[data-theme="dark"] label,
+[data-theme="dark"] small,
+[data-theme="dark"] strong,
+[data-theme="dark"] li,
+[data-theme="dark"] td,
+[data-theme="dark"] th {
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] [class*="subtitle"],
+[data-theme="dark"] [class*="caption"],
+[data-theme="dark"] [class*="label"]:not(label) {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .auth-card h1,
+[data-theme="dark"] .field label,
+[data-theme="dark"] .auth-footer,
+[data-theme="dark"] .auth-footer a,
+[data-theme="dark"] .forgot-password-link a,
+[data-theme="dark"] .back-link,
+[data-theme="dark"] .landing__welcome,
+[data-theme="dark"] .landing__tagline,
+[data-theme="dark"] .landing__about-link,
+[data-theme="dark"] .about-title,
+[data-theme="dark"] .about-back,
+[data-theme="dark"] a[class*="link"],
+[data-theme="dark"] [class*="value"],
+[data-theme="dark"] [class*="number"],
+[data-theme="dark"] [class*="rank"] {
+  color: var(--brand-primary) !important;
+}
+
+/* =========================================================
+   BOTONES CLAROS (PLAY, OUTLINE, CARDS, ETC.)
+   ========================================================= */
+
+[data-theme="dark"] .btn-outline,
+[data-theme="dark"] .btn-light,
+[data-theme="dark"] .btn-white,
+[data-theme="dark"] [class*="btn-play"],
+[data-theme="dark"] [class*="play-btn"],
+[data-theme="dark"] [class*="game-card"] a,
+[data-theme="dark"] [class*="game-card"] button,
+[data-theme="dark"] [class*="mini-game"] a,
+[data-theme="dark"] [class*="mini-game"] button {
+  background-color: var(--bg-card) !important;
+  color: var(--brand-primary) !important;
+  border: 1.5px solid var(--brand-primary) !important;
+}
+
+[data-theme="dark"] .btn-outline:hover,
+[data-theme="dark"] .btn-light:hover,
+[data-theme="dark"] .btn-white:hover,
+[data-theme="dark"] [class*="btn-play"]:hover,
+[data-theme="dark"] [class*="play-btn"]:hover,
+[data-theme="dark"] [class*="game-card"] a:hover,
+[data-theme="dark"] [class*="game-card"] button:hover,
+[data-theme="dark"] [class*="mini-game"] a:hover,
+[data-theme="dark"] [class*="mini-game"] button:hover {
+  background-color: var(--brand-primary) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-primary {
+  background-color: #7a1f2b !important;
+  border-color: #7a1f2b !important;
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   INPUTS Y SELECTS
+   ========================================================= */
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea,
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+  background-color: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--brand-border) !important;
+}
+
+[data-theme="dark"] .brand-mark img[src*="spell-challenge_red"] {
+  filter: brightness(1.45) contrast(1.05);
+}
+
+/* =========================================================
+   BOTÓN FLOTANTE GLOBAL DE TEMA
+   ========================================================= */
+
+.theme-toggle-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1055;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--brand-border);
+  background-color: var(--bg-card);
+  color: var(--brand-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.theme-toggle-fab:hover {
+  transform: scale(1.08);
+  background-color: var(--brand-primary);
+  color: #ffffff;
+}
+
+.theme-toggle-fab svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* =========================================================
+   LIMPIEZA DE TARJETAS Y MODALES DE COMPETITIONS
+   ========================================================= */
+
+[data-theme="dark"] .competition-card {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+[data-theme="dark"] .competition-card-active {
+  border-color: var(--brand-primary) !important;
+}
+
+[data-theme="dark"] .competition-card-header,
+[data-theme="dark"] .competition-card-body,
+[data-theme="dark"] .competition-card-footer,
+[data-theme="dark"] .competition-card-row,
+[data-theme="dark"] .competition-card-row-date,
+[data-theme="dark"] .competition-card-value,
+[data-theme="dark"] .competition-card-date,
+[data-theme="dark"] .competition-card-date-right {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+[data-theme="dark"] .competition-card-title {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .competition-card-value {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .competition-card-date {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .modal-content .modal-header {
+  background-color: var(--bg-subtle) !important;
+  border-bottom-color: var(--border-subtle) !important;
+}
+
+[data-theme="dark"] .modal-content .modal-title,
+[data-theme="dark"] .modal-content strong {
+  color: var(--brand-primary) !important;
+}
+
+[data-theme="dark"] .modal-content .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+[data-theme="dark"] .competitions-title,
+[data-theme="dark"] .section-title {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .competitions-subtitle {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .competitions-grid .competition-card {
+  background-color: var(--bg-card) !important;
+  border: 1.5px solid var(--border-subtle) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+[data-theme="dark"] .competitions-grid .competition-card.competition-card-active {
+  border-color: var(--brand-primary) !important;
+}
+
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-header {
+  background-color: rgba(122, 31, 43, 0.22) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-title {
+  color: #f5b7c0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-body,
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-footer,
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-row,
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-row-split,
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-row-date,
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-stat,
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-label,
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-value,
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-date,
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-date-right,
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-group {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-value,
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-label {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-date,
+[data-theme="dark"] .competitions-grid .competition-card .competition-card-group {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .competitions-grid .competition-card .btn-comp-outline {
+  background-color: transparent !important;
+  color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .competitions-grid .competition-card .btn-comp-outline:hover {
+  background-color: var(--brand-primary) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .competitions-grid .competition-card .btn-comp-solid {
+  background-color: #7a1f2b !important;
+  border-color: #7a1f2b !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body .competitions-grid .competition-card .competition-card-body,
+html[data-theme="dark"] body .competitions-grid .competition-card .competition-card-body *,
+html[data-theme="dark"] body .competitions-grid .competition-card .competition-card-footer {
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  outline: none !important;
+  border: none !important;
+}
+
+/* =========================================================
+   LIMPIEZA DE BORDES EN LA SECCIÓN MINI-GAMES (STUDENT HOME)
+   ========================================================= */
+
+html[data-theme="dark"] body [class*="mini-games-header"],
+html[data-theme="dark"] body [class*="mini-games-section"],
+html[data-theme="dark"] body [class*="mini-games-grid"],
+html[data-theme="dark"] body [class*="mini-games-row"],
+html[data-theme="dark"] body [class*="mini-game-title"],
+html[data-theme="dark"] body [class*="mini-game-name"],
+html[data-theme="dark"] body [class*="mini-game-link"],
+html[data-theme="dark"] body [class*="mini-game-play"],
+html[data-theme="dark"] body [class*="game-card-title"],
+html[data-theme="dark"] body [class*="game-title"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body [class*="mini-game-card"] *:not(button),
+html[data-theme="dark"] body [class*="game-card"]:not([class*="memory"]):not([class*="flip"]):not(:has([class*="front"])) *:not(button) {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body [class*="mini-game-card"],
+html[data-theme="dark"] body [class*="game-card"]:not([class*="memory"]):not([class*="flip"]):not(:has([class*="front"])) {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+html[data-theme="dark"] body [class*="mini-game-card"]:hover,
+html[data-theme="dark"] body [class*="game-card"]:not([class*="memory"]):not([class*="flip"]):not(:has([class*="front"])):hover {
+  border-color: var(--brand-primary) !important;
+}
+
+/* =========================================================
+   LEGIBILIDAD DE TEXTOS EN PROGRESS Y LISTAS DE RESULTADOS
+   ========================================================= */
+
+html[data-theme="dark"] body [class*="progress"] h1,
+html[data-theme="dark"] body [class*="progress"] h2,
+html[data-theme="dark"] body [class*="progress"] h3,
+html[data-theme="dark"] body [class*="progress"] h4,
+html[data-theme="dark"] body [class*="progress"] strong,
+html[data-theme="dark"] body [class*="progress"] [class*="title"],
+html[data-theme="dark"] body [class*="progress"] [class*="name"],
+html[data-theme="dark"] body [class*="result"] h1,
+html[data-theme="dark"] body [class*="result"] h2,
+html[data-theme="dark"] body [class*="result"] h3,
+html[data-theme="dark"] body [class*="result"] h4,
+html[data-theme="dark"] body [class*="result"] strong,
+html[data-theme="dark"] body [class*="result"] [class*="title"],
+html[data-theme="dark"] body [class*="result"] [class*="name"],
+html[data-theme="dark"] body [class*="achievement"] [class*="title"] {
+  color: var(--text-main) !important;
+}
+
+html[data-theme="dark"] body h1,
+html[data-theme="dark"] body h2,
+html[data-theme="dark"] body h3,
+html[data-theme="dark"] body h4,
+html[data-theme="dark"] body [class*="progress"] [class*="header"],
+html[data-theme="dark"] body [class*="progress"] [class*="title"],
+html[data-theme="dark"] body [class*="recent"] [class*="header"],
+html[data-theme="dark"] body [class*="recent"] [class*="title"],
+html[data-theme="dark"] body div:has(> h2:only-child),
+html[data-theme="dark"] body div:has(> h3:only-child),
+html[data-theme="dark"] body header:has(> h2:only-child),
+html[data-theme="dark"] body header:has(> h3:only-child),
+html[data-theme="dark"] body [class*="section-header"],
+html[data-theme="dark"] body [class*="results-header"],
+html[data-theme="dark"] body section,
+html[data-theme="dark"] body [class*="recent-results"],
+html[data-theme="dark"] body [class*="results-section"],
+html[data-theme="dark"] body [class*="section-title"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* =========================================================
+   BOTÓN "LEAVE GROUP" Y ACCIONES DESTRUCTIVAS EN MODO OSCURO
+   ========================================================= */
+
+html[data-theme="dark"] body [class*="group"] button[class*="leave"],
+html[data-theme="dark"] body [class*="group"] a[class*="leave"],
+html[data-theme="dark"] body [class*="leave-group"],
+html[data-theme="dark"] body .btn-leave,
+html[data-theme="dark"] body .btn-leave-group,
+html[data-theme="dark"] body [class*="group-card"] button:last-of-type,
+html[data-theme="dark"] body [class*="group-card"] a:last-of-type {
+  background-color: #7a1f2b !important;
+  border: 1.5px solid #7a1f2b !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body [class*="group"] button[class*="leave"]:hover,
+html[data-theme="dark"] body [class*="group"] a[class*="leave"]:hover,
+html[data-theme="dark"] body [class*="leave-group"]:hover,
+html[data-theme="dark"] body .btn-leave:hover,
+html[data-theme="dark"] body .btn-leave-group:hover,
+html[data-theme="dark"] body [class*="group-card"] button:last-of-type:hover,
+html[data-theme="dark"] body [class*="group-card"] a:last-of-type:hover {
+  background-color: #992636 !important;
+  border-color: #992636 !important;
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   EDIT PROFILE: ESPACIADO, CÁMARA SÓLIDA Y OJO CENTRADO
+   ========================================================= */
+
+div:has(> form[action*="profile"]),
+section:has(> form[action*="profile"]),
+form[action*="profile"] {
+  padding: 2.25rem 2.5rem !important;
+  border-radius: 16px !important;
+  box-sizing: border-box !important;
+}
+
+div:has(> form[action*="profile"]),
+section:has(> form[action*="profile"]) {
+  max-width: 780px;
+  margin: 1.5rem auto !important;
+}
+
+form[action*="profile"] label,
+[class*="edit-profile"] label {
+  display: block;
+  margin-top: 1rem !important;
+  margin-bottom: 0.45rem !important;
+}
+
+form[action*="profile"] input,
+[class*="edit-profile"] input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Mantiene el ojo de la contraseña centrado dentro de su campo */
+form[action*="profile"] .toggle-password,
+form[action*="profile"] [class*="password"] button,
+form[action*="profile"] [class*="eye"],
+[class*="edit-profile"] .toggle-password,
+[class*="edit-profile"] [class*="password"] button,
+[class*="edit-profile"] [class*="eye"] {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Texto "Change profile picture" limpio sin óvalo de fondo */
+html[data-theme="dark"] body form[action*="profile"] label:not(:has(svg)):not(:has(i)):not(:has(img)),
+html[data-theme="dark"] body [class*="avatar"] label:not(:has(svg)):not(:has(i)):not(:has(img)),
+html[data-theme="dark"] body [class*="profile-pic"] label:not(:has(svg)):not(:has(i)):not(:has(img)) {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: #f5b7c0 !important;
+}
+
+/* Botón SAVE CHANGES con contraste sólido guinda */
+html[data-theme="dark"] body form[action*="profile"] button[type="submit"],
+html[data-theme="dark"] body [class*="edit-profile"] button[type="submit"],
+html[data-theme="dark"] body [class*="btn-save"] {
+  margin-top: 1.25rem !important;
+  background-color: #7a1f2b !important;
+  border: 1.5px solid #7a1f2b !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] body form[action*="profile"] button[type="submit"]:hover,
+html[data-theme="dark"] body [class*="edit-profile"] button[type="submit"]:hover,
+html[data-theme="dark"] body [class*="btn-save"]:hover {
+  background-color: #992636 !important;
+  border-color: #992636 !important;
+}
+
+html[data-theme="dark"] body form[action*="profile"] input[readonly],
+html[data-theme="dark"] body form[action*="profile"] input[disabled] {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-muted) !important;
+}
+
+/* =========================================================
+   ENLACE DE REGRESO EN MINIJUEGOS ("← Mini Games")
+   ========================================================= */
+
+html[data-theme="dark"] body a[href*="mini"],
+html[data-theme="dark"] body a[class*="back"],
+html[data-theme="dark"] body button[class*="back"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #ffffff !important;
+}
+
+/* Color blanco para el ojo de contraseña en modo oscuro (Edit Profile) */
+html[data-theme="dark"] body form[action*="profile"] .toggle-password,
+html[data-theme="dark"] body form[action*="profile"] [class*="password"] button,
+html[data-theme="dark"] body form[action*="profile"] [class*="password"] span,
+html[data-theme="dark"] body form[action*="profile"] [class*="eye"],
+html[data-theme="dark"] body [class*="edit-profile"] .toggle-password,
+html[data-theme="dark"] body [class*="edit-profile"] [class*="password"] button,
+html[data-theme="dark"] body [class*="edit-profile"] [class*="eye"],
+html[data-theme="dark"] body input[type="password"] ~ button,
+html[data-theme="dark"] body input[type="password"] ~ span {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] body form[action*="profile"] .toggle-password svg,
+html[data-theme="dark"] body form[action*="profile"] [class*="password"] svg,
+html[data-theme="dark"] body form[action*="profile"] [class*="eye"] svg,
+html[data-theme="dark"] body [class*="edit-profile"] .toggle-password svg,
+html[data-theme="dark"] body input[type="password"] ~ button svg,
+html[data-theme="dark"] body input[type="password"] ~ span svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Iguala el tamaño, alineación y forma de CANCEL con SAVE CHANGES (excluyendo el botón del ojo) */
+html[data-theme="dark"] body form[action*="profile"] div:has(> button[type="submit"]),
+html[data-theme="dark"] body [class*="edit-profile"] div:has(> button[type="submit"]) {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  margin-top: 1.25rem !important;
+}
+
+html[data-theme="dark"] body form[action*="profile"] button[type="submit"],
+html[data-theme="dark"] body form[action*="profile"] a,
+html[data-theme="dark"] body form[action*="profile"] div:has(> button[type="submit"]) > button,
+html[data-theme="dark"] body [class*="edit-profile"] button[type="submit"],
+html[data-theme="dark"] body [class*="edit-profile"] a,
+html[data-theme="dark"] body [class*="btn-save"] {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  height: 46px !important;
+  padding: 0 2rem !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+html[data-theme="dark"] body form[action*="profile"] a,
+html[data-theme="dark"] body form[action*="profile"] div:has(> button[type="submit"]) > button[type="button"] {
+  background-color: transparent !important;
+  border: 1.5px solid var(--brand-primary) !important;
+  color: var(--brand-primary) !important;
+}
+
+/* Mantiene el ojo de contraseña blanco, sin marco ni relleno extra */
+html[data-theme="dark"] body form[action*="profile"] .toggle-password,
+html[data-theme="dark"] body form[action*="profile"] [class*="password"] button,
+html[data-theme="dark"] body form[action*="profile"] [class*="eye"],
+html[data-theme="dark"] body input[type="password"] ~ button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  height: auto !important;
+  width: auto !important;
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   LIMPIEZA DE FRANJAS SOMBREADAS EN TEXTOS (PRACTICE)
+   ========================================================= */
+
+html[data-theme="dark"] body [class*="practice"] p,
+html[data-theme="dark"] body [class*="practice"] [class*="desc"],
+html[data-theme="dark"] body [class*="practice"] [class*="text"],
+html[data-theme="dark"] body [class*="practice"] [class*="info"],
+html[data-theme="dark"] body [class*="practice"] [class*="sub"],
+html[data-theme="dark"] body [class*="skill"] p,
+html[data-theme="dark"] body [class*="skill"] [class*="desc"],
+html[data-theme="dark"] body [class*="mode"] p,
+html[data-theme="dark"] body [class*="mode"] [class*="desc"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* =========================================================
+   LIMPIEZA DE SUB-ELEMENTOS INTERNOS EN TARJETAS (PRACTICE)
+   ========================================================= */
+
+html[data-theme="dark"] body [class*="-card"]:not(.creator-card):not([class*="memory"]):not([class*="flip"]) [class*="card-"],
+html[data-theme="dark"] body [class*="-card"]:not(.creator-card):not([class*="memory"]):not([class*="flip"]) [class*="desc"],
+html[data-theme="dark"] body [class*="-card"]:not(.creator-card):not([class*="memory"]):not([class*="flip"]) [class*="icon"],
+html[data-theme="dark"] body [class*="-card"]:not(.creator-card):not([class*="memory"]):not([class*="flip"]) p,
+html[data-theme="dark"] body [class*="practice"] [class*="desc"],
+html[data-theme="dark"] body [class*="practice"] [class*="icon"],
+html[data-theme="dark"] body [class*="practice"] p {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* =========================================================
+   LIMPIEZA TOTAL DE TEXTOS E ÍCONOS DENTRO DE TARJETAS
+   ========================================================= */
+
+html[data-theme="dark"] main div > div > p,
+html[data-theme="dark"] main div > div > span:not([class*="badge"]):not([class*="pill"]):not([class*="tag"]):not([class*="chip"]),
+html[data-theme="dark"] main div > div > div:has(> svg),
+html[data-theme="dark"] main div > div > span:has(> svg),
+html[data-theme="dark"] main div > div > i,
+html[data-theme="dark"] [class*="practice"] p,
+html[data-theme="dark"] [class*="practice"] [class*="icon"],
+html[data-theme="dark"] [class*="practice"] [class*="desc"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   LIMPIEZA DE SOMBRAS Y FONDOS INTERNOS EN PRACTICE
+   ========================================================= */
+
+html[data-theme="dark"] body main div > div > div:not(:has(h2)):not(:has(h3)):not([class*="tag"]):not([class*="pill"]):not([class*="chip"]):not([class*="badge"]):not([class*="word"]),
+html[data-theme="dark"] body main div > div > p,
+html[data-theme="dark"] body main section div > div > p {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   ACABADO REDONDEADO Y MODERNO EN PRACTICE SPELLING
+   ========================================================= */
+
+/* 1. Contenedor principal del ejercicio (esquinas redondeadas y borde sutil) */
+html[data-theme="dark"] body div:has(> h2):has(input[type="text"]),
+html[data-theme="dark"] body div:has(> h3):has(input[type="text"]),
+html[data-theme="dark"] body [class*="spelling"] [class*="box"],
+html[data-theme="dark"] body [class*="spelling"] [class*="card"],
+html[data-theme="dark"] body [class*="practice"] [class*="card"]:has(input) {
+  background-color: var(--bg-card) !important;
+  border: 1.5px solid var(--border-subtle) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55) !important;
+  overflow: hidden !important;
+}
+
+/* 2. Controles "Play" y "Speak" limpios (sin subrayado y con buen contraste) */
+html[data-theme="dark"] body div:has(> h2):has(input[type="text"]) a,
+html[data-theme="dark"] body div:has(> h2):has(input[type="text"]) button:not(:last-of-type),
+html[data-theme="dark"] body div:has(> h3):has(input[type="text"]) a,
+html[data-theme="dark"] body div:has(> h3):has(input[type="text"]) button:not(:last-of-type) {
+  color: var(--text-main) !important;
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
+
+html[data-theme="dark"] body div:has(> h2):has(input[type="text"]) a:hover,
+html[data-theme="dark"] body div:has(> h2):has(input[type="text"]) button:not(:last-of-type):hover,
+html[data-theme="dark"] body div:has(> h3):has(input[type="text"]) a:hover,
+html[data-theme="dark"] body div:has(> h3):has(input[type="text"]) button:not(:last-of-type):hover {
+  color: var(--brand-primary) !important;
+}
+
+/* 3. Casillas de letras redondeadas y con borde inferior activo */
+html[data-theme="dark"] body div:has(> h2) input[type="text"],
+html[data-theme="dark"] body div:has(> h3) input[type="text"],
+html[data-theme="dark"] body [class*="spelling"] input[type="text"],
+html[data-theme="dark"] body [class*="letter"] input {
+  background-color: var(--bg-subtle) !important;
+  border: 1.5px solid #3a3a48 !important;
+  border-bottom: 2.5px solid var(--brand-primary) !important;
+  border-radius: 10px !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+html[data-theme="dark"] body div:has(> h2) input[type="text"]:focus,
+html[data-theme="dark"] body div:has(> h3) input[type="text"]:focus,
+html[data-theme="dark"] body [class*="spelling"] input[type="text"]:focus {
+  border-color: var(--brand-primary) !important;
+  box-shadow: 0 0 0 3px var(--brand-focus) !important;
+  outline: none !important;
+}
+
+/* =========================================================
+   AVISO DE PAUSA / LÍMITE DE TRANSCRIPCIÓN (DISEÑO LIMPIO)
+   ========================================================= */
+
+/* Evita que los contenedores envolventes generen bordes múltiples */
+html[data-theme="dark"] body main > div:has(img):has(h1, h2, h3),
+html[data-theme="dark"] body main > div > div:has(img):has(h1, h2, h3) {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Estilo exclusivo de la tarjeta marcada por JS (data-break-card) */
+html[data-theme="dark"] body [data-break-card="1"] {
+  background: linear-gradient(145deg, #24211b 0%, #1a1917 100%) !important;
+  border: 1.5px solid rgba(243, 198, 79, 0.4) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65) !important;
+  padding: 2.5rem 2rem !important;
+}
+
+html[data-theme="dark"] body [data-break-timer="1"] {
+  background-color: rgba(243, 198, 79, 0.08) !important;
+  border: 1.5px solid rgba(243, 198, 79, 0.45) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+  padding: 1rem 2.25rem !important;
+  margin: 1.25rem auto !important;
+}
+
+/* =========================================================
+   TARJETAS DE ESTADÍSTICAS EN HOME (LEVEL, XP, RANKINGS)
+   ========================================================= */
+
+html[data-theme="dark"] body [class*="stat-card"],
+html[data-theme="dark"] body [class*="stats"] > div,
+html[data-theme="dark"] body [class*="metric"],
+html[data-theme="dark"] body [class*="kpi"],
+html[data-theme="dark"] body [data-home-stat="1"] {
+  background-color: var(--bg-card) !important;
+  border: 1.5px solid var(--border-subtle) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* =========================================================
+   VENTANA MODAL DE NOTIFICACIONES (DISEÑO LIMPIO SIN DOBLE BORDE)
+   ========================================================= */
+
+html[data-theme="dark"] body .modal-content,
+html[data-theme="dark"] body [data-notif-modal="1"] {
+  background: #18181f !important;
+  background-color: var(--bg-card, #18181f) !important;
+  border: 1.5px solid var(--border-subtle, #2c2c38) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85) !important;
+  color: var(--text-main, #f1f1f4) !important;
+}
+
+html[data-theme="dark"] body [data-notif-modal="1"] .modal-header,
+html[data-theme="dark"] body [data-notif-modal="1"] .modal-body,
+html[data-theme="dark"] body [data-notif-modal="1"] .modal-footer {
+  background: #18181f !important;
+  background-color: var(--bg-card, #18181f) !important;
+  border-color: var(--border-subtle, #2c2c38) !important;
+}
+
+/* Tarjeta exterior de cada notificación (leída: borde neutro limpio) */
+html[data-theme="dark"] body [data-notif-modal="1"] [data-notif-item="1"] {
+  background-color: var(--bg-subtle, #20202a) !important;
+  border: 1px solid var(--border-subtle, #2c2c38) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+
+/* Tarjeta exterior de notificación NUEVA ("New") */
+html[data-theme="dark"] body [data-notif-modal="1"] [data-notif-item="1"][data-notif-unread="1"] {
+  background-color: #221b20 !important;
+  border: 1px solid rgba(224, 90, 109, 0.35) !important;
+}
+
+/* Elimina cualquier borde o caja interna dentro de la notificación */
+html[data-theme="dark"] body [data-notif-modal="1"] [data-notif-item="1"] div:not([data-notif-icon="1"]),
+html[data-theme="dark"] body [data-notif-modal="1"] [data-notif-item="1"] p,
+html[data-theme="dark"] body [data-notif-modal="1"] [data-notif-item="1"] span {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Círculo suave detrás del ícono de medalla */
+html[data-theme="dark"] body [data-notif-modal="1"] [data-notif-icon="1"] {
+  background-color: rgba(224, 90, 109, 0.14) !important;
+  border: none !important;
+  border-radius: 50% !important;
+}
+
+/* =========================================================
+   TEXTOS E ÍCONOS BLANCOS EN LA BARRA DE NAVEGACIÓN (MODO OSCURO)
+   ========================================================= */
+
+html[data-theme="dark"] body .navbar,
+html[data-theme="dark"] body header.navbar,
+html[data-theme="dark"] body .navbar a,
+html[data-theme="dark"] body .navbar .nav-link,
+html[data-theme="dark"] body .navbar button,
+html[data-theme="dark"] body .navbar span,
+html[data-theme="dark"] body .navbar i,
+html[data-theme="dark"] body .navbar svg,
+html[data-theme="dark"] body [class*="sidebar"] a,
+html[data-theme="dark"] body [class*="sidebar"] span,
+html[data-theme="dark"] body [class*="sidebar"] i,
+html[data-theme="dark"] body [class*="sidebar"] svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Efecto sutil al pasar el cursor o en el enlace activo */
+html[data-theme="dark"] body .navbar a:hover,
+html[data-theme="dark"] body .navbar .nav-link:hover,
+html[data-theme="dark"] body .navbar button:hover,
+html[data-theme="dark"] body [class*="sidebar"] a:hover {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+html[data-theme="dark"] body .navbar a:hover svg,
+html[data-theme="dark"] body .navbar .nav-link:hover svg,
+html[data-theme="dark"] body .navbar button:hover svg,
+html[data-theme="dark"] body [class*="sidebar"] a:hover svg {
+  stroke: rgba(255, 255, 255, 0.82) !important;
+}
+
+/* =========================================================
+   FONDO SÓLIDO Y ESTÉTICA REAL EN BOSS BATTLE (MODO OSCURO)
+   ========================================================= */
+
+/* 1. Contenedor principal del modal de Boss Battle */
+html[data-theme="dark"] body [data-boss-modal="1"] {
+  background: #18181f !important;
+  background-color: #18181f !important;
+  border: 2px solid #7a1f2b !important;
+  border-radius: 22px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.88) !important;
+  color: #f1f1f4 !important;
+}
+
+/* 2. Tarjeta de presentación de King Bee ("THE ROYAL CHALLENGER") */
+html[data-theme="dark"] body [data-boss-intro="1"] {
+  background: linear-gradient(145deg, #520f19 0%, #380910 100%) !important;
+  border: 2px solid #e6b84c !important;
+  border-radius: 18px !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5) !important;
+  color: #ffffff !important;
+}
+
+/* 3. Caja de arena (KING BEE vs BEENARY) */
+html[data-theme="dark"] body [data-boss-arena="1"] {
+  background: linear-gradient(145deg, #262119 0%, #1d1a15 100%) !important;
+  border: 1.5px solid rgba(243, 198, 79, 0.45) !important;
+  border-radius: 18px !important;
+}
+
+/* 4. Recuadro de la pista ("GUESS THE WORD!") */
+html[data-theme="dark"] body [data-boss-clue="1"] {
+  background-color: #20202a !important;
+  border: 1.5px solid rgba(243, 198, 79, 0.35) !important;
+  border-radius: 14px !important;
+  color: #f1f1f4 !important;
+}
+
+/* 5. Botones de opciones de respuesta (conservando colores de acierto/error) */
+html[data-theme="dark"] body [data-boss-modal="1"] [data-boss-option="1"] {
+  background-color: #22222c !important;
+  border: 1.5px solid #3a3a48 !important;
+  border-radius: 14px !important;
+  color: #f1f1f4 !important;
+  transition: all 0.2s ease !important;
+}
+
+html[data-theme="dark"] body [data-boss-modal="1"] [data-boss-option="1"]:hover {
+  background-color: #2b2b38 !important;
+  border-color: #f3c64f !important;
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   BARRAS DE VIDA (HP) Y BADGE DE RONDA EN BOSS BATTLE
+   ========================================================= */
+
+/* Pastilla dorada de "ROUND X / 10" con texto oscuro legible */
+html[data-theme="dark"] body [data-boss-modal="1"] [data-boss-round="1"] {
+  background: #f3c64f !important;
+  background-color: #f3c64f !important;
+  color: #1c1917 !important;
+  font-weight: 700 !important;
+  border: none !important;
+  border-radius: 999px !important;
+}
+
+/* Etiquetas "HP" visibles */
+html[data-theme="dark"] body [data-boss-arena="1"] [data-boss-hp-label="1"] {
+  color: #e6b84c !important;
+}
+
+/* Pista (fondo) de la barra de vida */
+html[data-theme="dark"] body [data-boss-arena="1"] [data-boss-hp-track="1"] {
+  background: #2e2a23 !important;
+  background-color: #2e2a23 !important;
+  border: 1px solid rgba(243, 198, 79, 0.4) !important;
+  overflow: hidden !important;
+}
+
+/* Relleno verde de la barra de vida */
+html[data-theme="dark"] body [data-boss-arena="1"] [data-boss-hp-fill="1"] {
+  background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%) !important;
+  background-color: #22c55e !important;
+  border: none !important;
+}
+
+/* =========================================================
+   MODAL DE MEMORY GAME (TARJETA ROJA Y CARTAS SIN BORDE BLANCO)
+   ========================================================= */
+
+/* Fondo atenuado detrás del modal */
+html[data-theme="dark"] body [data-memory-backdrop="1"] {
+  background: rgba(0, 0, 0, 0.68) !important;
+  background-color: rgba(0, 0, 0, 0.68) !important;
+}
+
+/* Tarjeta modal principal de Memory Game (fondo rojo/guinda original) */
+html[data-theme="dark"] body [data-memory-modal="1"] {
+  background: linear-gradient(145deg, #9b2828 0%, #7f1e1e 100%) !important;
+  background-color: #8f2424 !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75) !important;
+  color: #ffffff !important;
+}
+
+/* Textos e íconos blancos dentro del modal */
+html[data-theme="dark"] body [data-memory-modal="1"] h1,
+html[data-theme="dark"] body [data-memory-modal="1"] h2,
+html[data-theme="dark"] body [data-memory-modal="1"] h3,
+html[data-theme="dark"] body [data-memory-modal="1"] p,
+html[data-theme="dark"] body [data-memory-modal="1"] span,
+html[data-theme="dark"] body [data-memory-modal="1"] a {
+  color: #ffffff !important;
+}
+
+/* Quita cualquier borde blanco de las cartas y del enlace Mini Games */
+html[data-theme="dark"] body [data-memory-modal="1"] [class*="card"],
+html[data-theme="dark"] body [data-memory-modal="1"] [class*="tile"],
+html[data-theme="dark"] body [data-memory-modal="1"] [class*="grid"] button,
+html[data-theme="dark"] body [data-memory-modal="1"] [class*="board"] button,
+html[data-theme="dark"] body [data-memory-modal="1"] button:has(img),
+html[data-theme="dark"] body [data-memory-modal="1"] a {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Botones de dificultad (Easy, Medium, Hard) */
+html[data-theme="dark"] body [data-memory-modal="1"] button:not(:has(img)):not([class*="card"]):not([class*="tile"]) {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.65) !important;
+  border-radius: 14px !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] body [data-memory-modal="1"] button:not(:has(img)):not([class*="card"]):not([class*="tile"]):hover {
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  border-color: #ffffff !important;
+}
+
+/* Si el botón "← Mini Games" es un <button>, mantenlo sin borde */
+html[data-theme="dark"] body [data-memory-modal="1"] button:first-of-type {
+  background: transparent !important;
+  border: none !important;
+}
+/* =========================================================
+   FONDO SÓLIDO SOLO EN LA TARJETA DEL MODAL (MODO OSCURO)
+   ========================================================= */
+
+/* Velo semitransparente detrás de cualquier modal */
+html[data-theme="dark"] body [data-modal-backdrop="1"] {
+  background: rgba(0, 0, 0, 0.68) !important;
+  background-color: rgba(0, 0, 0, 0.68) !important;
+}
+
+/* Tarjeta flotante del modal (solo su caja, sin rellenar toda la pantalla) */
+html[data-theme="dark"] body .modal-content,
+html[data-theme="dark"] body [class*="modal-content"],
+html[data-theme="dark"] body [class*="modal-box"],
+html[data-theme="dark"] body [class*="modal-card"],
+html[data-theme="dark"] body [data-generic-modal="1"] {
+  background: #18181f !important;
+  background-color: var(--bg-card, #18181f) !important;
+  border: 1.5px solid var(--border-subtle, #2c2c38) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85) !important;
+  color: var(--text-main, #f1f1f4) !important;
+}
+
+/* Cajas internas dentro de modales (ej. Correct, Incorrect, Points Earned) */
+html[data-theme="dark"] body [data-generic-modal="1"] [data-modal-subcard="1"] {
+  background-color: var(--bg-subtle, #20202a) !important;
+  border: 1px solid var(--border-subtle, #2c2c38) !important;
+  border-radius: 14px !important;
+}
+
+/* =========================================================
+   BOTONES DE LETRAS EN MINIJUEGOS (MISSING LETTERS / HANGMAN)
+   ========================================================= */
+
+html[data-theme="dark"] body [data-minigame-modal="1"] button:hover {
+  filter: brightness(1.08);
+}
+
+/* =========================================================
+   LOGO DE SPELL-CHALLENGE EN BLANCO (MODO OSCURO)
+   ========================================================= */
+
+html[data-theme="dark"] body img[src*="logo" i]:not(.navbar img),
+html[data-theme="dark"] body img[src*="spell" i]:not(.navbar img),
+html[data-theme="dark"] body img[src*="challenge" i]:not(.navbar img),
+html[data-theme="dark"] body img[alt*="spell" i]:not(.navbar img),
+html[data-theme="dark"] body img[alt*="logo" i]:not(.navbar img),
+html[data-theme="dark"] body [class*="logo"] img:not(.navbar img),
+html[data-theme="dark"] body .auth-card img {
+  filter: brightness(0) invert(1) !important;
+  opacity: 1 !important;
+}
+
+/* Asegura que la foto de perfil nunca reciba filtros de color */
+html[data-theme="dark"] body img[src*="/media/"],
+html[data-theme="dark"] body [class*="avatar"] img,
+html[data-theme="dark"] body [class*="profile"] img {
+  filter: none !important;
+}
+
+/* =========================================================
+   BOTÓN "EDIT PROFILE" EN ACCOUNT SETTINGS (MODO OSCURO)
+   ========================================================= */
+
+html[data-theme="dark"] body main a[href*="edit"],
+html[data-theme="dark"] body main a[href*="profile"]:not(.navbar a),
+html[data-theme="dark"] body main button[class*="edit" i] {
+  background: linear-gradient(135deg, #272734 0%, #1f1f2b 100%) !important;
+  color: #f4f4f6 !important;
+  border: 1.5px solid rgba(224, 90, 109, 0.55) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+html[data-theme="dark"] body main a[href*="edit"]:hover,
+html[data-theme="dark"] body main a[href*="profile"]:not(.navbar a):hover,
+html[data-theme="dark"] body main button[class*="edit" i]:hover {
+  background: linear-gradient(135deg, #8c2330 0%, #6b1520 100%) !important;
+  color: #ffffff !important;
+  border-color: #e05a6d !important;
+  box-shadow: 0 6px 20px rgba(224, 90, 109, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* =========================================================
+   LOGO DE SPELL-CHALLENGE EN BLANCO (MODO OSCURO)
+   ========================================================= */
+
+html[data-theme="dark"] body img[src*="logo" i]:not(.navbar img),
+html[data-theme="dark"] body img[src*="spell" i]:not(.navbar img),
+html[data-theme="dark"] body img[src*="challenge" i]:not(.navbar img),
+html[data-theme="dark"] body img[alt*="spell" i]:not(.navbar img),
+html[data-theme="dark"] body img[alt*="logo" i]:not(.navbar img),
+html[data-theme="dark"] body [class*="logo"] img:not(.navbar img),
+html[data-theme="dark"] body .auth-card img,
+html[data-theme="dark"] body form img[src*=".png"],
+html[data-theme="dark"] body form img[src*=".svg"] {
+  filter: brightness(0) invert(1) !important;
+  opacity: 1 !important;
+}
+
+/* =========================================================
+   CONTENEDORES ESTRUCTURALES DE MODALES TRANSPARENTES
+   ========================================================= */
+
+html[data-theme="dark"] body .modal,
+html[data-theme="dark"] body .modal-dialog,
+html[data-theme="dark"] body [data-modal-wrapper="1"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   MODALES SAVE CHANGES Y CANCEL CHANGES (AVATAR CENTRADO AL FRENTE)
+   ========================================================= */
+
+html[data-theme="dark"] body [data-profile-confirm-modal="1"] {
+  background: var(--bg-card, #18181f) !important;
+  background-color: var(--bg-card, #18181f) !important;
+  border: 1.5px solid var(--border-subtle, #2c2c38) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85) !important;
+  z-index: 1 !important;
+}
+
+/* Aplica SOLO cuando el modal es Save Changes o Cancel Changes */
+html[data-theme="dark"] body [data-modal-wrapper="1"]:has([data-profile-confirm-modal="1"]) > *:has(img),
+html[data-theme="dark"] body [data-modal-wrapper="1"]:has([data-profile-confirm-modal="1"]) > img,
+html[data-theme="dark"] body [data-profile-confirm-modal="1"] [data-modal-avatar="1"],
+html[data-theme="dark"] body [data-profile-confirm-modal="1"] img {
+  z-index: 30 !important;
+}
+
+html[data-theme="dark"] body [data-modal-wrapper="1"]:has([data-profile-confirm-modal="1"]) img,
+html[data-theme="dark"] body [data-profile-confirm-modal="1"] img {
+  border: 3px solid #7a1f2b !important;
+  border-radius: 50% !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Quita cualquier borde o sombra de las abejas en modales */
+html[data-theme="dark"] body [data-modal-backdrop="1"] img[src*="bee" i],
+html[data-theme="dark"] body [data-modal-backdrop="1"] img[src*="beenary" i] {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body [data-profile-confirm-modal="1"] h1,
+html[data-theme="dark"] body [data-profile-confirm-modal="1"] h2,
+html[data-theme="dark"] body [data-profile-confirm-modal="1"] h3 {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] body [data-profile-confirm-modal="1"] p {
+  color: #d6d6dc !important;
+}
+
+/* Botón NO */
+html[data-theme="dark"] body [data-profile-confirm-modal="1"] button:first-of-type {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.75) !important;
+  border-radius: 999px !important;
+  color: #ffffff !important;
+}
+
+/* Botón YES */
+html[data-theme="dark"] body [data-profile-confirm-modal="1"] button:last-of-type {
+  background: #7a1f2b !important;
+  background-color: #7a1f2b !important;
+  border: 1.5px solid #7a1f2b !important;
+  border-radius: 999px !important;
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   PROTECCIÓN DE FOTO DE PERFIL EN MODO OSCURO
+   ========================================================= */
+html[data-theme="dark"] body form[action*="profile"] img,
+html[data-theme="dark"] body form img:not([src*="logo" i]):not([alt*="logo" i]),
+html[data-theme="dark"] body img[src*="/media/"],
+html[data-theme="dark"] body img[src*="avatar" i],
+html[data-theme="dark"] body img[src*="profile" i] {
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
+/* =========================================================
+   BOTONES "VIEW COMPETITION" Y BOTÓN "X" DE MODALES
+   ========================================================= */
+
+html[data-theme="dark"] body [data-view-comp-btn="1"] {
+  background-color: #272734 !important;
+  color: #f4f4f6 !important;
+  border: 1.5px solid rgba(224, 90, 109, 0.7) !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+  transition: all 0.2s ease !important;
+}
+
+html[data-theme="dark"] body [data-view-comp-btn="1"]:hover {
+  background-color: #7a1f2b !important;
+  color: #ffffff !important;
+  border-color: #e05a6d !important;
+}
+
+/* Mantiene intacta la imagen SVG de .btn-close en blanco */
+html[data-theme="dark"] body .btn-close {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  filter: invert(1) grayscale(100%) brightness(220%) !important;
+  opacity: 0.9 !important;
+}
+
+html[data-theme="dark"] body .btn-close:hover {
+  opacity: 1 !important;
+}
+
+/* Si el modal usa un botón X personalizado con texto o ícono SVG */
+html[data-theme="dark"] body [data-modal-close-btn="1"] {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #f1f1f4 !important;
+  opacity: 0.9 !important;
+}
+
+html[data-theme="dark"] body [data-modal-close-btn="1"] svg,
+html[data-theme="dark"] body [data-modal-close-btn="1"] i {
+  color: #f1f1f4 !important;
+  stroke: #f1f1f4 !important;
+}
+
+html[data-theme="dark"] body [data-modal-close-btn="1"]:hover {
+  color: #e05a6d !important;
+  opacity: 1 !important;
+}
+
+/* Posiciona el botón X inyectado en All Competitions History */
+html[data-theme="dark"] body [data-generic-modal="1"] {
+  position: relative !important;
+}
+
+html[data-theme="dark"] body [data-injected-close="1"] {
+  position: absolute !important;
+  top: 22px !important;
+  right: 24px !important;
+  background: transparent !important;
+  border: none !important;
+  color: #f1f1f4 !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  padding: 4px 8px !important;
+  opacity: 0.85 !important;
+}
+
+html[data-theme="dark"] body [data-injected-close="1"]:hover {
+  color: #e05a6d !important;
+  opacity: 1 !important;
+}
+
+/* =========================================================
+   SELECTORES Y OPCIONES DESPLEGABLES (FILTRO DE GRUPOS)
+   ========================================================= */
+
+html[data-theme="dark"] body select {
+  color-scheme: dark !important;
+  background-color: #1e1e26 !important;
+  color: #f4f4f6 !important;
+  border-color: rgba(224, 90, 109, 0.65) !important;
+}
+
+html[data-theme="dark"] body select option,
+html[data-theme="dark"] body select optgroup {
+  background-color: #1e1e26 !important;
+  color: #f4f4f6 !important;
+}
+
+html[data-theme="dark"] body select option:checked,
+html[data-theme="dark"] body select option:hover,
+html[data-theme="dark"] body select option:focus {
+  background-color: #7a1f2b !important;
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   TABLERO TRANSPARENTE EN MEMORY GAME (EASY, MEDIUM Y HARD)
+   ========================================================= */
+
+html[data-theme="dark"] body [data-memory-modal="1"] [data-memory-board="1"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   TABLERO TRANSPARENTE EN MEMORY GAME (EASY, MEDIUM Y HARD)
+   ========================================================= */
+
+html[data-theme="dark"] body [data-memory-modal="1"] [data-memory-board="1"],
+html[data-theme="dark"] body [data-memory-modal="1"] [data-memory-board="1"]::before,
+html[data-theme="dark"] body [data-memory-modal="1"] [data-memory-board="1"]::after {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+
+
+/* =========================================================
+   BARRAS DE PROGRESO Y NIVELES EN DASHBOARD DE PROFESOR
+   ========================================================= */
+
+html[data-theme="dark"] body [data-dash-track="1"] {
+  background-color: #262633 !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+}
+
+html[data-theme="dark"] body [data-dash-fill="1"] {
+  background-color: #b8293d !important;
+  border-radius: 999px !important;
+  min-height: 8px !important;
+}
+
+html[data-theme="dark"] body [data-dash-dot="1"] {
+  width: 9px !important;
+  height: 9px !important;
+  min-width: 9px !important;
+  min-height: 9px !important;
+  border-radius: 50% !important;
+  display: inline-block !important;
+  flex-shrink: 0 !important;
+}
+
+/* Paleta diferenciada por nivel CEFR (A1 - C2) */
+html[data-theme="dark"] body [data-cefr-level="A1"] {
+  background: #f9c6c9 !important;
+  background-color: #f9c6c9 !important;
+}
+
+html[data-theme="dark"] body [data-cefr-level="A2"] {
+  background: #f29b9b !important;
+  background-color: #f29b9b !important;
+}
+
+html[data-theme="dark"] body [data-cefr-level="B1"] {
+  background: #e46d72 !important;
+  background-color: #e46d72 !important;
+}
+
+html[data-theme="dark"] body [data-cefr-level="B2"] {
+  background: #c9414a !important;
+  background-color: #c9414a !important;
+}
+
+html[data-theme="dark"] body [data-cefr-level="C1"] {
+  background: #9e242e !important;
+  background-color: #9e242e !important;
+}
+
+html[data-theme="dark"] body [data-cefr-level="C2"] {
+  background: #6b141d !important;
+  background-color: #6b141d !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22) !important;
+}
+
+/* =========================================================
+   TARJETAS DE SELECCIÓN EN EL MODAL "ADD A WORD LIST"
+   ========================================================= */
+
+html[data-theme="dark"] body [data-wordlist-option="1"] {
+  background-color: #20202a !important;
+  border: 1.5px solid #3a3a48 !important;
+  border-radius: 14px !important;
+  transition: border-color 0.15s ease, background-color 0.15s ease !important;
+}
+
+html[data-theme="dark"] body [data-wordlist-option="1"]:hover {
+  background-color: #262229 !important;
+  border: 1.5px solid #e05a6d !important;
+}
+
+html[data-theme="dark"] body [data-wordlist-option="1"]:has(input:checked) {
+  background-color: #2b1d23 !important;
+  border: 1.5px solid #e05a6d !important;
+}
+
+/* =========================================================
+   BOTÓN "VIEW" EN TABLAS (VISTA DE GRUPO / ESTUDIANTES)
+   ========================================================= */
+
+html[data-theme="dark"] body [data-table-view-btn="1"] {
+  background: #7a1f2b !important;
+  background-color: #7a1f2b !important;
+  color: #ffffff !important;
+  border: 1.5px solid rgba(224, 90, 109, 0.7) !important;
+  border-radius: 999px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease !important;
+}
+
+html[data-theme="dark"] body [data-table-view-btn="1"]:hover {
+  background: #962635 !important;
+  background-color: #962635 !important;
+  border-color: #e05a6d !important;
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   ENCABEZADOS DE SECCIÓN LIMPIOS DENTRO DE TARJETAS
+   ========================================================= */
+
+html[data-theme="dark"] body main h1,
+html[data-theme="dark"] body main h2,
+html[data-theme="dark"] body main h3,
+html[data-theme="dark"] body main h4,
+html[data-theme="dark"] body main [data-clean-heading="1"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   BOTÓN CIRCULAR "X" EN MODALES (EDIT GROUP / CREATE GROUP)
+   ========================================================= */
+
+html[data-theme="dark"] body [data-modal-close-btn="1"] {
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] body [data-modal-close-btn="1"]:hover {
+  color: #ffffff !important;
+  border-color: #e05a6d !important;
+  background-color: rgba(224, 90, 109, 0.22) !important;
+}
+
+html[data-theme="dark"] body [data-modal-close-btn="1"] svg,
+html[data-theme="dark"] body [data-modal-close-btn="1"] i,
+html[data-theme="dark"] body [data-modal-close-btn="1"] span {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] body [data-modal-close-btn="1"]::before,
+html[data-theme="dark"] body [data-modal-close-btn="1"]::after {
+  color: #ffffff !important;
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* =========================================================
+   TARJETAS DE MÉTRICAS SUPERIORES (COMPETITIONS Y DASHBOARD)
+   ========================================================= */
+
+html[data-theme="dark"] body [data-home-stat="1"] {
+  background-color: var(--bg-card, #18181f) !important;
+  border: 1.5px solid var(--border-subtle, #2c2c38) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* =========================================================
+   CONTENEDOR TRANSPARENTE DE BOTONES EN TARJETAS DE COMPETITIONS
+   ========================================================= */
+
+html[data-theme="dark"] body main [data-comp-actions="1"],
+html[data-theme="dark"] body main [data-comp-actions="1"] > div {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   BOTONES "MANAGE PARTICIPANTS" Y "MANAGE COMPETITION"
+   ========================================================= */
+
+html[data-theme="dark"] body main [data-comp-manage-btn="1"] {
+  background: rgba(224, 90, 109, 0.14) !important;
+  background-color: rgba(224, 90, 109, 0.14) !important;
+  color: #f8fafc !important;
+  border: 1.5px solid #e05a6d !important;
+  border-radius: 999px !important;
+  font-weight: 600 !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+}
+
+html[data-theme="dark"] body main [data-comp-manage-btn="1"]:hover {
+  background: #7a1f2b !important;
+  background-color: #7a1f2b !important;
+  border-color: #ff7b8d !important;
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   TEXTOS GUINDA DE ALTO CONTRASTE EN STATISTICS Y TABLAS
+   ========================================================= */
+
+html[data-theme="dark"] body main table th,
+html[data-theme="dark"] body main [data-burgundy-text="1"] {
+  color: #ff7b8d !important;
+}
+
+html[data-theme="dark"] body main table td a,
+html[data-theme="dark"] body main table td strong,
+html[data-theme="dark"] body main [data-burgundy-primary="1"] {
+  color: #fda4af !important;
+}
+
+html[data-theme="dark"] body main [data-muted-light="1"] {
+  color: #b4b4c2 !important;
+}
+
+/* =========================================================
+   TARJETA DE INFORMACIÓN EN TEACHER PROFILE
+   ========================================================= */
+
+html[data-theme="dark"] body main [data-teacher-profile-card="1"] {
+  background-color: var(--bg-card, #18181f) !important;
+  border: 1.5px solid var(--border-subtle, #2c2c38) !important;
+  border-radius: 22px !important;
+  padding: 32px 36px !important;
+  margin-top: 24px !important;
+  margin-bottom: 32px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4) !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+html[data-theme="dark"] body main [data-teacher-profile-card="1"] * {
+  box-sizing: border-box !important;
+}
+
+/* Asegura que las filas/columnas internas no se salgan del cuadro */
+html[data-theme="dark"] body main [data-teacher-profile-card="1"] > div {
+  max-width: 100% !important;
+}
+
+/* Espaciado equilibrado entre campos y la sección ACCOUNT SETTINGS */
+html[data-theme="dark"] body main [data-teacher-profile-card="1"] h2,
+html[data-theme="dark"] body main [data-teacher-profile-card="1"] h3 {
+  margin-top: 24px !important;
+  margin-bottom: 16px !important;
+}
+
+/* =========================================================
+   INSIGNIAS DE ESTADO EN COMPETITIONS (ACTIVE, UPCOMING, FINISHED)
+   ========================================================= */
+
+html[data-theme="dark"] body main [data-comp-status] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 4px 14px !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  color: #18181b !important;
+  border: none !important;
+}
+
+html[data-theme="dark"] body main [data-comp-status="active"] {
+  background: #6ee76e !important;
+  background-color: #6ee76e !important;
+  color: #0f2912 !important;
+}
+
+html[data-theme="dark"] body main [data-comp-status="upcoming"] {
+  background: #eab349 !important;
+  background-color: #eab349 !important;
+  color: #271a04 !important;
+}
+
+html[data-theme="dark"] body main [data-comp-status="finished"] {
+  background: #e5dc4f !important;
+  background-color: #e5dc4f !important;
+  color: #242104 !important;
+}
+
+/* =========================================================
+   MODAL "CROP PROFILE PICTURE" (SIN INVERSIÓN DE COLOR EN JPG/PNG)
+   ========================================================= */
+
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] {
+  background: var(--bg-card, #18181f) !important;
+  background-color: var(--bg-card, #18181f) !important;
+  border: 1.5px solid var(--border-subtle, #2c2c38) !important;
+  border-radius: 22px !important;
+}
+
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] [data-crop-area="1"] {
+  background: #111116 !important;
+  background-color: #111116 !important;
+  border: 1px solid #2c2c38 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+/* Anula cualquier filtro de inversión sobre la foto cargada (JPG, PNG, WebP) */
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] img,
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] canvas {
+  filter: none !important;
+  -webkit-filter: none !important;
+  mix-blend-mode: normal !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Mantiene transparentes las capas internas de Cropper.js */
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-container,
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-wrap-box,
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-canvas,
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-drag-box,
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-crop-box,
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-view-box,
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-face,
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-bg {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  filter: none !important;
+}
+
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-modal {
+  background-color: rgba(0, 0, 0, 0.65) !important;
+  opacity: 1 !important;
+}
+
+/* Cuadro delimitador azul, guías punteadas y puntos de ajuste de Cropper.js */
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-line {
+  background-color: #3399ff !important;
+  opacity: 0.75 !important;
+}
+
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-point {
+  background-color: #3399ff !important;
+  opacity: 0.95 !important;
+  width: 7px !important;
+  height: 7px !important;
+}
+
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-dashed {
+  border-color: rgba(255, 255, 255, 0.55) !important;
+  opacity: 0.75 !important;
+}
+
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-center::before,
+html[data-theme="dark"] body [data-crop-modal="1"][data-crop-modal="1"] .cropper-center::after {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* =========================================================
+   ALERTAS Y MENSAJES DE CONFIRMACIÓN (PROFILE UPDATED, ETC.)
+   ========================================================= */
+
+html[data-theme="dark"] body [data-dark-alert="success"],
+html[data-theme="dark"] body .alert-success {
+  background-color: #132a20 !important;
+  background: #132a20 !important;
+  border: 1.5px solid rgba(34, 197, 94, 0.45) !important;
+  color: #86efac !important;
+  border-radius: 14px !important;
+}
+
+html[data-theme="dark"] body [data-dark-alert="success"] *,
+html[data-theme="dark"] body .alert-success * {
+  color: #86efac !important;
+}
+
+html[data-theme="dark"] body [data-dark-alert="danger"],
+html[data-theme="dark"] body .alert-danger,
+html[data-theme="dark"] body .alert-error {
+  background-color: #2c1519 !important;
+  background: #2c1519 !important;
+  border: 1.5px solid rgba(244, 63, 94, 0.45) !important;
+  color: #fda4af !important;
+  border-radius: 14px !important;
+}
+
+html[data-theme="dark"] body [data-dark-alert="warning"],
+html[data-theme="dark"] body .alert-warning {
+  background-color: #2b2212 !important;
+  background: #2b2212 !important;
+  border: 1.5px solid rgba(234, 179, 8, 0.45) !important;
+  color: #fde047 !important;
+  border-radius: 14px !important;
+}
+
+/* Evita el doble recuadro cuando la alerta está dentro de un contenedor wrapper */
+html[data-theme="dark"] body [data-dark-alert-wrapper="1"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* =========================================================
+   ADMIN DASHBOARD (/admin-panel/) - MODO OSCURO
+   ========================================================= */
+
+/* 1. Elimina los trazos/bordes internos dentro de las 4 tarjetas métricas superiores */
+html[data-theme="dark"] body main [data-home-stat="1"] div,
+html[data-theme="dark"] body main [data-home-stat="1"] p,
+html[data-theme="dark"] body main [data-home-stat="1"] span {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* 2. Gráfico circular (Pie Chart) y puntos de leyenda en "Users Overview" */
+html[data-theme="dark"] body main [data-admin-pie="1"] {
+  background-image: conic-gradient(#9e2235 0% var(--students-pct, 68%), #e56b7c var(--students-pct, 68%) 100%) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+  border: 2px solid #2c2c38 !important;
+}
+
+html[data-theme="dark"] body main [data-admin-pie="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l),
+html[data-theme="dark"] body main [data-admin-pie="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) span,
+html[data-theme="dark"] body main [data-admin-pie="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) div,
+html[data-theme="dark"] body main [data-admin-pie="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) p {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55) !important;
+}
+
+html[data-theme="dark"] body main [data-admin-legend="students"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  display: inline-block !important;
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
+  background: #9e2235 !important;
+  background-color: #9e2235 !important;
+  border: 1px solid rgba(253, 164, 175, 0.45) !important;
+  border-radius: 3px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html[data-theme="dark"] body main [data-admin-legend="teachers"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  display: inline-block !important;
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
+  background: #e56b7c !important;
+  background-color: #e56b7c !important;
+  border: 1px solid rgba(254, 205, 211, 0.45) !important;
+  border-radius: 3px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html[data-theme="dark"] body main [data-admin-legend-pseudo="students"]:not(#a#b#c#d#e#f#g#h#i#j#k#l)::before,
+html[data-theme="dark"] body main [data-admin-legend-pseudo="teachers"]:not(#a#b#c#d#e#f#g#h#i#j#k#l)::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 12px !important;
+  height: 12px !important;
+  margin-right: 8px !important;
+  border-radius: 3px !important;
+  vertical-align: middle !important;
+}
+
+html[data-theme="dark"] body main [data-admin-legend-pseudo="students"]:not(#a#b#c#d#e#f#g#h#i#j#k#l)::before {
+  background: #9e2235 !important;
+  background-color: #9e2235 !important;
+}
+
+html[data-theme="dark"] body main [data-admin-legend-pseudo="teachers"]:not(#a#b#c#d#e#f#g#h#i#j#k#l)::before {
+  background: #e56b7c !important;
+  background-color: #e56b7c !important;
+}
+
+/* 3. Cuadros de niveles A1 - C2 en "Students by Level" */
+html[data-theme="dark"] body main [data-admin-level-box="1"] {
+  background: #20202a !important;
+  background-color: #20202a !important;
+  border: 1.5px solid rgba(224, 90, 109, 0.55) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+}
+
+html[data-theme="dark"] body main [data-admin-level-box="1"] * {
+  background: transparent !important;
+  border: none !important;
+}
+
+html[data-theme="dark"] body main [data-admin-level-box="1"] :first-child {
+  color: #fda4af !important;
+  font-weight: 700 !important;
+}
+
+html[data-theme="dark"] body main [data-admin-level-box="1"] :last-child {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+}
+
+/* 4. Barras de progreso y promedio en "Student Performance" */
+html[data-theme="dark"] body main [data-admin-bar-track="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: #282834 !important;
+  background-color: #282834 !important;
+  border: none !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+}
+
+html[data-theme="dark"] body main [data-admin-bar-fill="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: linear-gradient(90deg, #9e2235 0%, #e05a6d 100%) !important;
+  background-color: #c83e51 !important;
+  border: none !important;
+  border-radius: 999px !important;
+  display: block !important;
+}
+
+html[data-theme="dark"] body main [data-admin-avg-pill="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: rgba(224, 90, 109, 0.14) !important;
+  background-color: rgba(224, 90, 109, 0.14) !important;
+  border: 1px solid rgba(224, 90, 109, 0.35) !important;
+  border-radius: 12px !important;
+}
+
+html[data-theme="dark"] body main [data-admin-avg-pill="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l),
+html[data-theme="dark"] body main [data-admin-avg-pill="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) span,
+html[data-theme="dark"] body main [data-admin-avg-pill="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) p {
+  color: #fda4af !important;
+  font-weight: 600 !important;
+}
+
+html[data-theme="dark"] body main [data-admin-avg-pill="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) strong,
+html[data-theme="dark"] body main [data-admin-avg-pill="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) b {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* 5. Filas de "Most Challenging Words" */
+html[data-theme="dark"] body main [data-admin-word-row="1"] {
+  background: #20202a !important;
+  background-color: #20202a !important;
+  border: 1px solid #2c2c38 !important;
+  border-radius: 10px !important;
+}
+
+/* 6. Tabla /admin_teachers/: alineación recta, divisores continuos, estados y grupos */
+html[data-theme="dark"] body main [data-admin-teacher-table="1"] {
+  background-color: #18181f !important;
+  border: 1px solid #2c2c38 !important;
+  border-radius: 16px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
+html[data-theme="dark"] body main [data-admin-teacher-table="1"] table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  margin: 0 !important;
+}
+
+html[data-theme="dark"] body main [data-admin-teacher-table="1"] thead tr {
+  background-color: #1e1e27 !important;
+  border-bottom: 1px solid #2c2c38 !important;
+}
+
+html[data-theme="dark"] body main [data-admin-teacher-table="1"] tbody tr {
+  border-bottom: 1px solid #282834 !important;
+  transition: background-color 0.15s ease !important;
+}
+
+html[data-theme="dark"] body main [data-admin-teacher-table="1"] tbody tr:last-child {
+  border-bottom: none !important;
+}
+
+html[data-theme="dark"] body main [data-admin-teacher-table="1"] tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.025) !important;
+}
+
+html[data-theme="dark"] body main [data-admin-teacher-table="1"] th,
+html[data-theme="dark"] body main [data-admin-teacher-table="1"] td {
+  padding: 15px 18px !important;
+  vertical-align: middle !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+}
+
+html[data-theme="dark"] body main [data-admin-teacher-table="1"] th {
+  font-size: 0.78rem !important;
+  letter-spacing: 0.05em !important;
+  white-space: nowrap !important;
+}
+
+html[data-theme="dark"] body main [data-admin-teacher-table="1"] th:last-child,
+html[data-theme="dark"] body main [data-admin-teacher-table="1"] td:last-child {
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
+html[data-theme="dark"] body main [data-admin-status-pill="active"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(34, 197, 94, 0.16) !important;
+  background-color: rgba(34, 197, 94, 0.16) !important;
+  color: #4ade80 !important;
+  border: 1px solid rgba(74, 222, 128, 0.35) !important;
+  border-radius: 999px !important;
+  padding: 4px 12px !important;
+  white-space: nowrap !important;
+}
+
+html[data-theme="dark"] body main [data-admin-status-pill="inactive"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(239, 68, 68, 0.16) !important;
+  background-color: rgba(239, 68, 68, 0.16) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(248, 113, 113, 0.35) !important;
+  border-radius: 999px !important;
+  padding: 4px 12px !important;
+  white-space: nowrap !important;
+}
+
+html[data-theme="dark"] body main [data-admin-group-badge="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: rgba(59, 130, 246, 0.16) !important;
+  background-color: rgba(59, 130, 246, 0.16) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(96, 165, 250, 0.35) !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+}
+
+html[data-theme="dark"] body main [data-admin-role-pill="student"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: rgba(239, 68, 68, 0.16) !important;
+  background-color: rgba(239, 68, 68, 0.16) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(248, 113, 113, 0.38) !important;
+  border-radius: 8px !important;
+}
+
+html[data-theme="dark"] body main [data-admin-role-pill="admin"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: rgba(168, 85, 247, 0.18) !important;
+  background-color: rgba(168, 85, 247, 0.18) !important;
+  color: #d8b4fe !important;
+  border: 1px solid rgba(192, 132, 252, 0.40) !important;
+  border-radius: 8px !important;
+}
+
+html[data-theme="dark"] body main [data-admin-role-pill="teacher"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: rgba(59, 130, 246, 0.16) !important;
+  background-color: rgba(59, 130, 246, 0.16) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(96, 165, 250, 0.38) !important;
+  border-radius: 8px !important;
+}
+
+html[data-theme="dark"] body main [data-admin-level-pill="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: #242430 !important;
+  background-color: #242430 !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #3a3a4a !important;
+  border-radius: 999px !important;
+}
+
+/* 7. Tarjetas de /admin_academy_management/ (Careers, Groups y Levels) sin franjas internas */
+html[data-theme="dark"] body main [data-admin-academy-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background-color: #18181f !important;
+  border: 1px solid #2c2c38 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+html[data-theme="dark"] body main [data-admin-academy-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) div:not([data-admin-status-pill]),
+html[data-theme="dark"] body main [data-admin-academy-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) p:not([data-admin-status-pill]),
+html[data-theme="dark"] body main [data-admin-academy-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) span:not([data-admin-status-pill]),
+html[data-theme="dark"] body main [data-admin-academy-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) h2,
+html[data-theme="dark"] body main [data-admin-academy-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) h3,
+html[data-theme="dark"] body main [data-admin-academy-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) h4 {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body main [data-admin-card-grid-wrap="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+html[data-theme="dark"] body main [data-admin-academy-tab="active"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: #7c1d28 !important;
+  background-color: #7c1d28 !important;
+  color: #ffffff !important;
+  border: 1.5px solid #e11d48 !important;
+}
+
+html[data-theme="dark"] body main [data-admin-academy-tab="inactive"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: #18181f !important;
+  background-color: #18181f !important;
+  color: #f87171 !important;
+  border: 1.5px solid #7c1d28 !important;
+}
+
+/* 8. Tarjetas de /admin_backups/: eliminar trazos y cápsulas internas */
+html[data-theme="dark"] body main [data-admin-backup-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background-color: #18181f !important;
+  border: 1px solid #2c2c38 !important;
+  border-radius: 16px !important;
+}
+
+html[data-theme="dark"] body main [data-admin-backup-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) div,
+html[data-theme="dark"] body main [data-admin-backup-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) p,
+html[data-theme="dark"] body main [data-admin-backup-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) span,
+html[data-theme="dark"] body main [data-admin-backup-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) h2,
+html[data-theme="dark"] body main [data-admin-backup-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) h3,
+html[data-theme="dark"] body main [data-admin-backup-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) h4,
+html[data-theme="dark"] body main [data-admin-backup-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) small,
+html[data-theme="dark"] body main [data-admin-backup-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) strong {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+html[data-theme="dark"] body main [data-admin-backup-type-pill="uploaded"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(34, 197, 94, 0.16) !important;
+  background-color: rgba(34, 197, 94, 0.16) !important;
+  color: #4ade80 !important;
+  border: 1px solid rgba(74, 222, 128, 0.35) !important;
+  border-radius: 8px !important;
+  padding: 4px 12px !important;
+}
+
+html[data-theme="dark"] body main [data-admin-backup-type-pill="manual"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(245, 158, 11, 0.16) !important;
+  background-color: rgba(245, 158, 11, 0.16) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(251, 191, 36, 0.35) !important;
+  border-radius: 8px !important;
+  padding: 4px 12px !important;
+}
+
+html[data-theme="dark"] body main [data-admin-backup-type-pill="scheduled"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(59, 130, 246, 0.16) !important;
+  background-color: rgba(59, 130, 246, 0.16) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(96, 165, 250, 0.35) !important;
+  border-radius: 8px !important;
+  padding: 4px 12px !important;
+}
+
+/* 9. Alertas y notificaciones globales del sistema en modo oscuro */
+html[data-theme="dark"] body [data-dark-alert="success"]:not(#a#b#c#d#e#f#g#h#i#j#k#l),
+html[data-theme="dark"] body .alert-success:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: rgba(16, 185, 129, 0.13) !important;
+  background-color: rgba(16, 185, 129, 0.13) !important;
+  border: 1px solid rgba(52, 211, 153, 0.38) !important;
+  color: #4ade80 !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body [data-dark-alert="error"]:not(#a#b#c#d#e#f#g#h#i#j#k#l),
+html[data-theme="dark"] body .alert-danger:not(#a#b#c#d#e#f#g#h#i#j#k#l),
+html[data-theme="dark"] body .alert-error:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: rgba(239, 68, 68, 0.14) !important;
+  background-color: rgba(239, 68, 68, 0.14) !important;
+  border: 1px solid rgba(248, 113, 113, 0.38) !important;
+  color: #f87171 !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body [data-dark-alert="warning"]:not(#a#b#c#d#e#f#g#h#i#j#k#l),
+html[data-theme="dark"] body .alert-warning:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: rgba(245, 158, 11, 0.14) !important;
+  background-color: rgba(245, 158, 11, 0.14) !important;
+  border: 1px solid rgba(251, 191, 36, 0.38) !important;
+  color: #fbbf24 !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body [data-dark-alert="info"]:not(#a#b#c#d#e#f#g#h#i#j#k#l),
+html[data-theme="dark"] body .alert-info:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background: rgba(59, 130, 246, 0.14) !important;
+  background-color: rgba(59, 130, 246, 0.14) !important;
+  border: 1px solid rgba(96, 165, 250, 0.38) !important;
+  color: #93c5fd !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body [data-dark-alert]:not(#a#b#c#d#e#f#g#h#i#j#k#l) * {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+/* 10. Panel de Ronda / Competencia: tarjetas de control, badge Active Round y botón Start/Finish Round */
+html[data-theme="dark"] body main [data-comp-control-card="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  background-color: #18181f !important;
+  border: 1px solid #2c2c38 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+html[data-theme="dark"] body main [data-comp-round-badge="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(245, 158, 11, 0.14) !important;
+  background-color: rgba(245, 158, 11, 0.14) !important;
+  color: #fde68a !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  border-radius: 10px !important;
+  padding: 8px 18px !important;
+}
+
+html[data-theme="dark"] body main [data-comp-round-action-btn="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #7c1d28 !important;
+  background-color: #7c1d28 !important;
+  color: #ffffff !important;
+  border: 1.5px solid #b45309 !important;
+  border-radius: 12px !important;
+  padding: 10px 24px !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+}
+
+html[data-theme="dark"] body main [data-comp-round-action-btn="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l):hover {
+  background: #922230 !important;
+  background-color: #922230 !important;
+  border-color: #d97706 !important;
+}
+
+html[data-theme="dark"] body main [data-comp-hex-tile="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l),
+html[data-theme="dark"] body main [data-comp-hex-tile="1"]:disabled:not(#a#b#c#d#e#f#g#h#i#j#k#l),
+html[data-theme="dark"] body main [data-comp-hex-tile="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) * {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}

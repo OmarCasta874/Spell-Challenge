@@ -4,7 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Spell-Challenge{% endblock %}</title>
     <link rel="icon" type="image/png" href="{% static 'img/beenary-left.png' %}">
+
+    <!-- Aplica el tema guardado ANTES de renderizar para evitar destellos blancos -->
+    <script>
+      (function() {
+        const savedTheme = localStorage.getItem('spell_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.documentElement.setAttribute('data-bs-theme', savedTheme);
+      })();
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,12 +25,20 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     {% block extra_css %}{% endblock %}
+    <!-- Variables y reglas globales de Modo Oscuro al final para tener prioridad -->
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
 <body class="{% block body_class %}{% endblock %}">
 
   {% block content %}{% endblock %}
 
   {% block extra_modals %}{% endblock %}
+
+  <!-- Botón global de Modo Oscuro / Claro -->
+  <button type="button" id="themeToggleBtn" class="theme-toggle-fab" aria-label="Toggle dark mode" title="Switch theme">
+    <i data-lucide="moon" id="themeIconMoon"></i>
+    <i data-lucide="sun" id="themeIconSun" style="display: none;"></i>
+  </button>
 
   <script src="{% static 'js/main.js' %}"></script>
   <script src="{% static 'js/pet_messages.js' %}"></script>
@@ -29,6 +47,1963 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     lucide.createIcons();
+
+    (function() {
+      const btn = document.getElementById('themeToggleBtn');
+      const moonIcon = document.getElementById('themeIconMoon');
+      const sunIcon = document.getElementById('themeIconSun');
+      if (!btn) return;
+
+      let isFixing = false;
+      let fixTimer = null;
+
+      function syncThemeUI(theme) {
+        const isDark = theme === 'dark';
+        if (moonIcon) moonIcon.style.display = isDark ? 'none' : 'block';
+        if (sunIcon) sunIcon.style.display = isDark ? 'block' : 'none';
+      }
+
+      function isLightColor(rgbStr) {
+        const match = rgbStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (!match) return false;
+        const alpha = match[4] !== undefined ? parseFloat(match[4]) : 1;
+        if (alpha === 0) return false;
+        const r = parseInt(match[1], 10);
+        const g = parseInt(match[2], 10);
+        const b = parseInt(match[3], 10);
+        return r > 225 && g > 225 && b > 225;
+      }
+
+      function saveOrigStyle(el) {
+        if (!el.dataset.darkFixed) {
+          el.dataset.origStyle = el.getAttribute('style') || '';
+          el.dataset.darkFixed = '1';
+        }
+      }
+
+      function isInsideMiniGame(el) {
+        if (el.closest('[data-memory-modal="1"], [data-memory-backdrop="1"], [data-minigame-modal="1"], [class*="memory"], [id*="memory"], [class*="minigame"], [id*="minigame"], [class*="hangman"], [id*="hangman"], [class*="missing"], [id*="missing"], [class*="wordsearch"], [id*="wordsearch"]')) {
+          return true;
+        }
+        let parent = el.parentElement;
+        while (parent && parent !== document.body && parent.tagName !== 'MAIN') {
+          const txt = parent.textContent || '';
+          if (!txt.includes('HANGMAN') && (txt.includes('MEMORY GAME') || txt.includes('MISSING LETTERS') || txt.includes('WORD SEARCH'))) {
+            return true;
+          }
+          parent = parent.parentElement;
+        }
+        return false;
+      }
+
+      function isInsideBossBattle(el) {
+        if (el.closest('[data-boss-modal="1"], [class*="boss"], [id*="boss"]')) {
+          return true;
+        }
+        const container = el.closest('[class*="modal"], [class*="dialog"], section, div');
+        if (container && container.offsetWidth > 0 && container.offsetWidth <= window.innerWidth * 0.95) {
+          const txt = container.textContent || '';
+          if (txt.includes('BOSS BATTLE') && (txt.includes('KING BEE') || txt.includes('EXIT BATTLE') || txt.includes('GUESS THE WORD'))) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function fixRemainingLightSurfaces() {
+        if (isFixing) return;
+        isFixing = true;
+
+        try {
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+          if (!isDark) {
+            document.querySelectorAll('[data-injected-close="1"]').forEach(el => el.remove());
+            document.querySelectorAll('[data-dark-fixed]').forEach(el => {
+              if (el.dataset.origStyle) {
+                el.setAttribute('style', el.dataset.origStyle);
+              } else {
+                el.removeAttribute('style');
+              }
+              delete el.dataset.origStyle;
+              delete el.dataset.darkFixed;
+              delete el.dataset.breakCard;
+              delete el.dataset.breakTimer;
+              delete el.dataset.homeStat;
+              delete el.dataset.notifModal;
+              delete el.dataset.notifItem;
+              delete el.dataset.notifUnread;
+              delete el.dataset.notifIcon;
+              delete el.dataset.bossModal;
+              delete el.dataset.bossRound;
+              delete el.dataset.bossIntro;
+              delete el.dataset.bossArena;
+              delete el.dataset.bossHpLabel;
+              delete el.dataset.bossHpTrack;
+              delete el.dataset.bossHpFill;
+              delete el.dataset.bossClue;
+              delete el.dataset.bossOption;
+              delete el.dataset.memoryModal;
+              delete el.dataset.memoryBackdrop;
+              delete el.dataset.memoryBoard;
+              delete el.dataset.modalBackdrop;
+              delete el.dataset.modalWrapper;
+              delete el.dataset.genericModal;
+              delete el.dataset.profileConfirmModal;
+              delete el.dataset.modalAvatar;
+              delete el.dataset.minigameModal;
+              delete el.dataset.modalSubcard;
+              delete el.dataset.viewCompBtn;
+              delete el.dataset.modalCloseBtn;
+              delete el.dataset.dashTrack;
+              delete el.dataset.dashFill;
+              delete el.dataset.dashDot;
+              delete el.dataset.dashSegment;
+              delete el.dataset.cefrLevel;
+              delete el.dataset.wordlistOption;
+              delete el.dataset.tableViewBtn;
+              delete el.dataset.compActions;
+              delete el.dataset.compManageBtn;
+              delete el.dataset.burgundyText;
+              delete el.dataset.burgundyPrimary;
+              delete el.dataset.mutedLight;
+              delete el.dataset.teacherProfileCard;
+              delete el.dataset.compStatus;
+              delete el.dataset.cropModal;
+              delete el.dataset.cropArea;
+              delete el.dataset.darkAlert;
+              delete el.dataset.darkAlertWrapper;
+              delete el.dataset.adminPie;
+              delete el.dataset.adminLegend;
+              delete el.dataset.adminLevelBox;
+              delete el.dataset.adminBarTrack;
+              delete el.dataset.adminBarFill;
+              delete el.dataset.adminWordRow;
+              delete el.dataset.adminAvgPill;
+              delete el.dataset.adminLegendPseudo;
+              delete el.dataset.adminTeacherTable;
+              delete el.dataset.adminStatusPill;
+              delete el.dataset.adminGroupBadge;
+              delete el.dataset.adminRolePill;
+              delete el.dataset.adminLevelPill;
+              delete el.dataset.adminAcademyCard;
+              delete el.dataset.adminCardGridWrap;
+              delete el.dataset.adminAcademyTab;
+              delete el.dataset.adminBackupCard;
+              delete el.dataset.adminBackupTypePill;
+              delete el.dataset.darkAlert;
+              delete el.dataset.compControlCard;
+              delete el.dataset.compRoundBadge;
+              delete el.dataset.compRoundActionBtn;
+              delete el.dataset.compHexTile;
+              if (el.matches('main button, main a') && /^(CAREERS|GROUPS|LEVELS)$/i.test((el.textContent || '').trim())) {
+                el.style.removeProperty('background');
+                el.style.removeProperty('background-color');
+                el.style.removeProperty('color');
+                el.style.removeProperty('border');
+              }
+            });
+            return;
+          }
+
+          const petYellowBgs = [
+            'rgb(254, 249, 195)',
+            'rgb(255, 251, 235)',
+            'rgb(254, 243, 199)',
+            'rgb(255, 248, 220)',
+            'rgb(253, 246, 178)'
+          ];
+
+          document.querySelectorAll('div, section, article, aside, header, p, span, h1, h2, h3, h4, h5, h6, strong, label, td, th, a, button').forEach(el => {
+            if (
+              el.closest('.navbar, header.navbar, #theme-toggle, .theme-toggle, [data-theme-toggle], [data-theme-fab="1"], .creator-card, [data-profile-confirm-modal="1"], [data-dash-track="1"], [data-wordlist-option="1"], [data-table-view-btn="1"], [data-home-stat="1"], [data-comp-actions="1"], [data-comp-manage-btn="1"], [data-teacher-profile-card="1"], [data-comp-status], [data-crop-modal="1"], [data-dark-alert], [data-admin-pie="1"], [data-admin-legend], [data-admin-legend-pseudo], [data-admin-level-box="1"], [data-admin-bar-track="1"], [data-admin-word-row="1"], [data-admin-avg-pill="1"], [data-admin-status-pill], [data-admin-group-badge="1"], [data-admin-role-pill], [data-admin-level-pill="1"], [data-admin-academy-card="1"], [data-admin-card-grid-wrap="1"], [data-admin-academy-tab], [data-admin-backup-card="1"], [data-admin-backup-type-pill], [data-comp-control-card="1"], [data-comp-round-badge="1"], [data-comp-round-action-btn="1"], [data-comp-hex-tile="1"]') ||
+              (el.matches('main button, main a') && /^(CAREERS|GROUPS|LEVELS)$/i.test((el.textContent || '').trim())) ||
+              el.dataset.dashFill === '1' ||
+              el.dataset.adminBarFill === '1' ||
+              isInsideMiniGame(el) ||
+              isInsideBossBattle(el) ||
+              el.classList.contains('toggle-password') ||
+              el.classList.contains('btn-close') ||
+              el.dataset.injectedClose === '1' ||
+              el.id === 'themeToggleBtn'
+            ) return;
+
+            const styles = getComputedStyle(el);
+            const bg = styles.backgroundColor;
+            const isFullScreen = el.offsetWidth >= window.innerWidth * 0.9 && el.offsetHeight >= window.innerHeight * 0.85;
+            const isModalWrapper = el.classList.contains('modal') || el.classList.contains('modal-dialog');
+            const isModalSurface = !isFullScreen && !isModalWrapper && (el.classList.contains('modal-content') || el.classList.contains('modal-header') || el.classList.contains('modal-body') || el.classList.contains('modal-footer') || el.getAttribute('role') === 'dialog' || el.tagName === 'DIALOG');
+            const rawParentCard = el.parentElement ? el.parentElement.closest('.card, [class*="-card"], [class*="category"], [class*="skill"], [class*="mode"], .auth-card, .modal-content') : null;
+            const parentCard = (rawParentCard && (rawParentCard.offsetWidth === 0 || rawParentCard.offsetWidth < window.innerWidth * 0.72)) ? rawParentCard : null;
+            const isBadgeOrAction = el.tagName === 'A' || el.tagName === 'BUTTON' || /badge|status|pill|tag|chip/i.test(el.className);
+            const isHeading = /^H[1-6]$/.test(el.tagName);
+            const isHeadingWrapper = (el.tagName === 'DIV' || el.tagName === 'HEADER' || el.tagName === 'SECTION') && el.querySelector('h1, h2, h3, h4') && (el.textContent || '').trim().length < 60 && !/LEVEL|TOTAL XP|GROUP RANKING|GLOBAL RANKING/i.test(el.textContent || '');
+
+            // 1. Corrige textos oscuros/negros y textos guinda oscuros que se pierden sobre fondos oscuros
+            const colorMatch = styles.color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+            if (colorMatch && !isBadgeOrAction && !el.closest('[class*="pet"], [id*="pet"]')) {
+              const cr = parseInt(colorMatch[1], 10);
+              const cg = parseInt(colorMatch[2], 10);
+              const cb = parseInt(colorMatch[3], 10);
+
+              // Texto negro / gris muy oscuro
+              if (cr < 95 && cg < 95 && cb < 95) {
+                saveOrigStyle(el);
+                if (cr >= 55 && cg >= 55 && cb >= 55) {
+                  el.dataset.mutedLight = '1';
+                  el.style.setProperty('color', '#b4b4c2', 'important');
+                } else {
+                  el.style.setProperty('color', 'var(--text-main)', 'important');
+                }
+              }
+              // Texto guinda / vino oscuro (ej. encabezados, nombres y XP en Statistics)
+              else if (cr >= 80 && cr <= 200 && cg < 75 && cb < 85 && cr > cg + 45) {
+                saveOrigStyle(el);
+                const isInsideTd = el.closest('td') !== null;
+                if (isInsideTd && !/\bXP\b|^\d+$/.test((el.textContent || '').trim())) {
+                  el.dataset.burgundyPrimary = '1';
+                  el.style.setProperty('color', '#fda4af', 'important');
+                } else {
+                  el.dataset.burgundyText = '1';
+                  el.style.setProperty('color', '#ff7b8d', 'important');
+                }
+              }
+            }
+
+            // 2. Corrige fondos claros y globo de Beenary
+            if (petYellowBgs.includes(bg)) {
+              saveOrigStyle(el);
+              el.style.setProperty('background-color', '#22201b', 'important');
+              el.style.setProperty('border-color', 'rgba(243, 198, 79, 0.45)', 'important');
+              el.style.setProperty('color', '#f1f1f4', 'important');
+            } else if (isLightColor(bg)) {
+              saveOrigStyle(el);
+              if (isModalSurface) {
+                el.style.setProperty('background', '#18181f', 'important');
+                el.style.setProperty('background-color', 'var(--bg-card, #18181f)', 'important');
+                el.style.setProperty('color', 'var(--text-main, #f1f1f4)', 'important');
+              } else if (isHeading || isHeadingWrapper || (parentCard && !isBadgeOrAction)) {
+                el.style.setProperty('background', 'transparent', 'important');
+                el.style.setProperty('background-color', 'transparent', 'important');
+                el.style.setProperty('box-shadow', 'none', 'important');
+                el.style.setProperty('border', 'none', 'important');
+              } else if (!isBadgeOrAction) {
+                el.style.setProperty('background-color', 'var(--bg-card)', 'important');
+                el.style.setProperty('color', 'var(--text-main)', 'important');
+              } else if (el.tagName === 'A' || el.tagName === 'BUTTON') {
+                el.style.setProperty('background-color', 'var(--bg-card)', 'important');
+                el.style.setProperty('color', 'var(--brand-primary)', 'important');
+              }
+            }
+          });
+
+          // 3. Restaura los cuadros de estadísticas (Home, Competitions y Admin Panel)
+          const statLabels = [
+            'LEVEL', 'TOTAL XP', 'GROUP RANKING', 'GLOBAL RANKING',
+            'TOTAL COMPETITIONS', 'ACTIVE', 'FINISHED', 'UPCOMING',
+            'ACTIVE TEACHERS', 'REGISTERED USERS', 'TOTAL GROUPS', 'TOTAL STUDENTS'
+          ];
+          document.querySelectorAll('main div, main section, main article').forEach(card => {
+            if (card.closest('.navbar, header.navbar, .creator-card, [class*="pet"], [id*="pet"]') || isInsideMiniGame(card) || isInsideBossBattle(card)) return;
+            const rawTxt = card.innerText ? card.innerText.trim().toUpperCase() : '';
+            const cleanTxt = rawTxt.replace(/:/g, '');
+            let matched = statLabels.filter(lbl => cleanTxt.startsWith(lbl + '\n') || cleanTxt === lbl || (cleanTxt.includes(lbl) && cleanTxt.length < 35));
+            if (matched.includes('ACTIVE TEACHERS')) {
+              matched = matched.filter(lbl => lbl !== 'ACTIVE');
+            }
+
+            if (
+              matched.length === 1 &&
+              card.children.length >= 2 &&
+              card.offsetWidth >= 140 &&
+              card.offsetWidth < window.innerWidth * 0.65 &&
+              card.offsetHeight >= 75 &&
+              card.offsetHeight <= 240
+            ) {
+              saveOrigStyle(card);
+              card.dataset.homeStat = '1';
+              card.style.setProperty('background-color', 'var(--bg-card, #18181f)', 'important');
+              card.style.setProperty('border', '1.5px solid var(--border-subtle, #2c2c38)', 'important');
+              card.style.setProperty('border-radius', '18px', 'important');
+              card.style.setProperty('box-shadow', '0 8px 24px rgba(0, 0, 0, 0.35)', 'important');
+
+              // Quita los trazos/bordes internos alrededor de los textos y números
+              card.querySelectorAll('div, p, span').forEach(inner => {
+                saveOrigStyle(inner);
+                inner.style.setProperty('background', 'transparent', 'important');
+                inner.style.setProperty('background-color', 'transparent', 'important');
+                inner.style.setProperty('border', 'none', 'important');
+                inner.style.setProperty('box-shadow', 'none', 'important');
+              });
+            }
+          });
+
+          // 3b. Elementos visuales del Dashboard de Admin (/admin-panel/)
+          document.querySelectorAll('main section, main div').forEach(panel => {
+            if (panel.closest('.navbar, header.navbar')) return;
+            const heading = panel.querySelector('h2, h3, h4');
+            if (!heading) return;
+            const title = (heading.textContent || '').trim();
+
+            // A) Users Overview: gráfico circular y puntos de leyenda
+            if (title === 'Users Overview' && panel.offsetWidth < window.innerWidth * 0.65) {
+              let studentsPct = 68;
+              panel.querySelectorAll('span, div, p').forEach(el => {
+                const t = (el.textContent || '').trim();
+                const m = t.match(/^(\d+)%$/);
+                if (m && parseInt(m[1], 10) > 50) studentsPct = parseInt(m[1], 10);
+
+                // Círculo del gráfico (conic-gradient)
+                if (el.offsetWidth >= 110 && el.offsetWidth <= 240 && Math.abs(el.offsetWidth - el.offsetHeight) <= 8 && (t.includes('%') || el.children.length <= 2)) {
+                  saveOrigStyle(el);
+                  el.dataset.adminPie = '1';
+                  el.style.setProperty('--students-pct', `${studentsPct}%`);
+                  el.style.setProperty('background-image', `conic-gradient(#9e2235 0% ${studentsPct}%, #e56b7c ${studentsPct}% 100%)`, 'important');
+                  el.style.setProperty('border-radius', '50%', 'important');
+                }
+
+                // Cuadritos de leyenda (Students / Teachers)
+                if (el.children.length === 0 && t === '' && el.offsetWidth >= 8 && el.offsetWidth <= 22 && el.offsetHeight >= 8 && el.offsetHeight <= 22) {
+                  const parentTxt = (el.parentElement?.textContent || '').trim();
+                  if (/Students/i.test(parentTxt)) {
+                    saveOrigStyle(el);
+                    el.dataset.adminLegend = 'students';
+                    el.style.setProperty('background-color', '#9e2235', 'important');
+                  } else if (/Teachers/i.test(parentTxt)) {
+                    saveOrigStyle(el);
+                    el.dataset.adminLegend = 'teachers';
+                    el.style.setProperty('background-color', '#e56b7c', 'important');
+                  }
+                }
+              });
+            }
+
+            // B) Students by Level: cuadros A1 - C2
+            if (title === 'Students by Level' && panel.offsetWidth < window.innerWidth * 0.65) {
+              panel.querySelectorAll('div').forEach(box => {
+                const t = (box.textContent || '').trim();
+                if (/^(A1|A2|B1|B2|C1|C2)\s*\d+$/.test(t) && box.offsetWidth >= 45 && box.offsetWidth <= 130 && box.offsetHeight >= 45 && box.offsetHeight <= 110) {
+                  saveOrigStyle(box);
+                  box.dataset.adminLevelBox = '1';
+                  box.style.setProperty('background-color', '#20202a', 'important');
+                  box.style.setProperty('border', '1.5px solid rgba(224, 90, 109, 0.55)', 'important');
+                  box.style.setProperty('border-radius', '12px', 'important');
+                }
+              });
+            }
+
+            // D) Most Challenging Words: filas suaves y porcentajes destacados
+            if (title === 'Most Challenging Words' && panel.offsetWidth < window.innerWidth * 0.5) {
+              panel.querySelectorAll('div, li').forEach(row => {
+                const t = (row.textContent || '').trim();
+                if (/^[a-zA-Z\s-]+\s+\d+%$/.test(t) && row.offsetHeight >= 28 && row.offsetHeight <= 60 && row.offsetWidth >= 150) {
+                  saveOrigStyle(row);
+                  row.dataset.adminWordRow = '1';
+                  row.style.setProperty('background-color', '#20202a', 'important');
+                  row.style.setProperty('border', '1px solid #2c2c38', 'important');
+                  row.style.setProperty('border-radius', '10px', 'important');
+                }
+              });
+            }
+          });
+
+          // 3c. Tarjeta "Student Performance" en /admin-panel/ (barras de grupo y AVERAGE SCORE)
+          document.querySelectorAll('main h1, main h2, main h3, main h4, main div, main span, main p').forEach(el => {
+            if ((el.textContent || '').trim() !== 'Student Performance') return;
+            let card = el.parentElement;
+            while (card && card !== document.body && card.tagName !== 'MAIN') {
+              const txt = card.textContent || '';
+              if (/Average score by group/i.test(txt) && /AVERAGE SCORE:/i.test(txt) && !/Users Overview/i.test(txt)) {
+                break;
+              }
+              card = card.parentElement;
+            }
+            if (!card || card === document.body || card.tagName === 'MAIN') return;
+
+            // 1. Recuadro inferior "AVERAGE SCORE: 87%"
+            card.querySelectorAll('div, p, span').forEach(box => {
+              const bt = (box.textContent || '').trim();
+              if (box !== card && /^AVERAGE SCORE:\s*\d+%$/i.test(bt) && !/Grupo/i.test(bt) && box.offsetHeight >= 24 && box.offsetHeight <= 100) {
+                saveOrigStyle(box);
+                box.dataset.adminAvgPill = '1';
+                box.style.setProperty('background', 'rgba(224, 90, 109, 0.14)', 'important');
+                box.style.setProperty('background-color', 'rgba(224, 90, 109, 0.14)', 'important');
+                box.style.setProperty('border', '1px solid rgba(224, 90, 109, 0.35)', 'important');
+                box.style.setProperty('border-radius', '12px', 'important');
+                box.style.setProperty('color', '#fda4af', 'important');
+
+                box.querySelectorAll('span, p, strong, b').forEach(txtEl => {
+                  saveOrigStyle(txtEl);
+                  const isPct = /^\d+%$/.test((txtEl.textContent || '').trim());
+                  txtEl.style.setProperty('color', isPct ? '#ffffff' : '#fda4af', 'important');
+                });
+              }
+            });
+
+            // 2. Barras de progreso de cada grupo
+            card.querySelectorAll('div, span').forEach(track => {
+              if (track === card || (track.textContent || '').trim() !== '') return;
+              if (track.children.length === 1 && track.offsetWidth >= 40 && track.offsetHeight >= 4 && track.offsetHeight <= 24) {
+                const fill = track.firstElementChild;
+                saveOrigStyle(track);
+                track.dataset.adminBarTrack = '1';
+                track.style.setProperty('background', '#282834', 'important');
+                track.style.setProperty('background-color', '#282834', 'important');
+                track.style.setProperty('border', 'none', 'important');
+                track.style.setProperty('border-radius', '999px', 'important');
+                track.style.setProperty('overflow', 'hidden', 'important');
+
+                saveOrigStyle(fill);
+                fill.dataset.adminBarFill = '1';
+                fill.style.setProperty('display', 'block', 'important');
+                fill.style.setProperty('height', '100%', 'important');
+                fill.style.setProperty('background', 'linear-gradient(90deg, #9e2235 0%, #e05a6d 100%)', 'important');
+                fill.style.setProperty('background-color', '#c83e51', 'important');
+                fill.style.setProperty('border', 'none', 'important');
+                fill.style.setProperty('border-radius', '999px', 'important');
+              }
+            });
+          });
+
+          // 3d. Cuadritos de leyenda (Students / Teachers) en "Users Overview"
+          document.querySelectorAll('main div, main span, main li, main p').forEach(el => {
+            if (el.closest('.navbar, header.navbar')) return;
+            const txt = (el.textContent || '').trim();
+            if (txt !== 'Students' && txt !== 'Teachers') return;
+
+            let card = el.parentElement;
+            while (card && card !== document.body && card.tagName !== 'MAIN') {
+              const cTxt = card.textContent || '';
+              if (/Users Overview/i.test(cTxt) && !/Student Performance/i.test(cTxt)) break;
+              card = card.parentElement;
+            }
+            if (!card || card === document.body || card.tagName === 'MAIN') return;
+
+            const isStudents = txt === 'Students';
+            const color = isStudents ? '#9e2235' : '#e56b7c';
+            const key = isStudents ? 'students' : 'teachers';
+
+            const dot =
+              Array.from(el.querySelectorAll('span, div, i')).find(d => (d.textContent || '').trim() === '') ||
+              (el.previousElementSibling && (el.previousElementSibling.textContent || '').trim() === '' ? el.previousElementSibling : null);
+
+            if (dot) {
+              saveOrigStyle(dot);
+              dot.dataset.adminLegend = key;
+              dot.style.setProperty('display', 'inline-block', 'important');
+              dot.style.setProperty('width', '12px', 'important');
+              dot.style.setProperty('height', '12px', 'important');
+              dot.style.setProperty('background', color, 'important');
+              dot.style.setProperty('background-color', color, 'important');
+              dot.style.setProperty('border-radius', '3px', 'important');
+            } else if (el.children.length === 0) {
+              saveOrigStyle(el);
+              el.dataset.adminLegendPseudo = key;
+            }
+          });
+          
+          // 4. Limpia cajas y sombras internas en tarjetas de Practice (descripciones e íconos)
+          document.querySelectorAll('main div, main section').forEach(box => {
+            if (box.closest('.navbar, header.navbar, .creator-card, [class*="pet"], [id*="pet"], [data-admin-bar-track="1"], [data-admin-avg-pill="1"], [data-admin-legend]') || isInsideMiniGame(box) || isInsideBossBattle(box)) return;
+            if (/LEVEL|TOTAL XP|GROUP RANKING|GLOBAL RANKING|STUDENTS BY LEVEL|STUDENT XP OVERVIEW|TOP STUDENTS|STUDENT PERFORMANCE/i.test(box.innerText)) return;
+            const heading = box.querySelector('h2, h3');
+            if (!heading || box.offsetWidth > window.innerWidth * 0.6) return;
+
+            box.querySelectorAll('p, div, span').forEach(child => {
+              if (child === box || child.contains(heading) || child.closest('[data-admin-bar-track="1"], [data-admin-avg-pill="1"]')) return;
+              const text = child.innerText.trim();
+              const isSmallPill = text.length > 0 && text.length <= 16 && getComputedStyle(child).borderRadius !== '0px' && getComputedStyle(child).borderWidth !== '0px';
+              if (isSmallPill || /START PRACTICE/i.test(text) || /^(Active|Upcoming|Finished)$/i.test(text)) return;
+
+              saveOrigStyle(child);
+              child.style.setProperty('background', 'transparent', 'important');
+              child.style.setProperty('background-color', 'transparent', 'important');
+              child.style.setProperty('box-shadow', 'none', 'important');
+              child.style.setProperty('border', 'none', 'important');
+            });
+          });
+
+          // 4b. Cuadritos de leyenda (Students / Teachers) en "Users Overview"
+          document.querySelectorAll('main div, main span, main li, main p').forEach(el => {
+            if (el.closest('.navbar, header.navbar')) return;
+            const txt = (el.textContent || '').trim();
+            if (txt !== 'Students' && txt !== 'Teachers') return;
+
+            let card = el.parentElement;
+            while (card && card !== document.body && card.tagName !== 'MAIN') {
+              const cTxt = card.textContent || '';
+              if (/Users Overview/i.test(cTxt) && !/Student Performance/i.test(cTxt)) break;
+              card = card.parentElement;
+            }
+            if (!card || card === document.body || card.tagName === 'MAIN') return;
+
+            const isStudents = txt === 'Students';
+            const color = isStudents ? '#9e2235' : '#e56b7c';
+            const borderColor = isStudents ? 'rgba(253, 164, 175, 0.45)' : 'rgba(254, 205, 211, 0.45)';
+            const key = isStudents ? 'students' : 'teachers';
+
+            const dot =
+              Array.from(el.querySelectorAll('span, div, i')).find(d => (d.textContent || '').trim() === '') ||
+              (el.previousElementSibling && (el.previousElementSibling.textContent || '').trim() === '' ? el.previousElementSibling : null);
+
+            if (dot) {
+              saveOrigStyle(dot);
+              dot.dataset.adminLegend = key;
+              dot.style.setProperty('display', 'inline-block', 'important');
+              dot.style.setProperty('width', '12px', 'important');
+              dot.style.setProperty('height', '12px', 'important');
+              dot.style.setProperty('min-width', '12px', 'important');
+              dot.style.setProperty('min-height', '12px', 'important');
+              dot.style.setProperty('background', color, 'important');
+              dot.style.setProperty('background-color', color, 'important');
+              dot.style.setProperty('border', `1px solid ${borderColor}`, 'important');
+              dot.style.setProperty('border-radius', '3px', 'important');
+            }
+          });
+
+          // 4c. Porcentajes blancos y nítidos dentro de la gráfica circular
+          document.querySelectorAll('main [data-admin-pie="1"] span, main [data-admin-pie="1"] div, main [data-admin-pie="1"] p').forEach(pctEl => {
+            if (/^\d+%$/.test((pctEl.textContent || '').trim())) {
+              saveOrigStyle(pctEl);
+              pctEl.style.setProperty('color', '#ffffff', 'important');
+              pctEl.style.setProperty('font-weight', '700', 'important');
+              pctEl.style.setProperty('text-shadow', '0 1px 4px rgba(0, 0, 0, 0.55)', 'important');
+            }
+          });
+
+          // 4d. Tablas /admin_teachers/ y /admin_panel/users/: alineación, roles, niveles, estados y grupos
+          document.querySelectorAll('main table').forEach(tbl => {
+            if (tbl.closest('.navbar, header.navbar')) return;
+            const headerTxt = (tbl.querySelector('thead')?.textContent || tbl.rows[0]?.textContent || '').toUpperCase();
+            const isTeachersTbl = headerTxt.includes('TEACHER') && headerTxt.includes('ASSIGNED GROUPS') && headerTxt.includes('STATUS');
+            const isUsersTbl = headerTxt.includes('USER') && headerTxt.includes('ROLE') && headerTxt.includes('STATUS');
+            if (!isTeachersTbl && !isUsersTbl) return;
+
+            saveOrigStyle(tbl);
+            tbl.style.setProperty('width', '100%', 'important');
+            tbl.style.setProperty('border-collapse', 'collapse', 'important');
+            tbl.style.setProperty('border-spacing', '0', 'important');
+
+            // 1. Alinear el contenedor de la tabla exactamente con el ancho/márgenes de la caja de búsqueda superior
+            const tableCard = tbl.closest('div, section');
+            if (tableCard && tableCard !== document.body && tableCard.tagName !== 'MAIN') {
+              saveOrigStyle(tableCard);
+              tableCard.dataset.adminTeacherTable = '1';
+
+              const searchInput = document.querySelector('main input[type="text"], main input[type="search"]');
+              const filterCard = searchInput ? searchInput.closest('div, form, section') : null;
+              const refBox = (filterCard && filterCard.parentElement && filterCard.parentElement !== document.body)
+                ? (filterCard.offsetWidth > tableCard.offsetWidth * 0.7 ? filterCard : filterCard.parentElement)
+                : null;
+
+              if (refBox && refBox.offsetWidth > 400 && refBox.offsetWidth < tableCard.offsetWidth) {
+                const cs = getComputedStyle(refBox);
+                tableCard.style.setProperty('width', `${refBox.offsetWidth}px`, 'important');
+                tableCard.style.setProperty('max-width', `${refBox.offsetWidth}px`, 'important');
+                tableCard.style.setProperty('margin-left', cs.marginLeft === '0px' ? 'auto' : cs.marginLeft, 'important');
+                tableCard.style.setProperty('margin-right', cs.marginRight === '0px' ? 'auto' : cs.marginRight, 'important');
+              } else {
+                tableCard.style.setProperty('max-width', 'calc(100% - 4rem)', 'important');
+                tableCard.style.setProperty('margin-left', 'auto', 'important');
+                tableCard.style.setProperty('margin-right', 'auto', 'important');
+              }
+              tableCard.style.setProperty('border-radius', '16px', 'important');
+              tableCard.style.setProperty('overflow-x', 'auto', 'important');
+            }
+
+            // 2. Píldoras de ROLE, LEVEL, STATUS y Grupos (sin tocar botones de ACTIONS)
+            tbl.querySelectorAll('tbody tr').forEach(tr => {
+              tr.querySelectorAll('span, div, small').forEach(el => {
+                if (el.closest('button, a') || el.children.length > 0) return;
+                const txt = (el.textContent || '').trim();
+                const upper = txt.toUpperCase();
+
+                // Roles: STUDENT (rojo coral), ADMIN (guinda/púrpura), TEACHER (azul acero)
+                if (upper === 'STUDENT' || upper === 'ADMIN' || upper === 'TEACHER') {
+                  const roleKey = upper.toLowerCase();
+                  const roleStyles = {
+                    student: { bg: 'rgba(239, 68, 68, 0.16)', color: '#fca5a5', border: 'rgba(248, 113, 113, 0.38)' },
+                    admin:   { bg: 'rgba(168, 85, 247, 0.18)', color: '#d8b4fe', border: 'rgba(192, 132, 252, 0.40)' },
+                    teacher: { bg: 'rgba(59, 130, 246, 0.16)', color: '#93c5fd', border: 'rgba(96, 165, 250, 0.38)' }
+                  }[roleKey];
+
+                  saveOrigStyle(el);
+                  el.dataset.adminRolePill = roleKey;
+                  el.style.setProperty('display', 'inline-flex', 'important');
+                  el.style.setProperty('align-items', 'center', 'important');
+                  el.style.setProperty('justify-content', 'center', 'important');
+                  el.style.setProperty('background', roleStyles.bg, 'important');
+                  el.style.setProperty('background-color', roleStyles.bg, 'important');
+                  el.style.setProperty('color', roleStyles.color, 'important');
+                  el.style.setProperty('border', `1px solid ${roleStyles.border}`, 'important');
+                  el.style.setProperty('border-radius', '8px', 'important');
+                  el.style.setProperty('padding', '4px 12px', 'important');
+                  el.style.setProperty('font-weight', '700', 'important');
+                  el.style.setProperty('white-space', 'nowrap', 'important');
+                  return;
+                }
+
+                // Niveles CEFR: A1, A2, B1, B2, C1, C2
+                if (/^(A1|A2|B1|B2|C1|C2)$/.test(upper)) {
+                  saveOrigStyle(el);
+                  el.dataset.adminLevelPill = '1';
+                  el.style.setProperty('display', 'inline-flex', 'important');
+                  el.style.setProperty('align-items', 'center', 'important');
+                  el.style.setProperty('justify-content', 'center', 'important');
+                  el.style.setProperty('background', '#242430', 'important');
+                  el.style.setProperty('background-color', '#242430', 'important');
+                  el.style.setProperty('color', '#f1f5f9', 'important');
+                  el.style.setProperty('border', '1px solid #3a3a4a', 'important');
+                  el.style.setProperty('border-radius', '999px', 'important');
+                  el.style.setProperty('padding', '3px 11px', 'important');
+                  el.style.setProperty('font-weight', '700', 'important');
+                  el.style.setProperty('white-space', 'nowrap', 'important');
+                  return;
+                }
+
+                // Estados ACTIVE / INACTIVE
+                if (upper === 'ACTIVE' || upper === 'INACTIVE') {
+                  const isActive = upper === 'ACTIVE';
+                  saveOrigStyle(el);
+                  el.dataset.adminStatusPill = isActive ? 'active' : 'inactive';
+                  el.style.setProperty('background', isActive ? 'rgba(34, 197, 94, 0.16)' : 'rgba(239, 68, 68, 0.16)', 'important');
+                  el.style.setProperty('background-color', isActive ? 'rgba(34, 197, 94, 0.16)' : 'rgba(239, 68, 68, 0.16)', 'important');
+                  el.style.setProperty('color', isActive ? '#4ade80' : '#f87171', 'important');
+                  el.style.setProperty('border', `1px solid ${isActive ? 'rgba(74, 222, 128, 0.35)' : 'rgba(248, 113, 113, 0.35)'}`, 'important');
+                  el.style.setProperty('border-radius', '999px', 'important');
+                  el.style.setProperty('font-weight', '700', 'important');
+                  el.style.setProperty('white-space', 'nowrap', 'important');
+                  return;
+                }
+
+                // Badges de grupos asignados ("Grupo ..." o "Group ...")
+                if (/^(Grupo|Group)\s+/i.test(txt) && txt.length <= 35) {
+                  saveOrigStyle(el);
+                  el.dataset.adminGroupBadge = '1';
+                  el.style.setProperty('display', 'inline-flex', 'important');
+                  el.style.setProperty('align-items', 'center', 'important');
+                  el.style.setProperty('background', 'rgba(59, 130, 246, 0.16)', 'important');
+                  el.style.setProperty('background-color', 'rgba(59, 130, 246, 0.16)', 'important');
+                  el.style.setProperty('color', '#93c5fd', 'important');
+                  el.style.setProperty('border', '1px solid rgba(96, 165, 250, 0.35)', 'important');
+                  el.style.setProperty('border-radius', '6px', 'important');
+                  el.style.setProperty('padding', '4px 10px', 'important');
+                  el.style.setProperty('font-weight', '600', 'important');
+                  el.style.setProperty('white-space', 'nowrap', 'important');
+
+                  const groupWrap = el.parentElement;
+                  if (groupWrap && groupWrap.tagName !== 'TD' && groupWrap.children.length > 1) {
+                    saveOrigStyle(groupWrap);
+                    groupWrap.style.setProperty('display', 'flex', 'important');
+                    groupWrap.style.setProperty('flex-wrap', 'wrap', 'important');
+                    groupWrap.style.setProperty('gap', '6px', 'important');
+                    groupWrap.style.setProperty('align-items', 'center', 'important');
+                  }
+                }
+              });
+            });
+          });
+
+          // 4e. Vista /admin_academy_management/ (Careers, Groups y Levels): quitar franjas sombreadas internas
+          document.querySelectorAll('main div, main section, main article').forEach(card => {
+            if (card.closest('.navbar, header.navbar')) return;
+            const pageTxt = document.querySelector('main')?.textContent || '';
+            if (!/Academy Management/i.test(pageTxt)) return;
+
+            const hasEditBtn = Array.from(card.querySelectorAll('button, a')).some(b => (b.textContent || '').trim().toUpperCase() === 'EDIT');
+            const hasDeleteBtn = Array.from(card.querySelectorAll('button, a')).some(b => (b.textContent || '').trim().toUpperCase() === 'DELETE');
+            const isSmallCard = card.offsetWidth >= 200 && card.offsetWidth <= 560 && card.offsetHeight >= 110 && card.offsetHeight <= 340;
+
+            if (!hasEditBtn || !hasDeleteBtn || !isSmallCard) return;
+
+            saveOrigStyle(card);
+            card.dataset.adminAcademyCard = '1';
+            card.style.setProperty('background-color', '#18181f', 'important');
+            card.style.setProperty('border', '1px solid #2c2c38', 'important');
+            card.style.setProperty('border-radius', '16px', 'important');
+            card.style.setProperty('box-shadow', '0 8px 24px rgba(0, 0, 0, 0.35)', 'important');
+
+            // Eliminar todos los cuadros y franjas sombreadas internas (título, descripción y contenedor de botones)
+            card.querySelectorAll('div, p, span, header, footer, h1, h2, h3, h4').forEach(inner => {
+              if (inner.closest('button, a') || inner.tagName === 'BUTTON' || inner.tagName === 'A') return;
+              const upper = (inner.textContent || '').trim().toUpperCase();
+
+              // Píldora ACTIVE / INACTIVE de Careers y Groups
+              if ((upper === 'ACTIVE' || upper === 'INACTIVE') && inner.children.length === 0) {
+                const isActive = upper === 'ACTIVE';
+                saveOrigStyle(inner);
+                inner.dataset.adminStatusPill = isActive ? 'active' : 'inactive';
+                inner.style.setProperty('background', isActive ? 'rgba(34, 197, 94, 0.16)' : 'rgba(239, 68, 68, 0.16)', 'important');
+                inner.style.setProperty('background-color', isActive ? 'rgba(34, 197, 94, 0.16)' : 'rgba(239, 68, 68, 0.16)', 'important');
+                inner.style.setProperty('color', isActive ? '#4ade80' : '#f87171', 'important');
+                inner.style.setProperty('border', `1px solid ${isActive ? 'rgba(74, 222, 128, 0.35)' : 'rgba(248, 113, 113, 0.35)'}`, 'important');
+                inner.style.setProperty('border-radius', '999px', 'important');
+                inner.style.setProperty('font-weight', '700', 'important');
+                return;
+              }
+
+              saveOrigStyle(inner);
+              inner.style.setProperty('background', 'transparent', 'important');
+              inner.style.setProperty('background-color', 'transparent', 'important');
+              inner.style.setProperty('border', 'none', 'important');
+              inner.style.setProperty('box-shadow', 'none', 'important');
+            });
+          });
+
+          // 4f. Quitar el contenedor/fondo sombreado detrás de las cuadrículas de cards en todas las ventanas
+          document.querySelectorAll('main div, main section').forEach(wrap => {
+            if (wrap.closest('.navbar, header.navbar') || wrap === document.body || wrap.tagName === 'MAIN') return;
+            if (wrap.hasAttribute('data-admin-academy-card') || wrap.hasAttribute('data-home-stat') || wrap.hasAttribute('data-admin-teacher-table')) return;
+
+            const academyCardsInside = wrap.querySelectorAll('[data-admin-academy-card="1"]');
+            const statCardsInside = wrap.querySelectorAll('[data-home-stat="1"]');
+            const hasMultiCards = academyCardsInside.length >= 2 || statCardsInside.length >= 2;
+            const isNotFullPage = wrap.offsetWidth < window.innerWidth * 0.98 && !wrap.querySelector('h1');
+
+            if (hasMultiCards && isNotFullPage) {
+              saveOrigStyle(wrap);
+              wrap.dataset.adminCardGridWrap = '1';
+              wrap.style.setProperty('background', 'transparent', 'important');
+              wrap.style.setProperty('background-color', 'transparent', 'important');
+              wrap.style.setProperty('border', 'none', 'important');
+              wrap.style.setProperty('box-shadow', 'none', 'important');
+              wrap.style.setProperty('padding-left', '0', 'important');
+              wrap.style.setProperty('padding-right', '0', 'important');
+            }
+          });
+
+          // 4g. Pestañas CAREERS / GROUPS / LEVELS en /admin_academy_management/ (sin estilos inline)
+          (function syncAcademyTabs() {
+            const mainEl = document.querySelector('main');
+            if (!mainEl || !/Academy Management/i.test(mainEl.textContent || '')) return;
+
+            const tabBtns = Array.from(mainEl.querySelectorAll('button, a')).filter(btn =>
+              /^(CAREERS|GROUPS|LEVELS)$/i.test((btn.textContent || '').trim())
+            );
+            if (tabBtns.length < 2) return;
+
+            const detectActiveTabName = (clickedName = null) => {
+              if (clickedName) return clickedName;
+              const visibleBtns = Array.from(mainEl.querySelectorAll('button, a')).filter(b => b.offsetParent !== null);
+              if (visibleBtns.some(b => /\+\s*Add Group/i.test(b.textContent || ''))) return 'GROUPS';
+              if (visibleBtns.some(b => /\+\s*Add Level/i.test(b.textContent || ''))) return 'LEVELS';
+              if (visibleBtns.some(b => /\+\s*Add Program/i.test(b.textContent || ''))) return 'CAREERS';
+              const activeByClass = tabBtns.find(b => b.getAttribute('aria-selected') === 'true' || /\bactive\b|\bselected\b/i.test(b.className || ''));
+              return activeByClass ? activeByClass.textContent.trim().toUpperCase() : 'CAREERS';
+            };
+
+            const updateTabAttrs = (clickedName = null) => {
+              const activeName = detectActiveTabName(clickedName);
+              tabBtns.forEach(btn => {
+                // Limpiar cualquier estilo inline previo para no interferir con el modo claro
+                btn.style.removeProperty('background');
+                btn.style.removeProperty('background-color');
+                btn.style.removeProperty('color');
+                btn.style.removeProperty('border');
+
+                const name = (btn.textContent || '').trim().toUpperCase();
+                btn.dataset.adminAcademyTab = (name === activeName) ? 'active' : 'inactive';
+              });
+            };
+
+            tabBtns.forEach(btn => {
+              if (!btn.dataset.academyTabBound) {
+                btn.dataset.academyTabBound = '1';
+                btn.addEventListener('click', () => {
+                  const name = (btn.textContent || '').trim().toUpperCase();
+                  updateTabAttrs(name);
+                  setTimeout(() => updateTabAttrs(name), 50);
+                });
+              }
+            });
+
+            updateTabAttrs();
+          })();
+
+          // 4h. Vista /admin_backups/: quitar trazos en tarjetas y colorear TYPE (Uploaded / Manual)
+          (function cleanBackupsView() {
+            const mainEl = document.querySelector('main');
+            if (!mainEl || !/Database & System Backups/i.test(mainEl.textContent || '')) return;
+
+            // 1. Limpiar las 3 tarjetas superiores (Last Backup, Total Backups, Auto-Backup)
+            mainEl.querySelectorAll('div, section, article').forEach(card => {
+              if (card.closest('.navbar, header.navbar')) return;
+              const txt = (card.textContent || '').trim();
+              const isMetricCard =
+                (/Last Backup/i.test(txt) && !/Total Backups/i.test(txt)) ||
+                (/Total Backups/i.test(txt) && !/Last Backup/i.test(txt)) ||
+                (/Auto-Backup/i.test(txt) && !/Total Backups/i.test(txt));
+
+              if (!isMetricCard || card.offsetWidth < 180 || card.offsetWidth > 540 || card.offsetHeight < 70 || card.offsetHeight > 220) return;
+
+              saveOrigStyle(card);
+              card.dataset.adminBackupCard = '1';
+              card.style.setProperty('background-color', '#18181f', 'important');
+              card.style.setProperty('border', '1px solid #2c2c38', 'important');
+              card.style.setProperty('border-radius', '16px', 'important');
+
+              card.querySelectorAll('div, p, span, h2, h3, h4, small, strong').forEach(inner => {
+                saveOrigStyle(inner);
+                inner.style.setProperty('background', 'transparent', 'important');
+                inner.style.setProperty('background-color', 'transparent', 'important');
+                inner.style.setProperty('border', 'none', 'important');
+                inner.style.setProperty('box-shadow', 'none', 'important');
+                inner.style.setProperty('outline', 'none', 'important');
+              });
+            });
+
+            // 2. Tabla Available Backup Snapshots y píldoras Uploaded / Manual
+            mainEl.querySelectorAll('table').forEach(tbl => {
+              const tableCard = tbl.closest('div, section');
+              if (tableCard && tableCard !== document.body && tableCard.tagName !== 'MAIN') {
+                saveOrigStyle(tableCard);
+                tableCard.dataset.adminTeacherTable = '1';
+              }
+
+              tbl.querySelectorAll('tbody tr').forEach(tr => {
+                tr.querySelectorAll('span, div, small, td').forEach(node => {
+                  if (node.closest('button, a') || node.children.length > 0) return;
+                  const rawTxt = (node.textContent || '').trim();
+                  const upper = rawTxt.toUpperCase();
+                  if (upper !== 'UPLOADED' && upper !== 'MANUAL' && upper !== 'SCHEDULED' && upper !== 'AUTOMATIC') return;
+
+                  let targetEl = node;
+                  if (node.tagName === 'TD') {
+                    const pillSpan = document.createElement('span');
+                    pillSpan.textContent = rawTxt;
+                    node.textContent = '';
+                    node.appendChild(pillSpan);
+                    targetEl = pillSpan;
+                  }
+
+                  const typeKey = upper === 'UPLOADED' ? 'uploaded' : (upper === 'MANUAL' ? 'manual' : 'scheduled');
+                  const palette = {
+                    uploaded:  { bg: 'rgba(34, 197, 94, 0.16)',  color: '#4ade80', border: 'rgba(74, 222, 128, 0.35)' },
+                    manual:    { bg: 'rgba(245, 158, 11, 0.16)', color: '#fbbf24', border: 'rgba(251, 191, 36, 0.35)' },
+                    scheduled: { bg: 'rgba(59, 130, 246, 0.16)', color: '#93c5fd', border: 'rgba(96, 165, 250, 0.35)' }
+                  }[typeKey];
+
+                  saveOrigStyle(targetEl);
+                  targetEl.dataset.adminBackupTypePill = typeKey;
+                  targetEl.style.setProperty('display', 'inline-flex', 'important');
+                  targetEl.style.setProperty('align-items', 'center', 'important');
+                  targetEl.style.setProperty('justify-content', 'center', 'important');
+                  targetEl.style.setProperty('background', palette.bg, 'important');
+                  targetEl.style.setProperty('background-color', palette.bg, 'important');
+                  targetEl.style.setProperty('color', palette.color, 'important');
+                  targetEl.style.setProperty('border', `1px solid ${palette.border}`, 'important');
+                  targetEl.style.setProperty('border-radius', '8px', 'important');
+                  targetEl.style.setProperty('padding', '4px 12px', 'important');
+                  targetEl.style.setProperty('font-weight', '700', 'important');
+                  targetEl.style.setProperty('white-space', 'nowrap', 'important');
+                });
+              });
+            });
+          })();
+
+          // 4i. Unificar TODAS las alertas y notificaciones del sistema en modo oscuro
+          (function normalizeSystemAlerts() {
+            const detectAlertTone = (el) => {
+              const cls = `${el.className || ''} ${el.id || ''}`.toLowerCase();
+              const txt = (el.textContent || '').trim().toLowerCase();
+              const bg = getComputedStyle(el).backgroundColor || '';
+              const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+
+              if (/danger|error|fail|invalid/.test(cls) || /\b(error|failed|invalid|cannot|denied)\b/.test(txt)) return 'error';
+              if (/warning|warn/.test(cls) || /\b(warning|caution|attention)\b/.test(txt)) return 'warning';
+              if (/info|notice/.test(cls)) return 'info';
+              if (/success/.test(cls) || /\b(successfully|added|updated|deleted|created|restored|saved|uploaded)\b/.test(txt)) return 'success';
+
+              if (m) {
+                const [r, g, b] = [Number(m[1]), Number(m[2]), Number(m[3])];
+                if (g > 200 && g > r + 15 && g > b + 15) return 'success'; // Verde pastel (#dcfce7 / #d4edda)
+                if (r > 210 && r > g + 25 && r > b + 25) return 'error';   // Rojo pastel (#fee2e2 / #f8d7da)
+                if (r > 215 && g > 200 && b < 190) return 'warning';       // Amarillo pastel (#fef3c7 / #fff3cd)
+                if (b > 210 && b > r + 20) return 'info';                  // Azul pastel (#dbeafe / #d1ecf1)
+              }
+              return null;
+            };
+
+            const palettes = {
+              success: { bg: 'rgba(16, 185, 129, 0.13)', border: 'rgba(52, 211, 153, 0.38)', text: '#4ade80' },
+              error:   { bg: 'rgba(239, 68, 68, 0.14)',  border: 'rgba(248, 113, 113, 0.38)', text: '#f87171' },
+              warning: { bg: 'rgba(245, 158, 11, 0.14)', border: 'rgba(251, 191, 36, 0.38)', text: '#fbbf24' },
+              info:    { bg: 'rgba(59, 130, 246, 0.14)', border: 'rgba(96, 165, 250, 0.38)', text: '#93c5fd' }
+            };
+
+            const styleAlertBox = (el) => {
+              if (!el || el.closest('.navbar, header.navbar, table, button, a')) return;
+              if (el.hasAttribute('data-admin-status-pill') || el.hasAttribute('data-admin-backup-type-pill')) return;
+              if (el.offsetWidth < 180 || el.offsetHeight < 28 || el.offsetHeight > 140) return;
+
+              const tone = detectAlertTone(el);
+              if (!tone) return;
+
+              const p = palettes[tone];
+              saveOrigStyle(el);
+              el.dataset.darkAlert = tone;
+              el.style.setProperty('background', p.bg, 'important');
+              el.style.setProperty('background-color', p.bg, 'important');
+              el.style.setProperty('border', `1px solid ${p.border}`, 'important');
+              el.style.setProperty('color', p.text, 'important');
+              el.style.setProperty('border-radius', '12px', 'important');
+              el.style.setProperty('box-shadow', 'none', 'important');
+
+              el.querySelectorAll('span, p, div, strong, b, em, small, i, li').forEach(child => {
+                if (child.closest('button, a')) return;
+                saveOrigStyle(child);
+                child.style.setProperty('background', 'transparent', 'important');
+                child.style.setProperty('background-color', 'transparent', 'important');
+                child.style.setProperty('border', 'none', 'important');
+                child.style.setProperty('color', p.text, 'important');
+              });
+
+              el.querySelectorAll('button, .close, [data-dismiss], [aria-label="Close"]').forEach(closeBtn => {
+                saveOrigStyle(closeBtn);
+                closeBtn.style.setProperty('color', p.text, 'important');
+                closeBtn.style.setProperty('background', 'transparent', 'important');
+                closeBtn.style.setProperty('border', 'none', 'important');
+              });
+            };
+
+            const scanAllAlerts = () => {
+              if (document.documentElement.getAttribute('data-theme') !== 'dark') return;
+              const candidates = document.querySelectorAll(
+                '[role="alert"], .alert, .messages li, .message, .toast, [class*="alert"], [class*="message"], [class*="toast"], [class*="notif"], main div, main p, main li'
+              );
+              candidates.forEach(el => {
+                const isExplicitAlert = el.matches('[role="alert"], .alert, .messages li, .message, .toast, [class*="alert"], [class*="toast"], [class*="notif"]');
+                const bg = getComputedStyle(el).backgroundColor || '';
+                const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                const hasPastelBg = m && (Number(m[1]) > 200 || Number(m[2]) > 200 || Number(m[3]) > 210);
+                if (isExplicitAlert || hasPastelBg) {
+                  styleAlertBox(el);
+                }
+              });
+            };
+
+            scanAllAlerts();
+
+            if (!window.__darkAlertObserver) {
+              window.__darkAlertObserver = new MutationObserver(() => scanAllAlerts());
+              window.__darkAlertObserver.observe(document.body, { childList: true, subtree: true });
+            }
+          })();
+
+          // 4j. Vista de Ronda / Competencia: tarjetas de control, badge Active Round y botón Start/Finish Round
+          (function restoreCompetitionControlCards() {
+            const mainEl = document.querySelector('main');
+            if (!mainEl) return;
+
+            // 1. Restaurar los 3 cuadros: 1. SELECT PARTICIPANT, 2. SELECT WORD CATEGORY, 3. ROUND MANAGEMENT
+            mainEl.querySelectorAll('div, section, article').forEach(card => {
+              if (card.closest('.navbar, header.navbar')) return;
+              const txt = (card.textContent || '').trim();
+              const isCard1 = /1\.\s*SELECT PARTICIPANT/i.test(txt) && !/2\.\s*SELECT WORD CATEGORY/i.test(txt);
+              const isCard2 = /2\.\s*SELECT WORD CATEGORY/i.test(txt) && !/3\.\s*ROUND MANAGEMENT/i.test(txt);
+              const isCard3 = /3\.\s*ROUND MANAGEMENT/i.test(txt) && !/1\.\s*SELECT PARTICIPANT/i.test(txt);
+
+              if ((!isCard1 && !isCard2 && !isCard3) || card.offsetWidth < 200 || card.offsetWidth > 540 || card.offsetHeight < 90 || card.offsetHeight > 320) return;
+
+              saveOrigStyle(card);
+              card.dataset.compControlCard = '1';
+              card.style.setProperty('background-color', '#18181f', 'important');
+              card.style.setProperty('border', '1px solid #2c2c38', 'important');
+              card.style.setProperty('border-radius', '16px', 'important');
+              card.style.setProperty('box-shadow', '0 8px 24px rgba(0, 0, 0, 0.35)', 'important');
+            });
+
+            // 2. Restaurar el recuadro de "Active Round: ..."
+            mainEl.querySelectorAll('div, span, p').forEach(el => {
+              if (el.closest('button, a') || el.children.length > 0) return;
+              const txt = (el.textContent || '').trim();
+              if (/^Active Round\s*:/i.test(txt) && txt.length <= 45) {
+                saveOrigStyle(el);
+                el.dataset.compRoundBadge = '1';
+                el.style.setProperty('display', 'inline-flex', 'important');
+                el.style.setProperty('align-items', 'center', 'important');
+                el.style.setProperty('justify-content', 'center', 'important');
+                el.style.setProperty('background', 'rgba(245, 158, 11, 0.14)', 'important');
+                el.style.setProperty('background-color', 'rgba(245, 158, 11, 0.14)', 'important');
+                el.style.setProperty('color', '#fde68a', 'important');
+                el.style.setProperty('border', '1px solid rgba(245, 158, 11, 0.45)', 'important');
+                el.style.setProperty('border-radius', '10px', 'important');
+                el.style.setProperty('padding', '8px 18px', 'important');
+              }
+            });
+
+            // 3. Restaurar el botón guinda con borde dorado de "Start Round" y "Finish Current Round"
+            mainEl.querySelectorAll('button, a, input[type="submit"], input[type="button"]').forEach(btn => {
+              const label = (btn.value || btn.textContent || '').trim();
+              if (!/^(Start Round|Finish Current Round)$/i.test(label)) return;
+
+              saveOrigStyle(btn);
+              btn.dataset.compRoundActionBtn = '1';
+              btn.style.setProperty('display', 'inline-flex', 'important');
+              btn.style.setProperty('align-items', 'center', 'important');
+              btn.style.setProperty('justify-content', 'center', 'important');
+              btn.style.setProperty('background', '#7c1d28', 'important');
+              btn.style.setProperty('background-color', '#7c1d28', 'important');
+              btn.style.setProperty('color', '#ffffff', 'important');
+              btn.style.setProperty('border', '1.5px solid #b45309', 'important');
+              btn.style.setProperty('border-radius', '12px', 'important');
+              btn.style.setProperty('padding', '10px 24px', 'important');
+              btn.style.setProperty('font-weight', '700', 'important');
+              btn.style.setProperty('text-decoration', 'none', 'important');
+              btn.style.setProperty('box-shadow', '0 4px 12px rgba(0, 0, 0, 0.3)', 'important');
+              btn.style.setProperty('cursor', 'pointer', 'important');
+            });
+          })();
+
+          // 4k. Panel de Competencia: números en negro en los hexágonos (habilitados y deshabilitados)
+          (function fixCompetitionHexNumbers() {
+            const mainEl = document.querySelector('main');
+            if (!mainEl) return;
+
+            mainEl.querySelectorAll('button, a, div, span').forEach(el => {
+              if (el.closest('.navbar, header.navbar')) return;
+              const txt = (el.textContent || '').trim();
+              if (!/^\d{1,3}$/.test(txt)) return;
+
+              const cs = getComputedStyle(el);
+              const parentCs = el.parentElement ? getComputedStyle(el.parentElement) : null;
+              const isHexShape =
+                (cs.clipPath && cs.clipPath.includes('polygon')) ||
+                (parentCs && parentCs.clipPath && parentCs.clipPath.includes('polygon')) ||
+                /hex/i.test(`${el.className || ''} ${el.parentElement?.className || ''}`);
+
+              if (!isHexShape) return;
+
+              const tile = (cs.clipPath && cs.clipPath.includes('polygon')) ? el : (el.closest('[class*="hex"], button, a') || el);
+              saveOrigStyle(tile);
+              tile.dataset.compHexTile = '1';
+              tile.style.setProperty('color', '#111827', 'important');
+              tile.style.setProperty('-webkit-text-fill-color', '#111827', 'important');
+
+              tile.querySelectorAll('span, strong, b, div, p').forEach(child => {
+                saveOrigStyle(child);
+                child.style.setProperty('color', '#111827', 'important');
+                child.style.setProperty('-webkit-text-fill-color', '#111827', 'important');
+              });
+            });
+          })();
+
+          // 5. Limpieza específica para el interior de las tarjetas de Competitions y títulos de sección
+          document.querySelectorAll('.competition-card-body, .competition-card-body *').forEach(el => {
+            saveOrigStyle(el);
+            el.style.setProperty('background', 'transparent', 'important');
+            el.style.setProperty('box-shadow', 'none', 'important');
+          });
+
+          document.querySelectorAll('main h1, main h2, main h3, main h4').forEach(h => {
+            if (h.closest('.navbar, header.navbar, [data-home-stat="1"], [data-notif-modal="1"], [data-boss-modal="1"], [data-memory-modal="1"], [data-generic-modal="1"], [data-profile-confirm-modal="1"], [class*="pet"], [id*="pet"]') || isInsideMiniGame(h)) return;
+            saveOrigStyle(h);
+            h.dataset.cleanHeading = '1';
+            h.style.setProperty('background', 'transparent', 'important');
+            h.style.setProperty('background-color', 'transparent', 'important');
+            h.style.setProperty('box-shadow', 'none', 'important');
+
+            const parent = h.parentElement;
+            if (parent && parent.tagName !== 'MAIN' && parent.tagName !== 'BODY' && parent.tagName !== 'FORM' && parent.innerText.trim() === h.innerText.trim()) {
+              saveOrigStyle(parent);
+              parent.dataset.cleanHeading = '1';
+              parent.style.setProperty('background', 'transparent', 'important');
+              parent.style.setProperty('background-color', 'transparent', 'important');
+              parent.style.setProperty('box-shadow', 'none', 'important');
+              parent.style.setProperty('border', 'none', 'important');
+            }
+          });
+
+          // 5b. Limpia el fondo sombreado del contenedor de botones en las tarjetas de Competitions
+          document.querySelectorAll('main div, main section, main footer').forEach(box => {
+            if (box.closest('.navbar, header.navbar, [data-modal-backdrop="1"]')) return;
+            const txt = box.textContent || '';
+            if (txt.includes('CODE:') || txt.includes('Your Competitions')) return;
+            const hasCompBtn = Array.from(box.querySelectorAll('a, button')).some(el =>
+              /^(View Details|Manage Competition|Finish Competition|Manage Participants|Enter Competition|View Results)$/i.test((el.textContent || '').trim())
+            );
+            if (hasCompBtn && box.offsetWidth >= 180 && box.offsetWidth < window.innerWidth * 0.65 && box.offsetHeight <= 150) {
+              saveOrigStyle(box);
+              box.dataset.compActions = '1';
+              box.style.setProperty('background', 'transparent', 'important');
+              box.style.setProperty('background-color', 'transparent', 'important');
+              box.style.setProperty('border', 'none', 'important');
+              box.style.setProperty('box-shadow', 'none', 'important');
+            }
+          });
+
+          // 6. Relleno sólido guinda para el botón circular de cámara en Edit Profile
+          document.querySelectorAll('form[action*="profile"] label, form[action*="profile"] button, form[action*="profile"] span, form[action*="profile"] div').forEach(el => {
+            const rect = el.getBoundingClientRect();
+            const hasIcon = el.querySelector('svg, i, img') || /camera|photo|avatar|upload/i.test(el.className);
+            const isSmallCircle = rect.width >= 24 && rect.width <= 56 && Math.abs(rect.width - rect.height) <= 4;
+            if (hasIcon && isSmallCircle && !el.closest('[class*="password"]')) {
+              saveOrigStyle(el);
+              el.style.setProperty('background', '#7a1f2b', 'important');
+              el.style.setProperty('background-color', '#7a1f2b', 'important');
+              el.style.setProperty('border', '2px solid #ffffff', 'important');
+              el.style.setProperty('border-radius', '50%', 'important');
+              el.style.setProperty('color', '#ffffff', 'important');
+            }
+          });
+
+          // 6b. Espaciado y alineación limpia para el cuadro de datos en Teacher Profile y Admin Profile
+          document.querySelectorAll('main div, main section').forEach(card => {
+            if (card.closest('.navbar, header.navbar, [data-modal-backdrop="1"]')) return;
+            const txt = card.textContent || '';
+            if (
+              txt.includes('First Name') &&
+              txt.includes('Email Address') &&
+              txt.includes('ACCOUNT SETTINGS') &&
+              !txt.includes('English Teacher') &&
+              !txt.includes('Administrator\n') &&
+              !card.querySelector('img') &&
+              card.offsetWidth >= 320 &&
+              card.offsetWidth < window.innerWidth * 0.85
+            ) {
+              saveOrigStyle(card);
+              card.dataset.teacherProfileCard = '1';
+              card.style.setProperty('background-color', 'var(--bg-card, #18181f)', 'important');
+              card.style.setProperty('border', '1.5px solid var(--border-subtle, #2c2c38)', 'important');
+              card.style.setProperty('border-radius', '22px', 'important');
+              card.style.setProperty('padding', '32px 36px', 'important');
+              card.style.setProperty('box-sizing', 'border-box', 'important');
+            }
+          });
+
+          // 6c. Alertas y mensajes flash (Student, Teacher y Admin)
+          document.querySelectorAll('.alert, [role="alert"], main div').forEach(alertEl => {
+            if (alertEl.closest('.navbar, header.navbar, [data-modal-backdrop="1"]')) return;
+            const txt = (alertEl.textContent || '').trim();
+            const isAlertClass = alertEl.classList.contains('alert') || alertEl.getAttribute('role') === 'alert';
+            const isProfileMsg = /(Profile updated successfully|profile has been updated successfully)/i.test(txt) && txt.length < 140 && alertEl.offsetHeight >= 32 && alertEl.offsetHeight <= 110;
+
+            if (!isAlertClass && !isProfileMsg) return;
+
+            // Si este div solo envuelve a una alerta hija con el mismo texto, lo hacemos transparente
+            const innerMatch = Array.from(alertEl.querySelectorAll('.alert, [role="alert"], div')).find(ch =>
+              ch !== alertEl && (ch.textContent || '').trim() === txt && ch.offsetHeight >= 28
+            );
+            if (innerMatch) {
+              saveOrigStyle(alertEl);
+              alertEl.dataset.darkAlertWrapper = '1';
+              alertEl.style.setProperty('background', 'transparent', 'important');
+              alertEl.style.setProperty('background-color', 'transparent', 'important');
+              alertEl.style.setProperty('border', 'none', 'important');
+              alertEl.style.setProperty('box-shadow', 'none', 'important');
+              return;
+            }
+
+            const cls = (alertEl.className || '').toLowerCase();
+            let type = 'success';
+            if (cls.includes('danger') || cls.includes('error')) type = 'danger';
+            else if (cls.includes('warning')) type = 'warning';
+
+            const palette = {
+              success: { bg: '#132a20', border: 'rgba(34, 197, 94, 0.45)', fg: '#86efac' },
+              danger:  { bg: '#2c1519', border: 'rgba(244, 63, 94, 0.45)', fg: '#fda4af' },
+              warning: { bg: '#2b2212', border: 'rgba(234, 179, 8, 0.45)', fg: '#fde047' }
+            }[type];
+
+            saveOrigStyle(alertEl);
+            alertEl.dataset.darkAlert = type;
+            alertEl.style.setProperty('background', palette.bg, 'important');
+            alertEl.style.setProperty('background-color', palette.bg, 'important');
+            alertEl.style.setProperty('border', `1.5px solid ${palette.border}`, 'important');
+            alertEl.style.setProperty('color', palette.fg, 'important');
+            alertEl.style.setProperty('border-radius', '14px', 'important');
+
+            alertEl.querySelectorAll('span, p, strong, div').forEach(child => {
+              saveOrigStyle(child);
+              child.style.setProperty('color', palette.fg, 'important');
+            });
+          });
+
+          // 7. Diseño limpio (sin marcos duplicados) para "Let's Take a Little Break!"
+          const allBreakDivs = Array.from(document.querySelectorAll('div')).filter(d =>
+            d.innerText && d.innerText.includes("Let's Take a Little Break!") && d.innerText.includes("TIME REMAINING")
+          );
+          if (allBreakDivs.length > 0) {
+            const textCol = allBreakDivs[allBreakDivs.length - 1];
+            const cardBox = (textCol.parentElement && textCol.parentElement.querySelector('img')) ? textCol.parentElement : textCol;
+
+            let ancestor = cardBox.parentElement;
+            while (ancestor && ancestor !== document.body && ancestor.tagName !== 'MAIN') {
+              saveOrigStyle(ancestor);
+              ancestor.style.setProperty('background', 'transparent', 'important');
+              ancestor.style.setProperty('border', 'none', 'important');
+              ancestor.style.setProperty('box-shadow', 'none', 'important');
+              ancestor = ancestor.parentElement;
+            }
+
+            if (textCol !== cardBox) {
+              saveOrigStyle(textCol);
+              textCol.style.setProperty('background', 'transparent', 'important');
+              textCol.style.setProperty('border', 'none', 'important');
+              textCol.style.setProperty('box-shadow', 'none', 'important');
+            }
+
+            saveOrigStyle(cardBox);
+            cardBox.dataset.breakCard = '1';
+            cardBox.style.setProperty('background', 'linear-gradient(145deg, #24211b 0%, #1a1917 100%)', 'important');
+            cardBox.style.setProperty('border', '1.5px solid rgba(243, 198, 79, 0.4)', 'important');
+            cardBox.style.setProperty('border-radius', '24px', 'important');
+            cardBox.style.setProperty('box-shadow', '0 18px 40px rgba(0, 0, 0, 0.65)', 'important');
+
+            cardBox.querySelectorAll('h1, h2, h3, p, span').forEach(txt => {
+              const t = txt.innerText.trim();
+              saveOrigStyle(txt);
+              if (/^JUST A MOMENT!$/i.test(t)) {
+                txt.style.setProperty('color', '#f3c64f', 'important');
+              } else if (/\d{2}:\d{2}:\d{2}/.test(t)) {
+                txt.style.setProperty('color', '#f3c64f', 'important');
+              } else if (/^TIME REMAINING$/i.test(t)) {
+                txt.style.setProperty('color', '#d6c38a', 'important');
+              } else if (txt.tagName === 'H1' || txt.tagName === 'H2' || txt.tagName === 'H3') {
+                txt.style.setProperty('color', '#ffffff', 'important');
+              } else {
+                txt.style.setProperty('color', '#d6d6dc', 'important');
+              }
+            });
+
+            cardBox.querySelectorAll('div').forEach(inner => {
+              if (inner !== cardBox && inner !== textCol && /TIME REMAINING|\d{2}:\d{2}:\d{2}/.test(inner.innerText) && inner.innerText.length < 45) {
+                saveOrigStyle(inner);
+                inner.dataset.breakTimer = '1';
+                inner.style.setProperty('background-color', 'rgba(243, 198, 79, 0.08)', 'important');
+                inner.style.setProperty('border', '1.5px solid rgba(243, 198, 79, 0.45)', 'important');
+                inner.style.setProperty('border-radius', '16px', 'important');
+              }
+            });
+          }
+
+          // 8. Fondo sólido y estilo limpio (sin bordes dobles) para Notifications
+          const notifCandidates = Array.from(document.querySelectorAll('.modal-content, dialog, div, section')).filter(el => {
+            if (el.closest('.navbar, header.navbar') || el.classList.contains('modal') || el.classList.contains('modal-dialog')) return false;
+            const txt = el.textContent || '';
+            const hasHeader = txt.includes('Notifications');
+            const hasCloseBtn = Array.from(el.querySelectorAll('button, a')).some(b => /^CLOSE$/i.test((b.textContent || '').trim()));
+            return hasHeader && hasCloseBtn && (el.offsetWidth === 0 || (el.offsetWidth >= 280 && el.offsetWidth <= 760));
+          });
+
+          if (notifCandidates.length > 0) {
+            const notifBox = notifCandidates[notifCandidates.length - 1];
+            saveOrigStyle(notifBox);
+            notifBox.dataset.notifModal = '1';
+            notifBox.style.setProperty('background', '#18181f', 'important');
+            notifBox.style.setProperty('background-color', 'var(--bg-card, #18181f)', 'important');
+            notifBox.style.setProperty('border', '1.5px solid var(--border-subtle, #2c2c38)', 'important');
+            notifBox.style.setProperty('border-radius', '22px', 'important');
+            notifBox.style.setProperty('box-shadow', '0 24px 60px rgba(0, 0, 0, 0.85)', 'important');
+
+            notifBox.querySelectorAll('.modal-header, .modal-body, .modal-footer').forEach(part => {
+              saveOrigStyle(part);
+              part.style.setProperty('background', '#18181f', 'important');
+              part.style.setProperty('background-color', 'var(--bg-card, #18181f)', 'important');
+              part.style.setProperty('border-color', 'var(--border-subtle, #2c2c38)', 'important');
+            });
+
+            notifBox.querySelectorAll('div, li').forEach(item => {
+              if (item === notifBox || item.classList.contains('modal-body')) return;
+              if (item.parentElement && item.parentElement.closest('[data-notif-item="1"]')) return;
+
+              const t = item.textContent || '';
+              const iconsCount = item.querySelectorAll('svg, i').length;
+              const datesCount = (t.match(/\d{4}\s*-\s*\d{2}:\d{2}/g) || []).length;
+              const isSingleItem = iconsCount >= 1 && iconsCount <= 2 && datesCount === 1;
+              const isCard = isSingleItem &&
+                             (item.offsetHeight === 0 || (item.offsetHeight >= 75 && item.offsetHeight <= 260)) &&
+                             (item.offsetWidth === 0 || item.offsetWidth > notifBox.offsetWidth * 0.65);
+
+              if (isCard) {
+                const isNew = /\bNew\b/.test(t) || Boolean(item.querySelector('button'));
+                saveOrigStyle(item);
+                item.dataset.notifItem = '1';
+                if (isNew) {
+                  item.dataset.notifUnread = '1';
+                  item.style.setProperty('background-color', '#221b20', 'important');
+                  item.style.setProperty('border', '1px solid rgba(224, 90, 109, 0.35)', 'important');
+                } else {
+                  delete item.dataset.notifUnread;
+                  item.style.setProperty('background-color', '#20202a', 'important');
+                  item.style.setProperty('border', '1px solid var(--border-subtle, #2c2c38)', 'important');
+                }
+                item.style.setProperty('border-radius', '16px', 'important');
+                item.style.setProperty('box-shadow', 'none', 'important');
+
+                item.querySelectorAll('div, span').forEach(sub => {
+                  const r = sub.getBoundingClientRect();
+                  const subHasSvg = Boolean(sub.querySelector('svg, i'));
+                  const isCircle = subHasSvg && ((r.width >= 28 && r.width <= 54 && Math.abs(r.width - r.height) <= 6) || /icon|circle|badge/i.test(sub.className));
+                  saveOrigStyle(sub);
+                  if (isCircle) {
+                    sub.dataset.notifIcon = '1';
+                    sub.style.setProperty('background-color', 'rgba(224, 90, 109, 0.14)', 'important');
+                    sub.style.setProperty('border', 'none', 'important');
+                    sub.style.setProperty('border-radius', '50%', 'important');
+                  } else if (sub.tagName === 'DIV') {
+                    sub.style.setProperty('background', 'transparent', 'important');
+                    sub.style.setProperty('border', 'none', 'important');
+                    sub.style.setProperty('box-shadow', 'none', 'important');
+                  }
+                });
+              }
+            });
+          }
+
+          // 9. Restaura el fondo sólido y la estética real del modal BOSS BATTLE
+          const bossCandidates = Array.from(document.querySelectorAll('.modal-content, dialog, div, section')).filter(el => {
+            if (el.closest('.navbar, header.navbar') || el.classList.contains('modal') || el.classList.contains('modal-dialog')) return false;
+            const txt = el.textContent || '';
+            const isBoss = txt.includes('BOSS BATTLE') && (txt.includes('KING BEE') || txt.includes('EXIT BATTLE') || txt.includes('GUESS THE WORD') || txt.includes('VICTORY') || txt.includes('DEFEAT'));
+            return isBoss && el.offsetWidth >= 320 && el.offsetWidth <= window.innerWidth * 0.94 && el.offsetHeight >= 260;
+          });
+
+          if (bossCandidates.length > 0) {
+            const bossBox = bossCandidates[bossCandidates.length - 1];
+            saveOrigStyle(bossBox);
+            bossBox.dataset.bossModal = '1';
+            bossBox.style.setProperty('background', '#18181f', 'important');
+            bossBox.style.setProperty('background-color', '#18181f', 'important');
+            bossBox.style.setProperty('border', '2px solid #7a1f2b', 'important');
+            bossBox.style.setProperty('border-radius', '22px', 'important');
+            bossBox.style.setProperty('box-shadow', '0 24px 60px rgba(0, 0, 0, 0.88)', 'important');
+            bossBox.style.setProperty('color', '#f1f1f4', 'important');
+
+            bossBox.querySelectorAll('div, span').forEach(el => {
+              const t = (el.textContent || '').trim();
+              if (/^ROUND\s*\d+\s*\/\s*\d+$/i.test(t) && el.children.length === 0) {
+                saveOrigStyle(el);
+                el.dataset.bossRound = '1';
+                el.style.setProperty('background', '#f3c64f', 'important');
+                el.style.setProperty('background-color', '#f3c64f', 'important');
+                el.style.setProperty('color', '#1c1917', 'important');
+                el.style.setProperty('font-weight', '700', 'important');
+                el.style.setProperty('border-radius', '999px', 'important');
+              }
+            });
+
+            bossBox.querySelectorAll('div').forEach(sub => {
+              const t = sub.textContent || '';
+              if (t.includes('THE ROYAL CHALLENGER') && t.includes("LET'S BEE-GIN") && sub !== bossBox) {
+                saveOrigStyle(sub);
+                sub.dataset.bossIntro = '1';
+                sub.style.setProperty('background', 'linear-gradient(145deg, #520f19 0%, #380910 100%)', 'important');
+                sub.style.setProperty('border', '2px solid #e6b84c', 'important');
+                sub.style.setProperty('border-radius', '18px', 'important');
+              }
+
+              if (t.includes('KING BEE') && t.includes('BEENARY') && t.includes('VS') && !t.includes('GUESS THE WORD') && sub !== bossBox) {
+                saveOrigStyle(sub);
+                sub.dataset.bossArena = '1';
+                sub.style.setProperty('background', 'linear-gradient(145deg, #262119 0%, #1d1a15 100%)', 'important');
+                sub.style.setProperty('border', '1.5px solid rgba(243, 198, 79, 0.45)', 'important');
+                sub.style.setProperty('border-radius', '18px', 'important');
+
+                sub.querySelectorAll('span, div, p, strong').forEach(lbl => {
+                  if (/^HP$/i.test((lbl.textContent || '').trim()) && lbl.children.length === 0) {
+                    saveOrigStyle(lbl);
+                    lbl.dataset.bossHpLabel = '1';
+                    lbl.style.setProperty('color', '#e6b84c', 'important');
+                  }
+                });
+
+                sub.querySelectorAll('div').forEach(track => {
+                  const fill = track.firstElementChild;
+                  if (fill && track.children.length === 1 && track.offsetWidth >= 80 && track.offsetHeight >= 6 && track.offsetHeight <= 24) {
+                    saveOrigStyle(track);
+                    track.dataset.bossHpTrack = '1';
+                    track.style.setProperty('background', '#2e2a23', 'important');
+                    track.style.setProperty('background-color', '#2e2a23', 'important');
+                    track.style.setProperty('border', '1px solid rgba(243, 198, 79, 0.4)', 'important');
+
+                    saveOrigStyle(fill);
+                    fill.dataset.bossHpFill = '1';
+                    fill.style.setProperty('background', 'linear-gradient(90deg, #16a34a 0%, #22c55e 100%)', 'important');
+                    fill.style.setProperty('background-color', '#22c55e', 'important');
+                  }
+                });
+              }
+
+              if (sub !== bossBox && !sub.querySelector('button, img') && sub.offsetHeight >= 48 && sub.offsetHeight <= 150 && sub.offsetWidth > bossBox.offsetWidth * 0.55) {
+                const prev = sub.previousElementSibling;
+                if (prev && /GUESS THE WORD/i.test(prev.textContent || '')) {
+                  saveOrigStyle(sub);
+                  sub.dataset.bossClue = '1';
+                  sub.style.setProperty('background-color', '#20202a', 'important');
+                  sub.style.setProperty('border', '1.5px solid rgba(243, 198, 79, 0.35)', 'important');
+                  sub.style.setProperty('border-radius', '14px', 'important');
+                  sub.style.setProperty('color', '#f1f1f4', 'important');
+                }
+              }
+            });
+
+            bossBox.querySelectorAll('button').forEach(optBtn => {
+              const btnTxt = (optBtn.textContent || '').trim();
+              if (!btnTxt || btnTxt === '×' || /BEE-GIN|EXIT BATTLE|PLAY AGAIN|CLOSE/i.test(btnTxt)) return;
+              const bgOpt = getComputedStyle(optBtn).backgroundColor;
+              if (/rgb\(34,\s*197|rgb\(22,\s*163|rgb\(220,\s*38|rgb\(239,\s*68|rgb\(25,\s*135|rgb\(220,\s*53/.test(bgOpt)) return;
+              saveOrigStyle(optBtn);
+              optBtn.dataset.bossOption = '1';
+              optBtn.style.setProperty('background-color', '#22222c', 'important');
+              optBtn.style.setProperty('border', '1.5px solid #3a3a48', 'important');
+              optBtn.style.setProperty('color', '#f1f1f4', 'important');
+            });
+          }
+
+          // 10. Restaura la tarjeta modal roja y limpia el tablero de MEMORY GAME en todas las dificultades
+          const memoryCards = Array.from(document.querySelectorAll('.modal-content, dialog, div, section')).filter(el => {
+            if (el.closest('.navbar, header.navbar') || el.tagName === 'MAIN' || el.tagName === 'BODY') return false;
+            const txt = el.textContent || '';
+            if (txt.includes('HANGMAN') || txt.includes('WORD SEARCH')) return false;
+            const hasContent = txt.includes('MEMORY GAME') && (txt.includes('Mini Games') || txt.includes('CHOOSE YOUR DIFFICULTY'));
+            const rect = el.getBoundingClientRect();
+            return hasContent && rect.width >= 300 && rect.height >= 240;
+          });
+
+          if (memoryCards.length > 0) {
+            const memCard = memoryCards[memoryCards.length - 1];
+            saveOrigStyle(memCard);
+            memCard.dataset.memoryModal = '1';
+            memCard.style.setProperty('background', 'linear-gradient(145deg, #9b2828 0%, #7f1e1e 100%)', 'important');
+            memCard.style.setProperty('background-color', '#8f2424', 'important');
+            memCard.style.setProperty('border', '1.5px solid rgba(255, 255, 255, 0.18)', 'important');
+            memCard.style.setProperty('border-radius', '20px', 'important');
+            memCard.style.setProperty('box-shadow', '0 24px 60px rgba(0, 0, 0, 0.75)', 'important');
+
+            // Limpia cualquier contenedor del tablero en Easy, Medium y Hard sin tocar las cartas
+            memCard.querySelectorAll('*').forEach(inner => {
+              if (inner === memCard || inner.tagName === 'BUTTON' || inner.tagName === 'A' || inner.tagName === 'IMG') return;
+              if (inner.offsetWidth > 240) {
+                saveOrigStyle(inner);
+                inner.dataset.memoryBoard = '1';
+                inner.style.setProperty('background', 'transparent', 'important');
+                inner.style.setProperty('background-color', 'transparent', 'important');
+                inner.style.setProperty('border', 'none', 'important');
+                inner.style.setProperty('box-shadow', 'none', 'important');
+              }
+            });
+
+            const backdrop = memCard.parentElement;
+            if (backdrop && backdrop !== document.body && backdrop.offsetWidth >= window.innerWidth * 0.9 && backdrop.offsetHeight >= window.innerHeight * 0.85) {
+              saveOrigStyle(backdrop);
+              backdrop.dataset.memoryBackdrop = '1';
+              backdrop.style.setProperty('background', 'rgba(0, 0, 0, 0.78)', 'important');
+              backdrop.style.setProperty('background-color', 'rgba(0, 0, 0, 0.78)', 'important');
+            }
+          }
+
+          // 11. Velo semitransparente detrás y fondo sólido SOLO en la tarjeta interior de cada modal
+          document.querySelectorAll('div, section, dialog').forEach(overlay => {
+            if (
+              overlay.id === 'themeToggleBtn' ||
+              overlay.closest('.navbar, header.navbar, [data-boss-modal="1"], [data-memory-modal="1"], [data-notif-modal="1"]') ||
+              overlay.querySelector('[data-boss-modal="1"], [data-memory-modal="1"], [data-notif-modal="1"]')
+            ) return;
+
+            const st = getComputedStyle(overlay);
+            if (st.display === 'none' || st.visibility === 'hidden') return;
+
+            const isFixedOverlay = st.position === 'fixed' && overlay.offsetWidth >= window.innerWidth * 0.85 && overlay.offsetHeight >= window.innerHeight * 0.85;
+            if (!isFixedOverlay) return;
+
+            saveOrigStyle(overlay);
+            overlay.dataset.modalBackdrop = '1';
+            overlay.style.setProperty('background', 'rgba(0, 0, 0, 0.68)', 'important');
+            overlay.style.setProperty('background-color', 'rgba(0, 0, 0, 0.68)', 'important');
+
+            const modalBoxes = Array.from(overlay.querySelectorAll('div, section, article')).filter(box => {
+              if (box === overlay) return false;
+              const bSt = getComputedStyle(box);
+              if (bSt.display === 'none') return false;
+              const w = box.offsetWidth;
+              const h = box.offsetHeight;
+              return w >= 260 && w <= window.innerWidth * 0.92 && h >= 110 && h <= window.innerHeight * 0.94 &&
+                     (box.querySelector('button, svg, i, table, h1, h2, h3, h4') !== null);
+            });
+
+            if (modalBoxes.length > 0) {
+              let modalCard = modalBoxes[0];
+
+              while (modalCard) {
+                const parentText = (modalCard.textContent || '').trim();
+                const parentControls = modalCard.querySelectorAll('button, a, input, select, textarea').length;
+
+                const exactInnerCard = Array.from(modalCard.children).find(ch =>
+                  modalBoxes.includes(ch) &&
+                  (ch.textContent || '').trim() === parentText &&
+                  ch.querySelectorAll('button, a, input, select, textarea').length === parentControls
+                );
+
+                if (exactInnerCard) {
+                  saveOrigStyle(modalCard);
+                  modalCard.dataset.modalWrapper = '1';
+                  modalCard.style.setProperty('background', 'transparent', 'important');
+                  modalCard.style.setProperty('background-color', 'transparent', 'important');
+                  modalCard.style.setProperty('border', 'none', 'important');
+                  modalCard.style.setProperty('box-shadow', 'none', 'important');
+                  modalCard = exactInnerCard;
+                  continue;
+                }
+                break;
+              }
+
+              if (!modalCard || modalCard.dataset.bossModal || modalCard.dataset.memoryModal || modalCard.dataset.notifModal) return;
+
+              const modalTxt = modalCard.textContent || '';
+
+              // Modales "Save Changes" y "Cancel Changes" (solo confirmación de perfil)
+              if ((modalTxt.includes('Save Changes') || modalTxt.includes('Cancel Changes')) && !modalTxt.includes('Edit Group') && !modalTxt.includes('Group Name')) {
+                saveOrigStyle(modalCard);
+                modalCard.dataset.profileConfirmModal = '1';
+                modalCard.style.setProperty('background', '#18181f', 'important');
+                modalCard.style.setProperty('background-color', 'var(--bg-card, #18181f)', 'important');
+                modalCard.style.setProperty('border', '1.5px solid var(--border-subtle, #2c2c38)', 'important');
+                modalCard.style.setProperty('border-radius', '24px', 'important');
+                modalCard.style.setProperty('box-shadow', '0 24px 60px rgba(0, 0, 0, 0.85)', 'important');
+
+                const avatarImg = modalCard.querySelector('img');
+                if (avatarImg) {
+                  const avatarWrap = avatarImg.parentElement && avatarImg.parentElement !== modalCard ? avatarImg.parentElement : avatarImg;
+                  saveOrigStyle(avatarWrap);
+                  avatarWrap.dataset.modalAvatar = '1';
+                  avatarWrap.style.setProperty('border', '3px solid #7a1f2b', 'important');
+                  avatarWrap.style.setProperty('border-radius', '50%', 'important');
+                }
+
+                const btns = modalCard.querySelectorAll('button');
+                if (btns.length >= 2) {
+                  saveOrigStyle(btns[0]);
+                  btns[0].style.setProperty('background', 'transparent', 'important');
+                  btns[0].style.setProperty('background-color', 'transparent', 'important');
+                  btns[0].style.setProperty('border', '1.5px solid rgba(255, 255, 255, 0.75)', 'important');
+                  btns[0].style.setProperty('border-radius', '999px', 'important');
+                  btns[0].style.setProperty('color', '#ffffff', 'important');
+
+                  saveOrigStyle(btns[1]);
+                  btns[1].style.setProperty('background', '#7a1f2b', 'important');
+                  btns[1].style.setProperty('background-color', '#7a1f2b', 'important');
+                  btns[1].style.setProperty('border', '1.5px solid #7a1f2b', 'important');
+                  btns[1].style.setProperty('border-radius', '999px', 'important');
+                  btns[1].style.setProperty('color', '#ffffff', 'important');
+                }
+                return;
+              }
+
+              saveOrigStyle(modalCard);
+              modalCard.dataset.genericModal = '1';
+              if (modalTxt.includes('MISSING LETTERS') || modalTxt.includes('HANGMAN') || modalTxt.includes('WORD SEARCH')) {
+                modalCard.dataset.minigameModal = '1';
+              }
+              modalCard.style.setProperty('background', '#18181f', 'important');
+              modalCard.style.setProperty('background-color', 'var(--bg-card, #18181f)', 'important');
+              modalCard.style.setProperty('border', '1.5px solid var(--border-subtle, #2c2c38)', 'important');
+              modalCard.style.setProperty('border-radius', '22px', 'important');
+              modalCard.style.setProperty('box-shadow', '0 24px 60px rgba(0, 0, 0, 0.85)', 'important');
+              modalCard.style.setProperty('color', 'var(--text-main, #f1f1f4)', 'important');
+
+              // Destapa la imagen en el modal "Crop Profile Picture" (PNG, JPG, JPEG, WebP)
+              if (modalTxt.includes('Crop Profile Picture')) {
+                modalCard.dataset.cropModal = '1';
+
+                const cleanCropperLayers = () => {
+                  modalCard.querySelectorAll('img, canvas').forEach(media => {
+                    saveOrigStyle(media);
+                    media.style.setProperty('filter', 'none', 'important');
+                    media.style.setProperty('-webkit-filter', 'none', 'important');
+                    media.style.setProperty('mix-blend-mode', 'normal', 'important');
+                    media.style.setProperty('opacity', '1', 'important');
+                    media.style.setProperty('background', 'transparent', 'important');
+                    media.style.setProperty('background-color', 'transparent', 'important');
+                  });
+
+                  const cropCandidates = Array.from(modalCard.querySelectorAll('div')).filter(box =>
+                    box !== modalCard &&
+                    !box.querySelector('button') &&
+                    !(box.textContent || '').includes('Crop Profile Picture') &&
+                    box.offsetWidth >= 180 &&
+                    box.offsetHeight >= 120
+                  );
+
+                  if (cropCandidates.length > 0) {
+                    const mainCropBox = cropCandidates[0];
+                    saveOrigStyle(mainCropBox);
+                    mainCropBox.dataset.cropArea = '1';
+                    mainCropBox.style.setProperty('background', '#111116', 'important');
+                    mainCropBox.style.setProperty('background-color', '#111116', 'important');
+
+                    mainCropBox.querySelectorAll('div, span').forEach(inner => {
+                      saveOrigStyle(inner);
+                      if (inner.classList.contains('cropper-modal')) {
+                        inner.style.setProperty('background-color', 'rgba(0, 0, 0, 0.65)', 'important');
+                        inner.style.setProperty('opacity', '1', 'important');
+                      } else if (inner.classList.contains('cropper-line') || inner.classList.contains('cropper-point')) {
+                        inner.style.setProperty('background-color', '#3399ff', 'important');
+                        inner.style.setProperty('opacity', '0.9', 'important');
+                      } else if (inner.classList.contains('cropper-dashed') || inner.classList.contains('cropper-center')) {
+                        // Conserva las guías punteadas y el centro
+                      } else {
+                        inner.style.setProperty('background', 'transparent', 'important');
+                        inner.style.setProperty('background-color', 'transparent', 'important');
+                        inner.style.setProperty('background-image', 'none', 'important');
+                      }
+                    });
+                  }
+                };
+
+                cleanCropperLayers();
+
+                if (!modalCard.dataset.cropListener) {
+                  modalCard.dataset.cropListener = '1';
+                  modalCard.addEventListener('load', () => {
+                    cleanCropperLayers();
+                    setTimeout(cleanCropperLayers, 40);
+                  }, true);
+                  setTimeout(cleanCropperLayers, 80);
+                  setTimeout(cleanCropperLayers, 250);
+                }
+              }
+
+              // Protege los bordes y el hover de las tarjetas en "Add a Word List"
+              if (modalTxt.includes('Add a Word List')) {
+                modalCard.querySelectorAll('label, div').forEach(opt => {
+                  if (opt === modalCard) return;
+                  const hasRadioOrCheck = opt.querySelector('input[type="radio"], input[type="checkbox"]') !== null;
+                  const optTxt = opt.textContent || '';
+                  if (hasRadioOrCheck && /words/i.test(optTxt) && opt.offsetHeight >= 45 && opt.offsetHeight <= 130) {
+                    saveOrigStyle(opt);
+                    opt.dataset.wordlistOption = '1';
+                    opt.style.setProperty('background-color', '#20202a', 'important');
+                    opt.style.setProperty('border', '1.5px solid #3a3a48', 'important');
+                    opt.style.setProperty('border-radius', '14px', 'important');
+                  }
+                });
+              }
+
+              // Agrega botón X superior derecho en "All Competitions History" si no lo tiene
+              if (modalTxt.includes('All Competitions History') && !modalCard.querySelector('[data-injected-close="1"]')) {
+                const closeTrigger = Array.from(modalCard.querySelectorAll('button, a, span')).find(el => /^close$/i.test((el.textContent || '').trim()));
+                if (closeTrigger) {
+                  const xBtn = document.createElement('button');
+                  xBtn.type = 'button';
+                  xBtn.textContent = '×';
+                  xBtn.dataset.injectedClose = '1';
+                  xBtn.setAttribute('aria-label', 'Close');
+                  xBtn.addEventListener('click', () => closeTrigger.click());
+                  modalCard.appendChild(xBtn);
+                }
+              }
+
+              // Hace visible el botón X de cierre en el modal (incluyendo botones circulares con SVG o ::before)
+              modalCard.querySelectorAll('button, span[role="button"], a').forEach(cBtn => {
+                if (cBtn.dataset.injectedClose === '1') return;
+                const cTxt = (cBtn.textContent || '').trim();
+                const rect = cBtn.getBoundingClientRect();
+                const isSmallSquare = rect.width >= 20 && rect.width <= 52 && Math.abs(rect.width - rect.height) <= 6;
+                const hasCloseHint = /close|cerrar|dismiss|modal-close/i.test((cBtn.className || '') + ' ' + (cBtn.id || '') + ' ' + (cBtn.getAttribute('aria-label') || ''));
+                const isCloseIcon = cBtn.classList.contains('btn-close') ||
+                                    cTxt === '×' || cTxt === '✕' || cTxt === 'X' || cTxt === 'x' ||
+                                    (cTxt === '' && (cBtn.querySelector('svg, i') !== null || hasCloseHint || isSmallSquare));
+
+                if (isCloseIcon && (rect.width === 0 || rect.width <= 54)) {
+                  saveOrigStyle(cBtn);
+                  if (cBtn.classList.contains('btn-close')) {
+                    cBtn.style.setProperty('background-color', 'transparent', 'important');
+                    cBtn.style.setProperty('filter', 'invert(1) grayscale(100%) brightness(220%)', 'important');
+                    cBtn.style.setProperty('opacity', '0.95', 'important');
+                  } else {
+                    cBtn.dataset.modalCloseBtn = '1';
+                    cBtn.style.setProperty('color', '#ffffff', 'important');
+                    cBtn.style.setProperty('border-color', 'rgba(255, 255, 255, 0.28)', 'important');
+                    cBtn.style.setProperty('opacity', '1', 'important');
+                  }
+                }
+              });
+
+              // Estiliza sub-tarjetas internas (ej. Correct / Incorrect / Points Earned)
+              if (!modalCard.dataset.minigameModal) {
+                modalCard.querySelectorAll('div').forEach(sub => {
+                  if (sub === modalCard) return;
+                  const sSt = getComputedStyle(sub);
+                  const hasBorder = sSt.borderWidth !== '0px' && sSt.borderStyle !== 'none';
+                  const isMetricBox = hasBorder && sub.offsetHeight >= 45 && sub.offsetHeight <= 150 && sub.offsetWidth >= 100 && sub.offsetWidth < modalCard.offsetWidth * 0.92;
+                  if (isMetricBox) {
+                    saveOrigStyle(sub);
+                    sub.dataset.modalSubcard = '1';
+                    sub.style.setProperty('background-color', 'var(--bg-subtle, #20202a)', 'important');
+                    sub.style.setProperty('border', '1px solid var(--border-subtle, #2c2c38)', 'important');
+                    sub.style.setProperty('border-radius', '14px', 'important');
+                  }
+                });
+              }
+            }
+          });
+
+          // 12. Botones "View Competition" de Progress
+          document.querySelectorAll('main button, main a').forEach(b => {
+            if (b.closest('[data-modal-backdrop="1"]')) return;
+            if (/^view competition$/i.test((b.textContent || '').trim())) {
+              saveOrigStyle(b);
+              b.dataset.viewCompBtn = '1';
+              b.style.setProperty('background-color', '#272734', 'important');
+              b.style.setProperty('color', '#f4f4f6', 'important');
+              b.style.setProperty('border', '1.5px solid rgba(224, 90, 109, 0.7)', 'important');
+              b.style.setProperty('border-radius', '10px', 'important');
+              b.style.setProperty('font-weight', '600', 'important');
+            }
+          });
+
+          // 12b. Botones "VIEW" en tablas (ej. Students dentro de View Group)
+          document.querySelectorAll('main table button, main table a').forEach(b => {
+            if (/^view$/i.test((b.textContent || '').trim())) {
+              saveOrigStyle(b);
+              b.dataset.tableViewBtn = '1';
+              b.style.setProperty('background', '#7a1f2b', 'important');
+              b.style.setProperty('background-color', '#7a1f2b', 'important');
+              b.style.setProperty('color', '#ffffff', 'important');
+              b.style.setProperty('border', '1.5px solid rgba(224, 90, 109, 0.7)', 'important');
+              b.style.setProperty('border-radius', '999px', 'important');
+              b.style.setProperty('font-weight', '600', 'important');
+            }
+          });
+
+          // 12c. Botones "Manage Participants" y "Manage Competition" en Competitions
+          document.querySelectorAll('main a, main button').forEach(b => {
+            if (b.closest('[data-modal-backdrop="1"]')) return;
+            if (/^(Manage Participants|Manage Competition)$/i.test((b.textContent || '').trim())) {
+              saveOrigStyle(b);
+              b.dataset.compManageBtn = '1';
+              b.style.setProperty('background', 'rgba(224, 90, 109, 0.14)', 'important');
+              b.style.setProperty('background-color', 'rgba(224, 90, 109, 0.14)', 'important');
+              b.style.setProperty('color', '#f8fafc', 'important');
+              b.style.setProperty('border', '1.5px solid #e05a6d', 'important');
+              b.style.setProperty('border-radius', '999px', 'important');
+              b.style.setProperty('font-weight', '600', 'important');
+            }
+          });
+
+          // 12d. Insignias de estado en tarjetas de Competitions (Active, Upcoming, Finished)
+          document.querySelectorAll('main span, main div, main p').forEach(el => {
+            if (el.closest('.navbar, header.navbar, [data-home-stat="1"], [data-modal-backdrop="1"]')) return;
+            if (el.children.length > 0) return;
+            const txt = (el.textContent || '').trim();
+            if (!/^(Active|Upcoming|Finished)$/i.test(txt)) return;
+
+            const card = el.closest('div, article, section');
+            if (!card || !(card.textContent || '').includes('CODE:')) return;
+
+            const statusKey = txt.toLowerCase();
+            const palette = {
+              active:   { bg: '#6ee76e', fg: '#0f2912' },
+              upcoming: { bg: '#eab349', fg: '#271a04' },
+              finished: { bg: '#e5dc4f', fg: '#242104' }
+            }[statusKey];
+
+            if (palette) {
+              saveOrigStyle(el);
+              el.dataset.compStatus = statusKey;
+              el.style.setProperty('background', palette.bg, 'important');
+              el.style.setProperty('background-color', palette.bg, 'important');
+              el.style.setProperty('color', palette.fg, 'important');
+              el.style.setProperty('border-radius', '999px', 'important');
+              el.style.setProperty('padding', '4px 14px', 'important');
+              el.style.setProperty('font-weight', '700', 'important');
+            }
+          });
+
+          // 13. Restaura las barras y puntos de leyenda en el Dashboard de Profesor
+          document.querySelectorAll('main div, main section').forEach(card => {
+            const txt = card.textContent || '';
+
+            // A) Barra segmentada y puntos de leyenda en "Students by level"
+            if (txt.includes('Students by level') && txt.includes('A1 -') && card.offsetWidth > 300) {
+              const levelColors = {
+                A1: '#f9c6c9',
+                A2: '#f29b9b',
+                B1: '#e46d72',
+                B2: '#c9414a',
+                C1: '#9e242e',
+                C2: '#6b141d'
+              };
+              const allLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+              const activeLevels = [];
+
+              // 1. Etiqueta cada punto circular de la leyenda (A1 - 0 ... C2 - 0) y detecta niveles activos (> 0)
+              card.querySelectorAll('div, span, li').forEach(item => {
+                const itemTxt = (item.textContent || '').trim();
+                const match = itemTxt.match(/^(A1|A2|B1|B2|C1|C2)\s*-\s*(\d+)$/);
+                if (match && item.children.length >= 1 && item.children.length <= 3) {
+                  const lvl = match[1];
+                  const count = parseInt(match[2], 10);
+                  if (count > 0 && !activeLevels.includes(lvl)) {
+                    activeLevels.push(lvl);
+                  }
+                  const dot = Array.from(item.querySelectorAll('span, div')).find(d => (d.textContent || '').trim() === '');
+                  if (dot) {
+                    saveOrigStyle(dot);
+                    dot.dataset.dashDot = '1';
+                    dot.dataset.cefrLevel = lvl;
+                    dot.style.setProperty('background', levelColors[lvl], 'important');
+                    dot.style.setProperty('background-color', levelColors[lvl], 'important');
+                  }
+                }
+              });
+
+              // 2. Pinta cada segmento dentro de la barra horizontal según su nivel correspondiente
+              card.querySelectorAll('div, section').forEach(track => {
+                if (track === card) return;
+                const h = track.offsetHeight;
+                const w = track.offsetWidth;
+                if (h >= 6 && h <= 20 && w > 200 && track.children.length > 0) {
+                  saveOrigStyle(track);
+                  track.dataset.dashTrack = '1';
+                  track.style.setProperty('background-color', '#262633', 'important');
+                  track.style.setProperty('border-radius', '999px', 'important');
+                  track.style.setProperty('overflow', 'hidden', 'important');
+
+                  const segments = Array.from(track.children);
+                  const levelSequence = segments.length === 6 ? allLevels : activeLevels;
+
+                  segments.forEach((seg, idx) => {
+                    const cls = (seg.className || '') + ' ' + (seg.getAttribute('title') || '');
+                    const explicitLvl = cls.match(/\b(A1|A2|B1|B2|C1|C2)\b/i);
+                    const lvl = explicitLvl ? explicitLvl[1].toUpperCase() : (levelSequence[idx] || allLevels[idx]);
+                    if (lvl && levelColors[lvl]) {
+                      saveOrigStyle(seg);
+                      seg.dataset.dashSegment = '1';
+                      seg.dataset.cefrLevel = lvl;
+                      seg.style.setProperty('background', levelColors[lvl], 'important');
+                      seg.style.setProperty('background-color', levelColors[lvl], 'important');
+                    }
+                  });
+                }
+              });
+            }
+
+            // B) Barras de progreso de XP en "Top Students"
+            if (txt.includes('Top Students') && txt.includes('XP') && card.offsetWidth < window.innerWidth * 0.7) {
+              card.querySelectorAll('div, span').forEach(el => {
+                if (el === card || (el.textContent || '').trim() !== '') return;
+                const h = el.offsetHeight;
+                const w = el.offsetWidth;
+                const parentW = el.parentElement ? el.parentElement.offsetWidth : 0;
+
+                if (h >= 6 && h <= 18 && w >= 120 && el.children.length >= 1) {
+                  saveOrigStyle(el);
+                  el.dataset.dashTrack = '1';
+                  el.style.setProperty('background-color', '#262633', 'important');
+                  el.style.setProperty('border-radius', '999px', 'important');
+                  el.style.setProperty('overflow', 'hidden', 'important');
+
+                  const fill = el.firstElementChild;
+                  if (fill) {
+                    saveOrigStyle(fill);
+                    fill.dataset.dashFill = '1';
+                    fill.style.setProperty('background', '#b8293d', 'important');
+                    fill.style.setProperty('background-color', '#b8293d', 'important');
+                    fill.style.setProperty('border-radius', '999px', 'important');
+                  }
+                } else if (h >= 6 && h <= 18 && w > 0 && parentW >= 120 && el.parentElement.dataset.dashTrack === '1') {
+                  saveOrigStyle(el);
+                  el.dataset.dashFill = '1';
+                  el.style.setProperty('background', '#b8293d', 'important');
+                  el.style.setProperty('background-color', '#b8293d', 'important');
+                }
+              });
+            }
+          });
+        } finally {
+          isFixing = false;
+        }
+      }
+
+      const initialTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      syncThemeUI(initialTheme);
+      fixRemainingLightSurfaces();
+
+      new MutationObserver(() => {
+        if (document.documentElement.getAttribute('data-theme') === 'dark') {
+          clearTimeout(fixTimer);
+          fixTimer = setTimeout(fixRemainingLightSurfaces, 30);
+        }
+      }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+
+      btn.addEventListener('click', function() {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        document.documentElement.setAttribute('data-bs-theme', next);
+        localStorage.setItem('spell_theme', next);
+        syncThemeUI(next);
+        setTimeout(fixRemainingLightSurfaces, 10);
+      });
+    })();
+
+  // Sincronizar al instante el ícono (Sol / Luna) del botón flotante de tema en todas las vistas con roles
+        (function syncFloatingThemeIcon() {
+          const MOON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
+          const SUN_SVG  = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+
+          const findThemeFab = () => {
+            const direct = document.querySelector('#theme-toggle, #themeToggle, .theme-toggle, [data-theme-toggle], [data-theme-fab="1"]');
+            if (direct) return direct;
+
+            // Respaldo: localizar el botón circular fijo en la esquina inferior derecha
+            return Array.from(document.querySelectorAll('button, a')).find(btn => {
+              const cs = getComputedStyle(btn);
+              const rect = btn.getBoundingClientRect();
+              return (
+                cs.position === 'fixed' &&
+                rect.width >= 36 && rect.width <= 68 &&
+                rect.height >= 36 && rect.height <= 68 &&
+                (window.innerWidth - rect.right) <= 45 &&
+                (window.innerHeight - rect.bottom) <= 45
+              );
+            });
+          };
+
+          const updateThemeFabIcon = () => {
+            const fab = findThemeFab();
+            if (!fab) return;
+            fab.dataset.themeFab = '1';
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const targetSvg = isDark ? SUN_SVG : MOON_SVG;
+
+            // Actualizar tanto el contenedor directo como posibles spans internos del botón
+            const iconHolder = fab.querySelector('span, i') && !fab.querySelector('svg')
+              ? fab.querySelector('span, i')
+              : fab;
+
+            if (iconHolder.dataset.lastIconTheme !== (isDark ? 'dark' : 'light')) {
+              iconHolder.innerHTML = targetSvg;
+              iconHolder.dataset.lastIconTheme = isDark ? 'dark' : 'light';
+            }
+          };
+
+          updateThemeFabIcon();
+
+          // Observar cambios en el atributo data-theme del <html> para actualizar el ícono al instante
+          if (!window.__themeFabObserver) {
+            window.__themeFabObserver = new MutationObserver((mutations) => {
+              if (mutations.some(m => m.attributeName === 'data-theme')) {
+                updateThemeFabIcon();
+              }
+            });
+            window.__themeFabObserver.observe(document.documentElement, {
+              attributes: true,
+              attributeFilter: ['data-theme']
+            });
+          }
+
+          // Refuerzo inmediato al hacer clic sobre el botón
+          document.addEventListener('click', (e) => {
+            if (e.target.closest('#theme-toggle, #themeToggle, .theme-toggle, [data-theme-toggle], [data-theme-fab="1"]')) {
+              requestAnimationFrame(updateThemeFabIcon);
+              setTimeout(updateThemeFabIcon, 20);
+            }
+          }, true);
+        })();
   </script>
   {% block extra_js %}{% endblock %}
 </body>
