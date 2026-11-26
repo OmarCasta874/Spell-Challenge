@@ -62,7 +62,7 @@
         <tbody>
             {% for b in backups %}
             <tr>
-                <td><strong class="text-primary">{{ b.nombre }}</strong></td>
+                <td><strong class="text-primary">{{ b.display_name }}</strong></td>
                 <td>{{ b.fecha|date:"M d, Y" }}</td>
                 <td>{{ b.hora|time:"h:i A" }}</td>
                 <td>{{ b.size_display }}</td>
@@ -131,7 +131,20 @@
                         <span>Include System Activity Logs</span>
                     </label>
                 </div>
-
+                <div class="form-field mt-1">
+                    <label for="createBackupName">Backup Name (optional)</label>
+                    <input
+                        type="text"
+                        id="createBackupName"
+                        name="backup_name"
+                        class="form-input"
+                        maxlength="45"
+                        pattern="[A-Za-z0-9_-]+"
+                        title="Use letters, numbers, hyphens, or underscores only."
+                        placeholder="e.g. Before_System_Update"
+                    >
+                    <small>Leave blank to use an automatic name. Do not include the file extension.</small>
+                </div>
                 <div class="form-field mt-1">
                     <label for="createDescription">Snapshot Description / Note</label>
                     <input
@@ -179,6 +192,20 @@
                         accept=".sql"
                         required
                     >
+                </div>
+                <div class="form-field mt-1">
+                    <label for="submitBackupName">Backup Name (optional)</label>
+                    <input
+                        type="text"
+                        id="submitBackupName"
+                        name="backup_name"
+                        class="form-input"
+                        maxlength="45"
+                        pattern="[A-Za-z0-9_-]+"
+                        title="Use letters, numbers, hyphens, or underscores only."
+                        placeholder="e.g. Before_System_Update"
+                    >
+                    <small>Leave blank to use an automatic name. Do not include the file extension.</small>
                 </div>
                 <div class="form-field mt-1">
                     <label for="backupDescription">Backup Description / Note</label>

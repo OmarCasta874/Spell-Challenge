@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'css/admin_base.css' %}">
 <link rel="stylesheet" href="{% static 'css/admin_academy.css' %}">
 {% endblock %}
@@ -39,39 +40,76 @@
             <div class="academy-card-name">{{ c.name }}</div>
             <div class="academy-card-meta">{{ c.groups_count }} groups · {{ c.students_count }} students</div>
             <div class="academy-card-actions">
-                <button class="btn-pill-outline" onclick="openModal('careerModal')">EDIT</button>
-                <button class="btn-pill-solid" onclick="openModal('deleteAcademyModal')">DELETE</button>
+                <button
+                    type="button"
+                    class="btn-pill-outline"
+                    data-code="{{ c.code }}"
+                    data-name="{{ c.name }}"
+                    data-description="{{ c.description }}"
+                    onclick="openCareerEdit(this)"
+                >
+                    EDIT
+                </button>
+                <button
+                    type="button"
+                    class="btn-pill-solid"
+                    data-code="{{ c.code }}"
+                    data-name="{{ c.name }}"
+                    onclick="openCareerDelete(this)"
+                >
+                    DELETE
+                </button>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
-
-<!-- ========================================== -->
-<!-- PESTAÑA 2: GROUPS                          -->
-<!-- ========================================== -->
+<!-- PESTAÑA 2: GROUPS-->
 <div id="tab-groups" class="tab-content {% if active_tab == 'groups' %}active{% endif %}">
     <div class="academy-cards-grid">
         {% for g in groups %}
         <div class="academy-card">
             <div class="academy-card-top">
                 <div class="academy-card-code">{{ g.name }}</div>
-                <span class="status-badge status-{{ g.status|lower }}">{{ g.status }}</span>
+                <span class="status-badge status-active">ACTIVE</span>
             </div>
             <div class="academy-card-name">{{ g.career }}</div>
-            <div class="academy-card-meta">Teacher: {{ g.teacher }} · Level {{ g.level }} · {{ g.students_count }} students</div>
-            <div class="academy-card-actions">
-                <button class="btn-pill-outline" onclick="openModal('groupModal')">EDIT</button>
-                <button class="btn-pill-solid" onclick="openModal('deleteAcademyModal')">DELETE</button>
+            <div class="academy-card-meta">
+                Teacher: {{ g.teacher }} · Level {{ g.level }} ·
+                {{ g.students_count }} students
             </div>
+            <div class="academy-card-actions">
+                <button
+                    type="button"
+                    class="btn-pill-outline"
+                    data-code="{{ g.code }}"
+                    data-name="{{ g.name }}"
+                    data-career="{{ g.career_code }}"
+                    data-teacher="{{ g.teacher_id }}"
+                    data-level="{{ g.level }}"
+                    onclick="openGroupEdit(this)"
+                >
+                    EDIT
+                </button>
+                <button
+                    type="button"
+                    class="btn-pill-solid"
+                    data-code="{{ g.code }}"
+                    data-name="{{ g.name }}"
+                    onclick="openGroupDelete(this)"
+                >
+                    DELETE
+                </button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="notifications-empty">
+            <p>No groups have been registered yet.</p>
         </div>
         {% endfor %}
     </div>
 </div>
-
-<!-- ========================================== -->
-<!-- PESTAÑA 3: LEVELS                          -->
-<!-- ========================================== -->
+<!-- PESTAÑA 3: LEVELS-->
 <div id="tab-levels" class="tab-content {% if active_tab == 'levels' %}active{% endif %}">
     <div class="academy-cards-grid">
         {% for l in levels %}
@@ -80,145 +118,421 @@
             <div class="academy-card-name">{{ l.name }}</div>
             <div class="academy-card-meta">{{ l.groups_count }} groups</div>
             <div class="academy-card-actions">
-                <button class="btn-pill-outline" onclick="openModal('levelModal')">EDIT</button>
-                <button class="btn-pill-solid" onclick="openModal('deleteAcademyModal')">DELETE</button>
+                <button
+                    type="button"
+                    class="btn-pill-outline"
+                    data-code="{{ l.code }}"
+                    data-name="{{ l.name }}"
+                    onclick="openLevelEdit(this)"
+                >
+                    EDIT
+                </button>
+
+                <button
+                    type="button"
+                    class="btn-pill-solid"
+                    data-code="{{ l.code }}"
+                    data-name="{{ l.name }}"
+                    onclick="openLevelDelete(this)"
+                >
+                    DELETE
+                </button>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
-
-<!-- ========================================== -->
-<!-- MODAL: ADD/EDIT CAREER                     -->
-<!-- ========================================== -->
+<!-- MODAL: ADD/EDIT CAREER -->
 <div id="careerModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Program / Career</h3>
-            <button class="modal-close" onclick="closeModal('careerModal')">&times;</button>
+            <h3 id="careerModalTitle">Add Program / Career</h3>
+            <button
+                type="button"
+                class="modal-close"
+                onclick="closeModal('careerModal')"
+            >
+                &times;
+            </button>
         </div>
-        <form method="POST" action="#">
+        <form method="POST" id="careerForm">
             {% csrf_token %}
+            <input
+                type="hidden"
+                name="action"
+                id="careerAction"
+                value="create_career"
+            >
             <div class="modal-body">
                 <div class="form-field">
-                    <label>Program Code</label>
-                    <input type="text" class="form-input" placeholder="e.g. DSMP" required>
+                    <label for="careerCode">Program Code</label>
+                    <input
+                        type="text"
+                        id="careerCode"
+                        name="clave"
+                        class="form-input"
+                        maxlength="10"
+                        placeholder="e.g. DSMP"
+                        required
+                    >
                 </div>
                 <div class="form-field">
-                    <label>Program Full Name</label>
-                    <input type="text" class="form-input" placeholder="e.g. Desarrollo de Software Multiplataforma" required>
+                    <label for="careerName">Program Full Name</label>
+                    <input
+                        type="text"
+                        id="careerName"
+                        name="nombre"
+                        class="form-input"
+                        maxlength="30"
+                        placeholder="e.g. Desarrollo de Software Multiplataforma"
+                        required
+                    >
                 </div>
                 <div class="form-field">
-                    <label>Status</label>
-                    <select class="form-select">
-                        <option value="ACTIVE">Active</option>
-                        <option value="INACTIVE">Inactive</option>
-                    </select>
+                    <label for="careerDescription">Description</label>
+                    <textarea
+                        id="careerDescription"
+                        name="descripcion"
+                        class="form-input"
+                        maxlength="255"
+                        rows="3"
+                        placeholder="Career description (optional)"
+                    ></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('careerModal')">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Program</button>
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    onclick="closeModal('careerModal')"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    id="careerSubmitButton"
+                >
+                    Save Program
+                </button>
             </div>
         </form>
     </div>
 </div>
-
-<!-- ========================================== -->
-<!-- MODAL: ADD/EDIT GROUP                      -->
-<!-- ========================================== -->
+<!-- MODAL: ADD/EDIT GROUP -->
 <div id="groupModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Class Group</h3>
-            <button class="modal-close" onclick="closeModal('groupModal')">&times;</button>
+            <h3 id="groupModalTitle">Add Class Group</h3>
+            <button
+                type="button"
+                class="modal-close"
+                onclick="closeModal('groupModal')"
+            >
+                &times;
+            </button>
         </div>
-        <form method="POST" action="#">
+        <form method="POST" id="groupForm">
             {% csrf_token %}
+            <input
+                type="hidden"
+                name="action"
+                id="groupAction"
+                value="create_group"
+            >
+            <input
+                type="hidden"
+                name="codigo"
+                id="groupCode"
+            >
             <div class="modal-body">
                 <div class="form-field">
-                    <label>Group Name</label>
-                    <input type="text" class="form-input" placeholder="e.g. Group 3A" required>
+                    <label for="groupName">Group Name</label>
+                    <input
+                        type="text"
+                        id="groupName"
+                        name="nombre"
+                        class="form-input"
+                        maxlength="50"
+                        placeholder="e.g. Group 3A"
+                        required
+                    >
                 </div>
                 <div class="form-field">
-                    <label>Career / Program</label>
-                    <select class="form-select">
+                    <label for="groupCareer">Career / Program</label>
+                    <select
+                        id="groupCareer"
+                        name="carrera"
+                        class="form-select"
+                        required
+                    >
+                        <option value="">Select a career...</option>
                         {% for c in careers %}
-                            <option value="{{ c.id }}">{{ c.name }}</option>
+                            <option value="{{ c.code }}">
+                                {{ c.name }}
+                            </option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="form-field">
-                    <label>Assigned Teacher</label>
-                    <select class="form-select">
+                    <label for="groupTeacher">Assigned Teacher</label>
+                    <select
+                        id="groupTeacher"
+                        name="profesor"
+                        class="form-select"
+                        required
+                    >
+                        <option value="">Select a teacher...</option>
                         {% for t in available_teachers %}
-                            <option value="{{ t }}">{{ t }}</option>
+                            <option value="{{ t.id }}">
+                                {{ t.name }}
+                            </option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="form-field">
-                    <label>Level</label>
-                    <select class="form-select">
+                    <label for="groupLevel">Level</label>
+                    <select
+                        id="groupLevel"
+                        name="ciclo"
+                        class="form-select"
+                        required
+                    >
+                        <option value="">Select a level...</option>
                         {% for l in levels %}
-                            <option value="{{ l.code }}">{{ l.code }} - {{ l.name }}</option>
+                            <option value="{{ l.code }}">
+                                {{ l.code }} - {{ l.name }}
+                            </option>
                         {% endfor %}
                     </select>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('groupModal')">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Group</button>
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    onclick="closeModal('groupModal')"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    id="groupSubmitButton"
+                >
+                    Save Group
+                </button>
             </div>
         </form>
     </div>
 </div>
-
-<!-- ========================================== -->
-<!-- MODAL: CONFIRM DELETE                      -->
-<!-- ========================================== -->
+<!-- MODAL: CONFIRM DELETE GROUP -->
+<div id="deleteGroupModal" class="modal-overlay">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h3>Delete Group</h3>
+            <button
+                type="button"
+                class="modal-close"
+                onclick="closeModal('deleteGroupModal')"
+            >
+                &times;
+            </button>
+        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete_group">
+            <input
+                type="hidden"
+                name="codigo"
+                id="deleteGroupCode"
+            >
+            <div class="modal-body">
+                <p>
+                    Are you sure you want to delete
+                    <strong id="deleteGroupName"></strong>?
+                </p>
+                <p class="warning-text">
+                    This action cannot be undone. Groups with assigned
+                    students cannot be deleted.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    onclick="closeModal('deleteGroupModal')"
+                >
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-danger">
+                    Confirm Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- MODAL: CONFIRM DELETE CAREER -->
 <div id="deleteAcademyModal" class="modal-overlay">
     <div class="modal-content modal-small">
         <div class="modal-header">
-            <h3>Delete Record</h3>
-            <button class="modal-close" onclick="closeModal('deleteAcademyModal')">&times;</button>
+            <h3>Delete Career</h3>
+            <button
+                type="button"
+                class="modal-close"
+                onclick="closeModal('deleteAcademyModal')"
+            >
+                &times;
+            </button>
         </div>
-        <div class="modal-body">
-            <p>Are you sure you want to remove this academic record?</p>
-            <p class="warning-text">This may unassign students and affect historical reporting.</p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteAcademyModal')">Cancel</button>
-            <button type="button" class="btn btn-danger">Confirm Delete</button>
-        </div>
-    </div>
-</div>
-
-<div id="levelModal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Proficiency Level</h3>
-            <button class="modal-close" onclick="closeModal('levelModal')">&times;</button>
-        </div>
-        <form method="POST" action="#">
+        <form method="POST" id="deleteCareerForm">
             {% csrf_token %}
+            <input
+                type="hidden"
+                name="action"
+                value="delete_career"
+            >
+            <input
+                type="hidden"
+                name="clave"
+                id="deleteCareerCode"
+            >
             <div class="modal-body">
-                <div class="form-field">
-                    <label>Level Code</label>
-                    <input type="text" class="form-input" placeholder="e.g. A1" required>
-                </div>
-                <div class="form-field">
-                    <label>Designation</label>
-                    <input type="text" class="form-input" placeholder="e.g. Beginner" required>
-                </div>
+                <p>
+                    Are you sure you want to delete
+                    <strong id="deleteCareerName"></strong>?
+                </p>
+                <p class="warning-text">
+                    This action cannot be undone. Careers assigned
+                    to students or groups cannot be deleted.
+                </p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('levelModal')">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Level</button>
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    onclick="closeModal('deleteAcademyModal')"
+                >
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-danger">
+                    Confirm Delete
+                </button>
             </div>
         </form>
     </div>
 </div>
-
+<!-- MODAL: ADD/EDIT LEVEL -->
+<div id="levelModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="levelModalTitle">Proficiency Level</h3>
+            <button
+                type="button"
+                class="modal-close"
+                onclick="closeModal('levelModal')"
+            >
+                &times;
+            </button>
+        </div>
+        <form method="POST" id="levelForm">
+            {% csrf_token %}
+            <input
+                type="hidden"
+                name="action"
+                id="levelAction"
+                value="create_level"
+            >
+            <div class="modal-body">
+                <div class="form-field">
+                    <label for="levelCode">Level Code</label>
+                    <input
+                        type="text"
+                        id="levelCode"
+                        name="codigo"
+                        class="form-input"
+                        maxlength="2"
+                        placeholder="e.g. A1"
+                        required
+                    >
+                </div>
+                <div class="form-field">
+                    <label for="levelDescription">Designation</label>
+                    <input
+                        type="text"
+                        id="levelDescription"
+                        name="descripcion"
+                        class="form-input"
+                        maxlength="100"
+                        placeholder="e.g. Beginner"
+                        required
+                    >
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    onclick="closeModal('levelModal')"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    id="levelSubmitButton"
+                >
+                    Save Level
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- MODAL: CONFIRM DELETE LEVEL -->
+<div id="deleteLevelModal" class="modal-overlay">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h3>Delete Level</h3>
+            <button
+                type="button"
+                class="modal-close"
+                onclick="closeModal('deleteLevelModal')"
+            >
+                &times;
+            </button>
+        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete_level">
+            <input
+                type="hidden"
+                name="codigo"
+                id="deleteLevelCode"
+            >
+            <div class="modal-body">
+                <p>
+                    Are you sure you want to delete
+                    <strong id="deleteLevelName"></strong>?
+                </p>
+                <p class="warning-text">
+                    Levels assigned to students cannot be deleted.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    onclick="closeModal('deleteLevelModal')"
+                >
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-danger">
+                    Confirm Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -229,6 +543,77 @@
         groups:  { label: '+ Add Group',   modal: 'groupModal' },
         levels:  { label: '+ Add Level',   modal: 'levelModal' }
     };
+
+    function openCareerEdit(button) {
+        const code = button.dataset.code;
+        const name = button.dataset.name;
+        const description = button.dataset.description;
+
+        document.getElementById('careerAction').value = 'update_career';
+
+        document.getElementById('careerCode').value = code;
+        document.getElementById('careerCode').readOnly = true;
+
+        document.getElementById('careerName').value = name;
+        document.getElementById('careerDescription').value = description;
+
+        document.getElementById('careerModalTitle').textContent = 'Edit Program / Career';
+        document.getElementById('careerSubmitButton').textContent = 'Update Program';
+
+        openModal('careerModal');
+    }
+
+    function openCareerDelete(button) {
+        document.getElementById('deleteCareerCode').value = button.dataset.code;
+        document.getElementById('deleteCareerName').textContent = button.dataset.name;
+
+        openModal('deleteAcademyModal');
+    }
+
+    function openGroupEdit(button) {
+        document.getElementById('groupForm').reset();
+
+        document.getElementById('groupAction').value = 'update_group';
+        document.getElementById('groupCode').value = button.dataset.code;
+
+        document.getElementById('groupName').value = button.dataset.name;
+        document.getElementById('groupCareer').value = button.dataset.career;
+        document.getElementById('groupTeacher').value = button.dataset.teacher;
+        document.getElementById('groupLevel').value = button.dataset.level;
+
+        document.getElementById('groupModalTitle').textContent = 'Edit Class Group';
+        document.getElementById('groupSubmitButton').textContent = 'Update Group';
+
+        openModal('groupModal');
+    }
+
+    function openGroupDelete(button) {
+        document.getElementById('deleteGroupCode').value = button.dataset.code;
+        document.getElementById('deleteGroupName').textContent = button.dataset.name;
+
+        openModal('deleteGroupModal');
+    }
+
+    function openLevelEdit(button) {
+        document.getElementById('levelAction').value = 'update_level';
+
+        document.getElementById('levelCode').value = button.dataset.code;
+        document.getElementById('levelCode').readOnly = true;
+
+        document.getElementById('levelDescription').value = button.dataset.name;
+
+        document.getElementById('levelModalTitle').textContent = 'Edit Proficiency Level';
+        document.getElementById('levelSubmitButton').textContent = 'Update Level';
+
+        openModal('levelModal');
+    }
+
+    function openLevelDelete(button) {
+        document.getElementById('deleteLevelCode').value = button.dataset.code;
+        document.getElementById('deleteLevelName').textContent = button.dataset.name;
+
+        openModal('deleteLevelModal');
+    }
 
     function switchTab(tabName, btnEl) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -245,6 +630,37 @@
 
     function openAddModal() {
         const modalId = document.getElementById('addAcademyBtn').getAttribute('data-modal');
+
+        if (modalId === 'careerModal') {
+            document.getElementById('careerForm').reset();
+
+            document.getElementById('careerAction').value = 'create_career';
+            document.getElementById('careerCode').readOnly = false;
+
+            document.getElementById('careerModalTitle').textContent = 'Add Program / Career';
+            document.getElementById('careerSubmitButton').textContent = 'Save Program';
+        }
+
+        if (modalId === 'levelModal') {
+            document.getElementById('levelForm').reset();
+
+            document.getElementById('levelAction').value = 'create_level';
+            document.getElementById('levelCode').readOnly = false;
+
+            document.getElementById('levelModalTitle').textContent = 'Add Proficiency Level';
+            document.getElementById('levelSubmitButton').textContent = 'Save Level';
+        }
+
+        if (modalId === 'groupModal') {
+            document.getElementById('groupForm').reset();
+
+            document.getElementById('groupAction').value = 'create_group';
+            document.getElementById('groupCode').value = '';
+
+            document.getElementById('groupModalTitle').textContent = 'Add Class Group';
+            document.getElementById('groupSubmitButton').textContent = 'Save Group';
+        }
+
         openModal(modalId);
     }
 

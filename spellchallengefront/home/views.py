@@ -67,8 +67,8 @@ def looks_like_sql(head_bytes):
 
 def parse_backup_datos(datos):
     """Reads Size/Type/Description from the datos text. First occurrence wins."""
-    info = {'size': '-', 'type': 'Manual', 'description': ''}
-    keys = {'Size': 'size', 'Type': 'type', 'Description': 'description'}
+    info = {'name': '', 'size': '-', 'type': 'Manual', 'description': ''}
+    keys = {'Name': 'name', 'Size': 'size', 'Type': 'type', 'Description': 'description'}
     seen = set()
     for line in datos.splitlines():
         key, sep, value = line.partition(':')
@@ -76,6 +76,23 @@ def parse_backup_datos(datos):
             info[keys[key]] = value.strip()
             seen.add(key)
     return info
+
+def validate_backup_name(name):
+    name = name.strip()
+    
+    if not name:
+        return None, 'Please enter a backup name.'
+    
+    if len(name) > 45:
+        return None, 'Backup name cannot exceed 45 characters.'
+    
+    if not re.fullmatch(r'[A-Za-z0-9_-]+', name):
+        return None, (
+            'Backup name may contain only letters, numbers, '
+            'hyphens and underscores.'
+        )
+        
+    return name, None
 
 def _update_numero_letras(lista):
     significados = Palabra.objects.filter(
@@ -4004,6 +4021,246 @@ def admin_users(request):
 @never_cache
 @role_required('administrator')
 def admin_academy(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        #CREATE CARRER
+        if action == 'create_career':
+            clave = request.POST.get('clave', '').strip().upper()
+            nombre = request.POST.get('nombre', '').strip()
+            descripcion = request.POST.get('descripcion', '').strip()
+            
+            if not clave or not nombre:
+                messages.error(request, 'Career code and name are required.')
+                
+            elif Carrera.objects.filter(clave=clave).exists():
+                messages.error(request, 'A career with that code already exists.')
+                
+            else:
+                Carrera.objects.create(
+                    clave=clave,
+                    nombre=nombre,
+                    descripcion=descripcion
+                )
+                messages.success(request, 'Career created successfully.')
+                
+            return redirect('admin_academy_management')
+        
+        elif action == 'update_career':
+            clave = request.POST.get('clave', '').strip().upper()
+            nombre = request.POST.get('nombre', '').strip()
+            descripcion = request.POST.get('descripcion', '').strip()
+            
+            carrera = get_object_or_404(Carrera, clave=clave)
+            
+            if not nombre:
+                messages.error(request, 'Career name is required.')
+                
+            else:
+                carrera.nombre = nombre
+                carrera.descripcion = descripcion
+                carrera.save(update_fields=['nombre', 'descripcion'])
+                
+                messages.success(request, 'Career updated successfully.')
+                
+            return redirect('admin_academy_management')
+        
+        elif action == 'delete_career':
+            clave = request.POST.get('clave', '').strip().upper()
+            carrera = get_object_or_404(Carrera, clave=clave)
+            
+            has_students = Alumno.objects.filter(carrera=carrera).exists()
+            has_groups = Grupo_Carrera.objects.filter(carrera=carrera).exists()
+            
+            if has_students or has_groups:
+                messages.error(
+                    request,
+                    'This career cannot be deleted because it is assigned to students or groups.'
+                )
+            else:
+                carrera.delete()
+                messages.success(request, 'Career deleted successfully.')
+                
+            return redirect('admin_academy_management')
+        
+        #CREATE LEVEL
+        elif action == 'create_level':
+            codigo = request.POST.get('codigo', '').strip().upper()
+            descripcion = request.POST.get('descripcion', '').strip()
+            
+            if not codigo or not descripcion:
+                messages.error(request, 'Level code and description are required.')
+                
+            elif len(codigo) > 2:
+                messages.error(request, 'Level code cannot exceed 2 characters.')
+                
+            elif Nivel.objects.filter(codigo=codigo).exists():
+                messages.error(request, 'A level with that code already exists.')
+                
+            else:
+                Nivel.objects.create(
+                    codigo=codigo,
+                    descripcion=descripcion
+                )
+                messages.success(request, 'Level created successfully.')
+                
+            return redirect('admin_academy_management')
+        
+        elif action == 'update_level':
+            codigo = request.POST.get('codigo', '').strip().upper()
+            descripcion = request.POST.get('descripcion', '').strip()
+            
+            nivel = get_object_or_404(Nivel, codigo=codigo)
+            
+            if not descripcion:
+                messages.error(request, 'Level description is required.')
+                
+            else:
+                nivel.descripcion = descripcion
+                nivel.save(update_fields=['descripcion'])
+                
+                messages.success(request, 'Level updated successfully.')
+                
+            return redirect('admin_academy_management')
+        
+        elif action == 'delete_level':
+            codigo = request.POST.get('codigo', '').strip().upper()
+            nivel = get_object_or_404(Nivel, codigo=codigo)
+            
+            if Alumno.objects.filter(nivel=nivel).exists():
+                messages.error(
+                    request,
+                    'This level cannot be deleted because it is assigned to students.'
+                )
+            else:
+                nivel.delete()
+                messages.success(request, 'Level deleted successfully.')
+                
+            return redirect('admin_academy_management')
+        
+        #CREATE GROUP
+        elif action == 'create_group':
+            nombre = request.POST.get('nombre', '').strip()
+            carrera_code = request.POST.get('carrera', '').strip().upper()
+            profesor_id = request.POST.get('profesor', '').strip()
+            ciclo = request.POST.get('ciclo', '').strip().upper()
+            
+            if not nombre or not carrera_code or not profesor_id or not ciclo:
+                messages.error(request, 'All group fields are required.')
+                
+            elif not Carrera.objects.filter(clave=carrera_code).exists():
+                messages.error(request, 'The selected career does not exist.')
+                
+            elif not Profesor.objects.filter(pk=profesor_id).exists():
+                messages.error(request, 'The selected teacher does not exist.')
+                
+            elif not Nivel.objects.filter(codigo=ciclo).exists():
+                messages.error(request, 'The selected level does not exist.')
+                
+            else:
+                carrera = get_object_or_404(Carrera, clave=carrera_code)
+                profesor = get_object_or_404(Profesor, pk=profesor_id)
+                
+                caracteres = string.ascii_uppercase + string.digits
+                
+                while True:
+                    codigo = f"GRP{random.randint(10000, 99999)}"
+                    
+                    if not Grupo.objects.filter(codigo=codigo).exists():
+                        break
+                    
+                while True:
+                    codigo_union = ''.join(
+                        random.choices(caracteres, k=6)
+                    )
+                    
+                    if not Grupo.objects.filter(
+                        codigo_union=codigo_union
+                    ).exists():
+                        break
+                    
+                grupo = Grupo.objects.create(
+                    codigo=codigo,
+                    codigo_union=codigo_union,
+                    nombre=nombre,
+                    fecha_creacion=date.today(),
+                    ciclo=ciclo,
+                    profesor=profesor,
+                )
+                
+                Grupo_Carrera.objects.create(
+                    grupo=grupo,
+                    carrera=carrera
+                )
+                
+                messages.success(request, 'Group created successfully.')
+                
+            return redirect('admin_academy_management')
+        
+        elif action == 'update_group':
+            codigo = request.POST.get('codigo', '').strip()
+            nombre = request.POST.get('nombre', '').strip()
+            carrera_code = request.POST.get('carrera', '').strip().upper()
+            profesor_id = request.POST.get('profesor', '').strip()
+            ciclo = request.POST.get('ciclo', '').strip().upper()
+            
+            grupo = get_object_or_404(Grupo, codigo=codigo)
+            
+            if not nombre or not carrera_code or not profesor_id or not ciclo:
+                messages.error(request, 'All group fields are required.')
+                
+            elif not Carrera.objects.filter(clave=carrera_code).exists():
+                messages.error(request, 'The selected career does not exist.')
+                
+            elif not Profesor.objects.filter(pk=profesor_id).exists():
+                messages.error(request, 'The selected teacher does not exist.')
+                
+            elif not Nivel.objects.filter(codigo=ciclo).exists():
+                messages.error(request, 'The selected level does not exist.')
+                
+            else:
+                carrera = get_object_or_404(Carrera, clave=carrera_code)
+                profesor = get_object_or_404(Profesor, pk=profesor_id)
+                
+                grupo.nombre = nombre
+                grupo.profesor = profesor
+                grupo.ciclo = ciclo
+                grupo.save(update_fields=['nombre', 'profesor', 'ciclo'])
+                
+                Grupo_Carrera.objects.filter(
+                    grupo=grupo
+                ).exclude(
+                    carrera=carrera
+                ).delete()
+                
+                Grupo_Carrera.objects.get_or_create(
+                    grupo=grupo,
+                    carrera=carrera
+                )
+                
+                messages.success(request, 'Group updated successfully.')
+                
+            return redirect('admin_academy_management')
+        
+        elif action == 'delete_group':
+            codigo = request.POST.get('codigo', '').strip()
+            grupo = get_object_or_404(Grupo, codigo=codigo)
+            
+            if Grupo_Alumno.objects.filter(grupo=grupo).exists():
+                messages.error(
+                    request,
+                    'This group cannot be deleted because it has assigned students.'
+                )
+            else:
+                grupo.delete()
+                messages.success(request, 'Group deleted successfully.')
+                
+            return redirect('admin_academy_management')
+        
+        else:
+            messages.error(request, 'Invalid academy management action.')
+            return redirect('admin_academy_management')
+    
     carreras = Carrera.objects.all().order_by('clave')
     
     careers = []
@@ -4020,6 +4277,7 @@ def admin_academy(request):
         careers.append({
             'code': carrera.clave,
             'name': carrera.nombre,
+            'description': carrera.descripcion,
             'status': 'ACTIVE',
             'groups_count': grupos.count(),
             'students_count': students_count,
@@ -4086,19 +4344,20 @@ def admin_academy(request):
             .first()
         )
         
-        level_code = (
-            nivel.codigo
-            if nivel
-            else 'Not assigned'
-        )
+        level_code = nivel.codigo if nivel else grupo.ciclo
         
         groups.append({
+            'code': grupo.codigo,
             'name': grupo.nombre,
             'career': career_name,
+            'career_code': (
+                grupo_carrera.carrera.clave
+                if grupo_carrera else ''
+            ),
             'teacher': teacher_name,
+            'teacher_id': grupo.profesor.pk,
             'level': level_code,
             'students_count': grupo.grupo_alumnos.count(),
-            'status': 'ACTIVE',
         })
         
     profesores = Profesor.objects.all().order_by(
@@ -4115,7 +4374,10 @@ def admin_academy(request):
             f"{profesor.apellidoMaterno or ''}"
         ).strip()
         
-        available_teachers.append(teacher_name)
+        available_teachers.append({
+            'id': profesor.pk,
+            'name': teacher_name,
+        })
     
     return render(
         request, 
@@ -4137,6 +4399,29 @@ def admin_backups(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         description = ' '.join(request.POST.get('description', '').split())[:200]
+        
+        backup_name = request.POST.get('backup_name', '').strip()
+        
+        if backup_name:
+            backup_name, error = validate_backup_name(backup_name)
+            
+            if error:
+                messages.error(request, error)
+                return redirect('admin_backups')
+            
+            existing_backups = Copia_Seguridad.objects.filter(
+                administrador=administrador
+            )
+            
+            for existing in existing_backups:
+                existing_info = parse_backup_datos(existing.datos)
+                
+                if existing_info.get('name', '').casefold() == backup_name.casefold():
+                    messages.error(
+                        request,
+                        'A backup with that name already exists in your backups.'
+                    )
+                    return redirect('admin_backups')
 
         # ---------- UPLOAD EXISTING BACKUP ----------
         if action == 'submit_backup':
@@ -4179,7 +4464,10 @@ def admin_backups(request):
                 number += 1
 
             codigo = f'COP{number:02d}'
-            filename = f'{codigo}_uploaded.sql'
+            
+            extension = '.sql'
+            display_name = backup_name or f'{codigo}_uploaded'
+            filename = f'{codigo}_uploaded{extension}'
             backup_path = os.path.join(backup_dir, filename)
 
             file_created = False
@@ -4195,6 +4483,7 @@ def admin_backups(request):
                 size_text = format_size(file_size)
 
                 datos = (
+                    f'Name: {display_name}\n'
                     f'Filename: {filename}\n'
                     f'Size: {size_text}\n'
                     f'Type: Uploaded\n'
@@ -4240,9 +4529,24 @@ def admin_backups(request):
         now = timezone.localtime()
         stamp = now.strftime("%Y-%m-%d_%H-%M-%S")
 
-        dump_path = os.path.join(backup_dir, f'backup_{stamp}.sql')
-        filename = f'backup_{stamp}.zip' if use_zip else f'backup_{stamp}.sql'
+        extension = '.zip' if use_zip else '.sql'
+        display_name = backup_name or f'backup_{stamp}'
+        
+        number = 1
+        while Copia_Seguridad.objects.filter(
+            codigo=f'COP{number:02d}'
+        ).exists():
+            number += 1
+            
+        codigo = f'COP{number:02d}'
+        
+        filename = f'{codigo}{extension}'
         backup_path = os.path.join(backup_dir, filename)
+        
+        if use_zip:
+            dump_path = os.path.join(backup_dir, f'_{codigo}_{stamp}.sql')
+        else:
+            dump_path = backup_path
 
         mysqldump_path = settings.MYSQLDUMP_PATH
 
@@ -4304,15 +4608,8 @@ def admin_backups(request):
 
             size_text = format_size(os.path.getsize(backup_path))
 
-            number = 1
-            while Copia_Seguridad.objects.filter(
-                codigo=f'COP{number:02d}'
-            ).exists():
-                number += 1
-
-            codigo = f'COP{number:02d}'
-
             datos = (
+                f'Name: {display_name}\n'
                 f'Filename: {filename}\n'
                 f'Size: {size_text}\n'
                 f'Type: {backup_type}\n'
@@ -4364,6 +4661,7 @@ def admin_backups(request):
         info = parse_backup_datos(backup.datos)
         backup.size_display = info['size']
         backup.type_display = info['type']
+        backup.display_name = info['name'] or backup.nombre
 
     context = {
         'backups': backups,

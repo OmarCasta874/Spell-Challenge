@@ -156,6 +156,48 @@
     box-sizing: border-box;
 }
 
+
+/* FIX: Keep Add Participants modal within the viewport */
+#addParticipantsModal .modal-dialog {
+    max-height: calc(100vh - 2rem);
+}
+
+#addParticipantsModal .modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 2rem);
+    overflow: hidden;
+}
+
+#addParticipantsModal form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Keep header and footer visible */
+#addParticipantsModal .modal-header,
+#addParticipantsModal .modal-footer {
+    flex-shrink: 0;
+}
+
+/* Allow the student list to scroll independently */
+#addParticipantsModal .res-modal-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#addParticipantsModal .res-participants-list {
+    flex: 1 1 auto;
+    min-height: 120px;
+    max-height: min(45vh, 420px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
 /* BEEHIVE EVALUATION BUTTON */
 .competition-management-container .beehive-item {
     position: relative;
