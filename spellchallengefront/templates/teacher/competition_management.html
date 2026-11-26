@@ -34,73 +34,122 @@
             </span>
         </div>
     </div>
-    <!-- PARTICIPANT SELECTION -->
-    <section class="management-section">
-        <h4>1. SELECT PARTICIPANT</h4>
-        <div class="management-control">
-            <label for="participantSelect">
-                Competition Participant
-            </label>
-            <select id="participantSelect">
-                <option value="">Select a participant</option>
-                {% for participacion in participaciones %}
-                    <option
-                        value="{{ participacion.alumno.matricula }}"
-                        data-name="{{ participacion.alumno.nombre_pila }}"
-                    >
-                        {{ participacion.alumno.nombre_pila }}
-                        {{ participacion.alumno.apellidoPaterno }}
-                        {{ participacion.alumno.apellidoMaterno }}
-                        ({{ participacion.alumno.matricula }})
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        {% if competition.estado == 'Upcoming' %}
-            <div class="management-participants-action">
-                <button
-                    type="button"
-                    class="res-btn-search"
-                    data-bs-toggle="modal"
-                    data-bs-target="#addParticipantsModal"
-                >
-                    <i data-lucide="user-plus"></i>
-                    Add Participants
-                </button>
+    <!-- PRE-BEEHIVE MANAGEMENT -->
+    <div class="management-pre-beehive">
+        <!-- PARTICIPANT SELECTION -->
+        <section class="management-section">
+            <h4>1. SELECT PARTICIPANT</h4>
+            <div class="management-control">
+                <label for="participantSelect">
+                    Competition Participant
+                </label>
+                <select id="participantSelect">
+                    <option value="">Select a participant</option>
+                    {% for participacion in participaciones %}
+                        <option
+                            value="{{ participacion.id }}"
+                            data-name="{% if participacion.tipo == 'Student' and participacion.alumno %}{{ participacion.alumno.nombre_pila }} {{ participacion.alumno.apellidoPaterno }} {{ participacion.alumno.apellidoMaterno }}{% else %}{{ participacion.nombre_completo }}{% endif %}"
+                        >
+                            {% if participacion.tipo == 'Student' and participacion.alumno %}
+                                {{ participacion.alumno.nombre_pila }}
+                                {{ participacion.alumno.apellidoPaterno }}
+                                {{ participacion.alumno.apellidoMaterno }}
+                                ({{ participacion.alumno.matricula }})
+                            {% else %}
+                                {{ participacion.nombre_completo }} (Guest)
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
-        {% endif %}
-        {% if competition.estado == 'Upcoming' %}
-            <p class="management-hint">
-                Register your participants before starting the competition.
-            </p>
-        {% endif %}
-    </section>
-    <!-- WORD CATEGORY -->
-    <section class="management-section">
-        <h4>2. SELECT WORD CATEGORY</h4>
-        <div class="word-length-selector">
-            <label for="wordLengthSelect">
-                SELECT WORD LENGTH
-            </label>
-            <select id="wordLengthSelect">
-                <option value="CAT11">6 Letters</option>
-                <option value="CAT12">7 Letters</option>
-                <option value="CAT13">8 Letters</option>
-                <option value="CAT14">9 Letters</option>
-                <option value="CAT15">10 Letters</option>
-                <option value="CAT16">11 Letters</option>
-                <option value="CAT17">12 Letters</option>
-                {% if es_spelling_bee %}
-                    <option value="SUDDEN_DEATH">
-                        13 Letters (Sudden Death)
-                    </option>
-                {% endif %}
-            </select>
-        </div>
-    </section>
+            {% if competition.estado == 'Upcoming' %}
+                <div class="management-participants-action">
+                    <button
+                        type="button"
+                        class="res-btn-search"
+                        data-bs-toggle="modal"
+                        data-bs-target="#addParticipantsModal"
+                    >
+                        <i data-lucide="user-plus"></i>
+                        Add Participants
+                    </button>
+                </div>
+            {% endif %}
+            {% if competition.estado == 'Upcoming' %}
+                <p class="management-hint">
+                    Register your participants before starting the competition.
+                </p>
+            {% endif %}
+        </section>
+        <!-- WORD CATEGORY -->
+        <section class="management-section">
+            <h4>2. SELECT WORD CATEGORY</h4>
+            <div class="word-length-selector">
+                <label for="wordLengthSelect">
+                    SELECT WORD LENGTH
+                </label>
+                <select id="wordLengthSelect">
+                    <option value="CAT11">6 Letters</option>
+                    <option value="CAT12">7 Letters</option>
+                    <option value="CAT13">8 Letters</option>
+                    <option value="CAT14">9 Letters</option>
+                    <option value="CAT15">10 Letters</option>
+                    <option value="CAT16">11 Letters</option>
+                    <option value="CAT17">12 Letters</option>
+                    {% if es_spelling_bee %}
+                        <option value="SUDDEN_DEATH">
+                            13 Letters (Sudden Death)
+                        </option>
+                    {% endif %}
+                </select>
+            </div>
+        </section>
+        <!-- ROUND MANAGEMENT -->
+        <section 
+            class="management-section"
+            id="roundManagement"
+            data-round-id="{% if ronda_activa %} {{ ronda_activa.id }} {% endif %}"
+            data-round-category="{% if ronda_activa %} {{ ronda_activa.categoria_beehive }} {% endif %}"
+        >
+            <h4>3. ROUND MANAGEMENT</h4>
+
+            {% if ronda_activa %}
+                <p class="active-round-info">
+                    Active Round: {{ ronda_activa.numero_ronda }}
+                    — {{ ronda_activa.categoria_beehive }}
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="finish_round">
+                    <input type="hidden" name="ronda_id" value="{{ ronda_activa.id }}">
+
+                    <button type="submit" class="res-btn-search">
+                        Finish Current Round
+                    </button>
+                </form>
+            {% else %}
+                <form method="post" id="startRoundForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="start_round">
+
+                    <input
+                        type="hidden"
+                        name="categoria_beehive"
+                        id="roundCategoryInput"
+                        value="CAT11"
+                    >
+
+                    <button type="submit" class="res-btn-search">
+                        Start Round
+                    </button>
+                </form>
+            {% endif %}
+        </section>
+    </div>
     <!-- BEEHIVE GRID -->
     <section class="management-section">
-        <h4>3. SELECT A BEEHIVE</h4>
+        <h4>4. SELECT A BEEHIVE</h4>
         <div class="honeycomb-grid">
         </div>
         <div class="beehive-pagination">

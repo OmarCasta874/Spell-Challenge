@@ -265,3 +265,135 @@
         font-size: 23px;
     }
 }
+
+/* ROUND MANAGEMENT BUTTONS */
+#roundManagement form {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+#roundManagement .res-btn-search {
+    min-width: 180px;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #8a5a00;
+    border-radius: 12px;
+    background: #7a1c1c;
+    color: #ffffff;
+    font-weight: 800;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease,
+                transform 0.2s ease;
+}
+
+#roundManagement .res-btn-search:hover {
+    background: #5c1414;
+    transform: translateY(-2px);
+}
+
+#roundManagement .res-btn-search:focus-visible {
+    outline: 3px solid #f2908a;
+    outline-offset: 3px;
+}
+
+#roundManagement .res-btn-search:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ACTIVE ROUND */
+#roundManagement .active-round-info {
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto 1rem;
+    padding: 0.65rem 1.25rem;
+    border: 1px solid #e8b93f;
+    border-radius: 12px;
+    background: #fff8e6;
+    color: #5A3E1B;
+    font-weight: 700;
+    text-align: center;
+}
+
+@media (max-width: 576px) {
+    #roundManagement .res-btn-search {
+        width: 100%;
+        max-width: 320px;
+        min-width: 0;
+    }
+}
+
+/* COMPACT PRE-BEEHIVE MANAGEMENT */
+.management-pre-beehive {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.management-pre-beehive .management-section {
+    min-width: 0;
+    margin: 0;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.management-pre-beehive .management-section h4 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.management-pre-beehive .management-control {
+    width: 100%;
+    max-width: none;
+}
+
+.management-pre-beehive .management-hint {
+    margin: 0.75rem 0 0;
+    font-size: 0.875rem;
+}
+
+.management-pre-beehive .management-participants-action {
+    margin: 0.75rem auto 0;
+}
+
+.management-pre-beehive #roundManagement form {
+    margin-top: auto;
+}
+
+.management-pre-beehive #roundManagement .active-round-info {
+    margin: 0 auto 1rem;
+}
+
+.management-pre-beehive .management-control label[for="participantSelect"] {
+    text-align: center;
+}
+
+@media (max-width: 900px) {
+    .management-pre-beehive {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .management-pre-beehive #roundManagement {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 576px) {
+    .management-pre-beehive {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .management-pre-beehive #roundManagement {
+        grid-column: auto;
+    }
+
+    .management-pre-beehive .management-section {
+        padding: 1rem;
+    }
+}

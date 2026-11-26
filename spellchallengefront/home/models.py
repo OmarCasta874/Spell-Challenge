@@ -1096,12 +1096,18 @@ class Competencia_Alumno(models.Model):
         db_table = 'competencia_alumno'
         unique_together = ('competencia', 'alumno')
         
-#MODELO COMPETENCIA_EVALUACION
-class Competencia_Evaluacion(models.Model):
+#MODELO COMPETENCIA_PARTICIPANTE
+class Competencia_Participante(models.Model):
     
-    RESULT_CHOICES = [
-        ('Correct', 'Correct'),
-        ('Incorrect', 'Incorrect'),
+    TIPO_CHOICES = [
+        ('Student', 'Student'),
+        ('Guest', 'Guest'),
+    ]
+    
+    ESTADO_CHOICES = [
+        ('Active', 'Active'),
+        ('Eliminated', 'Eliminated'),
+        ('Finished', 'Finished'),
     ]
     
     id = models.BigAutoField(primary_key=True)
@@ -1109,19 +1115,144 @@ class Competencia_Evaluacion(models.Model):
     competencia = models.ForeignKey(
         Competencia,
         on_delete=models.CASCADE,
-        related_name='evaluaciones',
+        related_name='participantes',
         db_column='competencia',
         to_field='codigo'
+    )
+    
+    tipo = models.CharField(
+        max_length=7,
+        choices=TIPO_CHOICES
     )
     
     alumno = models.ForeignKey(
         Alumno,
         on_delete=models.CASCADE,
-        related_name='evaluaciones_competencia',
+        null=True,
+        blank=True,
+        related_name='participaciones_competencia',
         db_column='alumno',
         to_field='matricula'
     )
     
+    nombre_completo = models.CharField(
+        max_length=150,
+        null=True,
+        blank=True
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    estado = models.CharField(
+        max_length=10,
+        choices=ESTADO_CHOICES,
+        default='Active'
+    )
+    
+    puntos_obtenidos = models.IntegerField(default=0)
+    
+    palabras_correctas = models.IntegerField(default=0)
+    
+    palabras_incorrectas = models.IntegerField(default=0)
+    
+    posicion = models.IntegerField(null=True, blank=True)
+    
+    class Meta:
+        managed = False
+        db_table = 'competencia_participante'
+        
+    def __str__(self):
+        if self.tipo == 'Student' and self.alumno:
+            return f"{self.competencia.codigo} - {self.alumno.matricula}"
+        
+        return f"{self.competencia.codigo} - {self.nombre_completo}"
+    
+#MODELO COMPETENCIA_RONDA
+class Competencia_Ronda(models.Model):
+    
+    ESTADO_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Active', 'Active'),
+        ('Finished', 'Finished'),
+    ]
+    
+    id = models.BigAutoField(primary_key=True)
+    
+    competencia = models.ForeignKey(
+        Competencia,
+        on_delete=models.CASCADE,
+        related_name='rondas',
+        db_column='competencia',
+        to_field='codigo'
+    )
+    
+    numero_ronda = models.PositiveIntegerField()
+    
+    categoria_beehive = models.CharField(max_length=15)
+    
+    estado = models.CharField(
+        max_length=8,
+        choices=ESTADO_CHOICES,
+        default='Pending'
+    )
+    
+    es_historica = models.BooleanField(default=False)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        managed = False
+        db_table = 'competencia_ronda'
+        
+    def __str__(self):
+        return (
+            f"{self.competencia.codigo} - "
+            f"Round {self.numero_ronda} - "
+            f"{self.categoria_beehive}"
+        )
+        
+# MODELO COMPETENCIA_EVALUACION
+class Competencia_Evaluacion(models.Model):
+
+    RESULT_CHOICES = [
+        ('Correct', 'Correct'),
+        ('Incorrect', 'Incorrect'),
+    ]
+
+    id = models.BigAutoField(primary_key=True)
+
+    competencia = models.ForeignKey(
+        Competencia,
+        on_delete=models.CASCADE,
+        related_name='evaluaciones',
+        db_column='competencia',
+        to_field='codigo'
+    )
+
+    participante = models.ForeignKey(
+        Competencia_Participante,
+        on_delete=models.CASCADE,
+        related_name='evaluaciones',
+        db_column='participante_id'
+    )
+
+    ronda = models.ForeignKey(
+        Competencia_Ronda,
+        on_delete=models.CASCADE,
+        related_name='evaluaciones',
+        db_column='ronda_id'
+    )
+
+    alumno = models.ForeignKey(
+        Alumno,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='evaluaciones_competencia',
+        db_column='alumno',
+        to_field='matricula'
+    )
+
     palabra = models.ForeignKey(
         Palabra,
         on_delete=models.PROTECT,
@@ -1129,21 +1260,21 @@ class Competencia_Evaluacion(models.Model):
         db_column='palabra',
         to_field='codigo'
     )
-    
+
     beehive = models.PositiveSmallIntegerField()
-    
+
     categoria_beehive = models.CharField(max_length=15)
-    
+
     spelling_result = models.CharField(
         max_length=9,
         choices=RESULT_CHOICES
     )
-    
+
     pronunciation_result = models.CharField(
         max_length=9,
         choices=RESULT_CHOICES
     )
-    
+
     evaluado_por = models.ForeignKey(
         Profesor,
         on_delete=models.PROTECT,
@@ -1151,18 +1282,28 @@ class Competencia_Evaluacion(models.Model):
         db_column='evaluado_por',
         to_field='clave'
     )
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         managed = False
         db_table = 'competencia_evaluacion'
-        
+
     def __str__(self):
-        return f"{self.competencia.nombre} - {self.alumno.matricula} - Beehive {self.beehive}"
-        
+        if self.alumno_id:
+            participante = self.alumno.matricula
+        elif self.participante_id:
+            participante = self.participante.nombre_completo
+        else:
+            participante = 'Historical participant'
+
+        return (
+            f"{self.competencia.nombre} - "
+            f"{participante} - "
+            f"Beehive {self.beehive}"
+        )
 
 #MODELO COMPETENCIA_PROFESOR
 class Competencia_Profesor(models.Model):

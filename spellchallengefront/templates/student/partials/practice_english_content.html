@@ -13,9 +13,9 @@
             Listen, speak and spell words correctly.
         </p>
         <ul class="pye-word-list">
-            <li>Apologize</li>
-            <li>Customs</li>
-            <li>Embarrassment</li>
+            {% for word in spelling_preview_words %}
+                <li>{{ word }}</li>
+            {% endfor %}
         </ul>
         <a href="{% url 'practice_spelling' %}" class="pye-practice-btn">
             <i data-lucide="play"></i>
@@ -50,9 +50,9 @@
             Practice pronunciation and improve your speaking skills.
         </p>
         <ul class="pye-word-list">
-            <li>Photography</li>
-            <li>Mountain</li>
-            <li>Loyalty</li>
+            {% for word in speaking_preview_words %}
+                <li>{{ word }}</li>
+            {% endfor %}
         </ul>
         <!-- NORMAL ACCESS -->
         <a

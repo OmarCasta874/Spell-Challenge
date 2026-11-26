@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const categorySelect = document.getElementById('wordLengthSelect');
     const grid = document.querySelector('.honeycomb-grid');
 
+    const roundManagement = document.getElementById('roundManagement');
+    const roundCategoryInput = document.getElementById('roundCategoryInput');
+
     const previousButton = document.getElementById('previousPageBtn');
     const nextButton = document.getElementById('nextPageBtn');
     const pageIndicator = document.getElementById('pageIndicator');
@@ -25,6 +28,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const openEvaluationBtn = document.getElementById('openEvaluationBtn');
 
     const managementContainer = document.getElementById('competitionManagement');
+
+    const activeRoundId = roundManagement
+        ? roundManagement.dataset.roundId
+        : '';
+
+    const activeRoundCategory = roundManagement
+        ? roundManagement.dataset.roundCategory
+        : '';
 
     const saveEvaluationUrl = managementContainer.dataset.saveUrl;
 
@@ -51,18 +62,29 @@ document.addEventListener('DOMContentLoaded', function () {
         return participantSelect.value;
     }
 
-    function getParticipantEvaluation(matricula) {
+    function getParticipantEvaluation(participantId) {
         return evaluations.find(
             evaluation =>
-                String(evaluation.alumno_id) === String(matricula)
+                String(evaluation.participante_id) === String(participantId) &&
+                String(evaluation.ronda_id) === String(activeRoundId)
         ) || null;
     }
 
     function getBeehiveEvaluation(category, hiveNumber) {
-        return evaluations.find(
-            evaluation =>
-                evaluation.categoria_beehive === category &&
-                Number(evaluation.beehive) === Number(hiveNumber)
+        const normalizedRoundId = String(activeRoundId).trim();
+        const normalizedHiveNumber = Number(hiveNumber);
+
+        return evaluations.find(evaluation =>
+                String(evaluation.ronda_id).trim() === normalizedRoundId &&
+                String(evaluation.categoria_beehive).trim() === String(category).trim() &&
+                Number(evaluation.beehive) === normalizedHiveNumber
+        ) || null;
+    }
+
+    function getUsedBeehiveEvaluation(category, hiveNumber) {
+        return evaluations.find(evaluation =>
+            evaluation.categoria_beehive === category &&
+            Number(evaluation.beehive) === Number(hiveNumber)
         ) || null;
     }
 
@@ -74,6 +96,25 @@ document.addEventListener('DOMContentLoaded', function () {
         return getCategoryWords().find(
             word => String(word.codigo) === String(code)
         ) || null;
+    }
+
+    function initRoundCategory() {
+
+        if (!roundManagement) {
+            return;
+        }
+
+        if (activeRoundId && activeRoundCategory) {
+            currentCategory = activeRoundCategory;
+            categorySelect.value = activeRoundCategory;
+            categorySelect.disabled = true;
+
+            if (roundCategoryInput) {
+                roundCategoryInput.value = activeRoundCategory;
+            }
+        } else if (roundCategoryInput) {
+            roundCategoryInput.value = categorySelect.value;
+        }
     }
 
     // CATEGORY SELECTOR
@@ -113,6 +154,10 @@ document.addEventListener('DOMContentLoaded', function () {
         currentEvaluation = null;
         currentWord = null;
 
+        if (roundCategoryInput) {
+            roundCategoryInput.value = currentCategory;
+        }
+
         renderBeehives();
     }
 
@@ -151,6 +196,13 @@ document.addEventListener('DOMContentLoaded', function () {
     function renderBeehives() {
 
         const availableWords = getCategoryWords();
+
+        console.log('[BEEHIVE INITIAL CHECK]', {
+            activeRoundId: activeRoundId,
+            currentCategory: currentCategory,
+            availableWords: availableWords.length,
+            selectedParticipant: getSelectedParticipant()
+        });
 
         const totalBeehives = availableWords.length;
 
@@ -214,24 +266,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const hiveNumber = globalHiveIndex;
 
-                    const evaluation = getBeehiveEvaluation(
-                        currentCategory,
-                        hiveNumber
-                    );
+                    const evaluation = getBeehiveEvaluation(currentCategory, hiveNumber);
+                    const usedEvaluation = getUsedBeehiveEvaluation(currentCategory, hiveNumber);
 
-                    const isOccupied = evaluation !== null;
+                    const isOccupied = usedEvaluation !== null;
 
                     const belongsToParticipant =
-                        isOccupied &&
+                        evaluation !== null &&
                         selectedParticipant &&
-                        String(evaluation.alumno_id) ===
-                        String(selectedParticipant);
+                        String(evaluation.participante_id).trim() === String(selectedParticipant).trim();
 
                     console.log('[BEEHIVE DEBUG]', {
+                        activeRoundId: activeRoundId,
                         category: currentCategory,
                         hive: hiveNumber,
                         selectedParticipant: selectedParticipant,
                         evaluation: evaluation,
+                        usedEvaluation: usedEvaluation,
                         isOccupied: isOccupied,
                         belongsToParticipant: belongsToParticipant
                     });
@@ -278,7 +329,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     // No hive can be selected without a participant.
-                    if (!selectedParticipant) {
+                    if (!activeRoundId || !selectedParticipant) {
+                        button.classList.add('beehive-disabled');
                         button.disabled = true;
                     }
 
@@ -353,9 +405,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function selectBeehive(hiveNumber) {
 
-        const matricula = getSelectedParticipant();
+        const participantId = getSelectedParticipant();
 
-        if (!matricula) {
+        if (!activeRoundId) {
+            alert('Please start a round before evaluating participants.');
+            return;
+        }
+
+        if (!participantId) {
             alert('Please select a participant first.');
             return;
         }
@@ -372,6 +429,15 @@ document.addEventListener('DOMContentLoaded', function () {
             currentCategory,
             currentHive
         );
+
+        // Do not open a hive assigned to another participant.
+        if (
+            currentEvaluation &&
+            String(currentEvaluation.participante_id).trim() !== String(participantId).trim()
+        ) {
+            alert('This Beehive is already assigned to another participant.');
+            return;
+        }
 
         const modalText = confirmModal.querySelector(
             '.beehive-modal-subtext'
@@ -514,6 +580,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 evaluations
                     .filter(
                         evaluation =>
+                            String(evaluation.ronda_id) === String(activeRoundId) &&
                             evaluation.categoria_beehive === currentCategory
                     )
                     .map(evaluation => String(evaluation.palabra_id))
@@ -612,17 +679,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     saveEvaluationBtn.addEventListener('click', async function () {
 
-        const matricula = getSelectedParticipant();
+        const participantId = getSelectedParticipant();
 
         if (
-            !matricula ||
+            !participantId ||
+            !activeRoundId ||
             !currentHive ||
             !currentWord ||
             currentWordHive !== currentHive ||
             !selectedSpellingResult ||
             !selectedPronunciationResult
         ) {
-            alert('Please complete all evaluation fields.');
+            alert('Please complete all evaluation fields and make sure a round is active.');
             return;
         }
 
@@ -634,78 +702,65 @@ document.addEventListener('DOMContentLoaded', function () {
         updateSaveButtonState();
 
         const formData = new URLSearchParams({
-
-            matricula: matricula,
+            participante_id: participantId,
+            ronda_id: activeRoundId,
             palabra_codigo: currentWord.codigo,
             categoria_beehive: currentCategory,
             spelling_result: selectedSpellingResult,
             pronunciation_result: selectedPronunciationResult,
             beehive: currentHive
-
         });
 
         try {
 
             const response = await fetch(saveEvaluationUrl, {
-
                 method: 'POST',
-
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
                     'X-CSRFToken': csrfToken,
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-
                 body: formData.toString()
-
             });
 
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-
                 throw new Error(
                     data.message || 'Unable to save the evaluation.'
                 );
-
             }
 
             const savedEvaluation = {
-
                 id: data.evaluation_id,
-                alumno_id: data.matricula,
+                participante_id: data.participante_id,
+                ronda_id: data.ronda_id,
+                alumno_id: data.alumno_id,
                 palabra_id: data.palabra_codigo,
                 categoria_beehive: data.categoria_beehive,
                 beehive: data.beehive,
                 spelling_result: data.spelling_result,
                 pronunciation_result: data.pronunciation_result
-
             };
 
             const existingIndex = evaluations.findIndex(
                 evaluation =>
-                    String(evaluation.alumno_id) === String(data.matricula)
+                    String(evaluation.participante_id) === String(data.participante_id) &&
+                    String(evaluation.ronda_id) === String(data.ronda_id)
             );
 
             if (existingIndex !== -1) {
-
                 Object.assign(
                     evaluations[existingIndex],
                     savedEvaluation
                 );
-
+                currentEvaluation = evaluations[existingIndex];
             } else {
-
                 evaluations.push(savedEvaluation);
-
+                currentEvaluation = savedEvaluation;
             }
 
-            currentEvaluation = existingIndex !== -1
-                ? evaluations[existingIndex]
-                : savedEvaluation;
-
             closeModal('evaluationModal');
-
             renderBeehives();
 
             alert('Evaluation saved successfully.');
@@ -714,7 +769,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             console.error('Evaluation save error:', error);
 
-            alert(error.message || 'An error occurred while saving the evaluation.');
+            alert(
+                error.message ||
+                'An error occurred while saving the evaluation.'
+            );
 
         } finally {
 
@@ -878,9 +936,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // INITIALIZATION
 
     initCategorySelector();
-
+    initRoundCategory();
     initParticipantModal();
-
     handleParticipantChange();
-
 });

@@ -144,12 +144,11 @@
 
 {% block extra_js %}
 {{ block.super }}
+{{ ps_words|json_script:"ps-words-data" }}
 <script>
-  var psWords = [
-    'Dragon',
-    'Elephant',
-    'Butterfly'
-  ];
+  var psWords = JSON.parse(
+    document.getElementById('ps-words-data').textContent
+  );
 
   var psMediaRecorder = null;
   var psAudioChunks = [];

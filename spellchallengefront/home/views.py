@@ -7,8 +7,8 @@ from django.views.decorators.cache import never_cache
 from functools import wraps
 from django.db import transaction, IntegrityError
 from django.db.models import Count, Avg, Q, ProtectedError, Prefetch, F, Sum, Max
-from home.models import Usuario, TipoUsuario, Profesor, Alumno, Administrador, Grupo, Palabra, Notificacion, Pista_Boss_Battle
-from home.models import Carrera, Categoria, Alumno_Insignia, Alumno_Practica, Lista_Grupo, Grupo_Alumno, Competencia_Evaluacion
+from home.models import Usuario, TipoUsuario, Profesor, Alumno, Administrador, Grupo, Palabra, Notificacion, Pista_Boss_Battle, Competencia_Participante
+from home.models import Carrera, Categoria, Alumno_Insignia, Alumno_Practica, Lista_Grupo, Grupo_Alumno, Competencia_Evaluacion, Competencia_Ronda
 from home.models import Nivel, Dificultad, Dificultad_Juego, Insignia, Intento_Palabra, Lista, Lista_Palabra, Competencia_Profesor
 from home.models import Proceso_Lista, Rango, Ranking, Reporte, TipoRanking, UsuarioManager, Juego, Practica_Sesion, Competencia_Alumno
 from home.models import Leccion, Lista_Leccion, Competencia, Lista_Competencia, Alumno_Leccion, Grupo_Carrera, Bitacora_Administrador
@@ -1847,6 +1847,17 @@ def transcribe_speaking(request):
                 {'error': 'Invalid or expired spelling session.'},
                 status=400
             )
+            
+        expected_words = request.session.get(
+            'ps_expected_words',
+            []
+        )
+        
+        if len(expected_words) != 3:
+            return JsonResponse(
+                {'error': 'Invalid spelling exercises.'},
+                status=400
+            )
 
     # LESSON SPEAKING
     elif activity_type == 'lesson':
@@ -2266,6 +2277,17 @@ def practices(request):
     
     alumno = request.user.alumno
     
+    available_words = list(
+        Palabra.objects
+        .filter(nivel=alumno.nivel)
+        .values_list('significado', flat=True)
+    )
+    
+    random.shuffle(available_words)
+    
+    spelling_preview_words = available_words[:3]
+    speaking_preview_words = available_words[3:6]
+    
     if request.method == 'POST':
         game = request.POST.get('game')
         round_token = request.POST.get('round_token')
@@ -2479,6 +2501,8 @@ def practices(request):
         'memory_difficulties': memory_difficulties,
         'word_search_vocabulary': word_search_vocabulary,
         'round_tokens': round_tokens,
+        'spelling_preview_words': spelling_preview_words,
+        'speaking_preview_words': speaking_preview_words,
     }
     
     return render(request, 'student/practices.html', context)
@@ -4900,6 +4924,7 @@ def practice_spelling(request):
             )
             
         del request.session['ps_round_token']
+        request.session.pop('ps_expected_words', None)
         
         try:
             errors = int(request.POST.get('errors', 0))
@@ -4940,15 +4965,28 @@ def practice_spelling(request):
             }
         )
         
+    alumno = request.user.alumno
+    
+    ps_words = list(
+        Palabra.objects
+        .filter(nivel=alumno.nivel)
+        .values_list('significado', flat=True)
+    )
+    
+    random.shuffle(ps_words)
+    ps_words = ps_words[:3]
+        
     round_token = secrets.token_urlsafe(32)
     
     request.session['ps_round_token'] = round_token
+    request.session['ps_expected_words'] = ps_words
     
     return render(
         request, 
         'student/practice_spelling.html',
         {
             'round_token': round_token,
+            'ps_words': ps_words,
         }
     )
 
@@ -5112,12 +5150,18 @@ def practice_speaking(request):
             }
         )
         
-    round_token = secrets.token_urlsafe(32)
+    alumno = request.user.alumno
     
-    pk_words = [
-        'Photography', 'Mountain', 'Loyalty', 'Umbrella', 'Journey', 'Kitchen', 'Freedom',
-        'Spotlight', 'Whisper', 'Adventure',
-    ]
+    pk_words = list(
+        Palabra.objects
+        .filter(nivel=alumno.nivel)
+        .values_list('significado', flat=True)
+    )
+    
+    random.shuffle(pk_words)
+    pk_words = pk_words[:10]
+        
+    round_token = secrets.token_urlsafe(32)
     
     request.session['pk_round_token'] = round_token
     request.session['pk_expected_words'] = pk_words
@@ -5505,6 +5549,125 @@ def teacher_competition_management(request, codigo):
         )
         return redirect('teacher_competitions')
     
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        # START ROUND
+        if action == 'start_round':
+            categoria = request.POST.get('categoria_beehive')
+
+            categorias_validas = [
+                'CAT11', 'CAT12', 'CAT13', 'CAT14',
+                'CAT15', 'CAT16', 'CAT17', 'SUDDEN_DEATH'
+            ]
+
+            if categoria not in categorias_validas:
+                messages.error(request, 'Select a valid category.')
+                return redirect('teacher_competition_management', codigo=codigo)
+
+            ronda_activa = Competencia_Ronda.objects.filter(
+                competencia=competition,
+                estado='Active'
+            ).exists()
+
+            if ronda_activa:
+                messages.error(request, 'There is already an active round.')
+                return redirect('teacher_competition_management', codigo=codigo)
+
+            participantes_activos = Competencia_Participante.objects.filter(
+                competencia=competition,
+                estado='Active'
+            ).exists()
+
+            if not participantes_activos:
+                messages.error(request, 'There are no active participants.')
+                return redirect('teacher_competition_management', codigo=codigo)
+
+            ultima_ronda = Competencia_Ronda.objects.filter(
+                competencia=competition
+            ).order_by('-numero_ronda').first()
+
+            siguiente_numero = (
+                ultima_ronda.numero_ronda + 1
+                if ultima_ronda
+                else 1
+            )
+
+            Competencia_Ronda.objects.create(
+                competencia=competition,
+                numero_ronda=siguiente_numero,
+                categoria_beehive=categoria,
+                estado='Active',
+                es_historica=False
+            )
+
+            if competition.estado == 'Upcoming':
+                competition.estado = 'Active'
+                competition.save(update_fields=['estado'])
+
+            messages.success(
+                request,
+                f'Round {siguiente_numero} has started.'
+            )
+            return redirect('teacher_competition_management', codigo=codigo)
+
+        # FINISH ROUND
+        elif action == 'finish_round':
+            ronda_id = request.POST.get('ronda_id')
+
+            ronda = get_object_or_404(
+                Competencia_Ronda,
+                id=ronda_id,
+                competencia=competition,
+                estado='Active'
+            )
+
+            participantes_activos = Competencia_Participante.objects.filter(
+                competencia=competition,
+                estado='Active'
+            )
+
+            evaluaciones_ronda = Competencia_Evaluacion.objects.filter(
+                competencia=competition,
+                ronda=ronda
+            )
+
+            participantes_evaluados = evaluaciones_ronda.values_list(
+                'participante_id',
+                flat=True
+            )
+
+            pendientes = participantes_activos.exclude(
+                id__in=participantes_evaluados
+            )
+
+            if pendientes.exists():
+                messages.error(
+                    request,
+                    'Every active participant must be evaluated before finishing the round.'
+                )
+                return redirect('teacher_competition_management', codigo=codigo)
+
+            for evaluacion in evaluaciones_ronda.select_related('participante'):
+                if (
+                    evaluacion.spelling_result == 'Incorrect'
+                    or evaluacion.pronunciation_result == 'Incorrect'
+                ):
+                    evaluacion.participante.estado = 'Eliminated'
+                    evaluacion.participante.save(update_fields=['estado'])
+                else:
+                    evaluacion.participante.estado = 'Active'
+                    evaluacion.participante.save(update_fields=['estado'])
+
+            ronda.estado = 'Finished'
+            ronda.save(update_fields=['estado'])
+
+            messages.success(
+                request,
+                f'Round {ronda.numero_ronda} has finished.'
+            )
+            return redirect('teacher_competition_management', codigo=codigo)
+    
     #ADD PARTICIPANTS 
     if request.method == 'POST' and request.POST.get('action') == 'add_participants':
         grupo_codigo = request.POST.get('grupo', '').strip()
@@ -5533,14 +5696,25 @@ def teacher_competition_management(request, codigo):
                 'Select at least one valid student.'
             )
         else:
-            for matricula in matriculas_seleccionadas:
-                Competencia_Alumno.objects.get_or_create(
-                    competencia=competition,
-                    alumno_id=matricula,
-                    defaults={
-                        'grupo': grupo_seleccionado
-                    }
-                )
+            with transaction.atomic():
+                
+                for matricula in matriculas_seleccionadas:
+                    Competencia_Alumno.objects.get_or_create(
+                        competencia=competition,
+                        alumno_id=matricula,
+                        defaults={
+                            'grupo': grupo_seleccionado
+                        }
+                    )
+                    
+                    Competencia_Participante.objects.get_or_create(
+                        competencia=competition,
+                        alumno_id=matricula,
+                        defaults={
+                            'tipo': 'Student',
+                            'estado': 'Active'
+                        }
+                    )
                 
             messages.success(
                 request,
@@ -5549,12 +5723,12 @@ def teacher_competition_management(request, codigo):
             
         return redirect('teacher_competition_management', codigo=competition.codigo)
     
-    #PARTICIPANTS
+    #PARTICIPANTS: STUDENTS AND GUESTS
     participaciones = (
-        Competencia_Alumno.objects
+        Competencia_Participante.objects
         .filter(competencia=competition)
         .select_related('alumno', 'alumno__usuario')
-        .order_by('alumno__nombre_pila', 'alumno__apellidoPaterno')
+        .order_by('tipo', 'alumno__nombre_pila', 'nombre_completo')
     )
     
     #AVAILABLE GROUPS
@@ -5594,9 +5768,35 @@ def teacher_competition_management(request, codigo):
         
     #REGISTERED PARTICIPANTS
     participantes_ids = set(
-        Competencia_Alumno.objects
-        .filter(competencia=competition)
+        participaciones
+        .filter(tipo='Student')
         .values_list('alumno_id', flat=True)
+    )
+    
+    #PARTICIPANT DATABASE IDS
+    participante_database_ids = set(
+        participaciones.values_list('id', flat=True)
+    )
+    
+    #COMPETITION ROUNDS
+    rondas = (
+        Competencia_Ronda.objects
+        .filter(competencia=competition)
+        .order_by('numero_ronda')
+    )
+    
+    ronda_activa = rondas.filter(
+        estado='Active'
+    ).first()
+    
+    rondas_data = list(
+        rondas.values(
+            'id',
+            'numero_ronda',
+            'categoria_beehive',
+            'estado',
+            'es_historica'
+        )
     )
     
     #WORD SOURCE
@@ -5689,14 +5889,16 @@ def teacher_competition_management(request, codigo):
     evaluaciones = (
         Competencia_Evaluacion.objects
         .filter(competencia=competition)
-        .select_related('alumno', 'palabra')
-        .order_by('categoria_beehive', 'beehive')
+        .select_related('participante', 'participante__alumno', 'ronda', 'palabra')
+        .order_by('ronda__numero_ronda', 'categoria_beehive', 'beehive')
     )
     
     #EVALUATIONS DATA FOR JAVASCRIPT
     evaluaciones_data = list(
         evaluaciones.values(
             'id',
+            'participante_id',
+            'ronda_id',
             'alumno_id',
             'palabra_id',
             'categoria_beehive',
@@ -5717,6 +5919,10 @@ def teacher_competition_management(request, codigo):
         'grupos_disponibles': grupos_disponibles,
         'alumnos_candidatos': list(alumnos_candidatos.values()),
         'participantes_ids': participantes_ids,
+        'participante_database_ids': participante_database_ids,
+        'rondas': rondas,
+        'rondas_data': json.dumps(rondas_data),
+        'ronda_activa': ronda_activa,
     }
     
     return render(
@@ -5741,7 +5947,8 @@ def save_competition_evaluation(request, codigo):
             'message': 'This competition can no longer be evaluated.'
         }, status=400)
         
-    matricula = request.POST.get('matricula')
+    participante_id = request.POST.get('participante_id')
+    ronda_id = request.POST.get('ronda_id')
     palabra_codigo = request.POST.get('palabra_codigo')
     categoria = request.POST.get('categoria_beehive')
     spelling_result = request.POST.get('spelling_result')
@@ -5749,7 +5956,8 @@ def save_competition_evaluation(request, codigo):
     beehive = request.POST.get('beehive')
     
     if not all([
-        matricula,
+        participante_id,
+        ronda_id,
         palabra_codigo,
         categoria,
         spelling_result,
@@ -5761,42 +5969,67 @@ def save_competition_evaluation(request, codigo):
             'message': 'All evaluation fields are required.'
         }, status=400)
         
-    if spelling_result not in ['Correct', 'Incorrect'] or \
-        pronunciation_result not in ['Correct', 'Incorrect']:
-            return JsonResponse({
-                'success': False,
-                'message': 'Invalid evaluation result.'
-            }, status=400)
+    if (
+        spelling_result not in ['Correct', 'Incorrect']
+        or pronunciation_result not in ['Correct', 'Incorrect']
+    ):
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid evaluation result.'
+        }, status=400)
             
     try:
+        participante_id = int(participante_id)
+        ronda_id = int(ronda_id)
         beehive = int(beehive)
         
-        if beehive < 1:
+        if participante_id < 1 or ronda_id < 1 or beehive < 1:
             raise ValueError
         
     except (ValueError, TypeError):
         return JsonResponse({
             'success': False,
-            'message': 'Invalid Beehive number.'
+            'message': 'Invalid participant, round or Beehive number.'
         }, status=400)
         
-    alumno = get_object_or_404(
-        Alumno,
-        matricula=matricula
+    participante = get_object_or_404(
+        Competencia_Participante,
+        id=participante_id,
+        competencia=competition
     )
     
+    ronda = get_object_or_404(
+        Competencia_Ronda,
+        id=ronda_id,
+        competencia=competition
+    )
+    
+    if ronda.estado != 'Active':
+        return JsonResponse({
+            'success': False,
+            'message': 'Only the active round can be evaluated.'
+        }, status=400)
+        
     palabra = get_object_or_404(
         Palabra,
         codigo=palabra_codigo
     )
     
-    if not Competencia_Alumno.objects.filter(
-        competencia=competition,
-        alumno=alumno
-    ).exists():
+    evaluation = Competencia_Evaluacion.objects.filter(
+        participante=participante,
+        ronda=ronda
+    ).first()
+    
+    if participante.estado != 'Active' and evaluation is None:
         return JsonResponse({
             'success': False,
-            'message': 'This student is not registered in the competition.'
+            'message': 'This participant has been eliminated.'
+        }, status=400)
+        
+    if ronda.categoria_beehive != categoria:
+        return JsonResponse({
+            'success': False,
+            'message': 'The selected category does not match the active round.'
         }, status=400)
         
     es_spelling_bee = False
@@ -5878,79 +6111,130 @@ def save_competition_evaluation(request, codigo):
     try:
         with transaction.atomic():
 
-            # Find the student's existing evaluation, if any.
-            evaluation = Competencia_Evaluacion.objects.select_for_update().filter(
-                competencia=competition,
-                alumno=alumno
-            ).first()
-
-            # A student's existing evaluation must remain in its assigned Beehive.
-            if evaluation and (
-                evaluation.beehive != beehive or
-                evaluation.categoria_beehive != categoria
-            ):
+            participante = (
+                Competencia_Participante.objects
+                .select_for_update()
+                .get(
+                    id=participante_id,
+                    competencia=competition
+                )
+            )
+            
+            ronda = (
+                Competencia_Ronda.objects
+                .select_for_update()
+                .get(
+                    id=ronda_id,
+                    competencia=competition
+                )
+            )
+            
+            if ronda.estado != 'Active':
                 return JsonResponse({
                     'success': False,
-                    'message': 'This student already has an evaluation in another Beehive.'
-                }, status=409)
-
-            # Prevent assigning a Beehive already occupied by another student.
-            occupied_beehive = Competencia_Evaluacion.objects.select_for_update().filter(
+                    'message': 'Only the active round can be evaluated.'
+                }, status=400)
+                
+            evaluation = (
+                Competencia_Evaluacion.objects
+                .select_for_update()
+                .filter(
+                    participante=participante,
+                    ronda=ronda
+                )
+                .first()
+            )
+            
+            if participante.estado != 'Active' and evaluation is None:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'This participant has been eliminated.'
+                }, status=400)
+                
+            if evaluation and evaluation.beehive != beehive:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'This participant already has an evaluation in another Beehive in this round.'
+                }, status=400)
+                
+            occupied_beehive = Competencia_Evaluacion.objects.filter(
                 competencia=competition,
                 categoria_beehive=categoria,
                 beehive=beehive
-            ).exclude(alumno=alumno).exists()
-
-            if occupied_beehive:
+            ).exists()
+            
+            same_existing_evaluation = (
+                evaluation is not None
+                and evaluation.ronda_id == ronda.id
+                and evaluation.categoria_beehive == categoria
+                and evaluation.beehive == beehive
+            )
+            
+            if occupied_beehive and not same_existing_evaluation:
                 return JsonResponse({
                     'success': False,
-                    'message': 'This Beehive is already assigned to another student.'
-                }, status=409)
-
-            # Prevent reusing a word within the same competition and category.
-            repeated_word = Competencia_Evaluacion.objects.filter(
-                competencia=competition,
-                categoria_beehive=categoria,
-                palabra=palabra
-            ).exclude(alumno=alumno).exists()
-
+                    'message': 'This Beehive is already assigned in this round.'
+                }, status=400)
+                
+            repeated_word = (
+                Competencia_Evaluacion.objects
+                .filter(ronda=ronda, palabra=palabra)
+                .exclude(participante=participante)
+                .exists()
+            )
+            
             if repeated_word:
                 return JsonResponse({
                     'success': False,
-                    'message': 'This word has already been assigned in this competition.'
-                }, status=409)
-
+                    'message': 'This word has already been assigned in this round.'
+                }, status=400)
+                
             if evaluation is None:
                 evaluation = Competencia_Evaluacion(
                     competencia=competition,
-                    alumno=alumno,
+                    participante=participante,
+                    ronda=ronda,
+                    alumno=participante.alumno,
                     beehive=beehive,
                     categoria_beehive=categoria
                 )
-
+                
             evaluation.palabra = palabra
             evaluation.spelling_result = spelling_result
             evaluation.pronunciation_result = pronunciation_result
             evaluation.evaluado_por = request.user.profesor
             evaluation.save()
-
-        return JsonResponse({
-            'success': True,
-            'message': 'Evaluation saved successfully.',
-            'evaluation_id': evaluation.id,
-            'matricula': alumno.matricula,
-            'palabra_codigo': palabra.codigo,
-            'beehive': evaluation.beehive,
-            'categoria_beehive': evaluation.categoria_beehive,
-            'spelling_result': evaluation.spelling_result,
-            'pronunciation_result': evaluation.pronunciation_result
-        })
+            
+            if (
+                spelling_result == 'Incorrect'
+                or pronunciation_result == 'Incorrect'
+            ):
+                participante.estado = 'Eliminated'
+            else:
+                participante.estado = 'Active'
+                
+            participante.save(update_fields=['estado'])
 
     except IntegrityError:
         return JsonResponse({
             'success': False,
             'message': 'The evaluation conflicts with an existing assignment. Please refresh and try again.'
         }, status=409)
+        
+    return JsonResponse({
+        'success': True,
+        'message': 'Evaluation saved successfully.',
+        'evaluation_id': evaluation.id,
+        'participante_id': participante.id,
+        'ronda_id': ronda.id,
+        'alumno_id': participante.alumno_id,
+        'palabra_codigo': palabra.codigo,
+        'beehive': evaluation.beehive,
+        'categoria_beehive': evaluation.categoria_beehive,
+        'spelling_result': evaluation.spelling_result,
+        'pronunciation_result': evaluation.pronunciation_result,
+        'estado_participante': participante.estado
+    })
 
 @never_cache
 @role_required('teacher')
