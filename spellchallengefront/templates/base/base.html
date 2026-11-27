@@ -228,6 +228,7 @@
               delete el.dataset.mediaUploadBtn;
               delete el.dataset.importPreviewPill;
               delete el.dataset.importStatusCell;
+              delete el.dataset.statsChartBar;
 
               if (el.matches('main button, main a') && /^(CAREERS|GROUPS|LEVELS)$/i.test((el.textContent || '').trim())) {
                 el.style.removeProperty('background');
@@ -1492,6 +1493,28 @@
                 applyPillStyle(el, 'incomplete', true);
               } else if (/^(Error|Invalid)$/i.test(txt)) {
                 applyPillStyle(el, 'error', true);
+              }
+            });
+          })();
+
+          // 4q. Vista /statistics/: barras sólidas de "Competitions Over Time"
+          (function styleStatisticsChartBars() {
+            const mainEl = document.querySelector('main');
+            if (!mainEl || !window.location.pathname.includes('/statistics')) return;
+
+            mainEl.querySelectorAll('.bar').forEach(bar => {
+              saveOrigStyle(bar);
+              bar.dataset.statsChartBar = '1';
+
+              if (bar.offsetHeight > 4) {
+                bar.style.setProperty('background', '#7c1d28', 'important');
+                bar.style.setProperty('background-color', '#7c1d28', 'important');
+                bar.style.setProperty('border', 'none', 'important');
+                bar.style.setProperty('border-radius', '4px 4px 0 0', 'important');
+              } else {
+                bar.style.setProperty('background', 'transparent', 'important');
+                bar.style.setProperty('background-color', 'transparent', 'important');
+                bar.style.setProperty('border', 'none', 'important');
               }
             });
           })();

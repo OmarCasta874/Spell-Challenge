@@ -2412,3 +2412,14 @@ html[data-theme="dark"] [data-word-list-outer-wrapper="1"] {
   border-radius: 0 !important;
   box-shadow: none !important;
 }
+
+[data-theme="dark"] .card *:not(a):not(button):not([class*="badge"]):not([class*="status"]):not([class*="pill"]):not(.bar),
+[data-theme="dark"] [class*="-card"]:not(.creator-card):not([class*="memory"]):not([class*="flip"]):not([class*="mg-"]):not([class*="match"]):not(:has([class*="front"])):not(:has([class*="back"])) *:not(a):not(button):not([class*="badge"]):not([class*="status"]):not([class*="pill"]):not(.bar) {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .bar {
+  border: none !important;
+  border-radius: 4px 4px 0 0 !important;
+}
