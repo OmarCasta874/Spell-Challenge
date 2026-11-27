@@ -2330,3 +2330,85 @@ html[data-theme="dark"] body main [data-comp-hex-tile="1"]:not(#a#b#c#d#e#f#g#h#
   color: #111827 !important;
   -webkit-text-fill-color: #111827 !important;
 }
+
+/* =========================================================
+   PÍLDORAS DE CONTEO EN WORD LISTS ("X words", "Y letters")
+   ========================================================= */
+
+html[data-theme="dark"] body main [data-wordlist-meta-pill="1"]:not(#a#b#c#d#e#f#g#h#i#j#k#l) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(224, 90, 109, 0.16) !important;
+  background-color: rgba(224, 90, 109, 0.16) !important;
+  color: #fda4af !important;
+  border: 1px solid rgba(224, 90, 109, 0.35) !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+}
+
+/* =========================================================
+   MODAL IMPORT EXCEL (ADAPTACIÓN FIEL DE MODO CLARO A OSCURO)
+   ========================================================= */
+
+html[data-theme="dark"] [data-import-excel-modal="1"]:not(#a#b#c) {
+  background: #181b24 !important;
+  background-color: #181b24 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75) !important;
+}
+
+html[data-theme="dark"] [data-import-excel-modal="1"] [data-import-dropzone="1"]:hover {
+  background: rgba(224, 90, 109, 0.14) !important;
+  border-color: #e05a6d !important;
+}
+
+html[data-theme="dark"] [data-import-excel-modal="1"] [data-import-choose-btn="1"]:hover {
+  background: rgba(224, 90, 109, 0.22) !important;
+  border-color: #fda4af !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] [data-import-excel-modal="1"] [data-import-cancel-btn="1"]:hover {
+  background: rgba(224, 90, 109, 0.28) !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] [data-import-excel-modal="1"] [data-import-submit-btn="1"]:hover {
+  background: #2b3042 !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] body [data-import-excel-modal="1"] [data-import-inner-wrapper="1"]:not(#a#b#c) {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+html[data-theme="dark"] [data-import-excel-modal="1"] [data-import-inner-wrapper="1"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html[data-theme="dark"] [data-import-excel-modal="1"] [data-import-inner-wrapper="1"]::before,
+html[data-theme="dark"] [data-import-excel-modal="1"] [data-import-inner-wrapper="1"]::after {
+  display: none !important;
+  content: none !important;
+}
+
+html[data-theme="dark"] [data-word-list-outer-wrapper="1"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}

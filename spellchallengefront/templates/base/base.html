@@ -75,10 +75,16 @@
       }
 
       function saveOrigStyle(el) {
-        if (!el.dataset.darkFixed) {
-          el.dataset.origStyle = el.getAttribute('style') || '';
-          el.dataset.darkFixed = '1';
-        }
+        if (!el || el.dataset.origStyleSaved === '1') return;
+        const rawStyle = el.getAttribute('style') || '';
+        // Nunca guardar display/visibility/opacity para no cerrar modales abiertos al volver a modo claro
+        const safeStyle = rawStyle
+          .split(';')
+          .map(s => s.trim())
+          .filter(s => s && !/^(display|visibility|opacity|pointer-events)\s*:/i.test(s))
+          .join('; ');
+        el.dataset.origStyle = safeStyle;
+        el.dataset.origStyleSaved = '1';
       }
 
       function isInsideMiniGame(el) {
@@ -119,13 +125,24 @@
 
           if (!isDark) {
             document.querySelectorAll('[data-injected-close="1"]').forEach(el => el.remove());
-            document.querySelectorAll('[data-dark-fixed]').forEach(el => {
+            document.querySelectorAll('[data-orig-style-saved="1"], [data-dark-fixed]').forEach(el => {
+              const currentDisplay = el.style.display;
+              const currentVisibility = el.style.visibility;
+              const currentOpacity = el.style.opacity;
+
               if (el.dataset.origStyle) {
                 el.setAttribute('style', el.dataset.origStyle);
               } else {
                 el.removeAttribute('style');
               }
+
+              // Preservar si el modal o dropdown estaba abierto al cambiar de tema
+              if (currentDisplay) el.style.display = currentDisplay;
+              if (currentVisibility) el.style.visibility = currentVisibility;
+              if (currentOpacity) el.style.opacity = currentOpacity;
+
               delete el.dataset.origStyle;
+              delete el.dataset.origStyleSaved;
               delete el.dataset.darkFixed;
               delete el.dataset.breakCard;
               delete el.dataset.breakTimer;
@@ -191,11 +208,27 @@
               delete el.dataset.adminAcademyTab;
               delete el.dataset.adminBackupCard;
               delete el.dataset.adminBackupTypePill;
-              delete el.dataset.darkAlert;
               delete el.dataset.compControlCard;
               delete el.dataset.compRoundBadge;
               delete el.dataset.compRoundActionBtn;
               delete el.dataset.compHexTile;
+              delete el.dataset.wordlistMetaPill;
+              delete el.dataset.importExcelModal;
+              delete el.dataset.importDropzone;
+              delete el.dataset.importChooseBtn;
+              delete el.dataset.importNoticeBox;
+              delete el.dataset.importCloseBtn;
+              delete el.dataset.importCancelBtn;
+              delete el.dataset.importSubmitBtn;
+              delete el.dataset.importInnerWrapper;
+              delete el.dataset.wordListOuterWrapper;
+              delete el.dataset.mediaStatusPill;
+              delete el.dataset.mediaLevelPill;
+              delete el.dataset.mediaBtnWrapper;
+              delete el.dataset.mediaUploadBtn;
+              delete el.dataset.importPreviewPill;
+              delete el.dataset.importStatusCell;
+
               if (el.matches('main button, main a') && /^(CAREERS|GROUPS|LEVELS)$/i.test((el.textContent || '').trim())) {
                 el.style.removeProperty('background');
                 el.style.removeProperty('background-color');
@@ -216,7 +249,7 @@
 
           document.querySelectorAll('div, section, article, aside, header, p, span, h1, h2, h3, h4, h5, h6, strong, label, td, th, a, button').forEach(el => {
             if (
-              el.closest('.navbar, header.navbar, #theme-toggle, .theme-toggle, [data-theme-toggle], [data-theme-fab="1"], .creator-card, [data-profile-confirm-modal="1"], [data-dash-track="1"], [data-wordlist-option="1"], [data-table-view-btn="1"], [data-home-stat="1"], [data-comp-actions="1"], [data-comp-manage-btn="1"], [data-teacher-profile-card="1"], [data-comp-status], [data-crop-modal="1"], [data-dark-alert], [data-admin-pie="1"], [data-admin-legend], [data-admin-legend-pseudo], [data-admin-level-box="1"], [data-admin-bar-track="1"], [data-admin-word-row="1"], [data-admin-avg-pill="1"], [data-admin-status-pill], [data-admin-group-badge="1"], [data-admin-role-pill], [data-admin-level-pill="1"], [data-admin-academy-card="1"], [data-admin-card-grid-wrap="1"], [data-admin-academy-tab], [data-admin-backup-card="1"], [data-admin-backup-type-pill], [data-comp-control-card="1"], [data-comp-round-badge="1"], [data-comp-round-action-btn="1"], [data-comp-hex-tile="1"]') ||
+              el.closest('.navbar, header.navbar, #theme-toggle, .theme-toggle, [data-theme-toggle], [data-theme-fab="1"], .creator-card, [data-profile-confirm-modal="1"], [data-dash-track="1"], [data-wordlist-option="1"], [data-table-view-btn="1"], [data-home-stat="1"], [data-comp-actions="1"], [data-comp-manage-btn="1"], [data-teacher-profile-card="1"], [data-comp-status], [data-crop-modal="1"], [data-dark-alert], [data-admin-pie="1"], [data-admin-legend], [data-admin-legend-pseudo], [data-admin-level-box="1"], [data-admin-bar-track="1"], [data-admin-word-row="1"], [data-admin-avg-pill="1"], [data-admin-status-pill], [data-admin-group-badge="1"], [data-admin-role-pill], [data-admin-level-pill="1"], [data-admin-academy-card="1"], [data-admin-card-grid-wrap="1"], [data-admin-academy-tab], [data-admin-backup-card="1"], [data-admin-backup-type-pill], [data-comp-control-card="1"], [data-comp-round-badge="1"], [data-comp-round-action-btn="1"], [data-comp-hex-tile="1"], [data-wordlist-meta-pill="1"], [data-import-excel-modal="1"]') ||
               (el.matches('main button, main a') && /^(CAREERS|GROUPS|LEVELS)$/i.test((el.textContent || '').trim())) ||
               el.dataset.dashFill === '1' ||
               el.dataset.adminBarFill === '1' ||
@@ -1088,6 +1121,381 @@
             });
           })();
 
+          // 4l. Vista /word_lists/: píldoras de cantidad de palabras y letras ("X words", "Y letters")
+          (function styleWordListMetaPills() {
+            const mainEl = document.querySelector('main');
+            if (!mainEl) return;
+
+            mainEl.querySelectorAll('span, div, p, small').forEach(el => {
+              if (el.closest('.navbar, header.navbar, button, a') || el.children.length > 0) return;
+              const txt = (el.textContent || '').trim();
+              if (!/^\d+\s+(word|words|letter|letters)$/i.test(txt)) return;
+
+              saveOrigStyle(el);
+              el.dataset.wordlistMetaPill = '1';
+              el.style.setProperty('display', 'inline-flex', 'important');
+              el.style.setProperty('align-items', 'center', 'important');
+              el.style.setProperty('justify-content', 'center', 'important');
+              el.style.setProperty('background', 'rgba(224, 90, 109, 0.16)', 'important');
+              el.style.setProperty('background-color', 'rgba(224, 90, 109, 0.16)', 'important');
+              el.style.setProperty('color', '#fda4af', 'important');
+              el.style.setProperty('border', '1px solid rgba(224, 90, 109, 0.35)', 'important');
+              el.style.setProperty('border-radius', '999px', 'important');
+              el.style.setProperty('font-weight', '700', 'important');
+            });
+          })();
+
+          // 4m. Modal "IMPORT EXCEL" dentro de una Word List (adaptación fiel del modo claro)
+          function styleImportExcelModal() {
+            if (document.documentElement.getAttribute('data-theme') !== 'dark') return;
+
+            const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, div, span')).filter(el => {
+              return el.children.length === 0 && /^IMPORT EXCEL$/i.test((el.textContent || '').trim());
+            });
+
+            headings.forEach(h => {
+              // Subir hasta el contenedor completo del modal (justo antes del backdrop fixed)
+              let modalCard = h.parentElement;
+              let candidate = null;
+
+              while (modalCard && modalCard !== document.body) {
+                const txt = modalCard.textContent || '';
+                const style = window.getComputedStyle(modalCard);
+                if (style.position === 'fixed' && (modalCard.offsetWidth >= window.innerWidth * 0.9)) {
+                  break; // Llegamos al overlay oscuro de pantalla completa
+                }
+                if (txt.includes('IMPORT EXCEL') && txt.includes('Upload & Preview')) {
+                  candidate = modalCard;
+                }
+                modalCard = modalCard.parentElement;
+              }
+
+              if (!candidate) return;
+              modalCard = candidate;
+
+              saveOrigStyle(modalCard);
+              modalCard.dataset.importExcelModal = '1';
+              modalCard.style.setProperty('background', '#181b24', 'important');
+              modalCard.style.setProperty('background-color', '#181b24', 'important');
+              modalCard.style.setProperty('border', '1px solid rgba(255, 255, 255, 0.1)', 'important');
+              modalCard.style.setProperty('border-radius', '20px', 'important');
+              modalCard.style.setProperty('box-shadow', '0 24px 60px rgba(0, 0, 0, 0.75)', 'important');
+
+              // 1. Botón cerrar (X) arriba a la derecha
+              modalCard.querySelectorAll('button').forEach(btn => {
+                const txt = (btn.textContent || '').trim();
+                if (txt === '×' || txt === '✕' || txt === 'X' || (txt === '' && btn.querySelector('svg') && btn.offsetWidth <= 48)) {
+                  saveOrigStyle(btn);
+                  btn.dataset.importCloseBtn = '1';
+                  btn.style.setProperty('background', '#222634', 'important');
+                  btn.style.setProperty('background-color', '#222634', 'important');
+                  btn.style.setProperty('border', '1px solid rgba(255, 255, 255, 0.14)', 'important');
+                  btn.style.setProperty('border-radius', '10px', 'important');
+                  btn.style.setProperty('color', '#e2e8f0', 'important');
+                }
+              });
+
+              // 2. Zona Drag & Drop con borde punteado guinda
+              modalCard.querySelectorAll('div, label').forEach(box => {
+                const txt = box.textContent || '';
+                if (
+                  txt.includes('Drag & Drop your Excel File') &&
+                  txt.includes('CHOOSE EXCEL FILE') &&
+                  !txt.includes('Important:')
+                ) {
+                  const hasInnerMatch = Array.from(box.querySelectorAll('div, label')).some(child => {
+                    const cTxt = child.textContent || '';
+                    return cTxt.includes('Drag & Drop your Excel File') && cTxt.includes('CHOOSE EXCEL FILE');
+                  });
+                  if (!hasInnerMatch) {
+                    saveOrigStyle(box);
+                    box.dataset.importDropzone = '1';
+                    box.style.setProperty('background', 'rgba(224, 90, 109, 0.08)', 'important');
+                    box.style.setProperty('background-color', 'rgba(224, 90, 109, 0.08)', 'important');
+                    box.style.setProperty('border', '2px dashed rgba(224, 90, 109, 0.55)', 'important');
+                    box.style.setProperty('border-radius', '16px', 'important');
+                  }
+                }
+              });
+
+              // 3. Botón píldora "+ CHOOSE EXCEL FILE"
+              modalCard.querySelectorAll('button, label, span, a, div').forEach(btn => {
+                if (btn.children.length > 1) return;
+                if (/^\+?\s*CHOOSE EXCEL FILE$/i.test((btn.textContent || '').trim())) {
+                  saveOrigStyle(btn);
+                  btn.dataset.importChooseBtn = '1';
+                  btn.style.setProperty('display', 'inline-flex', 'important');
+                  btn.style.setProperty('align-items', 'center', 'important');
+                  btn.style.setProperty('justify-content', 'center', 'important');
+                  btn.style.setProperty('background', '#232734', 'important');
+                  btn.style.setProperty('background-color', '#232734', 'important');
+                  btn.style.setProperty('color', '#fda4af', 'important');
+                  btn.style.setProperty('border', '1.5px solid rgba(224, 90, 109, 0.65)', 'important');
+                  btn.style.setProperty('border-radius', '999px', 'important');
+                  btn.style.setProperty('padding', '0.55rem 1.35rem', 'important');
+                  btn.style.setProperty('font-weight', '700', 'important');
+                }
+              });
+
+              // 4. Tarjeta de aviso "Important:" con borde izquierdo grueso
+              modalCard.querySelectorAll('div, p').forEach(notice => {
+                const txt = (notice.textContent || '').trim();
+                if (txt.startsWith('Important:') && txt.includes('preview step before saving')) {
+                  const targetBox = (notice.tagName === 'P' && notice.parentElement && (notice.parentElement.textContent || '').trim() === txt)
+                    ? notice.parentElement
+                    : notice;
+                  saveOrigStyle(targetBox);
+                  targetBox.dataset.importNoticeBox = '1';
+                  targetBox.style.setProperty('background', 'rgba(224, 90, 109, 0.11)', 'important');
+                  targetBox.style.setProperty('background-color', 'rgba(224, 90, 109, 0.11)', 'important');
+                  targetBox.style.setProperty('border', '1px solid rgba(224, 90, 109, 0.22)', 'important');
+                  targetBox.style.setProperty('border-left', '4px solid #e05a6d', 'important');
+                  targetBox.style.setProperty('border-radius', '12px', 'important');
+                  targetBox.style.setProperty('padding', '0.9rem 1.1rem', 'important');
+                  targetBox.style.setProperty('color', '#e2e8f0', 'important');
+                }
+              });
+
+              // 5. Select "Default English Level"
+              modalCard.querySelectorAll('select').forEach(sel => {
+                saveOrigStyle(sel);
+                sel.style.setProperty('background', '#12151e', 'important');
+                sel.style.setProperty('background-color', '#12151e', 'important');
+                sel.style.setProperty('border', '1px solid rgba(255, 255, 255, 0.16)', 'important');
+                sel.style.setProperty('border-radius', '10px', 'important');
+                sel.style.setProperty('color', '#f1f5f9', 'important');
+              });
+
+              // 6. Botones "Cancel" y "Upload & Preview"
+              modalCard.querySelectorAll('button, a').forEach(btn => {
+                const txt = (btn.textContent || '').trim();
+                if (/^Cancel$/i.test(txt)) {
+                  saveOrigStyle(btn);
+                  btn.dataset.importCancelBtn = '1';
+                  btn.style.setProperty('background', 'rgba(224, 90, 109, 0.18)', 'important');
+                  btn.style.setProperty('background-color', 'rgba(224, 90, 109, 0.18)', 'important');
+                  btn.style.setProperty('color', '#fda4af', 'important');
+                  btn.style.setProperty('border', '1px solid rgba(224, 90, 109, 0.35)', 'important');
+                  btn.style.setProperty('border-radius', '12px', 'important');
+                } else if (/^Upload & Preview$/i.test(txt)) {
+                  saveOrigStyle(btn);
+                  btn.dataset.importSubmitBtn = '1';
+                  btn.style.setProperty('background', '#222634', 'important');
+                  btn.style.setProperty('background-color', '#222634', 'important');
+                  btn.style.setProperty('color', '#cbd5e1', 'important');
+                  btn.style.setProperty('border', '1px solid rgba(255, 255, 255, 0.18)', 'important');
+                  btn.style.setProperty('border-radius', '12px', 'important');
+                }
+              });
+
+              // 7. Quitar el cuadro contenedor sombreado intermedio sin alterar sus hijos ni posiciones
+              const dropzoneEl = modalCard.querySelector('[data-import-dropzone="1"]');
+              let parent = dropzoneEl ? dropzoneEl.parentElement : null;
+              while (parent && parent !== modalCard) {
+                if (
+                  parent.dataset.importDropzone !== '1' &&
+                  parent.dataset.importNoticeBox !== '1' &&
+                  parent.dataset.importChooseBtn !== '1'
+                ) {
+                  saveOrigStyle(parent);
+                  parent.dataset.importInnerWrapper = '1';
+                  parent.style.setProperty('background', 'transparent', 'important');
+                  parent.style.setProperty('background-color', 'transparent', 'important');
+                  parent.style.setProperty('background-image', 'none', 'important');
+                  parent.style.setProperty('border', 'none', 'important');
+                  parent.style.setProperty('box-shadow', 'none', 'important');
+                  parent.style.setProperty('backdrop-filter', 'none', 'important');
+                }
+                parent = parent.parentElement;
+              }
+            });
+          }
+          styleImportExcelModal();
+
+          // 4n. Quitar el fondo y bordes redondeados del contenedor principal dentro de una Word List
+          function flattenWordListWrapper() {
+            if (document.documentElement.getAttribute('data-theme') !== 'dark') return;
+            if (!window.location.pathname.includes('/word_lists/')) return;
+
+            const backBtn = Array.from(document.querySelectorAll('a, button')).find(el =>
+              /BACK TO WORD LISTS/i.test((el.textContent || '').trim())
+            );
+            if (!backBtn) return;
+
+            let parent = backBtn.parentElement;
+            while (parent && parent !== document.body) {
+              const txt = parent.textContent || '';
+              if (txt.includes('BACK TO WORD LISTS') && txt.includes('Vocabulary Collection')) {
+                saveOrigStyle(parent);
+                parent.dataset.wordListOuterWrapper = '1';
+                parent.style.setProperty('background', 'transparent', 'important');
+                parent.style.setProperty('background-color', 'transparent', 'important');
+                parent.style.setProperty('background-image', 'none', 'important');
+                parent.style.setProperty('border', 'none', 'important');
+                parent.style.setProperty('border-radius', '0px', 'important');
+                parent.style.setProperty('box-shadow', 'none', 'important');
+              }
+              parent = parent.parentElement;
+            }
+          }
+          flattenWordListWrapper();
+
+          // 4o. Vista /word_lists/.../media/: píldoras de estado, insignias de nivel, contenedor y botón "Upload from device"
+          (function styleWordListMediaBadges() {
+            const mainEl = document.querySelector('main');
+            if (!mainEl || !window.location.pathname.includes('/media')) return;
+
+            // 1. Quitar solo la franja sombreada externa que agrupa ambos botones (sin tocar los botones)
+            mainEl.querySelectorAll('div, section, footer').forEach(wrap => {
+              if (wrap.closest('.navbar, header.navbar')) return;
+              const txt = wrap.textContent || '';
+              if (
+                txt.includes('Replace (Pixabay)') &&
+                txt.includes('Upload from device') &&
+                !txt.includes('AUDIO (MP3 SAVED)') &&
+                !wrap.querySelector('h1, h2, h3, h4, img, audio') &&
+                wrap.children.length >= 2
+              ) {
+                saveOrigStyle(wrap);
+                wrap.dataset.mediaBtnWrapper = '1';
+                wrap.style.setProperty('background', 'transparent', 'important');
+                wrap.style.setProperty('background-color', 'transparent', 'important');
+                wrap.style.setProperty('background-image', 'none', 'important');
+                wrap.style.setProperty('border', 'none', 'important');
+                wrap.style.setProperty('box-shadow', 'none', 'important');
+              }
+            });
+
+            // 2. Mantener siempre el borde, fondo y texto blanco del botón/label "Upload from device"
+            mainEl.querySelectorAll('label, button, a, span, div').forEach(btn => {
+              if (btn.closest('.navbar, header.navbar')) return;
+              if (!/^Upload from device$/i.test((btn.textContent || '').trim())) return;
+              if (btn.querySelector('div, section, p')) return;
+
+              saveOrigStyle(btn);
+              btn.dataset.mediaUploadBtn = '1';
+              btn.style.setProperty('display', 'inline-flex', 'important');
+              btn.style.setProperty('align-items', 'center', 'important');
+              btn.style.setProperty('justify-content', 'center', 'important');
+              btn.style.setProperty('background', '#18181f', 'important');
+              btn.style.setProperty('background-color', '#18181f', 'important');
+              btn.style.setProperty('color', '#f1f5f9', 'important');
+              btn.style.setProperty('border', '1px solid rgba(226, 232, 240, 0.55)', 'important');
+              btn.style.setProperty('border-radius', '10px', 'important');
+              btn.style.setProperty('font-weight', '600', 'important');
+              btn.style.setProperty('cursor', 'pointer', 'important');
+            });
+
+            // 3. Píldoras de estado e insignias de nivel CEFR
+            mainEl.querySelectorAll('span, div, p, small, badge').forEach(el => {
+              if (el.closest('.navbar, header.navbar, button, a, label') || el.children.length > 0) return;
+              const txt = (el.textContent || '').trim();
+
+              const missingMatch = txt.match(/^(\d+)\s+missing\s+(images?|mp3)$/i);
+              if (missingMatch) {
+                const count = parseInt(missingMatch[1], 10);
+                const isZero = count === 0;
+                saveOrigStyle(el);
+                el.dataset.mediaStatusPill = isZero ? 'ok' : 'pending';
+                el.style.setProperty('display', 'inline-flex', 'important');
+                el.style.setProperty('align-items', 'center', 'important');
+                el.style.setProperty('justify-content', 'center', 'important');
+                el.style.setProperty('background', isZero ? 'rgba(34, 197, 94, 0.16)' : 'rgba(245, 158, 11, 0.16)', 'important');
+                el.style.setProperty('background-color', isZero ? 'rgba(34, 197, 94, 0.16)' : 'rgba(245, 158, 11, 0.16)', 'important');
+                el.style.setProperty('color', isZero ? '#4ade80' : '#fbbf24', 'important');
+                el.style.setProperty('border', `1px solid ${isZero ? 'rgba(74, 222, 128, 0.35)' : 'rgba(251, 191, 36, 0.38)'}`, 'important');
+                el.style.setProperty('border-radius', '999px', 'important');
+                el.style.setProperty('font-weight', '700', 'important');
+                return;
+              }
+
+              if (/^(A1|A2|B1|B2|C1|C2)$/i.test(txt)) {
+                saveOrigStyle(el);
+                el.dataset.mediaLevelPill = '1';
+                el.style.setProperty('display', 'inline-flex', 'important');
+                el.style.setProperty('align-items', 'center', 'important');
+                el.style.setProperty('justify-content', 'center', 'important');
+                el.style.setProperty('background', 'rgba(245, 158, 11, 0.16)', 'important');
+                el.style.setProperty('background-color', 'rgba(245, 158, 11, 0.16)', 'important');
+                el.style.setProperty('color', '#fde68a', 'important');
+                el.style.setProperty('border', '1px solid rgba(245, 158, 11, 0.42)', 'important');
+                el.style.setProperty('border-radius', '999px', 'important');
+                el.style.setProperty('font-weight', '700', 'important');
+              }
+            });
+          })();
+
+          // 4p. Vista /word_lists/.../import/ (IMPORT PREVIEW): píldoras de conteo, columna STATUS y celda transparente
+          (function styleImportPreviewBadges() {
+            const mainEl = document.querySelector('main');
+            if (!mainEl || !window.location.pathname.includes('/import')) return;
+
+            const palettes = {
+              total:      { bg: 'rgba(224, 90, 109, 0.16)', color: '#fda4af', border: 'rgba(224, 90, 109, 0.38)' },
+              ready:      { bg: 'rgba(34, 197, 94, 0.16)',  color: '#4ade80', border: 'rgba(74, 222, 128, 0.35)' },
+              incomplete: { bg: 'rgba(245, 158, 11, 0.16)', color: '#fbbf24', border: 'rgba(251, 191, 36, 0.38)' },
+              error:      { bg: 'rgba(239, 68, 68, 0.16)',  color: '#f87171', border: 'rgba(248, 113, 113, 0.38)' }
+            };
+
+            const clearStatusCellBg = (pillEl) => {
+              let parent = pillEl.parentElement;
+              while (parent && parent !== mainEl && parent.tagName !== 'TR') {
+                if (parent.dataset.importPreviewPill === undefined) {
+                  saveOrigStyle(parent);
+                  parent.dataset.importStatusCell = '1';
+                  parent.style.setProperty('background', 'transparent', 'important');
+                  parent.style.setProperty('background-color', 'transparent', 'important');
+                  parent.style.setProperty('background-image', 'none', 'important');
+                  parent.style.setProperty('box-shadow', 'none', 'important');
+                }
+                parent = parent.parentElement;
+              }
+            };
+
+            const applyPillStyle = (el, key, isTableStatus = false) => {
+              const p = palettes[key];
+              if (!p) return;
+              saveOrigStyle(el);
+              el.dataset.importPreviewPill = key;
+              el.style.setProperty('display', 'inline-flex', 'important');
+              el.style.setProperty('align-items', 'center', 'important');
+              el.style.setProperty('justify-content', 'center', 'important');
+              el.style.setProperty('background', p.bg, 'important');
+              el.style.setProperty('background-color', p.bg, 'important');
+              el.style.setProperty('color', p.color, 'important');
+              el.style.setProperty('border', `1px solid ${p.border}`, 'important');
+              el.style.setProperty('border-radius', '999px', 'important');
+              el.style.setProperty('font-weight', '700', 'important');
+
+              if (isTableStatus) {
+                clearStatusCellBg(el);
+              }
+            };
+
+            mainEl.querySelectorAll('span, div, p, small, badge').forEach(el => {
+              if (el.closest('.navbar, header.navbar, button, a') || el.children.length > 0) return;
+              const txt = (el.textContent || '').trim();
+
+              // 1. Píldoras superiores: "20 total", "20 ready", "0 incomplete", "0 errors"
+              const countMatch = txt.match(/^\d+\s+(total|ready|incomplete|errors?)$/i);
+              if (countMatch) {
+                const rawType = countMatch[1].toLowerCase();
+                const key = rawType.startsWith('error') ? 'error' : rawType;
+                applyPillStyle(el, key, false);
+                return;
+              }
+
+              // 2. Insignias de la columna STATUS en la tabla: "Ready", "Incomplete", "Error" / "Invalid"
+              if (/^Ready$/i.test(txt)) {
+                applyPillStyle(el, 'ready', true);
+              } else if (/^Incomplete$/i.test(txt)) {
+                applyPillStyle(el, 'incomplete', true);
+              } else if (/^(Error|Invalid)$/i.test(txt)) {
+                applyPillStyle(el, 'error', true);
+              }
+            });
+          })();
+
           // 5. Limpieza específica para el interior de las tarjetas de Competitions y títulos de sección
           document.querySelectorAll('.competition-card-body, .competition-card-body *').forEach(el => {
             saveOrigStyle(el);
@@ -1497,8 +1905,8 @@
           document.querySelectorAll('div, section, dialog').forEach(overlay => {
             if (
               overlay.id === 'themeToggleBtn' ||
-              overlay.closest('.navbar, header.navbar, [data-boss-modal="1"], [data-memory-modal="1"], [data-notif-modal="1"]') ||
-              overlay.querySelector('[data-boss-modal="1"], [data-memory-modal="1"], [data-notif-modal="1"]')
+              overlay.closest('.navbar, header.navbar, [data-boss-modal="1"], [data-memory-modal="1"], [data-notif-modal="1"], [data-import-excel-modal="1"]') ||
+              overlay.querySelector('[data-boss-modal="1"], [data-memory-modal="1"], [data-notif-modal="1"], [data-import-excel-modal="1"], [data-word-list-outer-wrapper="1"]')
             ) return;
 
             const st = getComputedStyle(overlay);
