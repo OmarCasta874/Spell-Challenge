@@ -581,3 +581,47 @@
         margin-top: -12px;
     }
 }
+
+/* FIX RESPONSIVE: BEEHIVES EN PANTALLAS PEQUEÑAS */
+@media (max-width: 480px) {
+    .competition-management-container .honeycomb-grid {
+        overflow: visible;
+        padding-inline: 0;
+    }
+
+    .competition-management-container .honeycomb-row {
+        width: 100%;
+        justify-content: center;
+        gap: 2px;
+    }
+
+    .competition-management-container .beehive-cell {
+        width: clamp(24px, calc((100vw - 50px) / 10), 44px);
+        height: auto;
+        aspect-ratio: 78 / 90;
+        flex: 0 0 clamp(24px, calc((100vw - 50px) / 10), 44px);
+    }
+
+    .competition-management-container .beehive-number {
+        font-size: clamp(0.8rem, 4vw, 1.2rem);
+    }
+
+    .competition-management-container .honeycomb-row + .honeycomb-row {
+        margin-top: -10px;
+    }
+}
+
+@media (max-width: 360px) {
+    .competition-management-container .beehive-cell {
+        width: clamp(22px, calc((100vw - 40px) / 10), 32px);
+        flex-basis: clamp(22px, calc((100vw - 40px) / 10), 32px);
+    }
+
+    .competition-management-container .beehive-number {
+        font-size: 0.8rem;
+    }
+
+    .competition-management-container .honeycomb-row + .honeycomb-row {
+        margin-top: -8px;
+    }
+}

@@ -218,3 +218,121 @@
   height: 20px;
   stroke: currentColor;
 }
+
+/* RESPONSIVE LOGIN */
+.auth-card {
+  min-width: 0;
+}
+
+.auth-card h1,
+.form-error {
+  overflow-wrap: anywhere;
+}
+
+.brand-lockup,
+.brand-mark {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.auth-card .brand-mark img {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+}
+
+.field,
+.field-input {
+  min-width: 0;
+}
+
+.field-input input {
+  max-width: 100%;
+}
+
+/* TABLET */
+@media (max-width: 768px) {
+  .auth-page {
+    min-height: 100vh;
+    padding: 1rem 0;
+    box-sizing: border-box;
+  }
+
+  .auth-card {
+    width: calc(100% - 2rem);
+    max-width: 480px;
+    margin: 1rem;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 520px) {
+  .auth-card {
+    padding: 24px 22px 26px;
+  }
+
+  .auth-card h1 {
+    font-size: 1.2rem;
+    line-height: 1.35;
+  }
+
+  .auth-card .brand-mark img {
+    max-width: min(220px, 100%);
+  }
+
+  .field {
+    width: 100%;
+  }
+
+  .field label {
+    flex: none;
+  }
+
+  .field-input {
+    width: 100%;
+  }
+
+  .forgot-password-link {
+    margin-top: 0;
+  }
+
+  .auth-actions .btn {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+  .auth-card {
+    width: calc(100% - 1.25rem);
+    margin: 0.625rem;
+    padding: 20px 14px 22px;
+  }
+
+  .auth-card h1 {
+    font-size: 1.1rem;
+  }
+
+  .field-label {
+    font-size: 0.85rem;
+  }
+
+  .field-input input {
+    font-size: 0.85rem;
+  }
+
+  .forgot-password-link a {
+    font-size: 0.78rem;
+  }
+
+  .auth-actions .btn {
+    width: 100%;
+    padding: 10px 16px;
+  }
+
+  .auth-footer {
+    line-height: 1.5;
+  }
+}

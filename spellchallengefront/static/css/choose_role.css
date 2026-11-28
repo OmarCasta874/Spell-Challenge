@@ -132,3 +132,99 @@
         width: 100%;
     }
 }
+
+/* RESPONSIVE CHOOSE ROLE */
+.role-select__cards {
+    min-width: 0;
+}
+
+.role-card {
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.role-card p {
+    overflow-wrap: anywhere;
+}
+
+.role-select__cards .brand-lockup {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.role-select__cards .brand-mark img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* TABLET */
+@media (max-width: 900px) {
+    .role-select {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    .role-select__cards {
+        width: 100%;
+        gap: 24px;
+    }
+
+    .role-card {
+        width: 100%;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .role-select {
+        padding: 20px 16px 28px;
+    }
+
+    .role-select__title {
+        font-size: 1.25rem;
+        margin-bottom: 24px;
+    }
+
+    .role-select__cards {
+        gap: 20px;
+    }
+
+    .role-card {
+        padding: 20px 16px 24px;
+    }
+
+    .role-card img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .role-card h2 {
+        font-size: 1.15rem;
+    }
+
+    .role-card p {
+        font-size: 0.95rem;
+    }
+
+    .role-select__cards .brand-mark img {
+        max-width: 130px;
+    }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+    .role-select {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .role-card {
+        padding: 18px 12px 20px;
+    }
+
+    .role-card img {
+        width: 100px;
+        height: 100px;
+    }
+}

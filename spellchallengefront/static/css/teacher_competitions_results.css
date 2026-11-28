@@ -444,7 +444,7 @@
   }
 }
 
-/* ---------- Responsive ---------- */
+/* RESPONSIVE */
 @media (max-width: 768px) {
   .res-stats { grid-template-columns: repeat(2, 1fr); }
 }
@@ -452,4 +452,192 @@
 @media (max-width: 480px) {
   .res-profile { flex-direction: column; text-align: center; }
   .res-stats { grid-template-columns: 1fr; }
+}
+
+/* RESPONSIVE: COMPETITION RESULTS */
+
+.res-heading,
+.res-add-participants-bar,
+.res-add-participants-info,
+.res-search-bar,
+.res-search-field {
+    min-width: 0;
+}
+
+.res-heading h2,
+.res-add-participants-info h3,
+.res-add-participants-info p {
+    overflow-wrap: anywhere;
+}
+
+.res-search-field {
+    max-width: 100%;
+}
+
+.res-search-input,
+.res-sort-select {
+    max-width: 100%;
+}
+
+.res-table-wrap {
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+.res-table th,
+.res-table td {
+    overflow-wrap: anywhere;
+}
+
+/* TABLET */
+@media (max-width: 768px) {
+    .res-add-participants-bar {
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+    }
+
+    .res-search-bar {
+        gap: 0.75rem;
+    }
+
+    .res-search-field {
+        flex: 1 1 100%;
+    }
+
+    .res-sort-select {
+        flex: 1 1 150px;
+    }
+
+    .res-search-bar > .res-btn-search {
+        flex: 0 0 auto;
+    }
+
+    .res-modal .modal-dialog {
+        max-width: calc(100% - 2rem);
+        margin: 1rem auto;
+    }
+
+    .res-modal .modal-content {
+        min-width: 0;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 576px) {
+    .res-heading {
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .res-heading h2 {
+        font-size: 1.4rem;
+    }
+
+    .res-back svg {
+        width: 1.8rem;
+        height: 1.8rem;
+    }
+
+    .res-add-participants-bar {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .res-add-participants-bar > .res-btn-search {
+        width: 100%;
+        white-space: normal;
+    }
+
+    .res-search-bar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .res-search-field,
+    .res-sort-select,
+    .res-search-bar > .res-btn-search {
+        width: 100%;
+        flex: 1 1 auto;
+    }
+
+    .res-search-input {
+        font-size: 16px;
+    }
+
+    .res-table {
+        min-width: 720px;
+    }
+
+    .res-modal .modal-dialog {
+        max-width: calc(100% - 1rem);
+        margin: 0.5rem auto;
+    }
+
+    .res-modal .modal-content {
+        padding: 0.5rem 0.5rem 0.75rem;
+    }
+
+    .res-modal-header {
+        padding: 0.75rem 2rem 0.5rem;
+    }
+
+    .res-modal-title {
+        font-size: 1.25rem;
+        overflow-wrap: anywhere;
+    }
+
+    .res-modal-body {
+        padding: 0.5rem;
+    }
+
+    .res-fullname {
+        font-size: 1.25rem;
+        overflow-wrap: anywhere;
+    }
+
+    .res-modal-footer {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .res-modal-footer button {
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    .res-participant-option {
+        gap: 0.6rem;
+    }
+
+    .res-participant-details small {
+        overflow-wrap: anywhere;
+    }
+
+    .res-participant-added {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+    .res-heading h2 {
+        font-size: 1.2rem;
+    }
+
+    .res-add-participants-bar {
+        padding: 0.75rem;
+    }
+
+    .res-modal-title {
+        font-size: 1.1rem;
+    }
+
+    .res-btn-accept,
+    .res-modal-footer .res-btn-search {
+        width: 100%;
+        min-width: 0;
+        padding-inline: 0.75rem;
+    }
 }

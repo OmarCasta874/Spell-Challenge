@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
+{{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static 'css/admin_base.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/edit_admin_profile.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/save_changes_modal.css' %}">

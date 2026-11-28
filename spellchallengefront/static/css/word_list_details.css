@@ -704,3 +704,225 @@
 .media-prompt-banner strong {
     color: #7A1C1C;
 }
+
+/* RESPONSIVE: WORD LIST DETAILS */
+
+.word-details-page,
+.word-details-header > div,
+.word-details-action-column,
+.word-details-section > div,
+.word-details-card,
+.word-details-title {
+    min-width: 0;
+}
+
+.word-details-subtitle,
+.word-details-section p,
+.media-prompt-banner > div,
+.word-details-badge {
+    overflow-wrap: anywhere;
+}
+
+.word-details-header {
+    align-items: flex-start;
+}
+
+.word-details-action-column {
+    flex-shrink: 0;
+}
+
+.word-details-card-header {
+    min-width: 0;
+}
+
+.word-details-image img {
+    height: auto;
+    object-fit: contain;
+}
+
+.import-modal-subtitle,
+.import-notice-box,
+.import-file-badge,
+#selectedFileName {
+    overflow-wrap: anywhere;
+}
+
+#selectedFileName {
+    min-width: 0;
+}
+
+/* TABLET */
+@media (max-width: 768px) {
+    .word-details-header {
+        gap: 16px;
+    }
+
+    .word-details-action-column {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .word-details-action-column .dropdown {
+        order: 0;
+    }
+
+    .word-details-action-column .btn-import-excel,
+    .word-details-action-column .btn-create-list {
+        width: auto;
+        flex: 1 1 160px;
+    }
+
+    .word-details-section {
+        align-items: flex-start;
+    }
+
+    .media-prompt-banner {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .media-prompt-banner .btn-create-list {
+        align-self: flex-start;
+        white-space: normal;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 576px) {
+    .word-details-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .word-details-action-column {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .word-details-action-column .dropdown {
+        align-self: flex-end;
+    }
+
+    .word-details-action-column .btn-import-excel,
+    .word-details-action-column .btn-create-list {
+        width: 100%;
+        flex: none;
+    }
+
+    .word-details-meta {
+        gap: 8px;
+    }
+
+    .word-details-badge {
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    .word-details-section {
+        align-items: stretch;
+    }
+
+    .btn-complete-media {
+        justify-content: center;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .media-prompt-banner {
+        padding: 14px;
+    }
+
+    .media-prompt-banner .btn-create-list {
+        width: 100%;
+        align-self: stretch;
+        white-space: normal;
+    }
+
+    #deleteWordModal .modal-dialog,
+    #deleteListDetailModal .modal-dialog,
+    #importExcelModal .modal-dialog {
+        width: auto;
+        max-width: none;
+        margin: 0.75rem;
+    }
+
+    #deleteWordModal .modal-footer,
+    #deleteListDetailModal .modal-footer {
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    #deleteWordModal .modal-footer form,
+    #deleteListDetailModal .modal-footer form {
+        margin: 0;
+    }
+
+    #deleteWordModal .modal-footer button,
+    #deleteListDetailModal .modal-footer button {
+        max-width: 100%;
+    }
+
+    .import-excel-modal .modal-header {
+        gap: 0.5rem;
+    }
+
+    .import-excel-modal .modal-header .text-center {
+        min-width: 0;
+        padding-left: 0 !important;
+    }
+
+    .import-excel-modal .modal-footer {
+        padding-right: 1rem;
+        padding-left: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .import-excel-modal .modal-footer .btn {
+        flex: 1 1 130px;
+    }
+
+    .import-dropzone {
+        padding: 20px 12px;
+    }
+
+    .import-choose-btn {
+        max-width: 100%;
+        text-align: center;
+        overflow-wrap: anywhere;
+    }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+    .word-details-card {
+        padding: 14px;
+    }
+
+    .word-details-number {
+        flex-basis: 32px;
+        width: 32px;
+        height: 32px;
+    }
+
+    .word-details-word {
+        font-size: 1.15rem;
+    }
+
+    .word-details-card-header {
+        gap: 8px;
+    }
+
+    .word-details-badge {
+        padding: 7px 10px;
+        font-size: 0.76rem;
+    }
+
+    #deleteWordModal .modal-dialog,
+    #deleteListDetailModal .modal-dialog,
+    #importExcelModal .modal-dialog {
+        margin: 0.5rem;
+    }
+}

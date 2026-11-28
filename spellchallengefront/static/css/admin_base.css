@@ -317,3 +317,184 @@ body {
     padding: 2rem;
     color: #999999;
 }
+
+/* RESPONSIVE ADMIN BASE */
+.navbar,
+.navbar__brand,
+.navbar__nav,
+.app-main {
+  min-width: 0;
+}
+
+.navbar__logo {
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.navbar__nav li {
+  min-width: 0;
+}
+
+.navbar__link {
+  min-width: 0;
+}
+
+.messages-container {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.message {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.page-header {
+  min-width: 0;
+}
+
+.page-header h1,
+.subtitle {
+  overflow-wrap: anywhere;
+}
+
+/* TABLET */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 12px 20px;
+    gap: 14px;
+  }
+
+  .navbar__nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-content: center;
+    gap: 14px 12px;
+  }
+
+  .navbar__nav li {
+    display: flex;
+    justify-content: center;
+  }
+
+  .navbar__link {
+    justify-content: center;
+    font-size: 0.78rem;
+  }
+
+  .app-main {
+    padding: 20px;
+  }
+
+  .messages-container {
+    padding: 14px 20px 0;
+  }
+
+  .page-header h1 {
+    font-size: 1.6rem;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 520px) {
+  .navbar {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .navbar__logo {
+    height: 34px;
+  }
+
+  .navbar__nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 8px;
+    padding: 8px 0 4px;
+  }
+
+  .navbar__link {
+    font-size: 0.72rem;
+    gap: 5px;
+  }
+
+  .navbar__link i {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+
+  .navbar__link .lucide {
+    flex-shrink: 0;
+  }
+
+  .navbar__logout .lucide {
+    width: 19px;
+    height: 19px;
+  }
+
+  .app-main {
+    padding: 16px 12px;
+  }
+
+  .messages-container {
+    padding: 12px 12px 0;
+  }
+
+  .message {
+    padding: 10px 12px;
+    font-size: 0.82rem;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .page-header h1 {
+    font-size: 1.4rem;
+  }
+
+  .subtitle {
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+  .navbar {
+    padding: 10px;
+  }
+
+  .navbar__logo {
+    height: 30px;
+  }
+
+  .navbar__nav {
+    gap: 12px 4px;
+  }
+
+  .navbar__link {
+    font-size: 0.66rem;
+    gap: 4px;
+  }
+
+  .navbar__link i,
+  .navbar__link .lucide {
+    width: 14px;
+    height: 14px;
+  }
+
+  .app-main {
+    padding: 14px 10px;
+  }
+
+  .messages-container {
+    padding: 10px 10px 0;
+  }
+
+  .page-header h1 {
+    font-size: 1.25rem;
+  }
+}

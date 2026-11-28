@@ -1,6 +1,4 @@
-/* =========================================================
-   SPELL-CHALLENGE — Teacher / Competitions
-   ========================================================= */
+/* TEACHER COMPETITIONS */
 :root {
   --sc-maroon: #7A1220;
   --sc-maroon-dark: #6E1119;
@@ -10,9 +8,7 @@
   --sc-white: #FFFFFF;
 }
 
-/* =========================================================
-   Barra de búsqueda / filtro
-   ========================================================= */
+/* SEARCH INPUT */
 .search-input {
   border: 2px solid var(--sc-maroon);
   border-radius: 8px;
@@ -26,9 +22,7 @@
   box-shadow: 0 0 0 3px rgba(122, 18, 32, .15);
 }
 
-/* =========================================================
-   Stat boxes (Total / Active / Finished / Upcoming)
-   ========================================================= */
+/* STAT BOXES */
 .stat-box {
   background: var(--sc-salmon-soft);
   border-radius: 12px;
@@ -38,9 +32,7 @@
 .stat-box .stat-label { font-weight: 700; color: var(--sc-maroon-dark); }
 .stat-box .stat-value { font-size: 2rem; font-weight: 800; color: var(--sc-maroon-dark); }
 
-/* =========================================================
-   Tarjetas de competencia (blancas, borde vino, con badge)
-   ========================================================= */
+/* COMPETITION CARDS */
 .competition-card {
   background: var(--sc-white);
   border: 2px solid var(--sc-maroon);
@@ -70,11 +62,7 @@
 .badge-active   { background: #6fe36f; }
 .badge-upcoming { background: #f2a94a; }
 
-/* =========================================================
-   Panel "Create Competition" — reutiliza .panel-right
-   (definido en teacher-modals.css), aquí solo el layout
-   propio del formulario de 4 columnas de fecha/hora
-   ========================================================= */
+/* CREATE COMPETITION */
 .datetime-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -92,58 +80,164 @@
     margin-top: 1rem;
   }
 
-  .btn-comp-outline,
-  .btn-comp-solid {
-    font-weight: 700;
-    font-size: 0.8rem;
-    padding: 0.4rem 1.1rem;
-    border-radius: 20px;
-    text-decoration: none;
-    display: inline-block;
-    border: 1px solid #7a1f2b;
-    line-height: 1.2;
-  }
+.btn-comp-outline,
+.btn-comp-solid {
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.4rem 1.1rem;
+  border-radius: 20px;
+  text-decoration: none;
+  display: inline-block;
+  border: 1px solid #7a1f2b;
+  line-height: 1.2;
+}
 
-  .btn-comp-outline {
-    background: transparent;
-    color: #7a1f2b;
-  }
+.btn-comp-outline {
+  background: transparent;
+  color: #7a1f2b;
+}
 
-  .btn-comp-outline:hover {
-    background: rgba(122, 31, 43, 0.08);
-    color: #7a1f2b;
-  }
+.btn-comp-outline:hover {
+  background: rgba(122, 31, 43, 0.08);
+  color: #7a1f2b;
+}
 
-  .btn-comp-solid {
-    background: #7a1f2b;
-    color: #fff;
-  }
+.btn-comp-solid {
+  background: #7a1f2b;
+  color: #fff;
+}
 
-  .btn-comp-solid:hover {
-    background: #5e1821;
-    color: #fff;
-  }
+.btn-comp-solid:hover {
+  background: #5e1821;
+  color: #fff;
+}
 
-  .competition-modal-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
+.competition-modal-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.competition-modal-row > div {
+  flex: 1;
+  min-width: 140px;
+}
+
+.competition-modal-label {
+  font-weight: 700;
+  color: #7a1f2b;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.competition-modal-value {
+  font-size: 0.95rem;
+}
+
+/* RESPONSIVE: TEACHER COMPETITIONS */
+
+.search-input {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.competition-card,
+.competition-card > .d-flex,
+.competition-card-actions,
+.competition-card-actions form {
+    min-width: 0;
+}
+
+.competition-card h5 {
+    overflow-wrap: anywhere;
+}
+
+.competition-card > .d-flex {
     flex-wrap: wrap;
-  }
+    gap: 0.5rem;
+}
 
-  .competition-modal-row > div {
-    flex: 1;
-    min-width: 140px;
-  }
+.competition-card .comp-datetime {
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+}
 
-  .competition-modal-label {
-    font-weight: 700;
-    color: #7a1f2b;
-    font-size: 0.85rem;
-    margin-bottom: 0.25rem;
-  }
+.competition-card-actions form {
+    margin: 0;
+}
 
-  .competition-modal-value {
-    font-size: 0.95rem;
-  }
+.competition-card-actions .btn-comp-outline,
+.competition-card-actions .btn-comp-solid {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+}
+
+/* TABLET */
+@media (max-width: 991px) {
+    .search-input {
+        width: 100%;
+    }
+
+    .datetime-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .competition-card {
+        padding: 1rem;
+    }
+
+    .competition-card-actions {
+        align-items: stretch;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 576px) {
+    .search-input {
+        width: 100%;
+    }
+
+    .competition-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .competition-card-actions > a,
+    .competition-card-actions > button,
+    .competition-card-actions form,
+    .competition-card-actions form button {
+        width: 100%;
+    }
+
+    .competition-card .comp-datetime {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .datetime-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+    .stat-box {
+        padding: 0.75rem;
+    }
+
+    .stat-box .stat-value {
+        font-size: 1.6rem;
+    }
+
+    .competition-card {
+        padding: 0.75rem;
+    }
+
+    .btn-comp-outline,
+    .btn-comp-solid {
+        padding: 0.45rem 0.75rem;
+    }
+}

@@ -282,3 +282,123 @@
 .btn-pill-solid:hover {
     background-color: #5c1620;
 }
+
+/* RESPONSIVE ACADEMY MANAGEMENT */
+.academy-tabs-nav {
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.tabs-pills {
+    flex-wrap: wrap;
+}
+
+.tab-header-actions {
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.academy-cards-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.academy-card {
+    min-width: 0;
+}
+
+.academy-card-top {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.academy-card-name,
+.academy-card-meta {
+    overflow-wrap: anywhere;
+}
+
+.academy-card-actions {
+    flex-wrap: wrap;
+}
+
+.modal-overlay {
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+}
+
+.modal-footer {
+    flex-wrap: wrap;
+}
+
+/* TABLET */
+@media (max-width: 900px) {
+    .academy-cards-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .academy-tabs-nav {
+        align-items: flex-start;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .academy-tabs-nav {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tabs-pills {
+        width: 100%;
+        gap: 0.5rem;
+    }
+
+    .tab-btn {
+        flex: 1 1 auto;
+        padding: 0.5rem 0.8rem;
+    }
+
+    #addAcademyBtn {
+        width: 100%;
+    }
+
+    .academy-cards-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .academy-card {
+        padding: 1rem;
+    }
+
+    .academy-card-actions {
+        gap: 0.5rem;
+    }
+
+    .academy-card-actions button {
+        margin-left: 0;
+    }
+
+    .modal-overlay {
+        padding: 0.5rem;
+    }
+
+    .modal-content {
+        max-width: 100%;
+        max-height: 95vh;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 0.85rem;
+    }
+
+    .modal-footer > button {
+        flex: 1 1 auto;
+    }
+}

@@ -160,3 +160,165 @@
     margin: 0.5rem auto 1rem;
     border-radius: 12px;
 }
+
+
+/* RESPONSIVE MISSING LETTERS */
+
+.missing-theme {
+    box-sizing: border-box;
+    min-width: 0;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.missing-top-row,
+.missing-body,
+.missing-word-col,
+.missing-word-display,
+.missing-letter-bank {
+    min-width: 0;
+}
+
+.missing-word-col {
+    max-width: 100%;
+}
+
+.missing-word-display {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.missing-letter-bank .key-btn {
+    flex: 0 0 40px;
+}
+
+/* TABLET Y MÓVIL */
+@media (max-width: 600px) {
+    .missing-theme {
+        width: 94%;
+        padding: 1.2rem;
+    }
+
+    .missing-top-row {
+        gap: 1rem;
+        padding: 0;
+        margin-bottom: 1.2rem;
+    }
+
+    .missing-timer-box {
+        padding: 0.4rem 0.8rem;
+        font-size: 1.05rem;
+    }
+
+    .missing-completed {
+        font-size: 0.85rem;
+    }
+
+    .missing-body {
+        gap: 1rem;
+    }
+
+    .missing-bee {
+        width: 50px;
+    }
+
+    .missing-word-image {
+        width: min(110px, 100%);
+        height: 110px;
+    }
+
+    .missing-word-display .fixed-letter,
+    .missing-word-display .blank-letter {
+        font-size: 1.4rem;
+        min-width: 18px;
+    }
+
+    .missing-letter-bank {
+        gap: 0.4rem;
+    }
+
+    .missing-letter-bank .key-btn {
+        flex-basis: 34px;
+        width: 34px;
+        height: 34px;
+        font-size: 0.9rem;
+    }
+
+    .missing-actions {
+        flex-wrap: wrap;
+        gap: 0.7rem;
+    }
+
+    .missing-actions button {
+        max-width: 100%;
+    }
+
+    #missingResultModal .modal-footer {
+        flex-wrap: wrap;
+    }
+}
+
+/* MÓVILES ESTRECHOS */
+@media (max-width: 420px) {
+    .missing-theme {
+        padding: 1rem;
+    }
+
+    .missing-top-row {
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .missing-completed {
+        font-size: 0.78rem;
+    }
+
+    .missing-completed span {
+        font-size: 1.15rem;
+    }
+
+    .missing-body {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .missing-bee {
+        width: 44px;
+    }
+
+    .missing-word-col {
+        width: 100%;
+    }
+
+    .missing-word-display {
+        gap: 0.3rem;
+    }
+
+    .missing-word-display .fixed-letter,
+    .missing-word-display .blank-letter {
+        font-size: 1.2rem;
+        min-width: 16px;
+    }
+
+    .missing-letter-bank .key-btn {
+        flex-basis: 30px;
+        width: 30px;
+        height: 31px;
+        font-size: 0.82rem;
+    }
+
+    .missing-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .missing-actions .btn-pill-play,
+    .missing-actions .btn-skip {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #missingResultModal .modal-footer {
+        gap: 0.6rem !important;
+    }
+}

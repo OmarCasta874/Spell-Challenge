@@ -417,3 +417,310 @@
     background: #FDECEC;
     border: 1px solid #F3C6C6;
 }
+
+/* RESPONSIVE: ADD WORD TO LIST */
+
+.add-word-page,
+.add-word-card,
+.add-word-form,
+.add-word-section,
+.add-word-section-heading > div,
+.add-word-field {
+    min-width: 0;
+}
+
+.add-word-subtitle,
+.add-word-section-title,
+.add-word-section-description,
+.add-word-help,
+.add-word-ai-status {
+    overflow-wrap: anywhere;
+}
+
+.add-word-form .form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.add-word-form .form-check-input {
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+
+.add-word-form .form-check-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+#pixabay-results {
+    min-width: 0;
+}
+
+#pixabay-results > [class*="col-"] {
+    min-width: 0;
+}
+
+.pixabay-thumb {
+    min-width: 0;
+}
+
+.pixabay-thumb img {
+    display: block;
+    max-width: 100%;
+}
+
+/* TABLET */
+@media (max-width: 991px) {
+    .add-word-form {
+        display: block;
+    }
+
+    .add-word-section + .add-word-section {
+        margin-top: 28px;
+        padding-top: 24px;
+        border-top: 1px solid #F0E8E8;
+        border-left: 0;
+        padding-left: 0;
+    }
+
+    .add-word-section:nth-of-type(2) .add-word-fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .add-word-actions {
+        margin-top: 28px;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 650px) {
+    .add-word-section-heading {
+        align-items: flex-start;
+    }
+
+    .add-word-section-heading > div {
+        flex: 1;
+    }
+
+    .add-word-ai-button {
+        max-width: 100%;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .add-word-form input[type="file"].form-control {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .add-word-section:nth-of-type(2) .add-word-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    #pixabay-results {
+        margin-right: 0;
+        margin-left: 0;
+    }
+
+    #pixabay-results > [class*="col-"] {
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+
+    .add-word-actions {
+        gap: 10px;
+    }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+    .add-word-page {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .add-word-card {
+        padding: 18px 14px;
+    }
+
+    .add-word-section-heading {
+        gap: 9px;
+    }
+
+    .add-word-section-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .add-word-section-title {
+        font-size: 0.98rem;
+    }
+
+    .add-word-section-description {
+        font-size: 0.82rem;
+    }
+
+    .add-word-ai-button {
+        padding: 8px 10px;
+        font-size: 0.82rem;
+    }
+}
+
+/* RESPONSIVE: IMPORT WORDS PREVIEW */
+
+.preview-summary-bar,
+.preview-summary-bar > div,
+.preview-table-card {
+    min-width: 0;
+}
+
+.preview-summary-bar > div:first-child {
+    flex: 1 1 520px;
+}
+
+.preview-summary-bar > div:last-child {
+    flex: 0 1 260px;
+    min-width: 0;
+}
+
+.preview-badges {
+    min-width: 0;
+}
+
+.preview-table-card .table-responsive {
+    max-width: 100%;
+}
+
+.preview-table {
+    min-width: 1100px;
+}
+
+.preview-table th,
+.preview-table td {
+    overflow-wrap: anywhere;
+}
+
+.preview-table .preview-input,
+.preview-table .preview-textarea,
+.preview-table .preview-select {
+    width: 100%;
+    min-width: 130px;
+}
+
+.preview-table .col-check {
+    width: 42px;
+    min-width: 42px;
+}
+
+.preview-table .col-status {
+    min-width: 150px;
+}
+
+.preview-table .preview-textarea {
+    min-height: 72px;
+}
+
+.preview-summary-bar .d-flex {
+    min-width: 0;
+}
+
+/* TABLET */
+@media (max-width: 991px) {
+    .preview-summary-bar {
+        align-items: flex-start;
+    }
+
+    .preview-summary-bar > div:first-child {
+        flex-basis: 100%;
+    }
+
+    .preview-summary-bar > div:last-child {
+        flex: 1 1 100%;
+        align-items: flex-start !important;
+    }
+
+    .preview-summary-bar #aiBatchStatus {
+        text-align: left !important;
+    }
+
+    .preview-table-card {
+        padding: 14px;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 650px) {
+    .preview-summary-bar {
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .preview-summary-bar > div:first-child > .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    .preview-summary-bar .d-flex.gap-2.ms-sm-2 {
+        flex-wrap: wrap;
+        margin-left: 0 !important;
+    }
+
+    .preview-summary-bar #selectAllValidBtn,
+    .preview-summary-bar #deselectAllBtn {
+        white-space: normal;
+    }
+
+    .preview-summary-bar .add-word-ai-button {
+        width: 100%;
+        justify-content: center;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .preview-table-card {
+        padding: 10px;
+    }
+
+    .preview-table {
+        min-width: 1000px;
+    }
+
+    .preview-table th,
+    .preview-table td {
+        padding: 8px;
+    }
+
+    .preview-table .preview-input,
+    .preview-table .preview-textarea,
+    .preview-table .preview-select {
+        min-width: 120px;
+    }
+
+    .preview-table-card .add-word-actions {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .preview-table-card .add-word-actions > * {
+        flex: 1 1 150px;
+        text-align: center;
+    }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+    .preview-summary-bar {
+        padding: 12px;
+    }
+
+    .preview-badge {
+        padding: 5px 9px;
+        font-size: 0.76rem;
+    }
+
+    .preview-table-card {
+        padding: 8px;
+    }
+}

@@ -7,9 +7,7 @@
   --sc-white: #ffffff;
 }
 
-/* =========================================================
-   Topbar
-   ========================================================= */
+/* TOPBAR */
 .mw-topbar {
   background-color: var(--sc-maroon);
   padding: 1rem 1.5rem;
@@ -36,9 +34,7 @@
   font-size: 0.95rem;
 }
 
-/* =========================================================
-   Cuerpo
-   ========================================================= */
+/* BODY */
 .mw-body {
   max-width: 640px;
   margin: 0 auto;
@@ -77,9 +73,7 @@
   transition: width 0.3s ease;
 }
 
-/* =========================================================
-   Columnas Words / Categories
-   ========================================================= */
+/* COLUMN WORDS - CATEGORIES */
 .mw-columns {
   display: flex;
   justify-content: center;
@@ -136,9 +130,7 @@
 }
 .mw-item-matched:hover { background-color: #c9c9c9; }
 
-/* =========================================================
-   Pantalla Lesson Completed
-   ========================================================= */
+/* LESSON COMPLETED */
 .mw-completed-card {
   text-align: center;
   padding-top: 1rem;
@@ -226,9 +218,7 @@
 }
 .mw-btn-solid-pill:hover { background-color: var(--sc-salmon-hover); }
 
-/* =========================================================
-   Responsive
-   ========================================================= */
+/* RESPONSIVE */
 @media (max-width: 576px) {
   .mw-columns { gap: 1.5rem; }
   .mw-item { min-width: 120px; padding: 0.55rem 1rem; font-size: 0.8rem; }
@@ -249,4 +239,144 @@
   .mw-item {
     transition: none;
   }
+}
+
+/* RESPONSIVE: MATCH WORDS */
+.mw-topbar,
+.mw-body,
+.mw-columns,
+.mw-column,
+.mw-item,
+.mw-completed-card,
+.mw-results-box {
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.mw-body {
+    width: 100%;
+}
+
+.mw-topbar-title {
+    max-width: calc(100% - 150px);
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.mw-item {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+}
+
+.mw-results-text,
+.mw-completed-subtitle {
+    overflow-wrap: anywhere;
+}
+
+.mw-completed-actions {
+    align-items: center;
+}
+
+.mw-btn-outline-pill,
+.mw-btn-solid-pill {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    .mw-topbar {
+        padding: 0.85rem 1rem;
+        gap: 0.75rem;
+    }
+
+    .mw-topbar-title {
+        position: static;
+        transform: none;
+        flex: 1;
+        max-width: none;
+        margin-left: auto;
+        font-size: 0.85rem;
+    }
+
+    .mw-body {
+        padding: 1.75rem 1rem;
+    }
+
+    .mw-columns {
+        gap: 1rem;
+    }
+
+    .mw-column {
+        flex: 1 1 0;
+        width: 0;
+    }
+
+    .mw-item {
+        width: 100%;
+        min-width: 0;
+        padding: 0.55rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .mw-results-box {
+        width: 100%;
+        gap: 0.75rem;
+        padding: 1.25rem;
+    }
+
+    .mw-completed-actions {
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .mw-topbar {
+        flex-wrap: wrap;
+    }
+
+    .mw-topbar-title {
+        flex-basis: 100%;
+        margin: 0;
+        text-align: center;
+    }
+
+    .mw-body {
+        padding: 1.25rem 0.75rem;
+    }
+
+    .mw-columns {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.5rem;
+    }
+
+    .mw-column {
+        width: 100%;
+    }
+
+    .mw-column-title {
+        margin-bottom: 0.2rem;
+    }
+
+    .mw-item {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .mw-results-box {
+        padding: 1rem;
+    }
+
+    .mw-completed-title {
+        font-size: 1.45rem;
+    }
+
+    .mw-btn-outline-pill,
+    .mw-btn-solid-pill {
+        width: 100%;
+    }
 }

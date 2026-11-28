@@ -173,3 +173,110 @@
 .btn-save:hover {
     background-color: #e97b74;
 }
+
+/* RESPONSIVE EDIT ADMIN PROFILE */
+#editAdminProfileForm {
+    width: 100%;
+    min-width: 0;
+}
+
+.form-row-2,
+.form-row-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-field {
+    min-width: 0;
+}
+
+.form-field .form-input {
+    min-width: 0;
+}
+
+.password-field-wrap {
+    min-width: 0;
+}
+
+.edit-form-actions {
+    flex-wrap: wrap;
+}
+
+/* TABLET */
+@media (max-width: 900px) {
+    .form-row-2,
+    .form-row-3 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .edit-avatar-wrap {
+        margin-bottom: 1.5rem;
+    }
+
+    .edit-avatar-circle {
+        width: 110px;
+        height: 110px;
+    }
+
+    .avatar-preview-initials {
+        font-size: 2.3rem;
+    }
+
+    .form-row-2,
+    .form-row-3 {
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .edit-form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .edit-form-actions .btn {
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    #saveChangesModal .modal-dialog {
+        margin: 1rem;
+    }
+
+    #saveChangesModal .modal-content {
+        padding: 2.5rem 1rem 1 rem !important;
+    }
+
+    #saveChangesModal .modal-body p {
+        font-size: 0.9rem !important;
+    }
+
+    #saveChangesModal .modal-body .d-flex {
+        flex-wrap: wrap;
+        gap: 0.75rem !important;
+    }
+
+    #saveChangesModal .modal-body .btn {
+        flex: 1 1 100px;
+        padding: 0.5rem 1rem !important;
+    }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 380px) {
+    #saveChangesModal .modal-avatar-wrapper {
+        width: 75px !important;
+        height: 75px !important;
+        top: -38px !important;
+    }
+
+    #saveChangesModal .modal-body h3 {
+        font-size: 1.3rem !important;
+    }
+
+    #saveChangesModal .modal-body .btn {
+        flex-basis: 100%;
+    }
+}

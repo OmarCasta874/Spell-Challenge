@@ -334,3 +334,140 @@
     display: block;
     border-radius: 50%;
 }
+
+/* RESPONSIVE USER MANAGEMENT */
+.page-header {
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.filter-form,
+.search-box,
+.filter-group {
+    min-width: 0;
+}
+
+.search-box {
+    flex: 1 1 240px;
+}
+
+.filter-group .form-select {
+    max-width: 100%;
+}
+
+.table-card {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+    min-width: 1000px;
+}
+
+.form-row {
+    flex-wrap: wrap;
+}
+
+.form-row > .form-field {
+    min-width: 0;
+}
+
+/* TABLET */
+@media (max-width: 768px) {
+    .filter-card {
+        padding: 1rem;
+    }
+
+    .filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .filter-group .form-select {
+        flex: 1 1 140px;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .filter-group .btn-secondary {
+        flex-shrink: 0;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .form-row > .form-field {
+        width: 100%;
+    }
+
+    .modal-content {
+        max-height: 90vh;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 480px) {
+    .page-header {
+        align-items: stretch;
+    }
+
+    .page-header .btn {
+        width: 100%;
+    }
+
+    .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group .form-select,
+    .filter-group .btn-secondary {
+        width: 100%;
+    }
+
+    .modal-overlay {
+        padding: 0.5rem;
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        max-height: 95vh;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 0.85rem;
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+    }
+
+    .modal-footer > button,
+    .modal-footer > form {
+        flex: 1 1 auto;
+    }
+
+    .modal-footer > form button {
+        width: 100%;
+    }
+
+    .btn-pill-outline,
+    .btn-pill-solid {
+        margin-left: 0.2rem;
+    }
+}

@@ -137,3 +137,109 @@ body {
     gap: 16px;
   }
 }
+
+/* RESPONSIVE: STUDENT BASE */
+
+.navbar,
+.navbar__brand,
+.navbar__nav,
+.navbar__nav li,
+.app-main {
+    min-width: 0;
+}
+
+.navbar__nav {
+    row-gap: 12px;
+}
+
+.navbar__link {
+    max-width: 100%;
+}
+
+/* TABLET */
+@media (max-width: 900px) {
+    .navbar {
+        padding: 12px 20px;
+    }
+
+    .navbar__nav {
+        justify-content: center;
+        column-gap: 18px;
+    }
+
+    .app-main {
+        padding: 20px;
+    }
+
+    .messages-container {
+        padding: 15px 20px 0;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 576px) {
+    .navbar {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .navbar__logo {
+        height: 34px;
+        max-width: 100%;
+    }
+
+    .navbar__nav {
+        justify-content: flex-start;
+        gap: 12px 16px;
+    }
+
+    .navbar__link {
+        font-size: 0.78rem;
+        white-space: normal;
+    }
+
+    .navbar__link i {
+        flex-shrink: 0;
+    }
+
+    .navbar__logout {
+        padding: 4px;
+    }
+
+    .app-main {
+        padding: 16px 12px;
+    }
+
+    .messages-container {
+        padding: 12px 12px 0;
+    }
+
+    .message {
+        padding: 10px 12px;
+        overflow-wrap: anywhere;
+    }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+    .navbar {
+        padding: 10px;
+    }
+
+    .navbar__nav {
+        column-gap: 12px;
+    }
+
+    .navbar__link {
+        font-size: 0.72rem;
+        gap: 4px;
+    }
+
+    .app-main {
+        padding: 12px 8px;
+    }
+
+    .messages-container {
+        padding-inline: 8px;
+    }
+}

@@ -350,3 +350,142 @@
         transition: none;
     }
 }
+
+/* RESPONSIVE: WORD SEARCH */
+.ws-overlay,
+.ws-content,
+.ws-word-panel,
+.ws-board-container,
+.ws-board,
+.ws-result {
+    box-sizing: border-box;
+}
+
+.ws-content,
+.ws-word-panel,
+.ws-word-list,
+.ws-board-container,
+.ws-result {
+    min-width: 0;
+}
+
+.ws-instructions,
+.ws-feedback,
+.ws-result-text {
+    overflow-wrap: anywhere;
+}
+
+.ws-word-item {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-align: center;
+}
+
+.ws-board {
+    max-width: 100%;
+}
+
+.ws-cell {
+    min-width: 0;
+    aspect-ratio: 1;
+}
+
+.ws-btn {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    .ws-overlay {
+        padding: 10px;
+    }
+
+    .ws-content {
+        width: 100%;
+        max-height: calc(100vh - 20px);
+        padding: 16px 12px 20px;
+        border-radius: 18px;
+    }
+
+    .ws-word-panel {
+        padding: 12px;
+    }
+
+    .ws-word-list {
+        gap: 7px;
+    }
+
+    .ws-board {
+        gap: 2px;
+        padding: 4px;
+    }
+
+    .ws-result-actions {
+        width: 100%;
+    }
+
+    .ws-btn {
+        padding: 10px 18px;
+    }
+}
+
+@media (max-width: 400px) {
+    .ws-content {
+        padding-inline: 9px;
+    }
+
+    .ws-back {
+        gap: 7px;
+        font-size: 0.9rem;
+    }
+
+    .ws-title {
+        font-size: 1.2rem;
+    }
+
+    .ws-instructions {
+        font-size: 0.85rem;
+        margin-bottom: 18px;
+    }
+
+    .ws-game-info {
+        gap: 24px;
+        margin-bottom: 18px;
+    }
+
+    .ws-info-item strong {
+        font-size: 1.1rem;
+    }
+
+    .ws-word-panel {
+        padding: 10px;
+    }
+
+    .ws-word-item {
+        padding: 5px 7px;
+        font-size: 0.7rem;
+        letter-spacing: 0.02rem;
+    }
+
+    .ws-board {
+        gap: 1px;
+        padding: 3px;
+    }
+
+    .ws-cell {
+        border-radius: 2px;
+        font-size: clamp(0.45rem, 2.8vw, 0.7rem);
+    }
+
+    .ws-result-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ws-btn {
+        width: 100%;
+        font-size: 0.85rem;
+        padding: 10px 12px;
+    }
+}

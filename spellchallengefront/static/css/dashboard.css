@@ -266,3 +266,191 @@
     min-width: 0;
   }
 }
+
+/* RESPONSIVE TEACHER DASHBOARD */
+.stat-cards-row,
+.dashboard-overview-row,
+.level-distribution-card,
+.overview-card,
+.activity-card {
+  min-width: 0;
+}
+
+.stat-card,
+.overview-card,
+.activity-card {
+  overflow-wrap: anywhere;
+}
+
+.level-distribution-header {
+  min-width: 0;
+}
+
+.level-distribution-subtitle {
+  overflow-wrap: anywhere;
+}
+
+.level-legend {
+  min-width: 0;
+}
+
+.bar-row {
+  min-width: 0;
+}
+
+.bar-label {
+  min-width: 0;
+}
+
+.bar-track {
+  min-width: 0;
+}
+
+.bar-value {
+  overflow-wrap: anywhere;
+}
+
+/* TABLET */
+@media (max-width: 768px) {
+  .stat-cards-row {
+    gap: 0.85rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .level-distribution-card,
+  .overview-card,
+  .activity-card {
+    padding: 1.1rem 1.2rem;
+  }
+
+  .dashboard-overview-row {
+    gap: 1rem;
+  }
+
+  .level-legend {
+    gap: 0.75rem 1rem;
+  }
+
+  .bar-row {
+    gap: 0.6rem;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 576px) {
+  .stat-cards-row {
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    column-gap: 0.75rem;
+    align-items: center;
+  }
+
+  .stat-icon {
+    grid-row: span 2;
+    margin-bottom: 0;
+  }
+
+  .stat-label {
+    align-self: end;
+  }
+
+  .stat-value {
+    align-self: start;
+    font-size: 1.5rem;
+  }
+
+  .level-distribution-card,
+  .overview-card,
+  .activity-card {
+    padding: 1rem;
+  }
+
+  .level-distribution-subtitle {
+    font-size: 0.78rem;
+  }
+
+  .level-legend {
+    gap: 0.65rem 0.85rem;
+    font-size: 0.75rem;
+  }
+
+  .xp-overview-total {
+    padding: 0.9rem 1rem;
+  }
+
+  .xp-overview-label {
+    font-size: 0.72rem;
+  }
+
+  .xp-overview-value {
+    font-size: 1.7rem;
+    overflow-wrap: anywhere;
+  }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.4rem 0.65rem;
+    align-items: center;
+  }
+
+  .bar-label {
+    grid-column: 1 / -1;
+    width: auto;
+  }
+
+  .bar-track {
+    width: 100%;
+  }
+
+  .bar-value {
+    min-width: 60px;
+    font-size: 0.75rem;
+  }
+
+  .activity-title {
+    overflow-wrap: anywhere;
+  }
+
+  .activity-date {
+    font-size: 0.75rem;
+  }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+  .stat-card {
+    padding: 0.85rem;
+  }
+
+  .stat-value {
+    font-size: 1.35rem;
+  }
+
+  .level-distribution-card,
+  .overview-card,
+  .activity-card {
+    padding: 0.85rem;
+  }
+
+  .level-legend {
+    gap: 0.6rem;
+    font-size: 0.72rem;
+  }
+
+  .xp-overview-value {
+    font-size: 1.5rem;
+  }
+
+  .bar-value {
+    min-width: 54px;
+    font-size: 0.7rem;
+  }
+}

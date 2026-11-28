@@ -277,3 +277,125 @@
 .btn-pill-solid:hover {
     background-color: #5c1620;
 }
+
+/* RESPONSIVE BACKUPS */
+.header-actions {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+/* METRIC CARDS */
+.grid-3-col {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metric-card {
+    min-width: 0;
+}
+
+.metric-value {
+    overflow-wrap: anywhere;
+}
+
+.table-card {
+    min-width: 0;
+    overflow-x: auto;
+}
+
+.table-card .data-table {
+    min-width: 760px;
+    width: 100%;
+}
+
+/* TABLET */
+@media (max-width: 900px) {
+    .grid-3-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .header-actions {
+        flex-shrink: 1;
+    }
+
+    .actions-cell {
+        white-space: nowrap;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .header-actions .btn {
+        width: 100%;
+    }
+
+    .grid-3-col {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .metric-card {
+        padding: 1rem;
+    }
+
+    .metric-value {
+        font-size: 1.2rem;
+    }
+
+    .panel-header-title {
+        padding: 1rem;
+    }
+
+    .actions-cell {
+        white-space: nowrap;
+    }
+
+    .modal-overlay {
+        box-sizing: border-box;
+        padding: 0.75rem;
+        overflow-y: auto;
+        align-items: flex-start;
+    }
+
+    .modal-content,
+    .modal-content.modal-small {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        max-height: calc(100vh - 1.5rem);
+        margin: auto 0;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 1rem;
+    }
+
+    .modal-header h3 {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        font-size: 1rem;
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+    }
+
+    .modal-footer > button,
+    .modal-footer > form {
+        max-width: 100%;
+    }
+
+    .modal-footer > form button {
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    .form-input {
+        min-width: 0;
+    }
+}

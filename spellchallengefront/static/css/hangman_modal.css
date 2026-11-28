@@ -212,3 +212,129 @@
         filter: none;
     }
 }
+
+/* RESPONSIVE HANGMAN */
+.hangman-theme {
+    box-sizing: border-box;
+    min-width: 0;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.hangman-body,
+.hangman-clue-box,
+.hangman-word-display,
+.hangman-keyboard {
+    min-width: 0;
+}
+
+.hangman-clue-box {
+    overflow-wrap: anywhere;
+}
+
+.hangman-word-display .letter-slot {
+    flex: 0 1 24px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.hangman-keyboard .key-btn {
+    flex: 0 0 34px;
+}
+
+/* TABLET Y MÓVIL */
+@media (max-width: 600px) {
+    .hangman-theme {
+        width: 94%;
+        padding: 1.2rem;
+    }
+
+    .hangman-body {
+        gap: 1rem;
+    }
+
+    .hangman-bee {
+        width: 54px;
+    }
+
+    .hangman-clue-box {
+        padding: 0.9rem;
+    }
+
+    .hangman-word-image {
+        width: min(120px, 100%);
+        height: 120px;
+    }
+
+    .hangman-keyboard {
+        gap: 0.35rem;
+        margin-top: 1.2rem;
+    }
+
+    .hangman-keyboard .key-btn {
+        flex-basis: 32px;
+        width: 32px;
+        height: 32px;
+    }
+
+    .hangman-actions .btn-pill-play {
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    #hangmanResultModal .modal-footer {
+        flex-wrap: wrap;
+    }
+}
+
+/* MÓVILES ESTRECHOS */
+@media (max-width: 420px) {
+    .hangman-theme {
+        padding: 1rem;
+    }
+
+    .hangman-body {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .hangman-mascot-col {
+        flex-direction: row;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .hangman-bee {
+        width: 48px;
+    }
+
+    .hangman-hearts {
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .hangman-clue-box {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .hangman-word-display {
+        gap: 0.35rem;
+    }
+
+    .hangman-word-display .letter-slot {
+        flex-basis: 20px;
+        font-size: 1.1rem;
+    }
+
+    .hangman-keyboard .key-btn {
+        flex-basis: 29px;
+        width: 29px;
+        height: 31px;
+        font-size: 0.82rem;
+    }
+
+    #hangmanResultModal .modal-footer {
+        gap: 0.6rem !important;
+    }
+}

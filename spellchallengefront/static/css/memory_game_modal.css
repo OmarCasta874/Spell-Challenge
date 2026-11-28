@@ -1,8 +1,4 @@
-/* ==========================================================
-   MEMORY GAME MODAL — Student > Mini Games
-   Prefijo mg- en todas las clases para no chocar con los
-   modales de Hangman / Missing Letters en la misma página.
-   ========================================================== */
+/* MEMORY GAME MODAL - STUDENT */
 
 :root {
   --mg-red: #a62a2a;
@@ -12,7 +8,7 @@
   --mg-ok-dark: #2e8f57;
 }
 
-/* ---------- Overlay + contenedor (clases base del modal) ---------- */
+/* Overlay + contenedor (clases base del modal) */
 .mg-overlay {
   position: fixed;
   inset: 0;
@@ -60,7 +56,7 @@
   background: rgba(255, 255, 255, 0.65);
 }
 
-/* ---------- Encabezado: "← Mini Games" + título ---------- */
+/* Encabezado: "← Mini Games" + título */
 .mg-back {
   display: inline-flex;
   align-items: center;
@@ -113,7 +109,7 @@
   letter-spacing: 0.01em;
 }
 
-/* ---------- Tablero 4 x 3 ---------- */
+/* Tablero 4 x 3 */
 .mg-board {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -200,7 +196,7 @@
   background: var(--mg-card-hover);
 }
 
-/* ---------- Par correcto: verde + animación ---------- */
+/* Par correcto: verde + animación */
 .mg-card.matched {
   cursor: default;
   pointer-events: none;
@@ -275,7 +271,7 @@
   100% { transform: rotateY(180deg) scale(1); }
 }
 
-/* ---------- Par incorrecto: sacudida breve ---------- */
+/* Par incorrecto: sacudida breve */
 .mg-card.wrong .mg-card-inner {
   animation: mg-shake 0.45s ease;
 }
@@ -286,7 +282,7 @@
   75%      { transform: rotateY(180deg) translateX(5px); }
 }
 
-/* ---------- Pantalla final ---------- */
+/* Pantalla final  */
 .mg-result {
   display: none;
   flex-direction: column;
@@ -348,7 +344,7 @@
   background: rgba(255, 255, 255, 0.15);
 }
 
-/* ---------- Responsive ---------- */
+/* RESPONSIVE */
 @media (max-width: 480px) {
   .mg-content {
     padding: 14px 16px 22px;
@@ -385,4 +381,159 @@
   .mg-card.wrong .mg-card-inner {
     animation: none;
   }
+}
+
+/* RESPONSIVE MEMORY GAME */
+
+.mg-overlay {
+    box-sizing: border-box;
+}
+
+.mg-content {
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.mg-board,
+.mg-card,
+.mg-card-inner,
+.mg-face,
+.mg-word {
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.mg-word {
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+/* TABLET */
+@media (max-width: 650px) {
+    .mg-content {
+        width: min(94vw, 600px);
+        padding: 18px 20px 24px;
+    }
+
+    .mg-board {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .mg-difficulty-options {
+        gap: 12px;
+    }
+
+    .mg-difficulty-btn {
+        padding: 14px 10px;
+        font-size: 0.95rem;
+    }
+
+    .mg-result {
+        padding-top: 28px;
+    }
+
+    .mg-result-actions {
+        max-width: 100%;
+    }
+
+    .mg-btn {
+        max-width: 100%;
+        white-space: normal;
+    }
+}
+
+/* MÓVILES */
+@media (max-width: 480px) {
+    .mg-overlay {
+        padding: 10px;
+    }
+
+    .mg-content {
+        width: 100%;
+        max-height: calc(100vh - 20px);
+        padding: 14px 14px 20px;
+        border-radius: 18px;
+    }
+
+    .mg-title {
+        font-size: 1.25rem;
+        margin-bottom: 16px;
+    }
+
+    .mg-board {
+        gap: 9px;
+    }
+
+    .mg-face {
+        padding: 5%;
+    }
+
+    .mg-word {
+        padding: 5px;
+        font-size: clamp(0.75rem, 3.5vw, 1rem);
+        letter-spacing: 0.02rem;
+        overflow-wrap: anywhere;
+    }
+
+    .mg-difficulty {
+        padding-bottom: 14px;
+    }
+
+    .mg-difficulty h3 {
+        font-size: 1rem;
+        margin-bottom: 16px;
+    }
+
+    .mg-difficulty-options {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .mg-difficulty-btn {
+        min-height: 56px;
+        padding: 12px;
+    }
+
+    .mg-timer {
+        text-align: center;
+        margin-bottom: 12px;
+    }
+
+    .mg-result-title {
+        font-size: 1.5rem;
+    }
+
+    .mg-result-text {
+        font-size: 0.95rem;
+        overflow-wrap: anywhere;
+    }
+
+    .mg-result-actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .mg-btn {
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 0.85rem;
+    }
+}
+
+/* MÓVILES MUY ESTRECHOS */
+@media (max-width: 350px) {
+    .mg-board {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .mg-word {
+        font-size: 0.85rem;
+    }
+
+    .mg-content {
+        padding-inline: 10px;
+    }
 }

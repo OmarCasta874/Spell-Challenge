@@ -15,7 +15,7 @@
   max-width: 800px;
   margin: 2rem auto;
   padding: 0 1.5rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Lato', sans-serif;
 }
 
 /* --- Banner del Perfil --- */
@@ -173,4 +173,144 @@
   .btn {
     width: 100%;
   }
+}
+
+/* RESPONSIVE STUDENT PROFILE */
+
+.profile-container,
+.profile-header,
+.account-settings-card,
+.profile-form,
+.form-grid,
+.form-group {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.profile-container {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-control {
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* TABLET */
+@media (max-width: 992px) {
+    .profile-container {
+        max-width: 720px;
+        margin: 1.5rem auto;
+        padding: 0 1.25rem;
+    }
+
+    .account-settings-card {
+        padding: 1.75rem;
+    }
+
+    .form-grid {
+        gap: 1rem;
+    }
+
+    .user-fullname {
+        font-size: 1.65rem;
+        overflow-wrap: anywhere;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .profile-container {
+        margin: 1rem auto;
+        padding: 0 0.75rem;
+    }
+
+    .profile-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-header > div:first-child {
+        width: 115px !important;
+        height: 115px !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .user-fullname {
+        font-size: 1.4rem;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    .user-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .account-settings-card {
+        padding: 1.25rem 1rem;
+    }
+
+    .section-title {
+        font-size: 1.15rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        padding: 0.7rem 0.85rem;
+        font-size: 0.9rem;
+        overflow-wrap: anywhere;
+    }
+
+    .profile-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .profile-actions .btn {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        text-align: center;
+    }
+}
+
+/* VERY SMALL SCREENS */
+@media (max-width: 380px) {
+    .profile-container {
+        padding: 0 0.5rem;
+    }
+
+    .profile-header > div:first-child {
+        width: 100px !important;
+        height: 100px !important;
+    }
+
+    .user-fullname {
+        font-size: 1.2rem;
+    }
+
+    .account-settings-card {
+        padding: 1rem 0.85rem;
+    }
+
+    .section-title {
+        font-size: 1.05rem;
+    }
+
+    .form-control {
+        font-size: 0.85rem;
+    }
+
+    .profile-actions .btn {
+        font-size: 0.9rem;
+    }
 }

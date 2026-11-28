@@ -230,3 +230,138 @@
     min-width: 500px;
   }
 }
+
+/* RESPONSIVE: TEACHER STAISTICS */
+.statistics-container,
+.statistics-header,
+.filters-bar,
+.filter-group,
+.stat-card-box,
+.summary-stats-grid,
+.mini-stat-card {
+  min-width: 0;
+}
+
+.statistics-title,
+.statistics-subtitle,
+.card-section-title {
+  overflow-wrap: anywhere;
+}
+
+.filter-group select {
+  max-width: 100%;
+}
+
+.stat-card-box .table-responsive {
+  max-width: 100%;
+}
+
+.stat-card-box .table {
+  min-width: 560px;
+}
+
+.stat-card-box .table th,
+.stat-card-box .table td {
+  overflow-wrap: anywhere;
+}
+
+.stat-card-box .summary-stats-grid {
+  grid-template-columns:  repeat(3, minmax(0, 1fr));
+}
+
+.chart-wrapper {
+  min-width: 0;
+}
+
+.chart-bars {
+  min-width: 0;
+}
+
+.bar-group {
+  min-width: 0;
+}
+
+.bar-label {
+  white-space: nowrap;
+}
+
+/* TABLET */
+@media (max-width: 991px) {
+  .statistics-header {
+    align-items: stretch;
+  }
+
+  .filters-bar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .filter-group select {
+    width: 100%;
+  }
+
+  .summary-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stat-card-box .summary-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* MOBILE */
+@media (max-width: 576px) {
+  .statistics-container {
+    padding: 0.75rem;
+  }
+
+  .filters-bar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .summary-stats-grid,
+  .stat-card-box .summary-stats-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stat-card-box {
+    padding: 1rem;
+  }
+
+  .stat-card-box .table {
+    min-width: 560px;
+  }
+
+  .chart-wrapper {
+    overflow-x: auto;
+    align-items: flex-end;
+  }
+
+  .chart-y-axis {
+    flex: 0 0 auto;
+  }
+
+  .chart-bars {
+    flex: 0 0 500px;
+  }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+  .statistics-container {
+    padding: 0.5rem;
+  }
+
+  .statistics-title {
+    font-size: 1.5rem;
+  }
+
+  .stat-card-box {
+    padding: 0.75rem;
+  }
+
+  .mini-stat-card {
+    padding: 0.65rem;
+  }
+}

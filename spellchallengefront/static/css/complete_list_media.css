@@ -186,3 +186,150 @@
     background: #F8EEEE;
     border-color: #7A1C1C;
 }
+
+/* RESPONSIVE: COMPLETE LIST MEDIA */
+
+.media-toolbar,
+.media-toolbar > *,
+.media-card,
+.media-card-header,
+.media-card > div {
+    min-width: 0;
+}
+
+.media-toolbar > .d-flex {
+    min-width: 0;
+}
+
+.media-badges {
+    min-width: 0;
+}
+
+.media-card {
+    overflow-wrap: anywhere;
+}
+
+.media-card-header {
+    align-items: flex-start;
+}
+
+.media-word-title {
+    min-width: 0;
+}
+
+.media-card .input-group {
+    min-width: 0;
+}
+
+.media-card .input-group .form-control {
+    min-width: 0;
+}
+
+.media-current-img,
+.media-thumb-btn img {
+    max-width: 100%;
+}
+
+.media-card audio {
+    display: block;
+    max-width: 100%;
+}
+
+/* TABLET */
+@media (max-width: 991px) {
+    .media-toolbar {
+        align-items: flex-start;
+    }
+
+    .media-toolbar > .d-flex {
+        flex: 1 1 100%;
+    }
+
+    .media-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .media-card {
+        padding: 16px;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 650px) {
+    .media-toolbar {
+        padding: 16px;
+    }
+
+    .media-toolbar > .d-flex {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .media-toolbar .add-word-ai-button,
+    .media-toolbar .media-load-btn {
+        width: 100%;
+        justify-content: center;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .media-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .media-card {
+        padding: 14px;
+    }
+
+    .media-card-header {
+        flex-wrap: wrap;
+    }
+
+    .media-card-actions {
+        align-items: stretch;
+    }
+
+    .media-mini-btn {
+        max-width: 100%;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .media-thumbs-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .media-thumb-btn img {
+        height: 64px;
+    }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+    .media-toolbar {
+        padding: 12px;
+    }
+
+    .media-card {
+        padding: 12px;
+    }
+
+    .media-badge {
+        padding: 5px 9px;
+        font-size: 0.76rem;
+    }
+
+    .media-thumbs-grid {
+        gap: 5px;
+    }
+
+    .media-thumb-btn img {
+        height: 54px;
+    }
+
+    .media-mini-btn {
+        padding: 6px 8px;
+        font-size: 0.74rem;
+    }
+}

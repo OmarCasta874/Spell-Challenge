@@ -334,3 +334,239 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* RESPONSIVE STUDENT PROGRESS */
+
+.progress-container,
+.progress-container .row,
+.progress-container .col-lg-6,
+.chart-card,
+.achievements-card,
+.achievement-info {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.progress-container {
+    width: 100%;
+}
+
+/* TABLET */
+@media (max-width: 992px) {
+    .progress-container {
+        padding: 1.25rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .chart-card,
+    .achievements-card {
+        height: auto;
+    }
+
+    .achievements-modal-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .progress-container {
+        padding: 1rem;
+    }
+
+    .progress-title {
+        font-size: 1.5rem;
+    }
+
+    .progress-subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.7rem;
+    }
+
+    .stat-card {
+        padding: 0.85rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        overflow-wrap: anywhere;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+        overflow-wrap: anywhere;
+    }
+
+    .chart-card,
+    .achievements-card {
+        padding: 1rem;
+    }
+
+    .card-section-title {
+        font-size: 1.1rem;
+    }
+
+    .chart-card h2 {
+        font-size: 1.7rem;
+    }
+
+    .achievement-item {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.65rem;
+    }
+
+    .achievement-info {
+        flex: 1 1 65%;
+        overflow-wrap: anywhere;
+    }
+
+    .achievement-title {
+        overflow-wrap: anywhere;
+    }
+
+    .achievement-desc {
+        overflow-wrap: anywhere;
+    }
+
+    .achievement-counter {
+        font-size: 0.78rem;
+    }
+
+    .result-card {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding: 0.85rem;
+    }
+
+    .result-info {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
+    .result-name {
+        margin-right: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .btn-view-details {
+        width: 100%;
+        padding: 0.5rem;
+    }
+
+    .btn-view-all {
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    #allCompetitionsModal .modal-dialog {
+        margin: 0.75rem;
+    }
+
+    #allCompetitionsModal .modal-content {
+        padding: 0.75rem !important;
+    }
+
+    #allCompetitionsModal .modal-body {
+        padding: 0.75rem 0;
+    }
+
+    #allCompetitionsModal table {
+        min-width: 520px;
+        font-size: 0.85rem;
+    }
+
+    [id^="compDetailModal"] .modal-dialog {
+        margin: 0.75rem;
+    }
+
+    [id^="compDetailModal"] .modal-content {
+        padding: 0.85rem !important;
+    }
+
+    [id^="compDetailModal"] .modal-title {
+        font-size: 1rem;
+        overflow-wrap: anywhere;
+    }
+
+    .achievements-modal-header {
+        padding: 1rem;
+        gap: 0.5rem;
+    }
+
+    .achievements-modal-header .modal-title {
+        font-size: 1.2rem;
+    }
+
+    .achievements-modal-count {
+        font-size: 0.8rem;
+    }
+
+    .achievements-modal-body {
+        padding: 1rem;
+    }
+
+    .achievements-modal-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.65rem;
+    }
+
+    .achievement-tile {
+        min-width: 0;
+        min-height: 120px;
+        padding: 0.75rem;
+        overflow-wrap: anywhere;
+    }
+
+    .achievement-tile-title {
+        font-size: 0.8rem;
+    }
+
+    .achievement-tile-desc {
+        font-size: 0.7rem;
+    }
+}
+
+/* VERY SMALL SCREENS */
+@media (max-width: 380px) {
+    .progress-container {
+        padding: 0.75rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        padding: 0.8rem 1rem;
+    }
+
+    .achievement-item {
+        gap: 0.45rem;
+    }
+
+    .achievement-counter {
+        flex-basis: 100%;
+        text-align: right;
+    }
+
+    .achievements-modal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .achievements-modal-header .modal-title {
+        font-size: 1.05rem;
+    }
+
+    .achievements-modal-count {
+        font-size: 0.72rem;
+    }
+}

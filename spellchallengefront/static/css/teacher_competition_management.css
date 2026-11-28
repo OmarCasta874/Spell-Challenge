@@ -439,3 +439,141 @@
         padding: 1rem;
     }
 }
+
+/* RESPONSIVE: TEACHER COMPETITION MANAGEMENT */
+
+.competition-management-container,
+.competition-header,
+.management-competition-name,
+.management-section,
+.management-control,
+.word-length-selector {
+    min-width: 0;
+}
+
+.competition-title,
+.management-competition-name {
+    overflow-wrap: anywhere;
+}
+
+.competition-management-container img {
+    max-width: 100%;
+    height: auto;
+}
+
+.management-competition-info {
+    flex-wrap: wrap;
+}
+
+.management-control select,
+.word-length-selector select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.management-section form {
+    max-width: 100%;
+}
+
+.management-section .res-btn-search {
+    max-width: 100%;
+    white-space: normal;
+}
+
+/* TABLET */
+@media (max-width: 768px) {
+    .competition-management-container {
+        padding: 1.25rem 0.75rem;
+    }
+
+    .management-section {
+        padding: 1.25rem;
+    }
+
+    .management-pre-beehive {
+        gap: 0.75rem;
+    }
+
+    .management-pre-beehive .management-section {
+        padding: 1rem;
+    }
+
+    .evaluation-options {
+        gap: 0.75rem;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 576px) {
+    .competition-management-container {
+        padding: 1rem 0.5rem;
+    }
+
+    .competition-header {
+        overflow-wrap: anywhere;
+    }
+
+    .management-competition-info {
+        gap: 0.5rem;
+    }
+
+    .management-section {
+        padding: 1rem 0.75rem;
+        margin: 1rem auto;
+    }
+
+    .management-section h4 {
+        font-size: 1.05rem;
+        overflow-wrap: anywhere;
+    }
+
+    .management-pre-beehive {
+        margin: 1rem 0;
+    }
+
+    .management-pre-beehive .management-section {
+        padding: 1rem 0.75rem;
+    }
+
+    .management-control select,
+    .word-length-selector select {
+        font-size: 0.95rem;
+    }
+
+    .evaluation-options {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .evaluation-btn {
+        width: 100%;
+        min-width: 0;
+    }
+
+    #roundManagement .active-round-info {
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        overflow-wrap: anywhere;
+    }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+    .competition-management-container {
+        padding: 0.75rem 0.35rem;
+    }
+
+    .management-section,
+    .management-pre-beehive .management-section {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .management-section h4 {
+        font-size: 0.95rem;
+    }
+
+    .evaluation-btn {
+        padding: 0.6rem 0.75rem;
+    }
+}

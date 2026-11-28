@@ -594,3 +594,145 @@
     from { transform: scale(1); }
     to { transform: scale(1.08); }
 }
+
+/* RESPONSIVE: BOSS BATTLE */
+.boss-battle-overlay,
+.boss-battle-container,
+.boss-battle-intro,
+.boss-battle-arena,
+.boss-battle-challenge,
+.boss-battle-clue,
+.boss-battle-options,
+.boss-character {
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.boss-battle-container {
+    width: min(100%, 850px);
+}
+
+.boss-battle-header h2,
+.boss-battle-info p,
+.boss-battle-clue,
+.boss-battle-feedback,
+.boss-battle-option,
+.king-bee-dialogue-text,
+.boss-battle-result-text {
+    overflow-wrap: anywhere;
+}
+
+.boss-battle-option {
+    max-width: 100%;
+    white-space: normal;
+}
+
+.king-bee-intro-character,
+.king-bee-dialogue {
+    min-width: 0;
+}
+
+@media (max-width: 600px) {
+    .boss-battle-overlay {
+        padding: 8px;
+    }
+
+    .boss-battle-container {
+        max-height: calc(100vh - 16px);
+        padding: 12px;
+        border-width: 3px;
+        border-radius: 18px;
+    }
+
+    .boss-battle-arena {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+        padding: 14px 12px;
+    }
+
+    .boss-battle-vs {
+        width: 36px;
+        height: 36px;
+        justify-self: center;
+    }
+
+    .boss-character {
+        width: 100%;
+    }
+
+    .boss-health-container {
+        max-width: 280px;
+        margin: 12px auto 0;
+    }
+
+    .boss-battle-clue {
+        width: 100%;
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+
+    .boss-battle-intro {
+        width: 100%;
+        padding: 18px 12px;
+    }
+
+    .king-bee-dialogue-text {
+        font-size: 0.9rem;
+    }
+
+    .boss-battle-footer button {
+        max-width: 100%;
+        white-space: normal;
+    }
+}
+
+@media (max-width: 400px) {
+    .boss-battle-container {
+        padding: 10px;
+    }
+
+    .boss-battle-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .boss-battle-status-bar {
+        gap: 8px;
+    }
+
+    .boss-battle-info span,
+    .boss-battle-timer {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    .boss-battle-challenge h3 {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+
+    .boss-battle-option {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+
+    .king-bee-intro-character img {
+        max-width: 150px;
+        height: 140px;
+    }
+
+    .king-bee-dialogue h3 {
+        font-size: 1.35rem;
+        letter-spacing: 1px;
+    }
+
+    .king-bee-title {
+        letter-spacing: 1px;
+    }
+
+    .boss-battle-begin {
+        max-width: 100%;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        letter-spacing: 0.03em;
+    }
+}

@@ -1,9 +1,4 @@
-/* =========================================================
-   SPELL-CHALLENGE — Teacher modals theme
-   Convierte los modales de Bootstrap en los paneles de los
-   mockups: paneles anclados a la derecha (Create Word List,
-   Add Word) y modales centrados más chicos (choice, Excel).
-   ========================================================= */
+/* TEACHER MODALS  */
 
 :root {
   --sc-maroon: #7A1220;
@@ -13,16 +8,11 @@
   --sc-white: #FFFFFF;
 }
 
-/* Fondo detrás del modal más claro, para que la página siga
-   siendo legible (como en los mockups, sin overlay oscuro) */
 .modal-backdrop.show {
   opacity: 1;
   background: rgba(255, 255, 255, 0.55);
 }
 
-/* =========================================================
-   Botones tipo "pill" reutilizables dentro de los paneles
-   ========================================================= */
 .btn-pill-outline {
   border: 2px solid var(--sc-maroon);
   color: var(--sc-maroon);
@@ -52,9 +42,6 @@
 }
 .btn-pill-outline-light:hover { background: var(--sc-white); color: var(--sc-maroon); }
 
-/* =========================================================
-   Paneles anclados a la derecha: Create Word List (manual) y Add Word
-   ========================================================= */
 .modal-dialog.panel-right {
   position: fixed;
   top: 0;
@@ -146,9 +133,6 @@
   padding: 16px 40px 32px;
 }
 
-/* =========================================================
-   Modal centrado chico: Create a Word List (choice)
-   ========================================================= */
 .modal-dialog.panel-center .modal-content {
   background: var(--sc-white);
   color: var(--sc-maroon);
@@ -215,11 +199,6 @@
   margin: 0;
 }
 
-/* =========================================================
-   Modal centrado grande: Import from Excel
-   (sigue usando fondo salmón, no aparece en el mockup del
-   choice — no se tocó)
-   ========================================================= */
 .modal-dialog.panel-center.modal-lg .modal-content {
   background: var(--sc-salmon);
   color: var(--sc-white);
@@ -238,9 +217,6 @@
 #dropZone h5 { color: var(--sc-white); }
 #dropZone .bi { color: var(--sc-white) !important; }
 
-/* =========================================================
-   Tarjetas de "Word Lists" en la página
-   ========================================================= */
 .wordlist-card {
   background: #FFFFFF;
   border-radius: 16px;
@@ -320,9 +296,6 @@
   transform: translateY(-2px);
 }
 
-/* =========================================================
-   Modal "Create a Word List" (List Information) — centrado
-   ========================================================= */
 #createListModal .modal-header {
   justify-content: center;
   position: relative;
@@ -376,8 +349,6 @@
   color: var(--sc-maroon);
 }
 
-/* Botón "Cancel" claro, relleno salmón tenue (distinto del
-   outline-light que se usa sobre fondo salmón en los paneles) */
 .btn-pill-light {
   border: none;
   background: rgba(242, 144, 138, .35);
@@ -390,9 +361,6 @@
   background: rgba(242, 144, 138, .5);
 }
 
-/* =========================================================
-   Responsive: en pantallas chicas el panel derecho ocupa todo
-   ========================================================= */
 @media (max-width: 640px) {
   .modal-dialog.panel-right { max-width: 100vw; }
   .panel-right .modal-header,
@@ -400,10 +368,6 @@
   .panel-right .modal-footer { padding-left: 20px; padding-right: 20px; }
 }
 
-/* =========================================================
-   Form controls dentro de cualquier modal .panel-center
-   (antes solo existían para #createListModal específicamente)
-   ========================================================= */
 .panel-center .form-label {
   color: var(--sc-maroon);
   font-weight: 700;
@@ -422,8 +386,141 @@
   box-shadow: 0 0 0 3px rgba(122, 18, 32, .15);
 }
 
-/* Ancho específico del modal Create Competition (más campos
-   que el choice modal, necesita más espacio horizontal) */
 #createCompetitionModal .modal-dialog.panel-center {
   max-width: 660px;
+}
+
+/* RESPONSIVE TEACHER WORD LISTS */
+
+.teacher-page-header,
+.teacher-page-header > div,
+.wordlist-card,
+.wordlist-card > .d-flex {
+    min-width: 0;
+}
+
+.wordlist-card h5 {
+    overflow-wrap: anywhere;
+}
+
+.wordlist-card .badge {
+    flex-shrink: 0;
+}
+
+.wordlist-card .badge-pill {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.wordlist-card .wordlist-date {
+    overflow-wrap: anywhere;
+}
+
+/* TABLET */
+@media (max-width: 768px) {
+    .teacher-page-header {
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .wordlist-card {
+        height: 100%;
+    }
+
+    .wordlist-card .d-flex:last-child {
+        flex-wrap: wrap;
+    }
+
+    .wordlist-card .d-flex:last-child .btn {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .teacher-page-header {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 0.85rem;
+    }
+
+    .teacher-page-title {
+        font-size: 1.5rem;
+        overflow-wrap: anywhere;
+    }
+
+    .teacher-page-subtitle {
+        overflow-wrap: anywhere;
+    }
+
+    .btn-create-list {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+
+    .wordlist-card {
+        padding: 1rem !important;
+    }
+
+    .wordlist-card > .d-flex:first-child {
+        align-items: flex-start !important;
+    }
+
+    .wordlist-card .badge-pill {
+        white-space: normal;
+    }
+
+    .wordlist-card .d-flex:last-child {
+        gap: 0.5rem !important;
+    }
+
+    .wordlist-card .d-flex:last-child .btn {
+        flex: 1 1 0;
+        padding: 0.45rem 0.5rem;
+        font-size: 0.75rem;
+        text-align: center;
+    }
+
+    /* Modal de confirmación de eliminación */
+    #deleteListModal .modal-dialog {
+        width: auto;
+        max-width: none;
+        margin: 0.75rem;
+    }
+
+    #deleteListModal .modal-header,
+    #deleteListModal .modal-body {
+        padding: 1rem;
+    }
+
+    #deleteListModal .modal-footer {
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    #deleteListModal .modal-footer form {
+        margin: 0;
+    }
+
+    #deleteListModal .modal-footer button {
+        max-width: 100%;
+    }
+}
+
+/* VERY NARROW SCREENS */
+@media (max-width: 360px) {
+    .wordlist-card {
+        padding: 0.85rem !important;
+    }
+
+    .wordlist-card .d-flex:last-child .btn {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.35rem;
+    }
+
+    #deleteListModal .modal-dialog {
+        margin: 0.5rem;
+    }
 }

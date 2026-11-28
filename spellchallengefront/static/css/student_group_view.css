@@ -85,7 +85,7 @@
     vertical-align: middle;
 }
 
-/* ===== MODAL BASE ===== */
+/* MODAL BASE */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -156,7 +156,7 @@
     background: #BBB;
 }
 
-/* ===== CLASSMATE MODAL (tema guinda/salmón, fiel al mockup) ===== */
+/* CLASSMATE MODAL (tema guinda/salmón, fiel al mockup)  */
 .classmate-theme {
     max-width: 420px;
     background: linear-gradient(180deg, #d9585c 0%, #c1454a 100%);
@@ -225,7 +225,7 @@
     background: #f2c9ce;
 }
 
-/* ===== BORDE ROJO EN TABLA DE CLASSMATES ===== */
+/* BORDE ROJO EN TABLA DE CLASSMATES */
 .panel-border-red {
     border: 1px solid #f2c9ce;
     border-radius: 10px;
@@ -260,4 +260,163 @@
 
 .group-view-grid .text-center {
     text-align: center;
+}
+
+
+/* RESPONSIVE GROUP VIEW */
+
+/* Evitar desbordamientos */
+.group-view-grid,
+.left-column,
+.right-column,
+.panel-card,
+.table-responsive {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.group-view-grid .data-table {
+    width: 100%;
+}
+
+/* TABLET */
+@media (max-width: 992px) {
+    .group-view-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.25rem;
+    }
+
+    .left-column,
+    .right-column {
+        width: 100%;
+    }
+
+    .panel-card {
+        margin-bottom: 1rem;
+    }
+
+    .btn-back-link {
+        font-size: 1.2rem;
+        overflow-wrap: anywhere;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .group-view-grid {
+        gap: 1rem;
+    }
+
+    .btn-back-link {
+        font-size: 1.05rem;
+        gap: 0.35rem;
+    }
+
+    /* Tablas */
+    .group-view-grid .data-table {
+        min-width: 520px;
+    }
+
+    .group-view-grid .data-table th,
+    .group-view-grid .data-table td {
+        padding: 0.65rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .compact-table {
+        min-width: 0 !important;
+    }
+
+    .compact-table th,
+    .compact-table td {
+        padding: 0.6rem 0.65rem;
+        font-size: 0.82rem;
+        overflow-wrap: anywhere;
+    }
+
+    .actions-group .btn-pill-action {
+        margin: 0.15rem;
+    }
+
+    /* Modal base */
+    .modal-content,
+    .modal-small {
+        width: calc(100% - 2rem);
+        max-width: 400px;
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        padding: 0.85rem 1rem;
+        gap: 0.5rem;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        padding: 0 1rem 1rem;
+    }
+
+    .modal-footer button {
+        max-width: 100%;
+    }
+
+    /* Classmate modal */
+    .classmate-theme {
+        padding: 1.75rem 1.1rem 1.25rem;
+    }
+
+    .classmate-modal-title {
+        font-size: 1.2rem;
+    }
+
+    .classmate-avatar {
+        width: 85px;
+        height: 85px;
+    }
+
+    .classmate-name {
+        font-size: 1.15rem;
+        overflow-wrap: anywhere;
+    }
+
+    .classmate-detail {
+        font-size: 0.85rem;
+        overflow-wrap: anywhere;
+    }
+
+    .classmate-enrollment {
+        overflow-wrap: anywhere;
+    }
+}
+
+/* VERY SMALL SCREENS */
+@media (max-width: 380px) {
+    .btn-back-link {
+        font-size: 0.95rem;
+    }
+
+    .group-view-grid .data-table th,
+    .group-view-grid .data-table td {
+        padding: 0.55rem 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .classmate-theme {
+        padding: 1.5rem 0.9rem 1rem;
+    }
+
+    .classmate-avatar {
+        width: 75px;
+        height: 75px;
+    }
+
+    .btn-accept {
+        padding: 0.5rem 1.5rem;
+    }
 }
